@@ -81,7 +81,7 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  Traffic for %s: %v\n", name, err)
 	} else {
-		ts.Traffic = &Traffic{Count: count, Uniques: uniques, Window: "14 days"}
+		ts.Traffic = &Traffic{Count: count, Uniques: uniques, Window: "today"}
 	}
 
 	// Packages — Casks first, then Formula.

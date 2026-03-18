@@ -43,6 +43,8 @@ jobs:
           restore-keys: tap-history-v1-
 
       - name: Sync tap data
+        id: sync
+        continue-on-error: true
         env:
           # GH_TRAFFIC_TOKEN needs push access to ublue-os/* repos for traffic data.
           # Store a PAT with repo scope as GH_TRAFFIC_TOKEN secret.
@@ -50,6 +52,18 @@ jobs:
         run: |
           (cd stats-go && go build -o stats ./cmd/stats/)
           ./stats-go/stats
+
+      - name: Restore stats fallback if sync failed
+        if: steps.sync.outcome == 'failure'
+        run: |
+          if [ -f ".sync-cache/stats-latest.json" ]; then
+            echo "⚠️ Sync failed — using cached stats-latest.json"
+            mkdir -p src/data
+            cp .sync-cache/stats-latest.json src/data/stats.json
+          else
+            echo "❌ Sync failed and no cached stats available"
+            exit 1
+          fi
 
       - name: Save traffic history cache
         if: always()

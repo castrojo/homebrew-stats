@@ -56,11 +56,11 @@ const formulas = filterByType(sorted, 'formula');
     {traffic ? (
       <div class="stat-card stat-highlight">
         <div class="stat-value">{traffic.uniques.toLocaleString()}</div>
-        <div class="stat-label">Unique Tappers ({traffic.window})</div>
+        <div class="stat-label">Unique Tappers</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">{traffic.count.toLocaleString()}</div>
-        <div class="stat-label">Total Taps ({traffic.window})</div>
+        <div class="stat-label">Total Taps</div>
       </div>
     ) : (
       <div class="stat-card stat-muted">

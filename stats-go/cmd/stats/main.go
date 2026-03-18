@@ -9,14 +9,16 @@ import (
 
 	ghclient "github.com/castrojo/homebrew-stats/internal/github"
 	"github.com/castrojo/homebrew-stats/internal/history"
+	"github.com/castrojo/homebrew-stats/internal/osanalytics"
 	"github.com/castrojo/homebrew-stats/internal/tap"
 )
 
 // Output is the full JSON written to src/data/stats.json.
 type Output struct {
-	GeneratedAt string      `json:"generated_at"`
-	Taps        []tap.TapStats  `json:"taps"`
-	History     []history.DaySnapshot `json:"history"`
+	GeneratedAt string                 `json:"generated_at"`
+	Taps        []tap.TapStats         `json:"taps"`
+	History     []history.DaySnapshot  `json:"history"`
+	OSAnalytics *osanalytics.Analytics `json:"os_analytics,omitempty"`
 }
 
 // Taps to track, in display order.
@@ -74,11 +76,27 @@ func main() {
 		}
 	}
 
+	// Fetch OS analytics from Homebrew (public API, no auth required).
+	var osData *osanalytics.Analytics
+	osPeriods := make([]osanalytics.PeriodData, 0, 3)
+	for _, p := range []string{"30d", "90d", "365d"} {
+		pd, err := osanalytics.Fetch(p)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  OS analytics (%s): %v\n", p, err)
+			continue
+		}
+		osPeriods = append(osPeriods, *pd)
+	}
+	if len(osPeriods) > 0 {
+		osData = &osanalytics.Analytics{Periods: osPeriods}
+	}
+
 	// Write src/data/stats.json.
 	out := Output{
 		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
 		Taps:        tapStats,
 		History:     hist.Snapshots,
+		OSAnalytics: osData,
 	}
 
 	data, err := json.MarshalIndent(out, "", "  ")
@@ -95,6 +113,15 @@ func main() {
 	if err := os.WriteFile(outPath, data, 0o644); err != nil {
 		fmt.Fprintln(os.Stderr, "❌ write:", err)
 		os.Exit(1)
+	}
+
+	// Backup stats.json to cache for fallback builds.
+	backupPath := filepath.Join(".sync-cache", "stats-latest.json")
+	if err := os.WriteFile(backupPath, data, 0o644); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Could not write stats backup: %v\n", err)
+		// Non-fatal — don't exit
+	} else {
+		fmt.Fprintln(os.Stderr, "✓ Backed up stats to", backupPath)
 	}
 
 	// Summary to stderr.
