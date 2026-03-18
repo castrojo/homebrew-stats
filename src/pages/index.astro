@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import TapSection from '../components/TapSection.astro';
+import TesthubSection from '../components/TesthubSection.astro';
 import TrafficChart from '../components/TrafficChart.astro';
 import OsSection from '../components/OsSection.astro';
 import stats from '../data/stats.json';
@@ -34,7 +35,19 @@ const tapNames = stats.taps.map((t: any) => t.name);
     </>
   )}
 
-  {stats.taps.map((tap: any) => (
+  {stats.taps.slice(0, 1).map((tap: any) => (
+    <TapSection
+      name={tap.name}
+      url={tap.url}
+      traffic={tap.traffic}
+      packages={tap.packages}
+      history={stats.history}
+    />
+  ))}
+
+  {(stats as any).testhub && <TesthubSection testhub={(stats as any).testhub} />}
+
+  {stats.taps.slice(1).map((tap: any) => (
     <TapSection
       name={tap.name}
       url={tap.url}

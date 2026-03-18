@@ -13,11 +13,19 @@ import (
 	"github.com/castrojo/homebrew-stats/internal/tap"
 )
 
+// TesthubStats holds metadata for the projectbluefin testhub Flatpak OCI registry.
+type TesthubStats struct {
+	Org      string                    `json:"org"`
+	URL      string                    `json:"url"`
+	Packages []ghclient.TesthubPackage `json:"packages"`
+}
+
 // Output is the full JSON written to src/data/stats.json.
 type Output struct {
 	GeneratedAt string                 `json:"generated_at"`
 	Taps        []tap.TapStats         `json:"taps"`
 	History     []history.DaySnapshot  `json:"history"`
+	Testhub     *TesthubStats          `json:"testhub,omitempty"`
 	OSAnalytics *osanalytics.Analytics `json:"os_analytics,omitempty"`
 }
 
@@ -76,6 +84,21 @@ func main() {
 		}
 	}
 
+	// Collect testhub Flatpak packages from projectbluefin org.
+	var testhub *TesthubStats
+	fmt.Fprintln(os.Stderr, "→ Collecting projectbluefin/testhub…")
+	testhubPkgs, err := client.ListTesthubPackages("projectbluefin")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  testhub: %v\n", err)
+	} else {
+		testhub = &TesthubStats{
+			Org:      "projectbluefin",
+			URL:      "https://github.com/orgs/projectbluefin/packages",
+			Packages: testhubPkgs,
+		}
+		fmt.Fprintf(os.Stderr, "  testhub: %d packages\n", len(testhubPkgs))
+	}
+
 	// Fetch OS analytics from Homebrew (public API, no auth required).
 	var osData *osanalytics.Analytics
 	osPeriods := make([]osanalytics.PeriodData, 0, 3)
@@ -96,6 +119,7 @@ func main() {
 		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
 		Taps:        tapStats,
 		History:     hist.Snapshots,
+		Testhub:     testhub,
 		OSAnalytics: osData,
 	}
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-18T01:34:07Z",
+  "generated_at": "2026-03-18T02:44:57Z",
   "taps": [
     {
       "name": "ublue-os/homebrew-tap",
@@ -7,107 +7,9 @@
       "traffic": {
         "count": 2241,
         "uniques": 1878,
-        "window": "14 days"
+        "window": "today"
       },
       "packages": [
-        {
-          "name": "1password-gui-linux",
-          "type": "cask",
-          "version": "8.12.6",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "description": "Password manager that keeps all passwords secure behind one password",
-          "homepage": "https://1password.com/"
-        },
-        {
-          "name": "antigravity-linux",
-          "type": "cask",
-          "version": "1.20.5,5474622945755136",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "description": "AI Coding Agent IDE",
-          "homepage": "https://antigravity.google/"
-        },
-        {
-          "name": "aurora-wallpapers",
-          "type": "cask",
-          "version": "2026-03-05",
-          "latest_version": "aurora-v2026-03-05",
-          "is_stale": true,
-          "freshness_known": true,
-          "downloads": 8515,
-          "description": "Wallpapers for Aurora",
-          "homepage": "https://github.com/projectbluefin/artwork",
-          "source_owner": "ublue-os",
-          "source_repo": "artwork"
-        },
-        {
-          "name": "bazzite-wallpapers",
-          "type": "cask",
-          "version": "2025-12-14",
-          "latest_version": "aurora-v2026-03-05",
-          "is_stale": true,
-          "freshness_known": true,
-          "downloads": 8515,
-          "description": "Wallpapers for Bazzite",
-          "homepage": "https://bazzite.gg/",
-          "source_owner": "ublue-os",
-          "source_repo": "artwork"
-        },
-        {
-          "name": "bluefin-wallpapers",
-          "type": "cask",
-          "version": "2025-12-14",
-          "latest_version": "aurora-v2026-03-05",
-          "is_stale": true,
-          "freshness_known": true,
-          "downloads": 8515,
-          "description": "Wallpapers for Bluefin",
-          "homepage": "https://github.com/projectbluefin/artwork",
-          "source_owner": "projectbluefin",
-          "source_repo": "artwork"
-        },
-        {
-          "name": "bluefin-wallpapers-extra",
-          "type": "cask",
-          "version": "2025-12-14",
-          "latest_version": "aurora-v2026-03-05",
-          "is_stale": true,
-          "freshness_known": true,
-          "downloads": 8515,
-          "description": "Extra Wallpapers for Bluefin",
-          "homepage": "https://github.com/ublue-os/artwork",
-          "source_owner": "ublue-os",
-          "source_repo": "artwork"
-        },
-        {
-          "name": "framework-tool",
-          "type": "cask",
-          "version": "0.6.1",
-          "latest_version": "0.6.1",
-          "is_stale": false,
-          "freshness_known": true,
-          "downloads": 28896,
-          "description": "System tool for Framework laptop hardware management",
-          "homepage": "https://github.com/FrameworkComputer/framework-system",
-          "source_owner": "FrameworkComputer",
-          "source_repo": "framework-system"
-        },
-        {
-          "name": "framework-wallpapers",
-          "type": "cask",
-          "version": "2025-12-14",
-          "latest_version": "aurora-v2026-03-05",
-          "is_stale": true,
-          "freshness_known": true,
-          "downloads": 8515,
-          "description": "Wallpapers for Framework laptops",
-          "homepage": "https://github.com/projectbluefin/artwork",
-          "source_owner": "projectbluefin",
-          "source_repo": "artwork"
-        },
         {
           "name": "goose-linux",
           "type": "cask",
@@ -115,7 +17,7 @@
           "latest_version": "1.27.2",
           "is_stale": false,
           "freshness_known": true,
-          "downloads": 781729,
+          "downloads": 0,
           "description": "Open source, extensible AI agent that goes beyond code suggestions",
           "homepage": "https://block.github.io/goose/",
           "source_owner": "block",
@@ -130,6 +32,104 @@
           "downloads": 0,
           "description": "JetBrains tools manager",
           "homepage": "https://www.jetbrains.com/toolbox-app/"
+        },
+        {
+          "name": "aurora-wallpapers",
+          "type": "cask",
+          "version": "2026-03-05",
+          "latest_version": "aurora-v2026-03-05",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 0,
+          "description": "Wallpapers for Aurora",
+          "homepage": "https://github.com/projectbluefin/artwork",
+          "source_owner": "ublue-os",
+          "source_repo": "artwork"
+        },
+        {
+          "name": "bazzite-wallpapers",
+          "type": "cask",
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-03-05",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 0,
+          "description": "Wallpapers for Bazzite",
+          "homepage": "https://bazzite.gg/",
+          "source_owner": "ublue-os",
+          "source_repo": "artwork"
+        },
+        {
+          "name": "bluefin-wallpapers-extra",
+          "type": "cask",
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-03-05",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 0,
+          "description": "Extra Wallpapers for Bluefin",
+          "homepage": "https://github.com/ublue-os/artwork",
+          "source_owner": "ublue-os",
+          "source_repo": "artwork"
+        },
+        {
+          "name": "bluefin-wallpapers",
+          "type": "cask",
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-03-05",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 0,
+          "description": "Wallpapers for Bluefin",
+          "homepage": "https://github.com/projectbluefin/artwork",
+          "source_owner": "projectbluefin",
+          "source_repo": "artwork"
+        },
+        {
+          "name": "antigravity-linux",
+          "type": "cask",
+          "version": "1.20.5,5474622945755136",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 0,
+          "description": "AI Coding Agent IDE",
+          "homepage": "https://antigravity.google/"
+        },
+        {
+          "name": "framework-tool",
+          "type": "cask",
+          "version": "0.6.1",
+          "latest_version": "0.6.1",
+          "is_stale": false,
+          "freshness_known": true,
+          "downloads": 0,
+          "description": "System tool for Framework laptop hardware management",
+          "homepage": "https://github.com/FrameworkComputer/framework-system",
+          "source_owner": "FrameworkComputer",
+          "source_repo": "framework-system"
+        },
+        {
+          "name": "1password-gui-linux",
+          "type": "cask",
+          "version": "8.12.6",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 0,
+          "description": "Password manager that keeps all passwords secure behind one password",
+          "homepage": "https://1password.com/"
+        },
+        {
+          "name": "framework-wallpapers",
+          "type": "cask",
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-03-05",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 0,
+          "description": "Wallpapers for Framework laptops",
+          "homepage": "https://github.com/projectbluefin/artwork",
+          "source_owner": "projectbluefin",
+          "source_repo": "artwork"
         },
         {
           "name": "lm-studio-linux",
@@ -165,6 +165,28 @@
           "source_repo": "vscodium"
         },
         {
+          "name": "linux-mcp-server",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 155,
+          "description": "MCP server for Linux system administration and diagnostics",
+          "homepage": "https://rhel-lightspeed.github.io/linux-mcp-server/",
+          "download_owner": "ublue-os",
+          "download_repo": "homebrew-tap"
+        },
+        {
+          "name": "pmbootstrap",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 155,
+          "description": "Sophisticated chroot / build / flash tool to develop and install postmarketOS",
+          "homepage": "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap",
+          "download_owner": "ublue-os",
+          "download_repo": "homebrew-tap"
+        },
+        {
           "name": "heic-to-dynamic-gnome-wallpaper",
           "type": "formula",
           "is_stale": false,
@@ -174,27 +196,9 @@
           "homepage": "https://github.com/fia0/heic-to-dynamic-gnome-wallpaper",
           "source_owner": "fia0",
           "source_repo": "heic-to-dynamic-gnome-wallpaper"
-        },
-        {
-          "name": "linux-mcp-server",
-          "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "description": "MCP server for Linux system administration and diagnostics",
-          "homepage": "https://rhel-lightspeed.github.io/linux-mcp-server/"
-        },
-        {
-          "name": "pmbootstrap",
-          "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "description": "Sophisticated chroot / build / flash tool to develop and install postmarketOS",
-          "homepage": "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap"
         }
       ],
-      "updated_at": "2026-03-18T01:33:24Z"
+      "updated_at": "2026-03-18T02:44:49Z"
     },
     {
       "name": "ublue-os/homebrew-experimental-tap",
@@ -202,29 +206,31 @@
       "traffic": {
         "count": 466,
         "uniques": 301,
-        "window": "14 days"
+        "window": "today"
       },
       "packages": [
         {
-          "name": "1password-flatpak-browser-integration",
+          "name": "opencode-desktop-linux",
           "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
+          "version": "1.1.53",
+          "latest_version": "1.2.27",
+          "is_stale": true,
+          "freshness_known": true,
           "downloads": 0,
-          "description": "Integration for 1Password with Flatpak browsers",
-          "homepage": "https://github.com/FlyinPancake/1password-flatpak-browser-integration",
-          "source_owner": "FlyinPancake",
-          "source_repo": "1password-flatpak-browser-integration"
+          "description": "Open source AI coding agent desktop client",
+          "homepage": "https://opencode.ai/",
+          "source_owner": "anomalyco",
+          "source_repo": "opencode"
         },
         {
-          "name": "buildbox",
+          "name": "webstorm-linux",
           "type": "cask",
-          "version": "1.3.52",
+          "version": "2025.3.2,253.30387.83",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
-          "description": "Set of tools for remote worker build execution",
-          "homepage": "https://gitlab.com/BuildGrid/buildbox"
+          "description": "JavaScript IDE",
+          "homepage": "https://www.jetbrains.com/webstorm/"
         },
         {
           "name": "clion-linux",
@@ -243,7 +249,7 @@
           "latest_version": "0.7.7",
           "is_stale": true,
           "freshness_known": true,
-          "downloads": 3133,
+          "downloads": 0,
           "description": "Work with most powerful agents in the world, with the UX they deserve",
           "homepage": "https://agents.craft.do/",
           "source_owner": "lukilabs",
@@ -296,7 +302,7 @@
           "latest_version": "emacs-pgtk-30.2-18",
           "is_stale": true,
           "freshness_known": true,
-          "downloads": 152,
+          "downloads": 0,
           "description": "Text editor with PGTK support (Native Wayland and X11)",
           "homepage": "https://github.com/daegalus/linux-app-builds",
           "source_owner": "daegalus",
@@ -309,7 +315,7 @@
           "latest_version": "0.4.37",
           "is_stale": true,
           "freshness_known": true,
-          "downloads": 237408,
+          "downloads": 0,
           "description": "Agentic development environment for running multiple coding agents in parallel",
           "homepage": "https://emdash.sh/",
           "source_owner": "generalaction",
@@ -326,27 +332,24 @@
           "homepage": "https://www.jetbrains.com/goland/"
         },
         {
-          "name": "intellij-idea-linux",
+          "name": "pycharm-linux",
           "type": "cask",
-          "version": "2025.3.2,253.30387.90",
+          "version": "2025.3.2.1,253.30387.173",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
-          "description": "Java IDE by JetBrains",
-          "homepage": "https://www.jetbrains.com/idea/"
+          "description": "IDE for professional Python development",
+          "homepage": "https://www.jetbrains.com/pycharm/"
         },
         {
-          "name": "opencode-desktop-linux",
+          "name": "buildbox",
           "type": "cask",
-          "version": "1.1.53",
-          "latest_version": "1.2.27",
-          "is_stale": true,
-          "freshness_known": true,
-          "downloads": 19284319,
-          "description": "Open source AI coding agent desktop client",
-          "homepage": "https://opencode.ai/",
-          "source_owner": "anomalyco",
-          "source_repo": "opencode"
+          "version": "1.3.52",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 0,
+          "description": "Set of tools for remote worker build execution",
+          "homepage": "https://gitlab.com/BuildGrid/buildbox"
         },
         {
           "name": "phpstorm-linux",
@@ -359,14 +362,14 @@
           "homepage": "https://www.jetbrains.com/phpstorm/"
         },
         {
-          "name": "pycharm-linux",
+          "name": "intellij-idea-linux",
           "type": "cask",
-          "version": "2025.3.2.1,253.30387.173",
+          "version": "2025.3.2,253.30387.90",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
-          "description": "IDE for professional Python development",
-          "homepage": "https://www.jetbrains.com/pycharm/"
+          "description": "Java IDE by JetBrains",
+          "homepage": "https://www.jetbrains.com/idea/"
         },
         {
           "name": "rancher-desktop-linux",
@@ -408,14 +411,15 @@
           "homepage": "https://www.jetbrains.com/rustrover/"
         },
         {
-          "name": "webstorm-linux",
+          "name": "1password-flatpak-browser-integration",
           "type": "cask",
-          "version": "2025.3.2,253.30387.83",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
-          "description": "JavaScript IDE",
-          "homepage": "https://www.jetbrains.com/webstorm/"
+          "description": "Integration for 1Password with Flatpak browsers",
+          "homepage": "https://github.com/FlyinPancake/1password-flatpak-browser-integration",
+          "source_owner": "FlyinPancake",
+          "source_repo": "1password-flatpak-browser-integration"
         },
         {
           "name": "winboat",
@@ -424,7 +428,7 @@
           "latest_version": "0.9.0",
           "is_stale": false,
           "freshness_known": true,
-          "downloads": 431860,
+          "downloads": 0,
           "description": "Run Windows apps on Linux with seamless integration",
           "homepage": "https://www.winboat.app/",
           "source_owner": "TibixDev",
@@ -435,9 +439,22 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 0,
+          "downloads": 155,
           "description": "Control daemon, CLI tools for interacting with ASUS ROG laptops",
-          "homepage": "https://gitlab.com/asus-linux/asusctl"
+          "homepage": "https://gitlab.com/asus-linux/asusctl",
+          "download_owner": "ublue-os",
+          "download_repo": "homebrew-tap"
+        },
+        {
+          "name": "buildstream",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 82,
+          "description": "Powerful software integration tool",
+          "homepage": "https://buildstream.build",
+          "download_owner": "ublue-os",
+          "download_repo": "homebrew-experimental-tap"
         },
         {
           "name": "bluefin-cli",
@@ -449,15 +466,6 @@
           "homepage": "https://github.com/hanthor/bluefin-cli",
           "source_owner": "hanthor",
           "source_repo": "bluefin-cli"
-        },
-        {
-          "name": "buildstream",
-          "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "description": "Powerful software integration tool",
-          "homepage": "https://buildstream.build"
         },
         {
           "name": "foundry",
@@ -491,879 +499,202 @@
           "source_repo": "ydotool"
         }
       ],
-      "updated_at": "2026-03-18T01:33:45Z"
+      "updated_at": "2026-03-18T02:44:53Z"
     }
   ],
   "history": [
     {
-      "date": "2026-02-17",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1401,
-          "count": 1701,
-          "downloads": {
-            "goose-linux": 508530,
-            "framework-tool": 18934,
-            "aurora-wallpapers": 6186,
-            "bazzite-wallpapers": 6185,
-            "bluefin-wallpapers": 5984,
-            "bluefin-wallpapers-extra": 5723,
-            "framework-wallpapers": 5838
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 178,
-          "count": 265,
-          "downloads": {
-            "opencode-desktop-linux": 11025494,
-            "winboat": 281300,
-            "emdash-linux": 148374,
-            "craft-agents-linux": 1519,
-            "emacs-app-linux": 80
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-18",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1456,
-          "count": 1797,
-          "downloads": {
-            "goose-linux": 513464,
-            "framework-tool": 19533,
-            "aurora-wallpapers": 6213,
-            "bazzite-wallpapers": 6095,
-            "bluefin-wallpapers": 6072,
-            "bluefin-wallpapers-extra": 5737,
-            "framework-wallpapers": 5773
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 190,
-          "count": 259,
-          "downloads": {
-            "opencode-desktop-linux": 10975794,
-            "winboat": 282642,
-            "emdash-linux": 146043,
-            "craft-agents-linux": 1529,
-            "emacs-app-linux": 78
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-19",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1354,
-          "count": 1719,
-          "downloads": {
-            "goose-linux": 486781,
-            "framework-tool": 18902,
-            "aurora-wallpapers": 6117,
-            "bazzite-wallpapers": 6240,
-            "bluefin-wallpapers": 6114,
-            "bluefin-wallpapers-extra": 5790,
-            "framework-wallpapers": 5935
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 192,
-          "count": 289,
-          "downloads": {
-            "opencode-desktop-linux": 11047451,
-            "winboat": 282712,
-            "emdash-linux": 148652,
-            "craft-agents-linux": 1541,
-            "emacs-app-linux": 81
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-20",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1354,
-          "count": 1802,
-          "downloads": {
-            "goose-linux": 511625,
-            "framework-tool": 19018,
-            "aurora-wallpapers": 6210,
-            "bazzite-wallpapers": 6233,
-            "bluefin-wallpapers": 6044,
-            "bluefin-wallpapers-extra": 6257,
-            "framework-wallpapers": 5784
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 175,
-          "count": 277,
-          "downloads": {
-            "opencode-desktop-linux": 11567471,
-            "winboat": 287416,
-            "emdash-linux": 150232,
-            "craft-agents-linux": 1592,
-            "emacs-app-linux": 81
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-21",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1611,
-          "count": 1801,
-          "downloads": {
-            "goose-linux": 534070,
-            "framework-tool": 18949,
-            "aurora-wallpapers": 6324,
-            "bazzite-wallpapers": 6256,
-            "bluefin-wallpapers": 6091,
-            "bluefin-wallpapers-extra": 6122,
-            "framework-wallpapers": 6009
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 190,
-          "count": 300,
-          "downloads": {
-            "opencode-desktop-linux": 11290046,
-            "winboat": 284635,
-            "emdash-linux": 147297,
-            "craft-agents-linux": 1614,
-            "emacs-app-linux": 82
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-22",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1454,
-          "count": 1784,
-          "downloads": {
-            "goose-linux": 523757,
-            "framework-tool": 19664,
-            "aurora-wallpapers": 6147,
-            "bazzite-wallpapers": 6154,
-            "bluefin-wallpapers": 6128,
-            "bluefin-wallpapers-extra": 6157,
-            "framework-wallpapers": 6157
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 202,
-          "count": 300,
-          "downloads": {
-            "opencode-desktop-linux": 11693023,
-            "winboat": 298320,
-            "emdash-linux": 155014,
-            "craft-agents-linux": 1637,
-            "emacs-app-linux": 83
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-23",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1387,
-          "count": 1764,
-          "downloads": {
-            "goose-linux": 553334,
-            "framework-tool": 20083,
-            "aurora-wallpapers": 6708,
-            "bazzite-wallpapers": 6321,
-            "bluefin-wallpapers": 6478,
-            "bluefin-wallpapers-extra": 6203,
-            "framework-wallpapers": 6037
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 203,
-          "count": 292,
-          "downloads": {
-            "opencode-desktop-linux": 12256358,
-            "winboat": 301657,
-            "emdash-linux": 157368,
-            "craft-agents-linux": 1600,
-            "emacs-app-linux": 89
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-24",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1460,
-          "count": 1805,
-          "downloads": {
-            "goose-linux": 542953,
-            "framework-tool": 20450,
-            "aurora-wallpapers": 6765,
-            "bazzite-wallpapers": 6317,
-            "bluefin-wallpapers": 6314,
-            "bluefin-wallpapers-extra": 6454,
-            "framework-wallpapers": 6142
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 225,
-          "count": 311,
-          "downloads": {
-            "opencode-desktop-linux": 11911767,
-            "winboat": 303602,
-            "emdash-linux": 154717,
-            "craft-agents-linux": 1770,
-            "emacs-app-linux": 90
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-25",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1549,
-          "count": 1956,
-          "downloads": {
-            "goose-linux": 575939,
-            "framework-tool": 20300,
-            "aurora-wallpapers": 6615,
-            "bazzite-wallpapers": 6592,
-            "bluefin-wallpapers": 6694,
-            "bluefin-wallpapers-extra": 6172,
-            "framework-wallpapers": 6430
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 204,
-          "count": 346,
-          "downloads": {
-            "opencode-desktop-linux": 12722196,
-            "winboat": 308614,
-            "emdash-linux": 160524,
-            "craft-agents-linux": 1759,
-            "emacs-app-linux": 93
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-26",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1521,
-          "count": 1736,
-          "downloads": {
-            "goose-linux": 565276,
-            "framework-tool": 21404,
-            "aurora-wallpapers": 6519,
-            "bazzite-wallpapers": 6600,
-            "bluefin-wallpapers": 6610,
-            "bluefin-wallpapers-extra": 6606,
-            "framework-wallpapers": 6608
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 212,
-          "count": 333,
-          "downloads": {
-            "opencode-desktop-linux": 13016551,
-            "winboat": 318055,
-            "emdash-linux": 167810,
-            "craft-agents-linux": 1847,
-            "emacs-app-linux": 98
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-27",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1660,
-          "count": 1874,
-          "downloads": {
-            "goose-linux": 599545,
-            "framework-tool": 21983,
-            "aurora-wallpapers": 6875,
-            "bazzite-wallpapers": 7054,
-            "bluefin-wallpapers": 6723,
-            "bluefin-wallpapers-extra": 6579,
-            "framework-wallpapers": 6560
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 219,
-          "count": 321,
-          "downloads": {
-            "opencode-desktop-linux": 13413721,
-            "winboat": 329411,
-            "emdash-linux": 168638,
-            "craft-agents-linux": 1881,
-            "emacs-app-linux": 100
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-02-28",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1564,
-          "count": 1817,
-          "downloads": {
-            "goose-linux": 608039,
-            "framework-tool": 22460,
-            "aurora-wallpapers": 6808,
-            "bazzite-wallpapers": 6950,
-            "bluefin-wallpapers": 6784,
-            "bluefin-wallpapers-extra": 6543,
-            "framework-wallpapers": 6736
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 214,
-          "count": 346,
-          "downloads": {
-            "opencode-desktop-linux": 13814528,
-            "winboat": 332183,
-            "emdash-linux": 172780,
-            "craft-agents-linux": 2042,
-            "emacs-app-linux": 105
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-01",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1589,
-          "count": 2128,
-          "downloads": {
-            "goose-linux": 611108,
-            "framework-tool": 23708,
-            "aurora-wallpapers": 6798,
-            "bazzite-wallpapers": 7095,
-            "bluefin-wallpapers": 6893,
-            "bluefin-wallpapers-extra": 6858,
-            "framework-wallpapers": 7068
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 224,
-          "count": 352,
-          "downloads": {
-            "opencode-desktop-linux": 13957003,
-            "winboat": 338846,
-            "emdash-linux": 177612,
-            "craft-agents-linux": 2078,
-            "emacs-app-linux": 106
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-02",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1543,
-          "count": 1795,
-          "downloads": {
-            "goose-linux": 598550,
-            "framework-tool": 24111,
-            "aurora-wallpapers": 7154,
-            "bazzite-wallpapers": 7369,
-            "bluefin-wallpapers": 6920,
-            "bluefin-wallpapers-extra": 7046,
-            "framework-wallpapers": 7387
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 215,
-          "count": 350,
-          "downloads": {
-            "opencode-desktop-linux": 14343197,
-            "winboat": 347442,
-            "emdash-linux": 186612,
-            "craft-agents-linux": 2246,
-            "emacs-app-linux": 109
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-03",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1662,
-          "count": 1845,
-          "downloads": {
-            "goose-linux": 654685,
-            "framework-tool": 23912,
-            "aurora-wallpapers": 7012,
-            "bazzite-wallpapers": 7239,
-            "bluefin-wallpapers": 7393,
-            "bluefin-wallpapers-extra": 7443,
-            "framework-wallpapers": 7166
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 226,
-          "count": 353,
-          "downloads": {
-            "opencode-desktop-linux": 14676236,
-            "winboat": 352334,
-            "emdash-linux": 190715,
-            "craft-agents-linux": 2300,
-            "emacs-app-linux": 113
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-04",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1743,
-          "count": 1954,
-          "downloads": {
-            "goose-linux": 637781,
-            "framework-tool": 24515,
-            "aurora-wallpapers": 7074,
-            "bazzite-wallpapers": 7320,
-            "bluefin-wallpapers": 7388,
-            "bluefin-wallpapers-extra": 7496,
-            "framework-wallpapers": 7237
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 286,
-          "count": 377,
-          "downloads": {
-            "opencode-desktop-linux": 15127698,
-            "winboat": 355002,
-            "emdash-linux": 199506,
-            "craft-agents-linux": 2405,
-            "emacs-app-linux": 119
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-05",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1720,
-          "count": 2099,
-          "downloads": {
-            "goose-linux": 675145,
-            "framework-tool": 24865,
-            "aurora-wallpapers": 7503,
-            "bazzite-wallpapers": 7841,
-            "bluefin-wallpapers": 7676,
-            "bluefin-wallpapers-extra": 7202,
-            "framework-wallpapers": 7308
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 256,
-          "count": 372,
-          "downloads": {
-            "opencode-desktop-linux": 15356975,
-            "winboat": 351084,
-            "emdash-linux": 190785,
-            "craft-agents-linux": 2439,
-            "emacs-app-linux": 121
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-06",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1822,
-          "count": 2033,
-          "downloads": {
-            "goose-linux": 663988,
-            "framework-tool": 24194,
-            "aurora-wallpapers": 7704,
-            "bazzite-wallpapers": 7673,
-            "bluefin-wallpapers": 7730,
-            "bluefin-wallpapers-extra": 7661,
-            "framework-wallpapers": 7476
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 261,
-          "count": 389,
-          "downloads": {
-            "opencode-desktop-linux": 15988644,
-            "winboat": 371464,
-            "emdash-linux": 200660,
-            "craft-agents-linux": 2416,
-            "emacs-app-linux": 125
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-07",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1620,
-          "count": 2060,
-          "downloads": {
-            "goose-linux": 684191,
-            "framework-tool": 25895,
-            "aurora-wallpapers": 8035,
-            "bazzite-wallpapers": 7742,
-            "bluefin-wallpapers": 7625,
-            "bluefin-wallpapers-extra": 7580,
-            "framework-wallpapers": 7628
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 272,
-          "count": 382,
-          "downloads": {
-            "opencode-desktop-linux": 16633107,
-            "winboat": 397014,
-            "emdash-linux": 211525,
-            "craft-agents-linux": 2660,
-            "emacs-app-linux": 126
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-08",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1716,
-          "count": 2098,
-          "downloads": {
-            "goose-linux": 711492,
-            "framework-tool": 26396,
-            "aurora-wallpapers": 7758,
-            "bazzite-wallpapers": 8165,
-            "bluefin-wallpapers": 7912,
-            "bluefin-wallpapers-extra": 7499,
-            "framework-wallpapers": 7855
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 286,
-          "count": 454,
-          "downloads": {
-            "opencode-desktop-linux": 17166939,
-            "winboat": 393189,
-            "emdash-linux": 203375,
-            "craft-agents-linux": 2622,
-            "emacs-app-linux": 134
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-09",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1951,
-          "count": 2189,
-          "downloads": {
-            "goose-linux": 745405,
-            "framework-tool": 25533,
-            "aurora-wallpapers": 8107,
-            "bazzite-wallpapers": 7656,
-            "bluefin-wallpapers": 8194,
-            "bluefin-wallpapers-extra": 7955,
-            "framework-wallpapers": 7712
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 293,
-          "count": 393,
-          "downloads": {
-            "opencode-desktop-linux": 16728293,
-            "winboat": 399390,
-            "emdash-linux": 213069,
-            "craft-agents-linux": 2764,
-            "emacs-app-linux": 134
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-10",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1801,
-          "count": 2042,
-          "downloads": {
-            "goose-linux": 735743,
-            "framework-tool": 28033,
-            "aurora-wallpapers": 7949,
-            "bazzite-wallpapers": 8099,
-            "bluefin-wallpapers": 8078,
-            "bluefin-wallpapers-extra": 7917,
-            "framework-wallpapers": 8112
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 296,
-          "count": 428,
-          "downloads": {
-            "opencode-desktop-linux": 18366031,
-            "winboat": 409955,
-            "emdash-linux": 219455,
-            "craft-agents-linux": 2792,
-            "emacs-app-linux": 136
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-11",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1871,
-          "count": 2151,
-          "downloads": {
-            "goose-linux": 748692,
-            "framework-tool": 27343,
-            "aurora-wallpapers": 8276,
-            "bazzite-wallpapers": 8141,
-            "bluefin-wallpapers": 8270,
-            "bluefin-wallpapers-extra": 8101,
-            "framework-wallpapers": 8251
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 283,
-          "count": 473,
-          "downloads": {
-            "opencode-desktop-linux": 17758592,
-            "winboat": 401886,
-            "emdash-linux": 220538,
-            "craft-agents-linux": 2836,
-            "emacs-app-linux": 143
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-12",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1853,
-          "count": 2133,
-          "downloads": {
-            "goose-linux": 785912,
-            "framework-tool": 27813,
-            "aurora-wallpapers": 8003,
-            "bazzite-wallpapers": 8184,
-            "bluefin-wallpapers": 8224,
-            "bluefin-wallpapers-extra": 7980,
-            "framework-wallpapers": 8173
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 282,
-          "count": 466,
-          "downloads": {
-            "opencode-desktop-linux": 18084921,
-            "winboat": 408749,
-            "emdash-linux": 235295,
-            "craft-agents-linux": 2942,
-            "emacs-app-linux": 141
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-13",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1768,
-          "count": 2156,
-          "downloads": {
-            "goose-linux": 749870,
-            "framework-tool": 28385,
-            "aurora-wallpapers": 8453,
-            "bazzite-wallpapers": 8449,
-            "bluefin-wallpapers": 8549,
-            "bluefin-wallpapers-extra": 8217,
-            "framework-wallpapers": 8488
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 282,
-          "count": 430,
-          "downloads": {
-            "opencode-desktop-linux": 19076118,
-            "winboat": 426779,
-            "emdash-linux": 230123,
-            "craft-agents-linux": 2932,
-            "emacs-app-linux": 147
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-14",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1910,
-          "count": 2146,
-          "downloads": {
-            "goose-linux": 757695,
-            "framework-tool": 28523,
-            "aurora-wallpapers": 8038,
-            "bazzite-wallpapers": 8450,
-            "bluefin-wallpapers": 8413,
-            "bluefin-wallpapers-extra": 8281,
-            "framework-wallpapers": 8547
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 296,
-          "count": 461,
-          "downloads": {
-            "opencode-desktop-linux": 18602307,
-            "winboat": 429884,
-            "emdash-linux": 225565,
-            "craft-agents-linux": 3028,
-            "emacs-app-linux": 146
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-15",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1999,
-          "count": 2142,
-          "downloads": {
-            "goose-linux": 774176,
-            "framework-tool": 29249,
-            "aurora-wallpapers": 8484,
-            "bazzite-wallpapers": 8389,
-            "bluefin-wallpapers": 8235,
-            "bluefin-wallpapers-extra": 8558,
-            "framework-wallpapers": 8522
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 309,
-          "count": 475,
-          "downloads": {
-            "opencode-desktop-linux": 19046754,
-            "winboat": 426819,
-            "emdash-linux": 234234,
-            "craft-agents-linux": 3084,
-            "emacs-app-linux": 144
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-16",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1917,
-          "count": 2069,
-          "downloads": {
-            "goose-linux": 795620,
-            "framework-tool": 30055,
-            "aurora-wallpapers": 8429,
-            "bazzite-wallpapers": 8475,
-            "bluefin-wallpapers": 8482,
-            "bluefin-wallpapers-extra": 8808,
-            "framework-wallpapers": 8184
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 296,
-          "count": 436,
-          "downloads": {
-            "opencode-desktop-linux": 18181692,
-            "winboat": 412421,
-            "emdash-linux": 229623,
-            "craft-agents-linux": 3177,
-            "emacs-app-linux": 148
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-03-17",
-      "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 2010,
-          "count": 2252,
-          "downloads": {
-            "goose-linux": 790322,
-            "framework-tool": 28225,
-            "aurora-wallpapers": 8731,
-            "bazzite-wallpapers": 8337,
-            "bluefin-wallpapers": 8376,
-            "bluefin-wallpapers-extra": 8526,
-            "framework-wallpapers": 8509
-          }
-        },
-        "ublue-os/homebrew-experimental-tap": {
-          "uniques": 298,
-          "count": 485,
-          "downloads": {
-            "opencode-desktop-linux": 18790298,
-            "winboat": 426496,
-            "emdash-linux": 234369,
-            "craft-agents-linux": 3172,
-            "emacs-app-linux": 152
-          }
-        }
-      }
-    },
-    {
       "date": "2026-03-18",
       "taps": {
-        "ublue-os/homebrew-tap": {
-          "uniques": 1942,
-          "count": 2175,
-          "downloads": {
-            "goose-linux": 773466,
-            "framework-tool": 28817,
-            "aurora-wallpapers": 8545,
-            "bazzite-wallpapers": 8775,
-            "bluefin-wallpapers": 8498,
-            "bluefin-wallpapers-extra": 8455,
-            "framework-wallpapers": 8336
-          }
-        },
         "ublue-os/homebrew-experimental-tap": {
-          "uniques": 316,
-          "count": 434,
-          "downloads": {
-            "opencode-desktop-linux": 19416873,
-            "winboat": 415435,
-            "emdash-linux": 242361,
-            "craft-agents-linux": 3049,
-            "emacs-app-linux": 149
-          }
+          "uniques": 301,
+          "count": 466
+        },
+        "ublue-os/homebrew-tap": {
+          "uniques": 1878,
+          "count": 2241
         }
       }
     }
-  ]
+  ],
+  "os_analytics": {
+    "periods": [
+      {
+        "period": "30d",
+        "items": [
+          {
+            "os": "Ubuntu",
+            "count": 5791290,
+            "percent": 72.11
+          },
+          {
+            "os": "Debian GNU/Linux",
+            "count": 1014538,
+            "percent": 12.63
+          },
+          {
+            "os": "Bazzite",
+            "count": 288742,
+            "percent": 3.6
+          },
+          {
+            "os": "Fedora Linux",
+            "count": 126793,
+            "percent": 1.58
+          },
+          {
+            "os": "Alibaba Cloud Linux 3.2104 U12.3",
+            "count": 114653,
+            "percent": 1.43
+          },
+          {
+            "os": "Bluefin",
+            "count": 109608,
+            "percent": 1.36
+          },
+          {
+            "os": "Amazon Linux",
+            "count": 109569,
+            "percent": 1.36
+          },
+          {
+            "os": "Linux Mint",
+            "count": 71677,
+            "percent": 0.89
+          },
+          {
+            "os": "Aurora",
+            "count": 63860,
+            "percent": 0.8
+          },
+          {
+            "os": "Pop!_OS",
+            "count": 41494,
+            "percent": 0.52
+          }
+        ]
+      },
+      {
+        "period": "90d",
+        "items": [
+          {
+            "os": "Ubuntu",
+            "count": 14025324,
+            "percent": 72.31
+          },
+          {
+            "os": "Debian GNU/Linux",
+            "count": 1942795,
+            "percent": 10.02
+          },
+          {
+            "os": "Bazzite",
+            "count": 903065,
+            "percent": 4.66
+          },
+          {
+            "os": "Fedora Linux",
+            "count": 374926,
+            "percent": 1.93
+          },
+          {
+            "os": "Bluefin",
+            "count": 349742,
+            "percent": 1.8
+          },
+          {
+            "os": "Amazon Linux",
+            "count": 318529,
+            "percent": 1.64
+          },
+          {
+            "os": "Aurora",
+            "count": 205902,
+            "percent": 1.06
+          },
+          {
+            "os": "Linux Mint",
+            "count": 188961,
+            "percent": 0.97
+          },
+          {
+            "os": "Alibaba Cloud Linux 3.2104 U12.3",
+            "count": 137232,
+            "percent": 0.71
+          },
+          {
+            "os": "Pop!_OS",
+            "count": 119071,
+            "percent": 0.61
+          }
+        ]
+      },
+      {
+        "period": "365d",
+        "items": [
+          {
+            "os": "Ubuntu",
+            "count": 41355969,
+            "percent": 74.81
+          },
+          {
+            "os": "Debian GNU/Linux",
+            "count": 4201110,
+            "percent": 7.6
+          },
+          {
+            "os": "Bazzite",
+            "count": 2179799,
+            "percent": 3.94
+          },
+          {
+            "os": "Bluefin",
+            "count": 1210999,
+            "percent": 2.19
+          },
+          {
+            "os": "Fedora Linux",
+            "count": 1105380,
+            "percent": 2
+          },
+          {
+            "os": "Amazon Linux",
+            "count": 1094306,
+            "percent": 1.98
+          },
+          {
+            "os": "Aurora",
+            "count": 674886,
+            "percent": 1.22
+          },
+          {
+            "os": "Linux Mint",
+            "count": 526217,
+            "percent": 0.95
+          },
+          {
+            "os": "Pop!_OS",
+            "count": 373850,
+            "percent": 0.68
+          },
+          {
+            "os": "Arch Linux",
+            "count": 331382,
+            "percent": 0.6
+          }
+        ]
+      }
+    ]
+  },
+  "testhub": {
+    "org": "projectbluefin",
+    "url": "https://github.com/orgs/projectbluefin/packages",
+    "packages": [
+      {
+        "name": "com.example.MockApp",
+        "version": "latest",
+        "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/com.example.MockApp"
+      }
+    ]
+  }
 }

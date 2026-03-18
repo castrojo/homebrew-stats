@@ -10,6 +10,13 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// TesthubPackage represents a Flatpak package from projectbluefin testhub.
+type TesthubPackage struct {
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	HTMLURL string `json:"html_url,omitempty"`
+}
+
 // Client wraps the GitHub API.
 type Client struct {
 	gh  *gh.Client
@@ -77,6 +84,50 @@ func (c *Client) GetLatestReleaseTag(owner, repo string) (string, error) {
 		return "", fmt.Errorf("latest release for %s/%s: %w", owner, repo, err)
 	}
 	return release.GetTagName(), nil
+}
+
+// ListTesthubPackages returns container packages from the given GitHub org via the Packages API.
+func (c *Client) ListTesthubPackages(org string) ([]TesthubPackage, error) {
+	opts := &gh.PackageListOptions{
+		PackageType: gh.String("container"),
+		ListOptions: gh.ListOptions{PerPage: 100},
+	}
+
+	var all []TesthubPackage
+	for {
+		pkgs, resp, err := c.gh.Organizations.ListPackages(c.ctx, org, opts)
+		if err != nil {
+			return nil, fmt.Errorf("listing packages for %s: %w", org, err)
+		}
+
+		for _, pkg := range pkgs {
+			name := pkg.GetName()
+			tp := TesthubPackage{
+				Name:    name,
+				HTMLURL: pkg.GetHTMLURL(),
+			}
+
+			versions, _, verErr := c.gh.Organizations.PackageGetAllVersions(
+				c.ctx, org, "container", name,
+				&gh.PackageListOptions{ListOptions: gh.ListOptions{PerPage: 1}},
+			)
+			if verErr == nil && len(versions) > 0 {
+				meta := versions[0].GetMetadata()
+				if meta != nil && meta.Container != nil && len(meta.Container.Tags) > 0 {
+					tp.Version = meta.Container.Tags[0]
+				}
+			}
+
+			all = append(all, tp)
+		}
+
+		if resp.NextPage == 0 {
+			break
+		}
+		opts.Page = resp.NextPage
+	}
+
+	return all, nil
 }
 
 // GetTotalDownloads sums asset download counts across all releases for owner/repo.
