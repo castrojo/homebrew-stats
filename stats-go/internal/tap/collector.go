@@ -141,12 +141,12 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 		p.IsStale = p.LatestVersion != normaliseVersion(p.Version)
 	}
 
-	// Sort packages alphabetically within type (casks then formulas).
+	// Sort packages by downloads descending (within type: casks then formulas).
 	sort.Slice(ts.Packages, func(i, j int) bool {
 		if ts.Packages[i].Type != ts.Packages[j].Type {
 			return ts.Packages[i].Type < ts.Packages[j].Type // "cask" < "formula"
 		}
-		return ts.Packages[i].Name < ts.Packages[j].Name
+		return ts.Packages[i].Downloads > ts.Packages[j].Downloads
 	})
 
 	return ts, nil

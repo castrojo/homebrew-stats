@@ -40,8 +40,13 @@ interface Props {
 
 const { name, url, traffic, packages, history } = Astro.props;
 
-const casks = packages.filter(p => p.type === 'cask');
-const formulas = packages.filter(p => p.type === 'formula');
+const sorted = [...packages].sort((a, b) => {
+  if (a.type !== b.type) return a.type < b.type ? -1 : 1; // cask before formula
+  return (b.downloads ?? 0) - (a.downloads ?? 0);
+});
+
+const casks = sorted.filter(p => p.type === 'cask');
+const formulas = sorted.filter(p => p.type === 'formula');
 ---
 
 <div class="tap-section">
@@ -101,7 +106,7 @@ const formulas = packages.filter(p => p.type === 'formula');
       </tr>
     </thead>
     <tbody>
-      {packages.map(pkg => (
+      {sorted.map(pkg => (
         <tr>
           <td>
             <div class="pkg-name">
