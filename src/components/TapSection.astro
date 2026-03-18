@@ -1,17 +1,6 @@
 ---
 import DownloadsChart from './DownloadsChart.astro';
-
-interface Package {
-  name: string;
-  type: string;
-  version?: string;
-  latest_version?: string;
-  is_stale: boolean;
-  freshness_known: boolean;
-  downloads: number;
-  description?: string;
-  homepage?: string;
-}
+import { sortPackages, type Package } from '../lib/packages';
 
 interface Traffic {
   count: number;
@@ -40,10 +29,7 @@ interface Props {
 
 const { name, url, traffic, packages, history } = Astro.props;
 
-const sorted = [...packages].sort((a, b) => {
-  if (a.type !== b.type) return a.type < b.type ? -1 : 1; // cask before formula
-  return (b.downloads ?? 0) - (a.downloads ?? 0);
-});
+const sorted = sortPackages(packages);
 
 const casks = sorted.filter(p => p.type === 'cask');
 const formulas = sorted.filter(p => p.type === 'formula');
