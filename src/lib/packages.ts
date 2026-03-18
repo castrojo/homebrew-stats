@@ -20,3 +20,18 @@ export function sortPackages(packages: Package[]): Package[] {
     return (b.downloads ?? 0) - (a.downloads ?? 0);
   });
 }
+
+/** Filter packages by type (e.g. "cask" or "formula"). */
+export function filterByType(packages: Package[], type: string): Package[] {
+  return packages.filter(p => p.type === type);
+}
+
+/** Count packages that are stale. */
+export function countStale(packages: Package[]): number {
+  return packages.filter(p => p.is_stale).length;
+}
+
+/** Count packages that are known-fresh (freshness_known && !is_stale). */
+export function countUpToDate(packages: Package[]): number {
+  return packages.filter(p => p.freshness_known && !p.is_stale).length;
+}

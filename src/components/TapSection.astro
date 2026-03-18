@@ -1,6 +1,6 @@
 ---
 import DownloadsChart from './DownloadsChart.astro';
-import { sortPackages, type Package } from '../lib/packages';
+import { sortPackages, filterByType, countStale, countUpToDate, type Package } from '../lib/packages';
 
 interface Traffic {
   count: number;
@@ -31,8 +31,8 @@ const { name, url, traffic, packages, history } = Astro.props;
 
 const sorted = sortPackages(packages);
 
-const casks = sorted.filter(p => p.type === 'cask');
-const formulas = sorted.filter(p => p.type === 'formula');
+const casks = filterByType(sorted, 'cask');
+const formulas = filterByType(sorted, 'formula');
 ---
 
 <div class="tap-section">
@@ -69,11 +69,11 @@ const formulas = sorted.filter(p => p.type === 'formula');
       </div>
     )}
     <div class="stat-card stat-current">
-      <div class="stat-value">{packages.filter(p => p.freshness_known && !p.is_stale).length}</div>
+      <div class="stat-value">{countUpToDate(packages)}</div>
       <div class="stat-label">Up to Date</div>
     </div>
     <div class="stat-card stat-stale">
-      <div class="stat-value">{packages.filter(p => p.is_stale).length}</div>
+      <div class="stat-value">{countStale(packages)}</div>
       <div class="stat-label">Stale</div>
     </div>
   </div>
