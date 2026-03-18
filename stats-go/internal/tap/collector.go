@@ -2,9 +2,7 @@
 package tap
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"regexp"
 	"sort"
@@ -107,28 +105,9 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 		}
 	}
 
-	// Fetch Homebrew Analytics install counts for this tap's package type.
-	caskAnalytics, err := fetchBrewAnalytics("cask")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "⚠️  Brew cask analytics: %v\n", err)
-	}
-	formulaAnalytics, err := fetchBrewAnalytics("formula")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "⚠️  Brew formula analytics: %v\n", err)
-	}
-
-	// Freshness check and download lookup for each package.
+	// Freshness check and download count for each package with a detected GitHub source.
 	for i := range ts.Packages {
 		p := &ts.Packages[i]
-
-		// Homebrew Analytics 30-day install count.
-		if p.Type == "cask" {
-			p.Downloads = caskAnalytics[p.Name]
-		} else {
-			p.Downloads = formulaAnalytics[p.Name]
-		}
-
-		// Freshness check — only for packages with a detected GitHub source.
 		if p.SourceOwner == "" || p.SourceRepo == "" || p.Version == "" {
 			continue
 		}
@@ -139,6 +118,13 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 		p.LatestVersion = normaliseVersion(latest)
 		p.FreshnessKnown = true
 		p.IsStale = p.LatestVersion != normaliseVersion(p.Version)
+
+		downloads, err := client.GetTotalDownloads(p.SourceOwner, p.SourceRepo)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  Downloads for %s/%s: %v\n", p.SourceOwner, p.SourceRepo, err)
+		} else {
+			p.Downloads = downloads
+		}
 	}
 
 	// Sort packages by downloads descending (within type: casks then formulas).
@@ -182,44 +168,4 @@ func parseRuby(name, pkgType, content string) Package {
 
 func normaliseVersion(v string) string {
 	return strings.TrimPrefix(strings.TrimSpace(v), "v")
-}
-
-// fetchBrewAnalytics fetches 30-day install counts from the Homebrew Analytics API.
-// pkgType must be "cask" or "formula". Returns a map of package name → install count.
-func fetchBrewAnalytics(pkgType string) (map[string]int64, error) {
-	endpoint := "https://formulae.brew.sh/api/analytics/install/30d.json"
-	if pkgType == "cask" {
-		endpoint = "https://formulae.brew.sh/api/analytics/cask-install/30d.json"
-	}
-
-	resp, err := http.Get(endpoint) //nolint:noctx
-	if err != nil {
-		return nil, fmt.Errorf("fetching brew analytics: %w", err)
-	}
-	defer resp.Body.Close()
-
-	var result struct {
-		Items []struct {
-			Cask    string `json:"cask"`
-			Formula string `json:"formula"`
-			Count   string `json:"count"`
-		} `json:"items"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("decoding brew analytics: %w", err)
-	}
-
-	counts := make(map[string]int64, len(result.Items))
-	for _, item := range result.Items {
-		name := item.Cask
-		if name == "" {
-			name = item.Formula
-		}
-		// Count is formatted with commas (e.g. "159,172") — strip them.
-		cleaned := strings.ReplaceAll(item.Count, ",", "")
-		var n int64
-		fmt.Sscan(cleaned, &n)
-		counts[name] = n
-	}
-	return counts, nil
 }

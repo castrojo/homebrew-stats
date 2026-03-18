@@ -71,11 +71,36 @@ func (c *Client) GetFileContent(owner, repo, path string) (string, error) {
 func (c *Client) GetLatestReleaseTag(owner, repo string) (string, error) {
 	release, _, err := c.gh.Repositories.GetLatestRelease(c.ctx, owner, repo)
 	if err != nil {
-		// 404 = no releases, not a real error
 		if strings.Contains(err.Error(), "404") {
 			return "", nil
 		}
 		return "", fmt.Errorf("latest release for %s/%s: %w", owner, repo, err)
 	}
 	return release.GetTagName(), nil
+}
+
+// GetTotalDownloads sums asset download counts across all releases for owner/repo.
+// Returns 0 without error if the repo has no releases.
+func (c *Client) GetTotalDownloads(owner, repo string) (int64, error) {
+	opt := &gh.ListOptions{PerPage: 100}
+	var total int64
+	for {
+		releases, resp, err := c.gh.Repositories.ListReleases(c.ctx, owner, repo, opt)
+		if err != nil {
+			if strings.Contains(err.Error(), "404") {
+				return 0, nil
+			}
+			return 0, fmt.Errorf("list releases for %s/%s: %w", owner, repo, err)
+		}
+		for _, r := range releases {
+			for _, a := range r.Assets {
+				total += int64(a.GetDownloadCount())
+			}
+		}
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.Page = resp.NextPage
+	}
+	return total, nil
 }
