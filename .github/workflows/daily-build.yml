@@ -79,6 +79,17 @@ jobs:
       - name: Build Astro site
         run: npm run build
 
+      - name: Verify charts have data
+        run: |
+          count=$(grep -c 'chart-empty' dist/index.html || true)
+          if [ "$count" -gt 0 ]; then
+            echo "❌ $count chart(s) show 'Not enough history' — history bootstrap failed"
+            echo "   This means stats.json history did not reach the build."
+            echo "   Check that the history cache was restored and bootstrapped correctly."
+            exit 1
+          fi
+          echo "✅ All charts have data (no chart-empty found)"
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:

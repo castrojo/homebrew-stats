@@ -50,6 +50,68 @@ func Load() (*Store, error) {
 	return &s, nil
 }
 
+// LoadWithBootstrap reads history from the cache and, if the cache has fewer
+// snapshots than the committed stats.json at fallbackPath, merges them.
+// This ensures that history seeded into the committed stats.json (e.g. via a
+// "seed" commit) is not silently discarded when the CI cache starts fresh.
+//
+// Merge semantics:
+//   - Cache data takes precedence for any date that appears in both sources.
+//   - Dates present only in stats.json are added from stats.json.
+//   - Result is sorted chronologically.
+func LoadWithBootstrap(fallbackPath string) (*Store, error) {
+	cache, err := Load()
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse just the history array from the stats.json file.
+	statsSnaps, err := readHistoryFromStatsJSON(fallbackPath)
+	if err != nil || len(statsSnaps) <= len(cache.Snapshots) {
+		// Cache is at least as large, or stats.json is missing/unreadable — use cache as-is.
+		return cache, nil
+	}
+
+	// Merge: build a map of cache snapshots keyed by date (cache wins on conflicts).
+	byDate := make(map[string]DaySnapshot, len(cache.Snapshots))
+	for _, s := range cache.Snapshots {
+		byDate[s.Date] = s
+	}
+	// Add stats.json snapshots only for dates not already in cache.
+	for _, s := range statsSnaps {
+		if _, exists := byDate[s.Date]; !exists {
+			byDate[s.Date] = s
+		}
+	}
+
+	merged := make([]DaySnapshot, 0, len(byDate))
+	for _, s := range byDate {
+		merged = append(merged, s)
+	}
+	sort.Slice(merged, func(i, j int) bool {
+		return merged[i].Date < merged[j].Date
+	})
+
+	fmt.Fprintf(os.Stderr, "→ History: bootstrapped %d snapshots from %s (cache had %d)\n",
+		len(merged), fallbackPath, len(cache.Snapshots))
+	return &Store{Snapshots: merged}, nil
+}
+
+// readHistoryFromStatsJSON extracts just the history array from a stats.json file.
+func readHistoryFromStatsJSON(path string) ([]DaySnapshot, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var statsFile struct {
+		History []DaySnapshot `json:"history"`
+	}
+	if err := json.Unmarshal(data, &statsFile); err != nil {
+		return nil, fmt.Errorf("parsing history from %s: %w", path, err)
+	}
+	return statsFile.History, nil
+}
+
 // Append adds a new snapshot for today if one doesn't already exist.
 // Idempotent: repeated runs on the same day are no-ops.
 func (s *Store) Append(taps map[string]TapSnapshot) {

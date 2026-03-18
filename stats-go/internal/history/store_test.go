@@ -178,3 +178,120 @@ func TestSave_WritesValidJSON(t *testing.T) {
 		t.Errorf("expected 1 snapshot in saved JSON, got %d", len(decoded.Snapshots))
 	}
 }
+
+// writeStatsJSON writes a minimal stats.json file with the given history to path.
+func writeStatsJSON(t *testing.T, path string, snapshots []DaySnapshot) {
+	t.Helper()
+	type statsFile struct {
+		History []DaySnapshot `json:"history"`
+	}
+	data, err := json.Marshal(statsFile{History: snapshots})
+	if err != nil {
+		t.Fatalf("marshal stats JSON: %v", err)
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatalf("write stats JSON: %v", err)
+	}
+}
+
+func TestLoadWithBootstrap_UsesStatsWhenCacheEmpty(t *testing.T) {
+	chdirTemp(t)
+	// Write stats.json with 3 historical snapshots; no cache file.
+	snaps := []DaySnapshot{
+		{Date: "2026-01-01", Taps: map[string]TapSnapshot{"tap": {Uniques: 1, Downloads: map[string]int64{"pkg": 100}}}},
+		{Date: "2026-01-02", Taps: map[string]TapSnapshot{"tap": {Uniques: 2, Downloads: map[string]int64{"pkg": 110}}}},
+		{Date: "2026-01-03", Taps: map[string]TapSnapshot{"tap": {Uniques: 3, Downloads: map[string]int64{"pkg": 120}}}},
+	}
+	writeStatsJSON(t, "stats.json", snaps)
+
+	s, err := LoadWithBootstrap("stats.json")
+	if err != nil {
+		t.Fatalf("LoadWithBootstrap error: %v", err)
+	}
+	if len(s.Snapshots) != 3 {
+		t.Fatalf("expected 3 snapshots from bootstrap, got %d", len(s.Snapshots))
+	}
+	if s.Snapshots[0].Date != "2026-01-01" {
+		t.Errorf("first snapshot date = %q, want 2026-01-01", s.Snapshots[0].Date)
+	}
+	// Verify downloads are preserved through bootstrap.
+	dl := s.Snapshots[2].Taps["tap"].Downloads["pkg"]
+	if dl != 120 {
+		t.Errorf("Downloads[pkg] at day 3 = %d, want 120", dl)
+	}
+}
+
+func TestLoadWithBootstrap_PrefersCacheWhenLarger(t *testing.T) {
+	chdirTemp(t)
+	// Cache has 5 snapshots; stats.json has only 3. Cache wins.
+	cacheStore := &Store{
+		Snapshots: []DaySnapshot{
+			{Date: "2026-01-01", Taps: map[string]TapSnapshot{}},
+			{Date: "2026-01-02", Taps: map[string]TapSnapshot{}},
+			{Date: "2026-01-03", Taps: map[string]TapSnapshot{}},
+			{Date: "2026-01-04", Taps: map[string]TapSnapshot{}},
+			{Date: "2026-01-05", Taps: map[string]TapSnapshot{}},
+		},
+	}
+	if err := cacheStore.Save(); err != nil {
+		t.Fatalf("Save cache: %v", err)
+	}
+	statsSnaps := []DaySnapshot{
+		{Date: "2026-01-01", Taps: map[string]TapSnapshot{}},
+		{Date: "2026-01-02", Taps: map[string]TapSnapshot{}},
+		{Date: "2026-01-03", Taps: map[string]TapSnapshot{}},
+	}
+	writeStatsJSON(t, "stats.json", statsSnaps)
+
+	s, err := LoadWithBootstrap("stats.json")
+	if err != nil {
+		t.Fatalf("LoadWithBootstrap error: %v", err)
+	}
+	if len(s.Snapshots) != 5 {
+		t.Errorf("expected 5 snapshots (from cache), got %d", len(s.Snapshots))
+	}
+}
+
+func TestLoadWithBootstrap_MergesWhenStatsHasMoreHistory(t *testing.T) {
+	chdirTemp(t)
+	// Cache has 1 snapshot; stats.json has 3. Merged result has 3.
+	cacheStore := &Store{
+		Snapshots: []DaySnapshot{
+			{Date: "2026-01-03", Taps: map[string]TapSnapshot{"tap": {Uniques: 99}}},
+		},
+	}
+	if err := cacheStore.Save(); err != nil {
+		t.Fatalf("Save cache: %v", err)
+	}
+	statsSnaps := []DaySnapshot{
+		{Date: "2026-01-01", Taps: map[string]TapSnapshot{"tap": {Downloads: map[string]int64{"pkg": 50}}}},
+		{Date: "2026-01-02", Taps: map[string]TapSnapshot{"tap": {Downloads: map[string]int64{"pkg": 60}}}},
+		{Date: "2026-01-03", Taps: map[string]TapSnapshot{"tap": {Downloads: map[string]int64{"pkg": 70}}}},
+	}
+	writeStatsJSON(t, "stats.json", statsSnaps)
+
+	s, err := LoadWithBootstrap("stats.json")
+	if err != nil {
+		t.Fatalf("LoadWithBootstrap error: %v", err)
+	}
+	if len(s.Snapshots) != 3 {
+		t.Errorf("expected 3 snapshots (merged), got %d", len(s.Snapshots))
+	}
+	// Cache data for 2026-01-03 (Uniques=99) takes precedence over stats data.
+	tap := s.Snapshots[2].Taps["tap"]
+	if tap.Uniques != 99 {
+		t.Errorf("Uniques for 2026-01-03 = %d, want 99 (cache wins for duplicate dates)", tap.Uniques)
+	}
+}
+
+func TestLoadWithBootstrap_MissingStatsFileIsNotAnError(t *testing.T) {
+	chdirTemp(t)
+	// Neither cache nor stats.json exists — should return empty store, no error.
+	s, err := LoadWithBootstrap("nonexistent-stats.json")
+	if err != nil {
+		t.Fatalf("LoadWithBootstrap should not error when stats file missing, got: %v", err)
+	}
+	if len(s.Snapshots) != 0 {
+		t.Errorf("expected 0 snapshots, got %d", len(s.Snapshots))
+	}
+}

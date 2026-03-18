@@ -43,8 +43,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Load historical data from cache.
-	hist, err := history.Load()
+	// Load historical data from cache, bootstrapping from committed stats.json if the
+	// cache is empty or has fewer snapshots. This ensures that history seeded into
+	// src/data/stats.json (e.g. 30-day seed commits) is not lost when CI cache starts fresh.
+	hist, err := history.LoadWithBootstrap("src/data/stats.json")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  Could not load history: %v\n", err)
 		hist = &history.Store{}
@@ -72,18 +74,22 @@ func main() {
 			continue
 		}
 		tapStats = append(tapStats, *ts)
+		// Record downloads regardless of whether traffic data is available.
+		// Downloads come from the public Homebrew API (no auth); traffic requires
+		// a PAT with push access to ublue-os/* repos. These are independent sources.
+		pkgDownloads := make(map[string]int64, len(ts.Packages))
+		for _, pkg := range ts.Packages {
+			if pkg.Downloads > 0 {
+				pkgDownloads[pkg.Name] = pkg.Downloads
+			}
+		}
+		snap := history.TapSnapshot{Downloads: pkgDownloads}
 		if ts.Traffic != nil {
-			pkgDownloads := make(map[string]int64, len(ts.Packages))
-			for _, pkg := range ts.Packages {
-				if pkg.Downloads > 0 {
-					pkgDownloads[pkg.Name] = pkg.Downloads
-				}
-			}
-			todayTaps[ts.Name] = history.TapSnapshot{
-				Uniques:   ts.Traffic.Uniques,
-				Count:     ts.Traffic.Count,
-				Downloads: pkgDownloads,
-			}
+			snap.Uniques = ts.Traffic.Uniques
+			snap.Count = ts.Traffic.Count
+		}
+		if len(pkgDownloads) > 0 || ts.Traffic != nil {
+			todayTaps[ts.Name] = snap
 		}
 	}
 
