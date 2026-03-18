@@ -42,6 +42,10 @@ container-build:
 stop:
     podman rm -f homebrew-stats 2>/dev/null || true
 
+# Run unit tests (Go backend)
+test:
+    cd stats-go && go test -v ./...
+
 # Install npm dependencies
 install:
     npm install
