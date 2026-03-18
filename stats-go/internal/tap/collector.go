@@ -27,6 +27,7 @@ type Package struct {
 	LatestVersion  string `json:"latest_version,omitempty"`
 	IsStale        bool   `json:"is_stale"`
 	FreshnessKnown bool   `json:"freshness_known"`
+	Downloads      int64  `json:"downloads"`
 	Description    string `json:"description,omitempty"`
 	Homepage       string `json:"homepage,omitempty"`
 	SourceOwner    string `json:"source_owner,omitempty"`
@@ -117,6 +118,13 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 		p.LatestVersion = normaliseVersion(latest)
 		p.FreshnessKnown = true
 		p.IsStale = p.LatestVersion != normaliseVersion(p.Version)
+
+		downloads, err := client.GetTotalDownloads(p.SourceOwner, p.SourceRepo)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  Downloads for %s/%s: %v\n", p.SourceOwner, p.SourceRepo, err)
+		} else {
+			p.Downloads = downloads
+		}
 	}
 
 	// Sort packages alphabetically within type (casks then formulas).

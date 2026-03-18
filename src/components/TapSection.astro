@@ -6,6 +6,7 @@ interface Package {
   latest_version?: string;
   is_stale: boolean;
   freshness_known: boolean;
+  downloads: number;
   description?: string;
   homepage?: string;
 }
@@ -24,16 +25,6 @@ interface Props {
 }
 
 const { name, url, traffic, packages } = Astro.props;
-
-function statusEmoji(pkg: Package): string {
-  if (!pkg.freshness_known) return '❓';
-  return pkg.is_stale ? '⚠️' : '✅';
-}
-
-function statusLabel(pkg: Package): string {
-  if (!pkg.freshness_known) return 'unknown';
-  return pkg.is_stale ? 'stale' : 'current';
-}
 
 const casks = packages.filter(p => p.type === 'cask');
 const formulas = packages.filter(p => p.type === 'formula');
@@ -89,7 +80,7 @@ const formulas = packages.filter(p => p.type === 'formula');
         <th>Type</th>
         <th>Version</th>
         <th>Latest</th>
-        <th>Status</th>
+        <th>Downloads</th>
         <th>Description</th>
       </tr>
     </thead>
@@ -111,9 +102,9 @@ const formulas = packages.filter(p => p.type === 'formula');
             </span>
           </td>
           <td>
-            <span class={`badge badge-${statusLabel(pkg)}`}>
-              {statusEmoji(pkg)} {statusLabel(pkg)}
-            </span>
+            {pkg.downloads > 0
+              ? <span class="downloads">{pkg.downloads.toLocaleString()}</span>
+              : <span class="muted">—</span>}
           </td>
           <td class="pkg-desc">{pkg.description ?? ''}</td>
         </tr>
@@ -208,7 +199,7 @@ const formulas = packages.filter(p => p.type === 'formula');
 
   .badge-cask    { background: rgba(88,166,255,0.15); color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
   .badge-formula { background: rgba(163,113,247,0.15); color: #a371f7; border: 1px solid rgba(163,113,247,0.3); }
-  .badge-current { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
-  .badge-stale   { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid rgba(210,153,34,0.3); }
-  .badge-unknown { background: rgba(125,133,144,0.15); color: #7d8590; border: 1px solid rgba(125,133,144,0.3); }
+
+  .downloads { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: var(--text); }
+  .muted { color: var(--muted); }
 </style>

@@ -26,25 +26,20 @@ sync-build:
     just sync
     just build
 
-# Build and preview the static site locally
+# Build container and serve locally
 serve:
-    just build
-    xdg-open http://localhost:4324/homebrew-stats/ || true
-    npx astro preview --port 4324
+    just container-build
+    podman rm -f homebrew-stats 2>/dev/null || true
+    podman run -d --name homebrew-stats -p 8080:8080 ghcr.io/castrojo/homebrew-stats:local
+    xdg-open http://localhost:8080/homebrew-stats/ || true
+    echo "Running at http://localhost:8080/homebrew-stats/ — use 'just stop' to kill"
 
 # Build the container image locally
 container-build:
     podman build -t ghcr.io/castrojo/homebrew-stats:local -f Containerfile --build-arg SKIP_GO_SYNC=true .
 
-# Run the local container
-container-run:
-    just container-build
-    podman rm -f homebrew-stats 2>/dev/null || true
-    podman run -d --name homebrew-stats -p 8080:8080 ghcr.io/castrojo/homebrew-stats:local
-    echo "Running at http://localhost:8080/homebrew-stats/"
-
 # Stop the running container
-container-stop:
+stop:
     podman rm -f homebrew-stats 2>/dev/null || true
 
 # Install npm dependencies
