@@ -1,6 +1,10 @@
 package tap
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
+)
 
 func TestNormaliseVersion(t *testing.T) {
 	tests := []struct {
@@ -40,6 +44,42 @@ func TestPackageStatusString(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("[%s] StatusString() = %q, want %q", tc.name, got, tc.want)
 		}
+	}
+}
+
+
+func TestApplyDownloads_CasksGetDownloads(t *testing.T) {
+	pkgs := []Package{
+		{Name: "my-cask", Type: "cask"},
+		{Name: "my-formula", Type: "formula"},
+	}
+	installs := map[string]tapanalytics.PkgInstalls{
+		"ublue-os/tap/my-cask":    {Installs30d: 100, Installs90d: 250, Installs365d: 500},
+		"ublue-os/tap/my-formula": {Installs30d: 999, Installs90d: 999, Installs365d: 999},
+	}
+	applyDownloads(pkgs, "ublue-os/tap/", installs)
+
+	if pkgs[0].Downloads != 100 || pkgs[0].Installs90d != 250 || pkgs[0].Installs365d != 500 {
+		t.Errorf("cask did not get downloads: %+v", pkgs[0])
+	}
+	if pkgs[1].Downloads != 0 || pkgs[1].Installs90d != 0 || pkgs[1].Installs365d != 0 {
+		t.Errorf("formula must never get cask analytics data: %+v", pkgs[1])
+	}
+}
+
+func TestApplyDownloads_FormulaIgnoredEvenWhenNameMatchesCaskToken(t *testing.T) {
+	// Regression guard: a package named "linux-mcp-server" exists in the cask
+	// analytics (stale, from when it used to be a cask), but is now type=formula.
+	// It must receive zero downloads.
+	pkgs := []Package{
+		{Name: "linux-mcp-server", Type: "formula"},
+	}
+	installs := map[string]tapanalytics.PkgInstalls{
+		"ublue-os/tap/linux-mcp-server": {Installs30d: 155},
+	}
+	applyDownloads(pkgs, "ublue-os/tap/", installs)
+	if pkgs[0].Downloads != 0 {
+		t.Errorf("formula converted from cask must get 0 downloads, got %d", pkgs[0].Downloads)
 	}
 }
 

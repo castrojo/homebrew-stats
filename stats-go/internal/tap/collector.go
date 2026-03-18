@@ -131,13 +131,12 @@ func Collect(owner, repo string, client *ghclient.Client, brewInstalls map[strin
 			}
 		}
 
-		// Installs: look up full cask token in Homebrew analytics.
-		if installs, ok := brewInstalls[tapPrefix+p.Name]; ok {
-			p.Downloads = installs.Installs30d
-			p.Installs90d = installs.Installs90d
-			p.Installs365d = installs.Installs365d
-		}
 	}
+
+	// Apply download counts — casks only.  Formula packages are never in the
+	// Homebrew cask-install analytics, so applying analytics data to them
+	// would mean stale values persist when a cask is later converted to a formula.
+	applyDownloads(ts.Packages, tapPrefix, brewInstalls)
 
 	// Sort packages by downloads descending (within type: casks then formulas).
 	sort.Slice(ts.Packages, func(i, j int) bool {
@@ -183,6 +182,26 @@ func parseRuby(name, pkgType, content string) Package {
 		}
 	}
 	return p
+}
+
+// applyDownloads populates the Downloads/Installs90d/Installs365d fields for
+// each package by looking up the package's full cask token in the Homebrew
+// analytics map.  Formula packages are explicitly skipped: the Homebrew
+// cask-install API only tracks casks.  Without this guard, a package that was
+// once a cask and has since been converted to a formula would retain stale
+// analytics data indefinitely.
+func applyDownloads(packages []Package, tapPrefix string, brewInstalls map[string]tapanalytics.PkgInstalls) {
+	for i := range packages {
+		p := &packages[i]
+		if p.Type != "cask" {
+			continue // Homebrew cask analytics never covers formulas
+		}
+		if installs, ok := brewInstalls[tapPrefix+p.Name]; ok {
+			p.Downloads = installs.Installs30d
+			p.Installs90d = installs.Installs90d
+			p.Installs365d = installs.Installs365d
+		}
+	}
 }
 
 func normaliseVersion(v string) string {
