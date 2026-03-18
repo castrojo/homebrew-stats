@@ -48,7 +48,7 @@ jobs:
           # Store a PAT with repo scope as GH_TRAFFIC_TOKEN secret.
           GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          cd stats-go && go build -o stats ./cmd/stats/
+          (cd stats-go && go build -o stats ./cmd/stats/)
           ./stats-go/stats
 
       - name: Save traffic history cache

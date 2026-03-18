@@ -35,7 +35,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          cd stats-go && go build -o stats ./cmd/stats/
+          (cd stats-go && go build -o stats ./cmd/stats/)
           ./stats-go/stats
 
       - name: Log in to ghcr.io
