@@ -52,9 +52,16 @@ func main() {
 		}
 		tapStats = append(tapStats, *ts)
 		if ts.Traffic != nil {
+			pkgDownloads := make(map[string]int64, len(ts.Packages))
+			for _, pkg := range ts.Packages {
+				if pkg.Downloads > 0 {
+					pkgDownloads[pkg.Name] = pkg.Downloads
+				}
+			}
 			todayTaps[ts.Name] = history.TapSnapshot{
-				Uniques: ts.Traffic.Uniques,
-				Count:   ts.Traffic.Count,
+				Uniques:   ts.Traffic.Uniques,
+				Count:     ts.Traffic.Count,
+				Downloads: pkgDownloads,
 			}
 		}
 	}

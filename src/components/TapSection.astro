@@ -1,4 +1,6 @@
 ---
+import DownloadsChart from './DownloadsChart.astro';
+
 interface Package {
   name: string;
   type: string;
@@ -17,14 +19,26 @@ interface Traffic {
   window: string;
 }
 
+interface TapSnapshot {
+  uniques: number;
+  count: number;
+  downloads?: Record<string, number>;
+}
+
+interface DaySnapshot {
+  date: string;
+  taps: Record<string, TapSnapshot>;
+}
+
 interface Props {
   name: string;
   url: string;
   traffic?: Traffic;
   packages: Package[];
+  history: DaySnapshot[];
 }
 
-const { name, url, traffic, packages } = Astro.props;
+const { name, url, traffic, packages, history } = Astro.props;
 
 const casks = packages.filter(p => p.type === 'cask');
 const formulas = packages.filter(p => p.type === 'formula');
@@ -72,6 +86,8 @@ const formulas = packages.filter(p => p.type === 'formula');
       <div class="stat-label">Stale</div>
     </div>
   </div>
+
+  <DownloadsChart tapName={name} history={history} />
 
   <table>
     <thead>

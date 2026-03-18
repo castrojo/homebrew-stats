@@ -1,0 +1,199 @@
+---
+interface TapSnapshot {
+  uniques: number;
+  count: number;
+  downloads?: Record<string, number>;
+}
+
+interface DaySnapshot {
+  date: string;
+  taps: Record<string, TapSnapshot>;
+}
+
+interface Props {
+  tapName: string;
+  history: DaySnapshot[];
+}
+
+const { tapName, history } = Astro.props;
+
+// Only keep snapshots that have download data for this tap.
+const relevant = history.filter(d => d.taps[tapName]?.downloads);
+
+const COLOURS = [
+  '#388bfd', '#a371f7', '#3fb950', '#d29922', '#f78166',
+  '#79c0ff', '#d2a8ff', '#56d364', '#e3b341', '#ff7b72',
+];
+const TOP_N = 10;
+---
+
+{relevant.length < 2 ? (
+  <p class="chart-empty">Not enough history yet — charts will appear after a few daily syncs.</p>
+) : (
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Total 30d Installs Over Time</div>
+      <div class="chart-wrap">
+        <canvas id={`total-chart-${tapName.replace(/\//g, '-')}`}></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top {TOP_N} Packages Over Time</div>
+      <div class="chart-wrap">
+        <canvas id={`pkg-chart-${tapName.replace(/\//g, '-')}`}></canvas>
+      </div>
+    </div>
+  </div>
+)}
+
+<script define:vars={{ tapName, relevant, COLOURS, TOP_N }}>
+  if (relevant.length >= 2) {
+    import('chart.js/auto').then(({ default: Chart }) => {
+      const labels = relevant.map(d => d.date);
+
+      // Determine top N packages by most recent snapshot's download counts.
+      const latest = relevant[relevant.length - 1].taps[tapName]?.downloads ?? {};
+      const ranked = Object.entries(latest)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name]) => name);
+      const topPkgs = ranked.slice(0, TOP_N);
+      const restPkgs = ranked.slice(TOP_N);
+
+      const gridColor = '#21262d';
+      const tickColor = '#7d8590';
+
+      const sharedScales = {
+        x: {
+          ticks: { color: tickColor, font: { size: 11 }, maxRotation: 45 },
+          grid: { color: gridColor },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: tickColor, font: { size: 11 }, callback: v => Number(v).toLocaleString() },
+          grid: { color: gridColor },
+        },
+      };
+
+      // ── Chart A: Total installs per day ─────────────────────────────────
+      const totalData = relevant.map(d => {
+        const pkgs = d.taps[tapName]?.downloads ?? {};
+        return Object.values(pkgs).reduce((s, n) => s + n, 0);
+      });
+
+      new Chart(document.getElementById(`total-chart-${tapName.replace(/\//g, '-')}`), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Total installs (30d)',
+            data: totalData,
+            borderColor: COLOURS[0],
+            backgroundColor: COLOURS[0] + '22',
+            fill: true,
+            tension: 0.3,
+            pointRadius: relevant.length < 15 ? 4 : 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.parsed.y?.toLocaleString() ?? '—'} installs`,
+              },
+            },
+          },
+          scales: sharedScales,
+        },
+      });
+
+      // ── Chart B: Top N packages + "other" aggregate ──────────────────────
+      const pkgDatasets = topPkgs.map((name, i) => ({
+        label: name,
+        data: relevant.map(d => d.taps[tapName]?.downloads?.[name] ?? null),
+        borderColor: COLOURS[i % COLOURS.length],
+        backgroundColor: 'transparent',
+        tension: 0.3,
+        pointRadius: relevant.length < 15 ? 3 : 1,
+        spanGaps: true,
+      }));
+
+      if (restPkgs.length > 0) {
+        pkgDatasets.push({
+          label: `other (${restPkgs.length} packages)`,
+          data: relevant.map(d => {
+            const pkgs = d.taps[tapName]?.downloads ?? {};
+            return restPkgs.reduce((s, name) => s + (pkgs[name] ?? 0), 0);
+          }),
+          borderColor: '#7d8590',
+          backgroundColor: 'transparent',
+          borderDash: [4, 4],
+          tension: 0.3,
+          pointRadius: 0,
+          spanGaps: true,
+        });
+      }
+
+      new Chart(document.getElementById(`pkg-chart-${tapName.replace(/\//g, '-')}`), {
+        type: 'line',
+        data: { labels, datasets: pkgDatasets },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              labels: { color: '#e6edf3', font: { size: 11 }, boxWidth: 12 },
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'}`,
+              },
+            },
+          },
+          scales: sharedScales,
+        },
+      });
+    });
+  }
+</script>
+
+<style>
+  .chart-empty {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .charts-row { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+  }
+
+  .chart-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 12px;
+  }
+
+  .chart-wrap {
+    max-height: 280px;
+  }
+</style>

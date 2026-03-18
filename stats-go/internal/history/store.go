@@ -14,10 +14,11 @@ import (
 
 const cacheFile = ".sync-cache/history.json"
 
-// TapSnapshot records traffic for one tap at a point in time.
+// TapSnapshot records traffic and per-package downloads for one tap at a point in time.
 type TapSnapshot struct {
-	Uniques int `json:"uniques"`
-	Count   int `json:"count"`
+	Uniques   int               `json:"uniques"`
+	Count     int               `json:"count"`
+	Downloads map[string]int64  `json:"downloads,omitempty"` // package name → 30d installs
 }
 
 // DaySnapshot records all tap traffic for a single calendar date.
