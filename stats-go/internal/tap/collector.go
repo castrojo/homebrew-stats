@@ -30,8 +30,14 @@ type Package struct {
 	Downloads      int64  `json:"downloads"`
 	Description    string `json:"description,omitempty"`
 	Homepage       string `json:"homepage,omitempty"`
-	SourceOwner    string `json:"source_owner,omitempty"`
-	SourceRepo     string `json:"source_repo,omitempty"`
+	// SourceOwner/SourceRepo point to the upstream project for freshness checks.
+	SourceOwner string `json:"source_owner,omitempty"`
+	SourceRepo  string `json:"source_repo,omitempty"`
+	// DownloadOwner/DownloadRepo point to the ublue-os tap repo whose release
+	// assets host this package's download URL. Empty when the package is not
+	// distributed via the tap's own releases.
+	DownloadOwner string `json:"download_owner,omitempty"`
+	DownloadRepo  string `json:"download_repo,omitempty"`
 }
 
 // StatusString returns "current", "stale", or "unknown".
@@ -108,20 +114,25 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 	// Freshness check and download count for each package with a detected GitHub source.
 	for i := range ts.Packages {
 		p := &ts.Packages[i]
-		if p.SourceOwner == "" || p.SourceRepo == "" || p.Version == "" {
-			continue
-		}
-		latest, err := client.GetLatestReleaseTag(p.SourceOwner, p.SourceRepo)
-		if err != nil || latest == "" {
-			continue
-		}
-		p.LatestVersion = normaliseVersion(latest)
-		p.FreshnessKnown = true
-		p.IsStale = p.LatestVersion != normaliseVersion(p.Version)
 
-		downloads, err := client.GetTotalDownloads(p.SourceOwner, p.SourceRepo)
+		// Freshness: requires an upstream source and a pinned version.
+		if p.SourceOwner != "" && p.SourceRepo != "" && p.Version != "" {
+			latest, err := client.GetLatestReleaseTag(p.SourceOwner, p.SourceRepo)
+			if err == nil && latest != "" {
+				p.LatestVersion = normaliseVersion(latest)
+				p.FreshnessKnown = true
+				p.IsStale = p.LatestVersion != normaliseVersion(p.Version)
+			}
+		}
+
+		// Downloads: only count assets served by the ublue-os tap repos themselves.
+		// If the package URL does not resolve to a tap release, downloads stay 0.
+		if p.DownloadOwner == "" || p.DownloadRepo == "" {
+			continue
+		}
+		downloads, err := client.GetTotalDownloads(p.DownloadOwner, p.DownloadRepo)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "⚠️  Downloads for %s/%s: %v\n", p.SourceOwner, p.SourceRepo, err)
+			fmt.Fprintf(os.Stderr, "⚠️  Downloads for %s/%s: %v\n", p.DownloadOwner, p.DownloadRepo, err)
 		} else {
 			p.Downloads = downloads
 		}
@@ -149,18 +160,31 @@ func parseRuby(name, pkgType, content string) Package {
 	if m := reHomepage.FindStringSubmatch(content); len(m) > 1 {
 		p.Homepage = m[1]
 	}
-	// Detect GitHub source from url or homepage.
+	// Scan all GitHub URLs in the file:
+	//   - ublue-os tap repos  → DownloadOwner/DownloadRepo (first match wins)
+	//   - any other GitHub repo → SourceOwner/SourceRepo   (first match wins)
+	tapRepos := map[string]bool{
+		"homebrew-tap":              true,
+		"homebrew-experimental-tap": true,
+	}
 	for _, m := range reGHURL.FindAllStringSubmatch(content, -1) {
-		if len(m) >= 3 {
-			owner := m[1]
-			repo := strings.TrimSuffix(m[2], ".git")
-			// Skip the tap repo itself and common non-source hosts.
-			if owner == "ublue-os" && (repo == "homebrew-tap" || repo == "homebrew-experimental-tap") {
-				continue
+		if len(m) < 3 {
+			continue
+		}
+		owner := m[1]
+		repo := strings.TrimSuffix(m[2], ".git")
+		if owner == "ublue-os" && tapRepos[repo] {
+			// This URL is hosted by the tap itself — count its downloads.
+			if p.DownloadOwner == "" {
+				p.DownloadOwner = owner
+				p.DownloadRepo = repo
 			}
-			p.SourceOwner = owner
-			p.SourceRepo = repo
-			break
+		} else {
+			// Non-tap URL — use as upstream source for freshness.
+			if p.SourceOwner == "" {
+				p.SourceOwner = owner
+				p.SourceRepo = repo
+			}
 		}
 	}
 	return p
