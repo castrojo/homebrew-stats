@@ -3,3 +3,4 @@ dist/
 .astro/
 stats-go/stats
 .sync-cache/
+autoresearch-results.tsv

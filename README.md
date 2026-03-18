@@ -7,46 +7,148 @@ Live site: https://castrojo.github.io/homebrew-stats/
 ## What it tracks
 
 - **Unique tappers** — unique IPs that ran `brew tap ublue-os/tap` in the last 14 days
-- **Package health** — version freshness for each cask and formula
-- **Historical trend** — unique tappers over time (accumulated via GitHub Actions cache)
+- **Package health** — version freshness for each cask and formula (current / stale / unknown)
+- **Download counts** — total GitHub release asset downloads per package (sourced from the upstream release repo)
+- **Historical trends** — unique tappers and download counts over time, accumulated via GitHub Actions cache
 
 ## Local development
 
 ```bash
-# Install dependencies
+# Install npm dependencies
 just install
 
 # Fetch latest data from GitHub (requires GITHUB_TOKEN or GITHUB_PAT)
 just sync
 
-# Start dev server (hot reload, uses existing data)
+# Start hot-reload dev server at http://localhost:4324/homebrew-stats/
 just dev
 
 # Fetch data then start dev server
 just sync-dev
 
-# Build static site
+# Build static site to dist/ (uses existing synced data)
 just build
 
-# Build + run as container
-just container-run
+# Fetch data and build (full local pipeline without container)
+just sync-build
+
+# Build container image locally
+just container-build
+
+# Build container + run it at http://localhost:8080/homebrew-stats/
+just serve
+
+# Stop the running container
+just stop
+```
+
+> **Note:** `just serve` builds and runs a full container image (slow). For UI iteration,
+> use `just dev` (fast hot-reload, no container needed).
+
+## Data flow
+
+```
+GitHub API
+    │  clone traffic   (push access required — see Token requirement)
+    │  .rb file contents (public)
+    │  latest release tags (public)
+    │  release asset download counts (public)
+    ▼
+stats-go/cmd/stats/main.go
+    │  writes
+    ▼
+src/data/stats.json          ← consumed by Astro at build time
+    │
+    ▼
+Astro static site (src/)
+    │  builds to
+    ▼
+dist/                         → GitHub Pages
+    └─────────────────────────→ ghcr.io/castrojo/homebrew-stats (Chainguard nginx)
 ```
 
 ## Architecture
 
-- **`stats-go/`** — Go CLI that fetches tap traffic and package data from GitHub API
-- **`src/data/stats.json`** — generated JSON consumed by Astro at build time
-- **`.sync-cache/history.json`** — accumulated daily traffic snapshots (persisted via GitHub Actions cache)
-- **`src/`** — Astro static site (dark theme, Chart.js trend chart)
-- **`Containerfile`** — 3-stage Chainguard build (Go → Astro → nginx)
+```
+homebrew-stats/
+├── stats-go/                   Go CLI — fetches GitHub API data
+│   ├── cmd/stats/main.go       Entry point: collect → history → write stats.json
+│   ├── internal/github/        GitHub API client (traffic, files, releases, downloads)
+│   ├── internal/tap/           Ruby .rb parser, freshness check, download count
+│   └── internal/history/       Accumulates daily snapshots in .sync-cache/history.json
+│
+├── src/                        Astro static site
+│   ├── pages/index.astro       Root page
+│   ├── components/
+│   │   ├── TapSection.astro    Per-tap stat cards + package table
+│   │   ├── TrafficChart.astro  Unique tappers over time (Chart.js)
+│   │   └── DownloadsChart.astro Per-tap total installs + top-10 package charts
+│   └── layouts/Layout.astro   Dark GitHub-style theme, CSS custom properties
+│
+├── .sync-cache/history.json    Persisted history (via GitHub Actions cache)
+├── Containerfile               3-stage Chainguard build (Go → Astro → nginx)
+└── .github/workflows/
+    ├── daily-build.yml         Sync + Astro build + GitHub Pages deploy (6 AM UTC)
+    └── build-container.yml     Sync + container build + push to GHCR (8 AM UTC)
+```
 
-## GitHub Actions cache
+## GitHub Actions
 
-The workflow uses `actions/cache` to persist `.sync-cache/history.json` across daily runs.
-This builds up a historical traffic trend that goes beyond the GitHub API's 14-day rolling window.
+### `daily-build.yml` — GitHub Pages
+
+Runs daily at **6 AM UTC** (also on push to main and `workflow_dispatch`):
+
+1. Restore `.sync-cache` from `actions/cache`
+2. Build Go binary → run `./stats-go/stats` to fetch live data
+3. Save updated `.sync-cache` (90-day retention)
+4. `npm ci` + `astro build`
+5. Deploy `dist/` to GitHub Pages
+
+### `build-container.yml` — GHCR container
+
+Runs daily at **8 AM UTC** (two hours after Pages, so the cache is warm):
+
+1. Restore `.sync-cache` from `actions/cache`
+2. Sync tap data (same as above)
+3. Build and push `Containerfile` to `ghcr.io/castrojo/homebrew-stats:latest` and `:sha`
+
+### History cache
+
+`actions/cache` persists `.sync-cache/history.json` across daily runs using the key
+`tap-history-v1-{run_id}` with restore key `tap-history-v1-`. Each run appends one
+`DaySnapshot` (idempotent — duplicate dates are skipped). This builds a time-series
+that outlasts the GitHub API's 14-day rolling window.
 
 ## Token requirement
 
-The GitHub traffic API requires push access. Set `GH_TRAFFIC_TOKEN` as a repository secret
-(a PAT with `repo` scope that has push access to `ublue-os/homebrew-tap` and
-`ublue-os/homebrew-experimental-tap`).
+The GitHub clone-traffic API requires push access. Two tokens are used:
+
+| Token | Scope | Purpose |
+|---|---|---|
+| `GH_TRAFFIC_TOKEN` (repo secret) | `repo` (push access to `ublue-os/*`) | Clone traffic data |
+| `GITHUB_TOKEN` (automatic) | public repos | Package file contents, releases, downloads |
+
+If `GH_TRAFFIC_TOKEN` is absent, the workflow falls back to `GITHUB_TOKEN`. Traffic
+data will be unavailable (dashboard degrades gracefully — package data still shown).
+
+For local development, export either token:
+
+```bash
+export GITHUB_TOKEN=ghp_...
+just sync
+```
+
+## Adding a new tap
+
+Add an entry to the `taps` slice in `stats-go/cmd/stats/main.go`:
+
+```go
+var taps = []struct{ owner, repo string }{
+    {"ublue-os", "homebrew-tap"},
+    {"ublue-os", "homebrew-experimental-tap"},
+    {"my-org", "my-new-tap"},  // add here
+}
+```
+
+The pipeline automatically discovers `Casks/` and `Formula/` directories in the repo.
+Freshness checking requires a detectable GitHub URL in the `.rb` file.
