@@ -32,7 +32,7 @@ const TOP_N = 10;
 ) : (
   <div class="charts-row">
     <div class="chart-card">
-      <div class="chart-title">Total 30d Installs Over Time</div>
+      <div class="chart-title">Cumulative Installs Over Time</div>
       <div class="chart-wrap">
         <canvas id={`total-chart-${tapName.replace(/\//g, '-')}`}></canvas>
       </div>
@@ -88,18 +88,20 @@ const TOP_N = 10;
         };
       };
 
-      // ── Chart A: Total installs per day ─────────────────────────────────
-      const totalData = relevant.map(d => {
+      // ── Chart A: Cumulative installs over time ───────────────────────────
+      const dailyTotals = relevant.map(d => {
         const pkgs = d.taps[tapName]?.downloads ?? {};
         return Object.values(pkgs).reduce((s, n) => s + n, 0);
       });
+      let running = 0;
+      const totalData = dailyTotals.map(v => (running += v));
 
       const chartA = new Chart(document.getElementById(`total-chart-${tapName.replace(/\//g, '-')}`), {
         type: 'line',
         data: {
           labels,
           datasets: [{
-            label: 'Total installs (30d)',
+            label: 'Cumulative installs',
             data: totalData,
             borderColor: COLOURS[0],
             backgroundColor: COLOURS[0] + '22',
@@ -115,7 +117,7 @@ const TOP_N = 10;
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: ctx => `${ctx.parsed.y?.toLocaleString() ?? '—'} installs`,
+                label: ctx => `${ctx.parsed.y?.toLocaleString() ?? '—'} cumulative installs`,
               },
             },
           },
