@@ -40,6 +40,7 @@ const periods = [
               <th class="os-rank">#</th>
               <th>OS</th>
               <th></th>
+              <th class="os-count">Count</th>
               <th class="os-pct">%</th>
             </tr>
           </thead>
@@ -56,6 +57,7 @@ const periods = [
                       <div class="os-bar-fill" style={`width:${barWidth}%`}></div>
                     </div>
                   </td>
+                  <td class="os-count">{entry.count.toLocaleString()}</td>
                   <td class="os-pct">{entry.percent.toFixed(2)}%</td>
                 </tr>
               );
@@ -136,6 +138,13 @@ const periods = [
   }
 
   .os-name { color: var(--text); }
+
+  .os-count {
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+    text-align: right;
+  }
 
   .os-pct {
     color: var(--muted);
