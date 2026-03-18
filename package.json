@@ -1,0 +1,22 @@
+{
+  "name": "homebrew-stats",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev --port 4324 --host",
+    "build": "astro build",
+    "preview": "astro preview --port 4324",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "astro": "^5.5.5",
+    "chart.js": "^4.4.9"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^9.22.0",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,84 @@
+---
+interface DaySnapshot {
+  date: string;
+  taps: Record<string, { uniques: number; count: number }>;
+}
+
+interface Props {
+  history: DaySnapshot[];
+  tapNames: string[];
+}
+
+const { history, tapNames } = Astro.props;
+
+// Colours per tap (consistent ordering).
+const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
+---
+
+<div class="chart-wrap">
+  <canvas id="traffic-chart"></canvas>
+</div>
+
+<script define:vars={{ history, tapNames, COLOURS }}>
+  // Dynamically import Chart.js from the bundled package.
+  import('chart.js/auto').then(({ default: Chart }) => {
+    const labels = history.map(s => s.date);
+
+    const datasets = tapNames.map((name, i) => ({
+      label: name,
+      data: history.map(s => s.taps[name]?.uniques ?? null),
+      borderColor: COLOURS[i % COLOURS.length],
+      backgroundColor: COLOURS[i % COLOURS.length] + '22',
+      fill: true,
+      tension: 0.3,
+      pointRadius: history.length < 15 ? 4 : 2,
+      spanGaps: true,
+    }));
+
+    new Chart(document.getElementById('traffic-chart'), {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: { color: '#e6edf3', font: { size: 12 } },
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} unique tappers`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: { color: '#7d8590', font: { size: 11 }, maxRotation: 45 },
+            grid: { color: '#21262d' },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#7d8590',
+              font: { size: 11 },
+              callback: v => v.toLocaleString(),
+            },
+            grid: { color: '#21262d' },
+            title: { display: true, text: 'Unique Tappers', color: '#7d8590', font: { size: 11 } },
+          },
+        },
+      },
+    });
+  });
+</script>
+
+<style>
+  .chart-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 32px;
+    max-height: 360px;
+  }
+</style>

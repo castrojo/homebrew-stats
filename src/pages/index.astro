@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TapSection from '../components/TapSection.astro';
+import TrafficChart from '../components/TrafficChart.astro';
+import stats from '../data/stats.json';
+
+const generatedAt = new Date(stats.generated_at).toUTCString();
+const tapNames = stats.taps.map((t: any) => t.name);
+---
+
+<Layout title="ublue-os Homebrew Tap Stats">
+  <header>
+    <h1>🍺 ublue-os Homebrew Tap Health</h1>
+    <div class="meta">
+      Updated {generatedAt} ·
+      <a href="https://github.com/ublue-os/homebrew-tap">homebrew-tap</a> ·
+      <a href="https://github.com/ublue-os/homebrew-experimental-tap">homebrew-experimental-tap</a>
+    </div>
+  </header>
+
+  {stats.history.length > 1 && (
+    <>
+      <h2>Unique Tappers Over Time</h2>
+      <TrafficChart history={stats.history} tapNames={tapNames} />
+    </>
+  )}
+
+  {stats.taps.map((tap: any) => (
+    <TapSection
+      name={tap.name}
+      url={tap.url}
+      traffic={tap.traffic}
+      packages={tap.packages}
+    />
+  ))}
+</Layout>
