@@ -14,6 +14,14 @@ const base = import.meta.env.BASE_URL;
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <script is:inline>
+      (function() {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -29,6 +37,20 @@ const base = import.meta.env.BASE_URL;
         --red:      #f85149;
         --purple:   #a371f7;
         --blue:     #388bfd;
+      }
+
+      [data-theme="light"] {
+        --bg:       #ffffff;
+        --bg2:      #f6f8fa;
+        --border:   #d0d7de;
+        --text:     #1f2328;
+        --muted:    #656d76;
+        --link:     #0969da;
+        --green:    #1a7f37;
+        --yellow:   #9a6700;
+        --red:      #d1242f;
+        --purple:   #8250df;
+        --blue:     #0969da;
       }
 
       body {
@@ -87,6 +109,15 @@ const base = import.meta.env.BASE_URL;
         color: var(--muted);
         text-align: center;
       }
+
+      header { position: relative; }
+
+      #theme-toggle {
+        background: none; border: 1px solid var(--border); color: var(--text);
+        border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 14px;
+        position: absolute; top: 24px; right: 16px;
+      }
+      #theme-toggle:hover { background: var(--bg2); }
     </style>
   </head>
   <body>
@@ -96,5 +127,19 @@ const base = import.meta.env.BASE_URL;
         Data refreshed daily · <a href="https://github.com/castrojo/homebrew-stats">Source</a>
       </footer>
     </div>
+    <script>
+      const btn = document.getElementById('theme-toggle') as HTMLButtonElement;
+      function applyTheme(theme: string) {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+      applyTheme(document.documentElement.dataset.theme || 'dark');
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.dataset.theme;
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+        window.dispatchEvent(new CustomEvent('themechange'));
+      });
+    </script>
   </body>
 </html>

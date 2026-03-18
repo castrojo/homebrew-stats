@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import TapSection from '../components/TapSection.astro';
 import TrafficChart from '../components/TrafficChart.astro';
+import OsSection from '../components/OsSection.astro';
 import stats from '../data/stats.json';
 
 const generatedAt = new Date(stats.generated_at).toUTCString();
@@ -16,12 +17,20 @@ const tapNames = stats.taps.map((t: any) => t.name);
       <a href="https://github.com/ublue-os/homebrew-tap">homebrew-tap</a> ·
       <a href="https://github.com/ublue-os/homebrew-experimental-tap">homebrew-experimental-tap</a>
     </div>
+    <button id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
   </header>
 
   {stats.history.length > 1 && (
     <>
       <h2>Unique Tappers Over Time</h2>
       <TrafficChart history={stats.history} tapNames={tapNames} />
+    </>
+  )}
+
+  {(stats as any).os_analytics && (
+    <>
+      <h2>OS Analytics (Linux)</h2>
+      <OsSection osAnalytics={(stats as any).os_analytics} />
     </>
   )}
 

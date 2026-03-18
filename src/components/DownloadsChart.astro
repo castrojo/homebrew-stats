@@ -49,6 +49,18 @@ const TOP_N = 10;
 <script define:vars={{ tapName, relevant, COLOURS, TOP_N }}>
   if (relevant.length >= 2) {
     import('chart.js/auto').then(({ default: Chart }) => {
+      function getCSSVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+      function getChartColors() {
+        return {
+          text: getCSSVar('--text'),
+          muted: getCSSVar('--muted'),
+          grid: getCSSVar('--border'),
+          bg2: getCSSVar('--bg2'),
+        };
+      }
+
       const labels = relevant.map(d => d.date);
 
       // Determine top N packages by most recent snapshot's download counts.
@@ -59,19 +71,21 @@ const TOP_N = 10;
       const topPkgs = ranked.slice(0, TOP_N);
       const restPkgs = ranked.slice(TOP_N);
 
-      const gridColor = '#21262d';
-      const tickColor = '#7d8590';
+      const colors = getChartColors();
 
-      const sharedScales = {
-        x: {
-          ticks: { color: tickColor, font: { size: 11 }, maxRotation: 45 },
-          grid: { color: gridColor },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: tickColor, font: { size: 11 }, callback: v => Number(v).toLocaleString() },
-          grid: { color: gridColor },
-        },
+      const sharedScales = () => {
+        const c = getChartColors();
+        return {
+          x: {
+            ticks: { color: c.muted, font: { size: 11 }, maxRotation: 45 },
+            grid: { color: c.grid },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: c.muted, font: { size: 11 }, callback: v => Number(v).toLocaleString() },
+            grid: { color: c.grid },
+          },
+        };
       };
 
       // ── Chart A: Total installs per day ─────────────────────────────────
@@ -80,7 +94,7 @@ const TOP_N = 10;
         return Object.values(pkgs).reduce((s, n) => s + n, 0);
       });
 
-      new Chart(document.getElementById(`total-chart-${tapName.replace(/\//g, '-')}`), {
+      const chartA = new Chart(document.getElementById(`total-chart-${tapName.replace(/\//g, '-')}`), {
         type: 'line',
         data: {
           labels,
@@ -105,7 +119,7 @@ const TOP_N = 10;
               },
             },
           },
-          scales: sharedScales,
+          scales: sharedScales(),
         },
       });
 
@@ -136,7 +150,7 @@ const TOP_N = 10;
         });
       }
 
-      new Chart(document.getElementById(`pkg-chart-${tapName.replace(/\//g, '-')}`), {
+      const chartB = new Chart(document.getElementById(`pkg-chart-${tapName.replace(/\//g, '-')}`), {
         type: 'line',
         data: { labels, datasets: pkgDatasets },
         options: {
@@ -144,7 +158,7 @@ const TOP_N = 10;
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: {
-              labels: { color: '#e6edf3', font: { size: 11 }, boxWidth: 12 },
+              labels: { color: colors.text, font: { size: 11 }, boxWidth: 12 },
             },
             tooltip: {
               callbacks: {
@@ -152,8 +166,26 @@ const TOP_N = 10;
               },
             },
           },
-          scales: sharedScales,
+          scales: sharedScales(),
         },
+      });
+
+      window.addEventListener('themechange', () => {
+        const c = getChartColors();
+        const scales = sharedScales();
+
+        chartA.options.scales.x.ticks.color = scales.x.ticks.color;
+        chartA.options.scales.x.grid.color = scales.x.grid.color;
+        chartA.options.scales.y.ticks.color = scales.y.ticks.color;
+        chartA.options.scales.y.grid.color = scales.y.grid.color;
+        chartA.update();
+
+        chartB.options.plugins.legend.labels.color = c.text;
+        chartB.options.scales.x.ticks.color = scales.x.ticks.color;
+        chartB.options.scales.x.grid.color = scales.x.grid.color;
+        chartB.options.scales.y.ticks.color = scales.y.ticks.color;
+        chartB.options.scales.y.grid.color = scales.y.grid.color;
+        chartB.update();
       });
     });
   }

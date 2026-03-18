@@ -22,6 +22,18 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
 <script define:vars={{ history, tapNames, COLOURS }}>
   // Dynamically import Chart.js from the bundled package.
   import('chart.js/auto').then(({ default: Chart }) => {
+    function getCSSVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+    function getChartColors() {
+      return {
+        text: getCSSVar('--text'),
+        muted: getCSSVar('--muted'),
+        grid: getCSSVar('--border'),
+        bg2: getCSSVar('--bg2'),
+      };
+    }
+
     const labels = history.map(s => s.date);
 
     const datasets = tapNames.map((name, i) => ({
@@ -35,7 +47,8 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
       spanGaps: true,
     }));
 
-    new Chart(document.getElementById('traffic-chart'), {
+    const colors = getChartColors();
+    const chart = new Chart(document.getElementById('traffic-chart'), {
       type: 'line',
       data: { labels, datasets },
       options: {
@@ -43,7 +56,7 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
-            labels: { color: '#e6edf3', font: { size: 12 } },
+            labels: { color: colors.text, font: { size: 12 } },
           },
           tooltip: {
             callbacks: {
@@ -53,21 +66,32 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
         },
         scales: {
           x: {
-            ticks: { color: '#7d8590', font: { size: 11 }, maxRotation: 45 },
-            grid: { color: '#21262d' },
+            ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
+            grid: { color: colors.grid },
           },
           y: {
             beginAtZero: true,
             ticks: {
-              color: '#7d8590',
+              color: colors.muted,
               font: { size: 11 },
               callback: v => v.toLocaleString(),
             },
-            grid: { color: '#21262d' },
-            title: { display: true, text: 'Unique Tappers', color: '#7d8590', font: { size: 11 } },
+            grid: { color: colors.grid },
+            title: { display: true, text: 'Unique Tappers', color: colors.muted, font: { size: 11 } },
           },
         },
       },
+    });
+
+    window.addEventListener('themechange', () => {
+      const c = getChartColors();
+      chart.options.plugins.legend.labels.color = c.text;
+      chart.options.scales.x.ticks.color = c.muted;
+      chart.options.scales.x.grid.color = c.grid;
+      chart.options.scales.y.ticks.color = c.muted;
+      chart.options.scales.y.grid.color = c.grid;
+      chart.options.scales.y.title.color = c.muted;
+      chart.update();
     });
   });
 </script>
