@@ -16,231 +16,150 @@ interface Props {
 
 const { osAnalytics } = Astro.props;
 
-const period30 = osAnalytics.periods.find(p => p.period === '30d');
-const period90 = osAnalytics.periods.find(p => p.period === '90d');
+const period30  = osAnalytics.periods.find(p => p.period === '30d');
+const period90  = osAnalytics.periods.find(p => p.period === '90d');
 const period365 = osAnalytics.periods.find(p => p.period === '365d');
 
-function fmtCount(n: number): string {
-  return n.toLocaleString('en-US');
-}
+const periods = [
+  { label: 'Last 30 Days',  data: period30  },
+  { label: 'Last 90 Days',  data: period90  },
+  { label: 'Last 365 Days', data: period365 },
+];
 ---
 
 <div class="os-grid">
-  <!-- Column 1: Top 10 Linux OSes table (30d) -->
-  <div class="os-card">
-    <div class="card-title">Linux Users by OS (30d)</div>
-    {period30 ? (
-      <table class="os-table">
-        <thead>
-          <tr>
-            <th>OS</th>
-            <th class="num">Count</th>
-            <th class="num">%</th>
-          </tr>
-        </thead>
-        <tbody>
-          {period30.items.map((entry) => (
+  {periods.map(({ label, data }) => (
+    <div class="os-col">
+      <div class="os-col-header">
+        <span class="os-window-label">{label}</span>
+      </div>
+      {data ? (
+        <table class="os-table">
+          <thead>
             <tr>
-              <td>
-                <span class="os-name">{entry.os}</span>
-                <div class="bar-wrap">
-                  <div class="bar" style={`width:${Math.min(entry.percent, 100)}%`}></div>
-                </div>
-              </td>
-              <td class="num">{fmtCount(entry.count)}</td>
-              <td class="num">{entry.percent.toFixed(1)}%</td>
+              <th class="os-rank">#</th>
+              <th>OS</th>
+              <th></th>
+              <th class="os-pct">%</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    ) : (
-      <p class="no-data">No data available.</p>
-    )}
-  </div>
-
-  <!-- Column 2: 30d bar chart -->
-  <div class="os-card">
-    <div class="card-title">OS Usage — 30 Days</div>
-    {period30 ? (
-      <div class="chart-wrap">
-        <canvas id="os-chart-30d"></canvas>
-      </div>
-    ) : (
-      <p class="no-data">No data available.</p>
-    )}
-  </div>
-
-  <!-- Column 3: 90d bar chart -->
-  <div class="os-card">
-    <div class="card-title">OS Usage — 90 Days</div>
-    {period90 ? (
-      <div class="chart-wrap">
-        <canvas id="os-chart-90d"></canvas>
-      </div>
-    ) : (
-      <p class="no-data">No data available.</p>
-    )}
-  </div>
-
-  <!-- Column 4: 365d bar chart -->
-  <div class="os-card">
-    <div class="card-title">OS Usage — 365 Days</div>
-    {period365 ? (
-      <div class="chart-wrap">
-        <canvas id="os-chart-365d"></canvas>
-      </div>
-    ) : (
-      <p class="no-data">No data available.</p>
-    )}
-  </div>
+          </thead>
+          <tbody>
+            {data.items.map((entry, i) => {
+              const max = data.items[0]?.percent ?? 1;
+              const barWidth = max > 0 ? Math.round((entry.percent / max) * 100) : 0;
+              return (
+                <tr>
+                  <td class="os-rank">{i + 1}</td>
+                  <td class="os-name">{entry.os}</td>
+                  <td class="os-bar-cell">
+                    <div class="os-bar-track">
+                      <div class="os-bar-fill" style={`width:${barWidth}%`}></div>
+                    </div>
+                  </td>
+                  <td class="os-pct">{entry.percent.toFixed(2)}%</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <p class="no-data">No data available.</p>
+      )}
+    </div>
+  ))}
 </div>
-
-<script define:vars={{ period30, period90, period365 }}>
-  const BAR_COLOR = '#388bfd';
-  const BAR_ALPHA = 'cc'; // 80% opacity in hex
-
-  const tickColor = '#7d8590';
-  const gridColor = '#21262d';
-  const labelColor = '#e6edf3';
-
-  function makeChart(canvasId, periodData) {
-    if (!periodData) return;
-    import('chart.js/auto').then(({ default: Chart }) => {
-      const labels = periodData.items.map(e => e.os);
-      const data = periodData.items.map(e => e.count);
-
-      new Chart(document.getElementById(canvasId), {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Linux users',
-            data,
-            backgroundColor: BAR_COLOR + BAR_ALPHA,
-            borderColor: BAR_COLOR,
-            borderWidth: 1,
-          }],
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: ctx => ` ${ctx.parsed.x.toLocaleString()} installs`,
-              },
-            },
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              ticks: {
-                color: tickColor,
-                font: { size: 11 },
-                callback: v => Number(v).toLocaleString(),
-              },
-              grid: { color: gridColor },
-            },
-            y: {
-              ticks: { color: labelColor, font: { size: 11 } },
-              grid: { color: gridColor },
-            },
-          },
-        },
-      });
-    });
-  }
-
-  makeChart('os-chart-30d', period30);
-  makeChart('os-chart-90d', period90);
-  makeChart('os-chart-365d', period365);
-</script>
 
 <style>
   .os-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 32px;
   }
 
-  @media (max-width: 1024px) {
-    .os-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 600px) {
+  @media (max-width: 900px) {
     .os-grid { grid-template-columns: 1fr; }
   }
 
-  .os-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px 20px;
+  .os-col-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
-  .card-title {
-    font-size: 12px;
+  .os-window-label {
+    font-size: 14px;
     font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 12px;
+    color: var(--text);
   }
 
   .os-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 13px;
   }
 
   .os-table th {
-    color: var(--muted);
-    font-weight: 600;
+    background: var(--bg);
+    padding: 8px 10px;
     text-align: left;
-    padding: 4px 4px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
     border-bottom: 1px solid var(--border);
-  }
-
-  .os-table th.num,
-  .os-table td.num {
-    text-align: right;
+    white-space: nowrap;
   }
 
   .os-table td {
-    padding: 5px 4px;
-    color: var(--text);
+    padding: 7px 10px;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
+    color: var(--text);
   }
 
-  .os-table tr:last-child td {
-    border-bottom: none;
+  .os-table tr:last-child td { border-bottom: none; }
+  .os-table tr:hover td { background: rgba(48, 54, 61, 0.5); }
+
+  .os-rank {
+    color: var(--muted);
+    font-size: 11px;
+    width: 24px;
+    text-align: right;
+    padding-right: 6px !important;
   }
 
-  .os-name {
-    display: block;
-    margin-bottom: 3px;
+  .os-name { color: var(--text); }
+
+  .os-pct {
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+    text-align: right;
   }
 
-  .bar-wrap {
-    height: 4px;
+  .os-bar-cell {
+    width: 60px;
+    padding: 0 8px !important;
+  }
+
+  .os-bar-track {
     background: var(--border);
     border-radius: 2px;
+    height: 6px;
     overflow: hidden;
   }
 
-  .bar {
-    height: 100%;
+  .os-bar-fill {
     background: var(--blue);
+    height: 6px;
     border-radius: 2px;
-  }
-
-  .chart-wrap {
-    position: relative;
-    height: 280px;
   }
 
   .no-data {

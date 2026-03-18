@@ -1,0 +1,69 @@
+// Package tapanalytics fetches Homebrew cask-install analytics for ublue-os taps.
+package tapanalytics
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+)
+
+const caskInstallBaseURL = "https://formulae.brew.sh/api/analytics/cask-install"
+
+// PkgInstalls holds Homebrew cask install counts across periods.
+type PkgInstalls struct {
+	Installs30d  int64 `json:"installs_30d"`
+	Installs90d  int64 `json:"installs_90d"`
+	Installs365d int64 `json:"installs_365d"`
+}
+
+// Fetch returns install counts for all ublue-os tap packages across 30d/90d/365d.
+// Map key is the full cask token e.g. "ublue-os/tap/jetbrains-toolbox-linux".
+func Fetch() (map[string]PkgInstalls, error) {
+	result := make(map[string]PkgInstalls)
+
+	periods := []struct {
+		name string
+		set  func(p *PkgInstalls, v int64)
+	}{
+		{"30d", func(p *PkgInstalls, v int64) { p.Installs30d = v }},
+		{"90d", func(p *PkgInstalls, v int64) { p.Installs90d = v }},
+		{"365d", func(p *PkgInstalls, v int64) { p.Installs365d = v }},
+	}
+
+	for _, period := range periods {
+		url := fmt.Sprintf("%s/%s.json", caskInstallBaseURL, period.name)
+		resp, err := http.Get(url) //nolint:gosec // URL is constructed from allowlisted base
+		if err != nil {
+			return nil, fmt.Errorf("fetching cask-install analytics (%s): %w", period.name, err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("cask-install analytics (%s): HTTP %d", period.name, resp.StatusCode)
+		}
+
+		var payload struct {
+			Items []struct {
+				Cask  string `json:"cask"`
+				Count string `json:"count"`
+			} `json:"items"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+			return nil, fmt.Errorf("decoding cask-install analytics (%s): %w", period.name, err)
+		}
+
+		for _, item := range payload.Items {
+			if !strings.HasPrefix(item.Cask, "ublue-os/") {
+				continue
+			}
+			countStr := strings.ReplaceAll(item.Count, ",", "")
+			count, _ := strconv.ParseInt(countStr, 10, 64)
+			entry := result[item.Cask]
+			period.set(&entry, count)
+			result[item.Cask] = entry
+		}
+	}
+
+	return result, nil
+}

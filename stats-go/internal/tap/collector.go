@@ -10,6 +10,7 @@ import (
 	"time"
 
 	ghclient "github.com/castrojo/homebrew-stats/internal/github"
+	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
 )
 
 // Traffic holds 14-day clone traffic for a tap.
@@ -27,17 +28,14 @@ type Package struct {
 	LatestVersion  string `json:"latest_version,omitempty"`
 	IsStale        bool   `json:"is_stale"`
 	FreshnessKnown bool   `json:"freshness_known"`
-	Downloads      int64  `json:"downloads"`
+	Downloads      int64  `json:"downloads"`     // Homebrew 30d installs (kept for history compat)
+	Installs90d    int64  `json:"installs_90d"`  // Homebrew 90d installs
+	Installs365d   int64  `json:"installs_365d"` // Homebrew 365d installs
 	Description    string `json:"description,omitempty"`
 	Homepage       string `json:"homepage,omitempty"`
 	// SourceOwner/SourceRepo point to the upstream project for freshness checks.
 	SourceOwner string `json:"source_owner,omitempty"`
 	SourceRepo  string `json:"source_repo,omitempty"`
-	// DownloadOwner/DownloadRepo point to the ublue-os tap repo whose release
-	// assets host this package's download URL. Empty when the package is not
-	// distributed via the tap's own releases.
-	DownloadOwner string `json:"download_owner,omitempty"`
-	DownloadRepo  string `json:"download_repo,omitempty"`
 }
 
 // StatusString returns "current", "stale", or "unknown".
@@ -68,7 +66,8 @@ var (
 )
 
 // Collect fetches traffic and package data for the given owner/repo tap.
-func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
+// brewInstalls maps full cask tokens (e.g. "ublue-os/tap/pkg-name") to install counts.
+func Collect(owner, repo string, client *ghclient.Client, brewInstalls map[string]tapanalytics.PkgInstalls) (*TapStats, error) {
 	name := owner + "/" + repo
 	ts := &TapStats{
 		Name:      name,
@@ -81,7 +80,7 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  Traffic for %s: %v\n", name, err)
 	} else {
-		ts.Traffic = &Traffic{Count: count, Uniques: uniques, Window: "today"}
+		ts.Traffic = &Traffic{Count: count, Uniques: uniques, Window: "14d"}
 	}
 
 	// Packages — Casks first, then Formula.
@@ -111,7 +110,14 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 		}
 	}
 
-	// Freshness check and download count for each package with a detected GitHub source.
+	// Homebrew cask token prefix: "ublue-os/tap/" for homebrew-tap,
+	// "ublue-os/experimental-tap/" for homebrew-experimental-tap, etc.
+	// Homebrew strips "homebrew-" from the repo name to form the tap shortname.
+	tapShortName := strings.TrimPrefix(repo, "homebrew-")
+	tapPrefix := owner + "/" + tapShortName + "/"
+
+	// Freshness check for each package with a detected GitHub source.
+	// Also populate install counts from Homebrew analytics.
 	for i := range ts.Packages {
 		p := &ts.Packages[i]
 
@@ -125,16 +131,11 @@ func Collect(owner, repo string, client *ghclient.Client) (*TapStats, error) {
 			}
 		}
 
-		// Downloads: only count assets served by the ublue-os tap repos themselves.
-		// If the package URL does not resolve to a tap release, downloads stay 0.
-		if p.DownloadOwner == "" || p.DownloadRepo == "" {
-			continue
-		}
-		downloads, err := client.GetTotalDownloads(p.DownloadOwner, p.DownloadRepo)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "⚠️  Downloads for %s/%s: %v\n", p.DownloadOwner, p.DownloadRepo, err)
-		} else {
-			p.Downloads = downloads
+		// Installs: look up full cask token in Homebrew analytics.
+		if installs, ok := brewInstalls[tapPrefix+p.Name]; ok {
+			p.Downloads = installs.Installs30d
+			p.Installs90d = installs.Installs90d
+			p.Installs365d = installs.Installs365d
 		}
 	}
 
@@ -160,9 +161,7 @@ func parseRuby(name, pkgType, content string) Package {
 	if m := reHomepage.FindStringSubmatch(content); len(m) > 1 {
 		p.Homepage = m[1]
 	}
-	// Scan all GitHub URLs in the file:
-	//   - ublue-os tap repos  → DownloadOwner/DownloadRepo (first match wins)
-	//   - any other GitHub repo → SourceOwner/SourceRepo   (first match wins)
+	// Scan all GitHub URLs in the file; pick the first non-tap URL as upstream source.
 	tapRepos := map[string]bool{
 		"homebrew-tap":              true,
 		"homebrew-experimental-tap": true,
@@ -174,17 +173,13 @@ func parseRuby(name, pkgType, content string) Package {
 		owner := m[1]
 		repo := strings.TrimSuffix(m[2], ".git")
 		if owner == "ublue-os" && tapRepos[repo] {
-			// This URL is hosted by the tap itself — count its downloads.
-			if p.DownloadOwner == "" {
-				p.DownloadOwner = owner
-				p.DownloadRepo = repo
-			}
-		} else {
-			// Non-tap URL — use as upstream source for freshness.
-			if p.SourceOwner == "" {
-				p.SourceOwner = owner
-				p.SourceRepo = repo
-			}
+			// URL hosted by the tap itself — skip (installs come from Homebrew analytics)
+			continue
+		}
+		// Non-tap URL — use as upstream source for freshness.
+		if p.SourceOwner == "" {
+			p.SourceOwner = owner
+			p.SourceRepo = repo
 		}
 	}
 	return p

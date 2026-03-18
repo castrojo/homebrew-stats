@@ -11,6 +11,7 @@ import (
 	"github.com/castrojo/homebrew-stats/internal/history"
 	"github.com/castrojo/homebrew-stats/internal/osanalytics"
 	"github.com/castrojo/homebrew-stats/internal/tap"
+	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
 )
 
 // TesthubStats holds metadata for the projectbluefin testhub Flatpak OCI registry.
@@ -49,13 +50,23 @@ func main() {
 		hist = &history.Store{}
 	}
 
+	// Fetch Homebrew cask-install analytics for all ublue-os packages.
+	fmt.Fprintln(os.Stderr, "→ Fetching Homebrew cask-install analytics…")
+	brewInstalls, err := tapanalytics.Fetch()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Homebrew cask-install analytics: %v\n", err)
+		brewInstalls = make(map[string]tapanalytics.PkgInstalls)
+	} else {
+		fmt.Fprintf(os.Stderr, "  cask-install: %d ublue-os packages found\n", len(brewInstalls))
+	}
+
 	// Collect data for each tap.
 	tapStats := make([]tap.TapStats, 0, len(taps))
 	todayTaps := make(map[string]history.TapSnapshot)
 
 	for _, t := range taps {
 		fmt.Fprintf(os.Stderr, "→ Collecting %s/%s…\n", t.owner, t.repo)
-		ts, err := tap.Collect(t.owner, t.repo, client)
+		ts, err := tap.Collect(t.owner, t.repo, client, brewInstalls)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "⚠️  %s/%s: %v\n", t.owner, t.repo, err)
 			continue

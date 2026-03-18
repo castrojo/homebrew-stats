@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -74,11 +75,12 @@ func (c *Client) GetFileContent(owner, repo, path string) (string, error) {
 }
 
 // GetLatestReleaseTag returns the latest release tag for owner/repo.
-// Returns empty string without error if no releases exist.
+// Returns empty string without error if no releases exist (404).
 func (c *Client) GetLatestReleaseTag(owner, repo string) (string, error) {
 	release, _, err := c.gh.Repositories.GetLatestRelease(c.ctx, owner, repo)
 	if err != nil {
-		if strings.Contains(err.Error(), "404") {
+		var ghErr *gh.ErrorResponse
+		if errors.As(err, &ghErr) && ghErr.Response != nil && ghErr.Response.StatusCode == 404 {
 			return "", nil
 		}
 		return "", fmt.Errorf("latest release for %s/%s: %w", owner, repo, err)
@@ -130,28 +132,4 @@ func (c *Client) ListTesthubPackages(org string) ([]TesthubPackage, error) {
 	return all, nil
 }
 
-// GetTotalDownloads sums asset download counts across all releases for owner/repo.
-// Returns 0 without error if the repo has no releases.
-func (c *Client) GetTotalDownloads(owner, repo string) (int64, error) {
-	opt := &gh.ListOptions{PerPage: 100}
-	var total int64
-	for {
-		releases, resp, err := c.gh.Repositories.ListReleases(c.ctx, owner, repo, opt)
-		if err != nil {
-			if strings.Contains(err.Error(), "404") {
-				return 0, nil
-			}
-			return 0, fmt.Errorf("list releases for %s/%s: %w", owner, repo, err)
-		}
-		for _, r := range releases {
-			for _, a := range r.Assets {
-				total += int64(a.GetDownloadCount())
-			}
-		}
-		if resp.NextPage == 0 {
-			break
-		}
-		opt.Page = resp.NextPage
-	}
-	return total, nil
-}
+// GetTotalDownloads was removed. Install counts now come from Homebrew analytics.

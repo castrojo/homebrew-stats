@@ -44,8 +44,8 @@ func TestPackageStatusString(t *testing.T) {
 }
 
 func TestParseRuby(t *testing.T) {
-	t.Run("cask whose URL points to an external repo — no tap download", func(t *testing.T) {
-		// framework-tool pattern: upstream release, not hosted by the tap.
+	t.Run("cask with external GitHub source gets SourceOwner/Repo", func(t *testing.T) {
+		// Upstream release — framework-tool hosted on its own repo.
 		content := `
 cask "framework-tool" do
   version "0.6.1"
@@ -61,17 +61,10 @@ end
 		if p.SourceRepo != "framework-system" {
 			t.Errorf("SourceRepo = %q, want %q", p.SourceRepo, "framework-system")
 		}
-		// DownloadOwner/Repo must be empty — downloads should be 0.
-		if p.DownloadOwner != "" {
-			t.Errorf("DownloadOwner = %q, want empty (not tap-hosted)", p.DownloadOwner)
-		}
-		if p.DownloadRepo != "" {
-			t.Errorf("DownloadRepo = %q, want empty (not tap-hosted)", p.DownloadRepo)
-		}
 	})
 
-	t.Run("cask whose URL points to the ublue-os tap — downloads from tap", func(t *testing.T) {
-		// wallpaper-style cask: asset is published to the tap's own releases.
+	t.Run("cask whose URL points to the ublue-os tap does not bleed into SourceOwner", func(t *testing.T) {
+		// The tap repo URL must be ignored for source/freshness tracking.
 		content := `
 cask "aurora-wallpapers" do
   version "1.0.0"
@@ -85,37 +78,9 @@ end
 		if p.SourceOwner != "ublue-os" || p.SourceRepo != "artwork" {
 			t.Errorf("SourceOwner/SourceRepo = %q/%q, want ublue-os/artwork", p.SourceOwner, p.SourceRepo)
 		}
-		// DownloadOwner/Repo must point to the tap repo.
-		if p.DownloadOwner != "ublue-os" {
-			t.Errorf("DownloadOwner = %q, want %q", p.DownloadOwner, "ublue-os")
-		}
-		if p.DownloadRepo != "homebrew-tap" {
-			t.Errorf("DownloadRepo = %q, want %q", p.DownloadRepo, "homebrew-tap")
-		}
 	})
 
-	t.Run("cask from experimental-tap gets download fields set to experimental-tap", func(t *testing.T) {
-		content := `
-cask "cool-tool" do
-  version "2.0.0"
-  desc "A cool tool"
-  homepage "https://github.com/some-org/cool-tool"
-  url "https://github.com/ublue-os/homebrew-experimental-tap/releases/download/v2.0.0/cool-tool.tar.gz"
-end
-`
-		p := parseRuby("cool-tool", "cask", content)
-		if p.SourceOwner != "some-org" {
-			t.Errorf("SourceOwner = %q, want %q", p.SourceOwner, "some-org")
-		}
-		if p.DownloadOwner != "ublue-os" {
-			t.Errorf("DownloadOwner = %q, want %q", p.DownloadOwner, "ublue-os")
-		}
-		if p.DownloadRepo != "homebrew-experimental-tap" {
-			t.Errorf("DownloadRepo = %q, want %q", p.DownloadRepo, "homebrew-experimental-tap")
-		}
-	})
-
-	t.Run("cask with only tap URL and no other GitHub URL has no SourceOwner", func(t *testing.T) {
+	t.Run("cask with only tap URL has no SourceOwner", func(t *testing.T) {
 		content := `
 cask "tool" do
   version "2.0.0"
@@ -127,13 +92,6 @@ end
 		// Tap URLs must NOT bleed into SourceOwner/SourceRepo.
 		if p.SourceOwner == "ublue-os" && (p.SourceRepo == "homebrew-tap" || p.SourceRepo == "homebrew-experimental-tap") {
 			t.Errorf("SourceOwner/SourceRepo must not point to the tap repos")
-		}
-		// But DownloadOwner/Repo should be set.
-		if p.DownloadOwner != "ublue-os" {
-			t.Errorf("DownloadOwner = %q, want %q", p.DownloadOwner, "ublue-os")
-		}
-		if p.DownloadRepo != "homebrew-tap" {
-			t.Errorf("DownloadRepo = %q, want %q", p.DownloadRepo, "homebrew-tap")
 		}
 	})
 
@@ -168,10 +126,6 @@ end
 		if p.SourceRepo != "ghostty" {
 			t.Errorf("SourceRepo = %q, want %q", p.SourceRepo, "ghostty")
 		}
-		// No tap URL → no download tracking.
-		if p.DownloadOwner != "" {
-			t.Errorf("DownloadOwner = %q, want empty", p.DownloadOwner)
-		}
 	})
 
 	t.Run("package with no version or description", func(t *testing.T) {
@@ -199,9 +153,6 @@ end
 		}
 		if p.Version != "" || p.Description != "" || p.Homepage != "" {
 			t.Errorf("expected all string fields empty for empty content")
-		}
-		if p.DownloadOwner != "" || p.DownloadRepo != "" {
-			t.Errorf("expected DownloadOwner/Repo empty for empty content")
 		}
 	})
 }
