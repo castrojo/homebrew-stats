@@ -1,6 +1,7 @@
 ---
 import DownloadsChart from './DownloadsChart.astro';
 import { sortPackages, filterByType, countStale, countUpToDate, type Package } from '../lib/packages';
+import { computePackageCumulative, type DaySnapshot } from '../lib/charts';
 
 interface Traffic {
   count: number;
@@ -12,11 +13,6 @@ interface TapSnapshot {
   uniques: number;
   count: number;
   downloads?: Record<string, number>;
-}
-
-interface DaySnapshot {
-  date: string;
-  taps: Record<string, TapSnapshot>;
 }
 
 interface Props {
@@ -33,6 +29,12 @@ const sorted = sortPackages(packages);
 
 const casks = filterByType(sorted, 'cask');
 const formulas = filterByType(sorted, 'formula');
+
+// Compute cumulative installs for each package using delta accumulation over history.
+// This gives a monotonically increasing total — values never decrease between syncs.
+const cumulativeByName = new Map<string, number>(
+  sorted.map(pkg => [pkg.name, computePackageCumulative(history, name, pkg.name)])
+);
 ---
 
 <div class="tap-section">
@@ -87,7 +89,7 @@ const formulas = filterByType(sorted, 'formula');
         <th>Type</th>
         <th>Version</th>
         <th>Latest</th>
-        <th>30d Installs</th>
+        <th>Total Installs</th>
         <th>Description</th>
       </tr>
     </thead>
@@ -109,8 +111,8 @@ const formulas = filterByType(sorted, 'formula');
             </span>
           </td>
           <td>
-            {pkg.downloads > 0
-              ? <span class="downloads">{pkg.downloads.toLocaleString()}</span>
+            {(cumulativeByName.get(pkg.name) ?? 0) > 0
+              ? <span class="downloads">{(cumulativeByName.get(pkg.name) ?? 0).toLocaleString()}</span>
               : <span class="muted">—</span>}
           </td>
           <td class="pkg-desc">{pkg.description ?? ''}</td>
