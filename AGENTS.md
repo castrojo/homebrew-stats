@@ -189,3 +189,122 @@ npm test
 - **TypeScript**: vitest unit tests in `src/lib/*.test.ts` covering pure chart/package utility functions. Run `npx vitest run` from the repo root.
 - **Do not add `console.log` debugging** to committed code.
 - **Do not push** from automated agents — commit only.
+
+---
+
+## MANDATORY PATTERNS — Chart Components
+
+**Read this before touching any `.astro` file with a `<script>` block.**
+
+### Data injection into scripts
+
+```astro
+---
+import { safeJson } from '../lib/inject.ts';
+---
+<script type="application/json" id="my-data" set:html={safeJson(data)}></script>
+```
+
+| Rule | Why |
+|---|---|
+| **Always `set:html`** (never `set:text`) | `set:text` HTML-encodes `"` → `&quot;`; browsers don't decode entities in `<script>` raw text |
+| **Always `safeJson()`** (never raw `JSON.stringify`) | `JSON.stringify` doesn't escape `<`, so `</script>` in a data value breaks HTML parsing |
+| **Never `define:vars`** for chart data | Only works with `is:inline` scripts; chart components use ES module imports |
+
+Read data in the `<script>` block:
+```ts
+import { readChartData } from '../lib/inject.js';
+const data = readChartData<MyType>('my-data');
+```
+
+### Chart.js imports
+
+```ts
+// ✅ CORRECT — tree-shaken, registers Line/Bar/Doughnut/Category/Linear/Tooltip/Legend
+import '../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+
+// ❌ NEVER — imports 200KB kitchen-sink bundle
+import Chart from 'chart.js/auto';
+```
+
+### Shared utilities (never re-declare locally)
+
+```ts
+import { BRAND_COLOURS, getCSSVar, getChartColors, getChartDefaults, applyTheme } from '../lib/chart-theme.js';
+```
+
+| Export | Purpose |
+|---|---|
+| `BRAND_COLOURS` | 10-colour brand palette (consistent ordering across all charts) |
+| `getCSSVar(name)` | Read a CSS custom property from the document root |
+| `getChartColors()` | Returns `{ text, muted, grid }` from current CSS vars |
+| `getChartDefaults(colors)` | Chart.js scale/plugin defaults object |
+| `applyTheme(chart)` | Update chart colors on `themechange` without destroying |
+
+### Card wrapper
+
+```astro
+import ChartCard from './ChartCard.astro';
+
+<ChartCard
+  title="My Chart"
+  canvasId="my-canvas"
+  height={260}
+  rangeId="my-range-btns"
+  ranges={[{ label: '30d', value: '30' }, { label: 'All', value: 'all' }]}
+  defaultRange="30"
+/>
+```
+
+`ChartCard` provides: card shell, `.chart-card`/`.chart-wrap` CSS, range buttons, `role="img"` + `aria-label` on the canvas, and an empty state (`isEmpty` + `emptyMsg` props). **Do NOT duplicate this CSS in component `<style>` blocks.**
+
+### Shared types
+
+```ts
+import type { DaySnapshot, TapSnapshot, WeekRecord, AppDayCount, Package } from '../lib/types.ts';
+```
+
+### themechange handler (use `chart.update()`, never `chart.destroy()`)
+
+```ts
+window.addEventListener('themechange', () => {
+  if (!chart) return;
+  const c = getChartColors();
+  (chart.options.plugins!.legend!.labels as { color: string }).color = c.text;
+  chart.options.scales!.x!.ticks!.color = c.muted;
+  (chart.options.scales!.x!.grid as { color: string }).color = c.grid;
+  chart.options.scales!.y!.ticks!.color = c.muted;
+  (chart.options.scales!.y!.grid as { color: string }).color = c.grid;
+  chart.update();  // ← chart.update() NOT chart.destroy() + new Chart()
+});
+```
+
+### Error handling — wrap Chart.js init
+
+```ts
+let chart: Chart | undefined;
+try {
+  chart = new Chart(canvas, { ... });
+} catch (e) {
+  console.error('[MyChart] Chart.js init failed:', e);
+}
+```
+
+### ESLint guard
+
+`npm run lint` will error if `set:text=` appears on any `<script>` element (enforced via `eslint-plugin-astro` + `no-restricted-syntax`). Do not disable this rule.
+
+---
+
+## Testing (full suite)
+
+```bash
+just test-all    # 79 unit tests (Vitest) + 18 E2E tests (Playwright)
+just test        # unit tests only
+just test-e2e    # E2E tests only (builds site first, then launches preview server)
+npm run typecheck  # TypeScript type check (no emit)
+npm run lint       # ESLint (includes .astro files via eslint-plugin-astro)
+```
+
+All must pass before merging. CI runs: typecheck → build → verify data → E2E → deploy.
