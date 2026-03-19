@@ -132,4 +132,10 @@ func (c *Client) ListTesthubPackages(org string) ([]TesthubPackage, error) {
 	return all, nil
 }
 
+// GitHub returns the underlying go-github client for direct API access in subpackages.
+func (c *Client) GitHub() *gh.Client { return c.gh }
+
+// Context returns the client's context.
+func (c *Client) Context() context.Context { return c.ctx }
+
 // GetTotalDownloads was removed. Install counts now come from Homebrew analytics.
