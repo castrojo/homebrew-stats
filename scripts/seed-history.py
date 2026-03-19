@@ -61,11 +61,12 @@ APP_PASS_RATE = {
 }
 
 # Countme baseline (real numbers, current week)
+# Countme baseline — keys MUST be lowercase (Go validDistros: "Bazzite" → "bazzite")
 BASELINE = {
-    "Bazzite":     71_000,
-    "Bluefin":      3_600,
-    "Bluefin LTS":     64,
-    "Aurora":       2_600,
+    "bazzite":     71_000,
+    "bluefin":      3_600,
+    "bluefin-lts":     64,
+    "aurora":       2_600,
 }
 
 # Fedora version distribution per distro (realistic for March 2026)
