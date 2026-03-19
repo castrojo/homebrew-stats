@@ -32,59 +32,334 @@
   "history": {
     "week_records": [
       {
+        "week_start": "2025-08-18",
+        "week_end": "2025-08-24",
+        "distros": {
+          "bazzite": 28030,
+          "bluefin": 1450,
+          "bluefin-lts": 26,
+          "aurora": 1036
+        },
+        "total": 30542
+      },
+      {
+        "week_start": "2025-08-25",
+        "week_end": "2025-08-31",
+        "distros": {
+          "bazzite": 29252,
+          "bluefin": 1454,
+          "bluefin-lts": 27,
+          "aurora": 1115
+        },
+        "total": 31848
+      },
+      {
+        "week_start": "2025-09-01",
+        "week_end": "2025-09-07",
+        "distros": {
+          "bazzite": 30072,
+          "bluefin": 1570,
+          "bluefin-lts": 28,
+          "aurora": 1109
+        },
+        "total": 32779
+      },
+      {
+        "week_start": "2025-09-08",
+        "week_end": "2025-09-14",
+        "distros": {
+          "bazzite": 30654,
+          "bluefin": 1589,
+          "bluefin-lts": 27,
+          "aurora": 1155
+        },
+        "total": 33425
+      },
+      {
+        "week_start": "2025-09-15",
+        "week_end": "2025-09-21",
+        "distros": {
+          "bazzite": 31111,
+          "bluefin": 1646,
+          "bluefin-lts": 29,
+          "aurora": 1198
+        },
+        "total": 33984
+      },
+      {
+        "week_start": "2025-09-22",
+        "week_end": "2025-09-28",
+        "distros": {
+          "bazzite": 34025,
+          "bluefin": 1677,
+          "bluefin-lts": 31,
+          "aurora": 1259
+        },
+        "total": 36992
+      },
+      {
+        "week_start": "2025-09-29",
+        "week_end": "2025-10-05",
+        "distros": {
+          "bazzite": 34660,
+          "bluefin": 1718,
+          "bluefin-lts": 29,
+          "aurora": 1261
+        },
+        "total": 37668
+      },
+      {
+        "week_start": "2025-10-06",
+        "week_end": "2025-10-12",
+        "distros": {
+          "bazzite": 34255,
+          "bluefin": 1731,
+          "bluefin-lts": 31,
+          "aurora": 1320
+        },
+        "total": 37337
+      },
+      {
+        "week_start": "2025-10-13",
+        "week_end": "2025-10-19",
+        "distros": {
+          "bazzite": 35984,
+          "bluefin": 1804,
+          "bluefin-lts": 34,
+          "aurora": 1351
+        },
+        "total": 39173
+      },
+      {
+        "week_start": "2025-10-20",
+        "week_end": "2025-10-26",
+        "distros": {
+          "bazzite": 37460,
+          "bluefin": 1865,
+          "bluefin-lts": 34,
+          "aurora": 1425
+        },
+        "total": 40784
+      },
+      {
+        "week_start": "2025-10-27",
+        "week_end": "2025-11-02",
+        "distros": {
+          "bazzite": 39434,
+          "bluefin": 1945,
+          "bluefin-lts": 34,
+          "aurora": 1413
+        },
+        "total": 42826
+      },
+      {
+        "week_start": "2025-11-03",
+        "week_end": "2025-11-09",
+        "distros": {
+          "bazzite": 40563,
+          "bluefin": 1988,
+          "bluefin-lts": 37,
+          "aurora": 1470
+        },
+        "total": 44058
+      },
+      {
+        "week_start": "2025-11-10",
+        "week_end": "2025-11-16",
+        "distros": {
+          "bazzite": 40441,
+          "bluefin": 2044,
+          "bluefin-lts": 36,
+          "aurora": 1566
+        },
+        "total": 44087
+      },
+      {
+        "week_start": "2025-11-17",
+        "week_end": "2025-11-23",
+        "distros": {
+          "bazzite": 43026,
+          "bluefin": 2172,
+          "bluefin-lts": 37,
+          "aurora": 1528
+        },
+        "total": 46763
+      },
+      {
+        "week_start": "2025-11-24",
+        "week_end": "2025-11-30",
+        "distros": {
+          "bazzite": 44739,
+          "bluefin": 2221,
+          "bluefin-lts": 40,
+          "aurora": 1639
+        },
+        "total": 48639
+      },
+      {
+        "week_start": "2025-12-01",
+        "week_end": "2025-12-07",
+        "distros": {
+          "bazzite": 43922,
+          "bluefin": 2302,
+          "bluefin-lts": 39,
+          "aurora": 1659
+        },
+        "total": 47922
+      },
+      {
+        "week_start": "2025-12-08",
+        "week_end": "2025-12-14",
+        "distros": {
+          "bazzite": 45546,
+          "bluefin": 2403,
+          "bluefin-lts": 43,
+          "aurora": 1734
+        },
+        "total": 49726
+      },
+      {
+        "week_start": "2025-12-15",
+        "week_end": "2025-12-21",
+        "distros": {
+          "bazzite": 48009,
+          "bluefin": 2394,
+          "bluefin-lts": 43,
+          "aurora": 1745
+        },
+        "total": 52191
+      },
+      {
+        "week_start": "2025-12-22",
+        "week_end": "2025-12-28",
+        "distros": {
+          "bazzite": 47856,
+          "bluefin": 2448,
+          "bluefin-lts": 43,
+          "aurora": 1807
+        },
+        "total": 52154
+      },
+      {
+        "week_start": "2025-12-29",
+        "week_end": "2026-01-04",
+        "distros": {
+          "bazzite": 51233,
+          "bluefin": 2495,
+          "bluefin-lts": 45,
+          "aurora": 1864
+        },
+        "total": 55637
+      },
+      {
+        "week_start": "2026-01-05",
+        "week_end": "2026-01-11",
+        "distros": {
+          "bazzite": 53209,
+          "bluefin": 2663,
+          "bluefin-lts": 49,
+          "aurora": 1955
+        },
+        "total": 57876
+      },
+      {
+        "week_start": "2026-01-12",
+        "week_end": "2026-01-18",
+        "distros": {
+          "bazzite": 53908,
+          "bluefin": 2804,
+          "bluefin-lts": 48,
+          "aurora": 2013
+        },
+        "total": 58773
+      },
+      {
+        "week_start": "2026-01-19",
+        "week_end": "2026-01-25",
+        "distros": {
+          "bazzite": 56611,
+          "bluefin": 2828,
+          "bluefin-lts": 52,
+          "aurora": 2097
+        },
+        "total": 61588
+      },
+      {
+        "week_start": "2026-01-26",
+        "week_end": "2026-02-01",
+        "distros": {
+          "bazzite": 58738,
+          "bluefin": 2869,
+          "bluefin-lts": 50,
+          "aurora": 2081
+        },
+        "total": 63738
+      },
+      {
+        "week_start": "2026-02-02",
+        "week_end": "2026-02-08",
+        "distros": {
+          "bazzite": 60020,
+          "bluefin": 3023,
+          "bluefin-lts": 53,
+          "aurora": 2153
+        },
+        "total": 65249
+      },
+      {
+        "week_start": "2026-02-09",
+        "week_end": "2026-02-15",
+        "distros": {
+          "bazzite": 59742,
+          "bluefin": 3096,
+          "bluefin-lts": 57,
+          "aurora": 2199
+        },
+        "total": 65094
+      },
+      {
         "week_start": "2026-02-16",
         "week_end": "2026-02-22",
         "distros": {
-          "bazzite": 63976,
-          "bluefin": 3140,
-          "bluefin-lts": 55,
-          "aurora": 2309
+          "bazzite": 60861,
+          "bluefin": 3118,
+          "bluefin-lts": 58,
+          "aurora": 2343
         },
-        "total": 69480
+        "total": 66380
       },
       {
         "week_start": "2026-02-23",
         "week_end": "2026-03-01",
         "distros": {
-          "bazzite": 64656,
-          "bluefin": 3336,
-          "bluefin-lts": 58,
-          "aurora": 2342
+          "bazzite": 64275,
+          "bluefin": 3181,
+          "bluefin-lts": 57,
+          "aurora": 2410
         },
-        "total": 70392
+        "total": 69923
       },
       {
         "week_start": "2026-03-02",
         "week_end": "2026-03-08",
         "distros": {
-          "bazzite": 65803,
-          "bluefin": 3413,
-          "bluefin-lts": 59,
-          "aurora": 2486
+          "bazzite": 67519,
+          "bluefin": 3410,
+          "bluefin-lts": 63,
+          "aurora": 2422
         },
-        "total": 71761
+        "total": 73414
       },
       {
         "week_start": "2026-03-09",
         "week_end": "2026-03-15",
         "distros": {
-          "bazzite": 68025,
-          "bluefin": 3501,
-          "bluefin-lts": 64,
-          "aurora": 2604
+          "bazzite": 69208,
+          "bluefin": 3380,
+          "bluefin-lts": 61,
+          "aurora": 2518
         },
-        "total": 74194
-      },
-      {
-        "week_start": "2026-03-16",
-        "week_end": "2026-03-22",
-        "distros": {
-          "bazzite": 70757,
-          "bluefin": 3587,
-          "bluefin-lts": 65,
-          "aurora": 2640
-        },
-        "total": 77049
+        "total": 75167
       }
     ],
     "day_records": [

@@ -405,6 +405,15 @@ if err := saveCountmeHistory(store); err != nil {
 fmt.Fprintf(os.Stderr, "⚠️  countme history save: %v\n", err)
 }
 
+// If we still have no week history (e.g. cold-start CI with empty cache + failed CSV),
+// fall back to the committed src/data/countme.json so the site renders real data.
+if len(store.WeekRecords) == 0 {
+	if fb := loadFallbackCountmeHistory(); fb != nil {
+		fmt.Fprintf(os.Stderr, "  using %d fallback week records from committed countme.json\n", len(fb.WeekRecords))
+		store = fb
+	}
+}
+
 out := buildCountmeOutput(store)
 if err := writeJSON("src/data/countme.json", out); err != nil {
 return err
@@ -503,4 +512,25 @@ if err := os.WriteFile(path, data, 0o644); err != nil {
 return fmt.Errorf("write %s: %w", path, err)
 }
 return nil
+}
+
+// loadFallbackCountmeHistory reads week_records from the committed src/data/countme.json
+// and reconstructs a HistoryStore from it. Used when both the cache and the live CSV fetch
+// are unavailable (e.g. CI cold-start with no read:packages scope or rate-limited endpoint).
+func loadFallbackCountmeHistory() *countme.HistoryStore {
+data, err := os.ReadFile("src/data/countme.json")
+if err != nil {
+return nil
+}
+var out countmeOutput
+if err := json.Unmarshal(data, &out); err != nil {
+return nil
+}
+if len(out.History.WeekRecords) == 0 {
+return nil
+}
+return &countme.HistoryStore{
+WeekRecords:  out.History.WeekRecords,
+OsVersionDist: out.OsVersionDist,
+}
 }
