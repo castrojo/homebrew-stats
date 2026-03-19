@@ -13,13 +13,23 @@ const osVersionDist = (data as any).os_version_dist ?? {};
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">
   <header>
-    <h1>🌐 Universal Blue Active Users</h1>
+    <h1>🌐 Universal Blue Active Devices</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://github.com/ublue-os/countme">ublue-os/countme</a>
     </div>
     <button id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
   </header>
+
+  <div class="explainer">
+    <p>
+      These counts come from <strong>countme</strong>, a privacy-respecting feature built into
+      <a href="https://fedoraproject.org/wiki/Changes/DNF_Better_Counting" target="_blank" rel="noopener">Fedora's package manager</a>.
+      Once a week, each device sends a single anonymous check-in — no personal data, no IP addresses stored,
+      just a count of how many devices are actively using each operating system.
+      Think of it like a headcount: it tells us how many devices checked in this week, not who they are or what they did.
+    </p>
+  </div>
 
   <CountmeKPIs
     currentWeek={data.current_week as any}
@@ -33,11 +43,25 @@ const osVersionDist = (data as any).os_version_dist ?? {};
     <h2>🌍 Ecosystem Share</h2>
     <EcosystemPieChart currentWeek={data.current_week as any} />
 
-    <h2>🐧 Fedora Version Distribution</h2>
+    <h2>🐧 Popular <code>bootc</code> Operating System Images</h2>
     <FedoraVersionChart osVersionDist={osVersionDist} />
   </section>
 </Layout>
 
 <style>
   .charts-section { margin-bottom: 48px; }
+  .explainer {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .explainer p { margin: 0; }
+  .explainer strong { color: var(--text); }
+  .explainer a { color: var(--blue); }
 </style>
