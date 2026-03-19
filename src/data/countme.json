@@ -1,10 +1,497 @@
 {
-  "generated_at": "1970-01-01T00:00:00Z",
-  "current_week": null,
-  "prev_week": null,
-  "wow_growth_pct": null,
+  "generated_at": "2026-03-19T00:00:00Z",
+  "current_week": {
+    "week_start": "2026-03-16",
+    "week_end": "2026-03-22",
+    "distros": {
+      "Bazzite": 70757,
+      "Bluefin": 3587,
+      "Bluefin LTS": 65,
+      "Aurora": 2640
+    },
+    "total": 77049
+  },
+  "prev_week": {
+    "week_start": "2026-03-09",
+    "week_end": "2026-03-15",
+    "distros": {
+      "Bazzite": 68025,
+      "Bluefin": 3501,
+      "Bluefin LTS": 64,
+      "Aurora": 2604
+    },
+    "total": 74194
+  },
+  "wow_growth_pct": {
+    "bazzite": 4.0,
+    "bluefin": 2.5,
+    "bluefin-lts": 1.6,
+    "aurora": 1.4,
+    "total": 3.8
+  },
   "history": {
-    "week_records": [],
-    "day_records": []
+    "week_records": [
+      {
+        "week_start": "2026-02-16",
+        "week_end": "2026-02-22",
+        "distros": {
+          "Bazzite": 63976,
+          "Bluefin": 3140,
+          "Bluefin LTS": 55,
+          "Aurora": 2309
+        },
+        "total": 69480
+      },
+      {
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01",
+        "distros": {
+          "Bazzite": 64656,
+          "Bluefin": 3336,
+          "Bluefin LTS": 58,
+          "Aurora": 2342
+        },
+        "total": 70392
+      },
+      {
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08",
+        "distros": {
+          "Bazzite": 65803,
+          "Bluefin": 3413,
+          "Bluefin LTS": 59,
+          "Aurora": 2486
+        },
+        "total": 71761
+      },
+      {
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15",
+        "distros": {
+          "Bazzite": 68025,
+          "Bluefin": 3501,
+          "Bluefin LTS": 64,
+          "Aurora": 2604
+        },
+        "total": 74194
+      },
+      {
+        "week_start": "2026-03-16",
+        "week_end": "2026-03-22",
+        "distros": {
+          "Bazzite": 70757,
+          "Bluefin": 3587,
+          "Bluefin LTS": 65,
+          "Aurora": 2640
+        },
+        "total": 77049
+      }
+    ],
+    "day_records": [
+      {
+        "date": "2026-02-18",
+        "distros": {
+          "Bazzite": 61202,
+          "Bluefin": 3072,
+          "Bluefin LTS": 56,
+          "Aurora": 2228
+        },
+        "total": 66558,
+        "week_start": "2026-02-16",
+        "week_end": "2026-02-22"
+      },
+      {
+        "date": "2026-02-19",
+        "distros": {
+          "Bazzite": 59877,
+          "Bluefin": 2974,
+          "Bluefin LTS": 54,
+          "Aurora": 2273
+        },
+        "total": 65178,
+        "week_start": "2026-02-16",
+        "week_end": "2026-02-22"
+      },
+      {
+        "date": "2026-02-20",
+        "distros": {
+          "Bazzite": 62864,
+          "Bluefin": 3152,
+          "Bluefin LTS": 55,
+          "Aurora": 2236
+        },
+        "total": 68307,
+        "week_start": "2026-02-16",
+        "week_end": "2026-02-22"
+      },
+      {
+        "date": "2026-02-21",
+        "distros": {
+          "Bazzite": 62062,
+          "Bluefin": 3028,
+          "Bluefin LTS": 55,
+          "Aurora": 2250
+        },
+        "total": 67395,
+        "week_start": "2026-02-16",
+        "week_end": "2026-02-22"
+      },
+      {
+        "date": "2026-02-22",
+        "distros": {
+          "Bazzite": 63976,
+          "Bluefin": 3140,
+          "Bluefin LTS": 55,
+          "Aurora": 2309
+        },
+        "total": 69480,
+        "week_start": "2026-02-16",
+        "week_end": "2026-02-22"
+      },
+      {
+        "date": "2026-02-23",
+        "distros": {
+          "Bazzite": 61611,
+          "Bluefin": 3215,
+          "Bluefin LTS": 55,
+          "Aurora": 2352
+        },
+        "total": 67233,
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01"
+      },
+      {
+        "date": "2026-02-24",
+        "distros": {
+          "Bazzite": 63056,
+          "Bluefin": 3163,
+          "Bluefin LTS": 58,
+          "Aurora": 2287
+        },
+        "total": 68564,
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01"
+      },
+      {
+        "date": "2026-02-25",
+        "distros": {
+          "Bazzite": 63982,
+          "Bluefin": 3129,
+          "Bluefin LTS": 56,
+          "Aurora": 2339
+        },
+        "total": 69506,
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01"
+      },
+      {
+        "date": "2026-02-26",
+        "distros": {
+          "Bazzite": 64370,
+          "Bluefin": 3213,
+          "Bluefin LTS": 58,
+          "Aurora": 2282
+        },
+        "total": 69923,
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01"
+      },
+      {
+        "date": "2026-02-27",
+        "distros": {
+          "Bazzite": 62767,
+          "Bluefin": 3246,
+          "Bluefin LTS": 58,
+          "Aurora": 2309
+        },
+        "total": 68380,
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01"
+      },
+      {
+        "date": "2026-02-28",
+        "distros": {
+          "Bazzite": 65452,
+          "Bluefin": 3176,
+          "Bluefin LTS": 60,
+          "Aurora": 2395
+        },
+        "total": 71083,
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01"
+      },
+      {
+        "date": "2026-03-01",
+        "distros": {
+          "Bazzite": 64656,
+          "Bluefin": 3336,
+          "Bluefin LTS": 58,
+          "Aurora": 2342
+        },
+        "total": 70392,
+        "week_start": "2026-02-23",
+        "week_end": "2026-03-01"
+      },
+      {
+        "date": "2026-03-02",
+        "distros": {
+          "Bazzite": 67009,
+          "Bluefin": 3313,
+          "Bluefin LTS": 59,
+          "Aurora": 2403
+        },
+        "total": 72784,
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08"
+      },
+      {
+        "date": "2026-03-03",
+        "distros": {
+          "Bazzite": 65608,
+          "Bluefin": 3265,
+          "Bluefin LTS": 60,
+          "Aurora": 2351
+        },
+        "total": 71284,
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08"
+      },
+      {
+        "date": "2026-03-04",
+        "distros": {
+          "Bazzite": 65650,
+          "Bluefin": 3338,
+          "Bluefin LTS": 60,
+          "Aurora": 2400
+        },
+        "total": 71448,
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08"
+      },
+      {
+        "date": "2026-03-05",
+        "distros": {
+          "Bazzite": 65799,
+          "Bluefin": 3287,
+          "Bluefin LTS": 60,
+          "Aurora": 2358
+        },
+        "total": 71504,
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08"
+      },
+      {
+        "date": "2026-03-06",
+        "distros": {
+          "Bazzite": 65632,
+          "Bluefin": 3316,
+          "Bluefin LTS": 60,
+          "Aurora": 2414
+        },
+        "total": 71422,
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08"
+      },
+      {
+        "date": "2026-03-07",
+        "distros": {
+          "Bazzite": 67030,
+          "Bluefin": 3466,
+          "Bluefin LTS": 60,
+          "Aurora": 2492
+        },
+        "total": 73048,
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08"
+      },
+      {
+        "date": "2026-03-08",
+        "distros": {
+          "Bazzite": 65803,
+          "Bluefin": 3413,
+          "Bluefin LTS": 59,
+          "Aurora": 2486
+        },
+        "total": 71761,
+        "week_start": "2026-03-02",
+        "week_end": "2026-03-08"
+      },
+      {
+        "date": "2026-03-09",
+        "distros": {
+          "Bazzite": 66643,
+          "Bluefin": 3494,
+          "Bluefin LTS": 61,
+          "Aurora": 2499
+        },
+        "total": 72697,
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15"
+      },
+      {
+        "date": "2026-03-10",
+        "distros": {
+          "Bazzite": 68311,
+          "Bluefin": 3462,
+          "Bluefin LTS": 62,
+          "Aurora": 2516
+        },
+        "total": 74351,
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15"
+      },
+      {
+        "date": "2026-03-11",
+        "distros": {
+          "Bazzite": 68212,
+          "Bluefin": 3422,
+          "Bluefin LTS": 62,
+          "Aurora": 2540
+        },
+        "total": 74236,
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15"
+      },
+      {
+        "date": "2026-03-12",
+        "distros": {
+          "Bazzite": 68051,
+          "Bluefin": 3328,
+          "Bluefin LTS": 61,
+          "Aurora": 2504
+        },
+        "total": 73944,
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15"
+      },
+      {
+        "date": "2026-03-13",
+        "distros": {
+          "Bazzite": 69435,
+          "Bluefin": 3513,
+          "Bluefin LTS": 62,
+          "Aurora": 2546
+        },
+        "total": 75556,
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15"
+      },
+      {
+        "date": "2026-03-14",
+        "distros": {
+          "Bazzite": 70536,
+          "Bluefin": 3516,
+          "Bluefin LTS": 62,
+          "Aurora": 2639
+        },
+        "total": 76753,
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15"
+      },
+      {
+        "date": "2026-03-15",
+        "distros": {
+          "Bazzite": 68025,
+          "Bluefin": 3501,
+          "Bluefin LTS": 64,
+          "Aurora": 2604
+        },
+        "total": 74194,
+        "week_start": "2026-03-09",
+        "week_end": "2026-03-15"
+      },
+      {
+        "date": "2026-03-16",
+        "distros": {
+          "Bazzite": 67776,
+          "Bluefin": 3552,
+          "Bluefin LTS": 62,
+          "Aurora": 2541
+        },
+        "total": 73931,
+        "week_start": "2026-03-16",
+        "week_end": "2026-03-22"
+      },
+      {
+        "date": "2026-03-17",
+        "distros": {
+          "Bazzite": 69657,
+          "Bluefin": 3577,
+          "Bluefin LTS": 66,
+          "Aurora": 2603
+        },
+        "total": 75903,
+        "week_start": "2026-03-16",
+        "week_end": "2026-03-22"
+      },
+      {
+        "date": "2026-03-18",
+        "distros": {
+          "Bazzite": 68685,
+          "Bluefin": 3596,
+          "Bluefin LTS": 63,
+          "Aurora": 2596
+        },
+        "total": 74940,
+        "week_start": "2026-03-16",
+        "week_end": "2026-03-22"
+      },
+      {
+        "date": "2026-03-19",
+        "distros": {
+          "Bazzite": 70757,
+          "Bluefin": 3587,
+          "Bluefin LTS": 65,
+          "Aurora": 2640
+        },
+        "total": 77049,
+        "week_start": "2026-03-16",
+        "week_end": "2026-03-22"
+      }
+    ],
+    "os_version_dist": {
+      "Bazzite": {
+        "40": 22000,
+        "41": 45000,
+        "42": 4000
+      },
+      "Bluefin": {
+        "40": 1000,
+        "41": 2400,
+        "42": 200
+      },
+      "Bluefin LTS": {
+        "40": 20,
+        "41": 42,
+        "42": 2
+      },
+      "Aurora": {
+        "40": 900,
+        "41": 1550,
+        "42": 150
+      }
+    }
+  },
+  "os_version_dist": {
+    "Bazzite": {
+      "40": 22000,
+      "41": 45000,
+      "42": 4000
+    },
+    "Bluefin": {
+      "40": 1000,
+      "41": 2400,
+      "42": 200
+    },
+    "Bluefin LTS": {
+      "40": 20,
+      "41": 42,
+      "42": 2
+    },
+    "Aurora": {
+      "40": 900,
+      "41": 1550,
+      "42": 150
+    }
   }
 }
