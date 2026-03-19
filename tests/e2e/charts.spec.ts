@@ -170,3 +170,38 @@ test.describe('Overall tab', () => {
     await expect(callout).toContainText('countme');
   });
 });
+
+// ─── No-empty-state contract ──────────────────────────────────────────────────
+// These tests enforce that no chart renders in the empty/placeholder state.
+// An empty chart (class="chart-empty") means data failed to reach the component.
+// This is the E2E equivalent of the CI "Verify charts have data" step, and
+// catches the case where the CI grep gives a false negative.
+
+test.describe('No empty charts contract', () => {
+  async function assertNoEmptyCharts(page: Page, url: string) {
+    await page.goto(url);
+    const emptyCharts = await page.locator('.chart-empty').all();
+    if (emptyCharts.length > 0) {
+      // Collect context for easier debugging
+      const messages = await Promise.all(
+        emptyCharts.map(el => el.textContent())
+      );
+      throw new Error(
+        `${emptyCharts.length} empty chart(s) found on ${url}:\n` +
+        messages.map((m, i) => `  [${i + 1}] "${m?.trim()}"`).join('\n')
+      );
+    }
+  }
+
+  test('Homebrew tab has no empty charts', async ({ page }) => {
+    await assertNoEmptyCharts(page, '/homebrew-stats/');
+  });
+
+  test('Testhub tab has no empty charts', async ({ page }) => {
+    await assertNoEmptyCharts(page, '/homebrew-stats/testhub/');
+  });
+
+  test('Overall tab has no empty charts', async ({ page }) => {
+    await assertNoEmptyCharts(page, '/homebrew-stats/overall/');
+  });
+});

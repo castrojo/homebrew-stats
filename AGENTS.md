@@ -308,3 +308,22 @@ npm run lint       # ESLint (includes .astro files via eslint-plugin-astro)
 ```
 
 All must pass before merging. CI runs: typecheck → build → verify data → E2E → deploy.
+
+---
+
+## DEFINITION OF DONE — Non-Negotiable
+
+A task is **not complete** until GitHub Actions CI shows a green ✅ deploy on `main`.
+
+**Before declaring any task done:**
+1. Push the commit
+2. Run `gh run watch` or check `gh run list` until the deploy workflow completes
+3. Confirm conclusion is `success` — not just that local tests pass
+
+**If CI is red when you pick up a task:** Stop. Read the failure log (`gh run view <id> --log-failed`). Fix the CI before adding any new commits. Never build on a broken baseline.
+
+**Rationale:** Local tests run against local data in a local environment. CI runs against a clean checkout, a fresh environment, and real GitHub API data. These are not equivalent. A green local test suite does not mean CI will pass.
+
+### CI verify step — common false-positive trap
+
+The "Verify charts have data" step greps for `class="chart-empty"` (element attribute, with quotes). Do NOT change this to `chart-empty` without quotes — that matches the CSS class definition in Astro's inlined `<style>` tag and produces a false positive on every healthy build.

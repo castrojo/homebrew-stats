@@ -97,14 +97,19 @@ jobs:
 
       - name: Verify charts have data
         run: |
-          count=$(grep -c 'chart-empty' dist/index.html || true)
-          if [ "$count" -gt 0 ]; then
-            echo "❌ $count chart(s) show 'Not enough history' — history bootstrap failed"
-            echo "   This means stats.json history did not reach the build."
-            echo "   Check that the history cache was restored and bootstrapped correctly."
-            exit 1
-          fi
-          echo "✅ All charts have data (no chart-empty found)"
+          # Match the HTML element class attribute — NOT the CSS class definition.
+          # Astro inlines .chart-empty{} CSS rules into the HTML <style> tag, so a
+          # bare grep for 'chart-empty' produces false positives even when all charts
+          # are healthy. We need to match the rendered element: class="chart-empty".
+          for page in dist/index.html dist/testhub/index.html dist/overall/index.html; do
+            count=$(grep -c 'class=chart-empty' "$page" || true)
+            if [ "$count" -gt 0 ]; then
+              echo "❌ $page: $count chart(s) rendered in empty state"
+              echo "   Run: grep -n 'class="chart-empty"' $page"
+              exit 1
+            fi
+            echo "✅ $page: no empty charts"
+          done
 
       - name: Verify summary KPIs are populated
         run: |
