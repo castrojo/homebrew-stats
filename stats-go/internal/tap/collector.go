@@ -113,8 +113,7 @@ func Collect(owner, repo string, client *ghclient.Client, brewInstalls map[strin
 	// Homebrew cask token prefix: "ublue-os/tap/" for homebrew-tap,
 	// "ublue-os/experimental-tap/" for homebrew-experimental-tap, etc.
 	// Homebrew strips "homebrew-" from the repo name to form the tap shortname.
-	tapShortName := strings.TrimPrefix(repo, "homebrew-")
-	tapPrefix := owner + "/" + tapShortName + "/"
+	tapPrefix := buildTapPrefix(owner, repo)
 
 	// Freshness check for each package with a detected GitHub source.
 	// Also populate install counts from Homebrew analytics.
@@ -202,6 +201,20 @@ func applyDownloads(packages []Package, tapPrefix string, brewInstalls map[strin
 			p.Installs365d = installs.Installs365d
 		}
 	}
+}
+
+// buildTapPrefix constructs the Homebrew cask token prefix for the given
+// owner/repo pair.  Homebrew's convention strips the "homebrew-" prefix from
+// the repository name when forming a tap short-name, so:
+//
+//	ublue-os/homebrew-tap              → "ublue-os/tap/"
+//	ublue-os/homebrew-experimental-tap → "ublue-os/experimental-tap/"
+//
+// A package named "goose-linux" in the first tap resolves to the lookup key
+// "ublue-os/tap/goose-linux", which is what the Homebrew analytics API uses.
+func buildTapPrefix(owner, repo string) string {
+	shortName := strings.TrimPrefix(repo, "homebrew-")
+	return owner + "/" + shortName + "/"
 }
 
 func normaliseVersion(v string) string {
