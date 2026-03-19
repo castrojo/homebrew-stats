@@ -183,6 +183,51 @@ func TestComputeBuildMetrics_ZeroTotal(t *testing.T) {
 	}
 }
 
+// --- isTesthubPackage / stripTesthubPrefix tests ---
+
+func TestListPackagesFiltersToTesthubPrefix(t *testing.T) {
+	tests := []struct {
+		name     string
+		pkgName  string
+		wantKeep bool
+	}{
+		{"testhub package", "testhub/ghostty", true},
+		{"testhub package with slash", "testhub/goose", true},
+		{"bluefin package excluded", "bluefin", false},
+		{"dakota package excluded", "dakota", false},
+		{"egg package excluded", "egg/foo", false},
+		{"partial prefix excluded", "testhubx/ghostty", false},
+		{"empty name excluded", "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isTesthubPackage(tt.pkgName)
+			if got != tt.wantKeep {
+				t.Errorf("isTesthubPackage(%q) = %v, want %v", tt.pkgName, got, tt.wantKeep)
+			}
+		})
+	}
+}
+
+func TestListPackagesStripsPrefix(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"testhub/ghostty", "ghostty"},
+		{"testhub/goose", "goose"},
+		{"testhub/firefox-nightly", "firefox-nightly"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			got := stripTesthubPrefix(tt.input)
+			if got != tt.want {
+				t.Errorf("stripTesthubPrefix(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestComputeBuildMetrics_WindowFiltering(t *testing.T) {
 	// Only snapshots within the window should count for PassRate7d
 	old := time.Now().UTC().AddDate(0, 0, -10).Format("2006-01-02")

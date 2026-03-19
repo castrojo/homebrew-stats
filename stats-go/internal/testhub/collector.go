@@ -26,8 +26,21 @@ func parseJobApp(jobName string) (string, bool) {
 	return strings.TrimSpace(m[1]), true
 }
 
+// isTesthubPackage reports whether the package name belongs to the testhub namespace.
+func isTesthubPackage(name string) bool {
+	return strings.HasPrefix(name, "testhub/")
+}
+
+// stripTesthubPrefix removes the "testhub/" prefix from a package name.
+func stripTesthubPrefix(name string) string {
+	return strings.TrimPrefix(name, "testhub/")
+}
+
 // ListPackages fetches container packages from the given GitHub org.
-// It retrieves version count and latest version tag for each package.
+// Only packages with the "testhub/" prefix are returned; the prefix is stripped
+// from the display name. Version count is determined by paginating
+// PackageGetAllVersions rather than using GetVersionCount() which always returns 0
+// from the list API.
 func ListPackages(ctx context.Context, client *gh.Client, org string) ([]Package, error) {
 	opts := &gh.PackageListOptions{
 		PackageType: gh.String("container"),
@@ -42,7 +55,12 @@ func ListPackages(ctx context.Context, client *gh.Client, org string) ([]Package
 		}
 
 		for _, pkg := range pkgs {
-			name := pkg.GetName()
+			fullName := pkg.GetName()
+			if !isTesthubPackage(fullName) {
+				continue
+			}
+			name := stripTesthubPrefix(fullName)
+
 			p := Package{
 				Name:    name,
 				HTMLURL: pkg.GetHTMLURL(),
@@ -54,19 +72,31 @@ func ListPackages(ctx context.Context, client *gh.Client, org string) ([]Package
 				p.UpdatedAt = t.UTC().Format(time.RFC3339)
 			}
 
-			// Fetch version count and latest tag.
-			versions, _, verErr := client.Organizations.PackageGetAllVersions(
-				ctx, org, "container", name,
-				&gh.PackageListOptions{ListOptions: gh.ListOptions{PerPage: 1}},
-			)
-			if verErr == nil && len(versions) > 0 {
-				meta := versions[0].GetMetadata()
-				if meta != nil && meta.Container != nil && len(meta.Container.Tags) > 0 {
-					p.Version = meta.Container.Tags[0]
+			// Paginate versions to get an accurate count and extract the latest tag.
+			var versionCount int64
+			vPage := 1
+			for {
+				vers, vResp, vErr := client.Organizations.PackageGetAllVersions(
+					ctx, org, "container", fullName,
+					&gh.PackageListOptions{ListOptions: gh.ListOptions{PerPage: 100, Page: vPage}},
+				)
+				if vErr != nil {
+					break
 				}
+				// Grab the latest tag from the first version on the first page.
+				if vPage == 1 && len(vers) > 0 {
+					meta := vers[0].GetMetadata()
+					if meta != nil && meta.Container != nil && len(meta.Container.Tags) > 0 {
+						p.Version = meta.Container.Tags[0]
+					}
+				}
+				versionCount += int64(len(vers))
+				if vResp.NextPage == 0 {
+					break
+				}
+				vPage = vResp.NextPage
 			}
-			// VersionCount comes from the package object itself.
-			p.VersionCount = int64(pkg.GetVersionCount())
+			p.VersionCount = versionCount
 
 			all = append(all, p)
 		}
