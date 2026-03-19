@@ -1,59 +1,42 @@
 ---
-interface DaySnapshot {
-  date: string;
-  taps: Record<string, { uniques: number; count: number }>;
-}
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
 
 interface Props {
-  history: DaySnapshot[];
+  history: { date: string; taps: Record<string, { uniques: number; count: number }> }[];
   tapNames: string[];
 }
 
 const { history, tapNames } = Astro.props;
-
-// Colours per tap (consistent ordering).
-const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
 ---
 
-<div class="chart-card">
-  <div class="chart-header">
-    <div class="chart-title">Unique Tappers Over Time</div>
-    <div class="range-btns" id="traffic-range-btns">
-      <button class="range-btn active" data-range="30">30d</button>
-      <button class="range-btn" data-range="90">90d</button>
-      <button class="range-btn" data-range="all">All</button>
-    </div>
-  </div>
-  <div class="chart-wrap">
-    <canvas id="traffic-chart"></canvas>
-  </div>
-</div>
-<script type="application/json" id="traffic-data" set:html={JSON.stringify({ history, tapNames, COLOURS })}></script>
+<ChartCard
+  title="Unique Tappers Over Time"
+  canvasId="traffic-chart"
+  height={260}
+  rangeId="traffic-range-btns"
+  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+  defaultRange="30"
+/>
+<script type="application/json" id="traffic-data" set:html={safeJson({ history, tapNames })}></script>
 
 <script>
-  import Chart from 'chart.js/auto';
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
 
-  const { history: allHistory, tapNames, COLOURS } = JSON.parse(
-    document.getElementById('traffic-data')!.textContent!
-  );
+  const { history: allHistory, tapNames } = readChartData<{
+    history: { date: string; taps: Record<string, { uniques: number }> }[];
+    tapNames: string[];
+  }>('traffic-data');
 
-  function getCSSVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-  function getChartColors() {
-    return {
-      text: getCSSVar('--text'),
-      muted: getCSSVar('--muted'),
-      grid: getCSSVar('--border'),
-    };
-  }
-
-  function buildDatasets(data) {
+  function buildDatasets(data: typeof allHistory) {
     return tapNames.map((name, i) => ({
       label: name,
       data: data.map(s => s.taps[name]?.uniques ?? null),
-      borderColor: COLOURS[i % COLOURS.length],
-      backgroundColor: COLOURS[i % COLOURS.length] + '22',
+      borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length] + '22',
       fill: true,
       tension: 0.3,
       pointRadius: data.length < 15 ? 4 : 2,
@@ -61,7 +44,7 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
     }));
   }
 
-  function getWindow(range) {
+  function getWindow(range: string) {
     if (range === '30') return allHistory.slice(-30);
     if (range === '90') return allHistory.slice(-90);
     return allHistory;
@@ -70,9 +53,9 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
   let current = getWindow('30');
   const colors = getChartColors();
 
-  let chart;
+  let chart: Chart | undefined;
   try {
-    chart = new Chart(document.getElementById('traffic-chart'), {
+    chart = new Chart(document.getElementById('traffic-chart') as HTMLCanvasElement, {
       type: 'line',
       data: {
         labels: current.map(s => s.date),
@@ -102,7 +85,7 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
             ticks: {
               color: colors.muted,
               font: { size: 11 },
-              callback: v => v.toLocaleString(),
+              callback: v => Number(v).toLocaleString(),
             },
             grid: { color: colors.grid },
             title: { display: true, text: 'Unique Tappers', color: colors.muted, font: { size: 11 } },
@@ -114,13 +97,12 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
     console.error('[TrafficChart] Chart.js init failed:', e);
   }
 
-  // Time range selector
   document.querySelectorAll('#traffic-range-btns .range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!chart) return;
       document.querySelectorAll('#traffic-range-btns .range-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const data = getWindow(btn.dataset.range);
+      (btn as HTMLElement).classList.add('active');
+      const data = getWindow((btn as HTMLElement).dataset.range!);
       chart.data.labels = data.map(s => s.date);
       chart.data.datasets = buildDatasets(data);
       chart.update();
@@ -129,71 +111,6 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
 
   window.addEventListener('themechange', () => {
     if (!chart) return;
-    const c = getChartColors();
-    chart.options.plugins.legend.labels.color = c.text;
-    chart.options.scales.x.ticks.color = c.muted;
-    chart.options.scales.x.grid.color = c.grid;
-    chart.options.scales.y.ticks.color = c.muted;
-    chart.options.scales.y.grid.color = c.grid;
-    chart.options.scales.y.title.color = c.muted;
-    chart.update();
+    applyTheme(chart);
   });
 </script>
-
-<style>
-  .chart-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px 20px;
-    margin-bottom: 0;
-  }
-
-  .chart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .chart-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .chart-wrap {
-    position: relative;
-    height: 260px;
-  }
-
-  .range-btns {
-    display: flex;
-    gap: 4px;
-  }
-
-  .range-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-  }
-
-  .range-btn:hover {
-    background: var(--bg);
-    color: var(--text);
-  }
-
-  .range-btn.active {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-  }
-</style>

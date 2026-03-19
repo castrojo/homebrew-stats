@@ -1,63 +1,53 @@
 ---
-interface AppDayCount {
-  app: string;
-  passed: number;
-  failed: number;
-  total: number;
-}
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+import type { AppDayCount } from '../lib/types.ts';
+
 interface DaySnapshot {
   date: string;
   build_counts: AppDayCount[];
   last_run_id: number;
 }
+
 interface Props {
   history: DaySnapshot[];
 }
 const { history } = Astro.props;
-const COLOURS = ['#388bfd','#a371f7','#3fb950','#d29922','#f78166','#79c0ff','#d2a8ff','#56d364','#e3b341','#ff7b72'];
 ---
 
 {history.length === 0 ? (
-  <p class="chart-empty">Collecting data…</p>
+  <ChartCard title="Build Pass Rate by App" canvasId="testhub-build-chart" isEmpty emptyMsg="Collecting data…" />
 ) : (
   <>
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Build Pass Rate by App</div>
-        <div class="range-btns" id="build-range-btns">
-          <button class="range-btn active" data-range="7">7d</button>
-          <button class="range-btn" data-range="30">30d</button>
-          <button class="range-btn" data-range="all">All</button>
-        </div>
-      </div>
-      <div class="chart-wrap">
-        <canvas id="testhub-build-chart"></canvas>
-      </div>
-    </div>
-    <script type="application/json" id="testhub-build-data" set:html={JSON.stringify({ history, COLOURS })}></script>
+    <ChartCard
+      title="Build Pass Rate by App"
+      canvasId="testhub-build-chart"
+      height={300}
+      rangeId="build-range-btns"
+      ranges={[{ label: '7d', value: '7' }, { label: '30d', value: '30' }, { label: 'All', value: 'all' }]}
+      defaultRange="7"
+    />
+    <script type="application/json" id="testhub-build-data" set:html={safeJson({ history })}></script>
   </>
 )}
 
 <script>
-import Chart from 'chart.js/auto';
+import '../lib/chart-registry.js';
+import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('testhub-build-data');
 if (dataEl) {
-  const { history, COLOURS } = JSON.parse(dataEl.textContent!);
+  const { history } = JSON.parse(dataEl.textContent!);
   const canvas = document.getElementById('testhub-build-chart') as HTMLCanvasElement;
-  const getCSSVar = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
-  // Gather all app names
   const appSet = new Set<string>();
   for (const snap of history) {
     for (const c of snap.build_counts) appSet.add(c.app);
   }
   const apps = Array.from(appSet).sort();
 
-  let chart: Chart | null = null;
-  let currentRange = '7';
-
-  function getFilteredHistory(range: string) {
+  function getFiltered(range: string) {
     if (range === 'all') return history;
     const days = Number(range);
     const cutoff = new Date();
@@ -66,72 +56,75 @@ if (dataEl) {
     return history.filter((s: { date: string }) => s.date >= cutoffStr);
   }
 
-  function buildChart(range: string) {
-    const filtered = getFilteredHistory(range);
-    const labels = filtered.map((s: { date: string }) => s.date);
-
-    const datasets = apps.map((app: string, i: number) => {
-      const data = filtered.map((snap: { build_counts: { app: string; passed: number; total: number }[] }) => {
+  function buildDatasets(data: { build_counts: { app: string; passed: number; total: number }[] }[]) {
+    return apps.map((app: string, i: number) => ({
+      label: app,
+      data: data.map(snap => {
         const c = snap.build_counts.find((bc: { app: string }) => bc.app === app);
         if (!c || c.total === 0) return null;
         return Math.round((c.passed / c.total) * 100);
-      });
-      return {
-        label: app,
-        data,
-        borderColor: COLOURS[i % COLOURS.length],
-        backgroundColor: 'transparent',
-        spanGaps: true,
-        tension: 0.3,
-        pointRadius: 3,
-      };
-    });
+      }),
+      borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+      backgroundColor: 'transparent',
+      spanGaps: true,
+      tension: 0.3,
+      pointRadius: 3,
+    }));
+  }
 
-    const gridColor = getCSSVar('--border') || 'rgba(255,255,255,0.08)';
-    const labelColor = getCSSVar('--muted') || '#7d8590';
+  let currentRange = '7';
+  let filtered = getFiltered(currentRange);
+  const c = getChartColors();
 
-    if (chart) { chart.destroy(); }
+  let chart: Chart | undefined;
+  try {
     chart = new Chart(canvas, {
       type: 'line',
-      data: { labels, datasets },
+      data: {
+        labels: filtered.map((s: { date: string }) => s.date),
+        datasets: buildDatasets(filtered),
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { grid: { color: gridColor }, ticks: { color: labelColor, maxTicksLimit: 10 } },
+          x: { grid: { color: c.grid }, ticks: { color: c.muted, maxTicksLimit: 10 } },
           y: {
-            min: 0, max: 100,
-            grid: { color: gridColor },
-            ticks: { color: labelColor, callback: (v: number | string) => `${v}%` },
+            min: 0,
+            max: 100,
+            grid: { color: c.grid },
+            ticks: { color: c.muted, callback: (v: number | string) => `${v}%` },
           },
         },
-        plugins: { legend: { labels: { color: labelColor, usePointStyle: true, boxWidth: 8 } } },
+        plugins: { legend: { labels: { color: c.text, usePointStyle: true, boxWidth: 8 } } },
       },
     });
+  } catch (e) {
+    console.error('[TesthubBuildChart] Chart.js init failed:', e);
   }
-
-  buildChart(currentRange);
 
   document.getElementById('build-range-btns')?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (!chart) return;
       document.getElementById('build-range-btns')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentRange = btn.dataset.range!;
-      buildChart(currentRange);
+      const data = getFiltered(currentRange);
+      chart.data.labels = data.map((s: { date: string }) => s.date);
+      chart.data.datasets = buildDatasets(data);
+      chart.update();
     });
   });
 
-  window.addEventListener('themechange', () => buildChart(currentRange));
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    const colors = getChartColors();
+    (chart.options.plugins!.legend!.labels as { color: string }).color = colors.text;
+    chart.options.scales!.x!.ticks!.color = colors.muted;
+    (chart.options.scales!.x!.grid as { color: string }).color = colors.grid;
+    chart.options.scales!.y!.ticks!.color = colors.muted;
+    (chart.options.scales!.y!.grid as { color: string }).color = colors.grid;
+    chart.update();
+  });
 }
 </script>
-
-<style>
-  .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
-  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .chart-title { font-size: 14px; font-weight: 600; color: var(--text); }
-  .range-btns { display: flex; gap: 4px; }
-  .range-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 4px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
-  .range-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-  .chart-wrap { position: relative; height: 300px; }
-</style>

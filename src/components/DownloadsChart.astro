@@ -1,29 +1,16 @@
 ---
-interface TapSnapshot {
-  uniques: number;
-  count: number;
-  downloads?: Record<string, number>;
-}
-
-interface DaySnapshot {
-  date: string;
-  taps: Record<string, TapSnapshot>;
-}
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
 
 interface Props {
   tapName: string;
-  history: DaySnapshot[];
+  history: { date: string; taps: Record<string, { uniques: number; count: number; downloads?: Record<string, number> }> }[];
 }
 
 const { tapName, history } = Astro.props;
 
-// Only keep snapshots that have download data for this tap.
 const relevant = history.filter(d => d.taps[tapName]?.downloads);
 
-const COLOURS = [
-  '#388bfd', '#a371f7', '#3fb950', '#d29922', '#f78166',
-  '#79c0ff', '#d2a8ff', '#56d364', '#e3b341', '#ff7b72',
-];
 const TOP_N = 10;
 const safeId = tapName.replace(/\//g, '-');
 ---
@@ -33,107 +20,90 @@ const safeId = tapName.replace(/\//g, '-');
 ) : (
   <>
     <div class="charts-row">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Cumulative Installs Over Time</div>
-          <div class="range-btns" id={`range-btns-${safeId}`}>
-            <button class="range-btn active" data-range="30">30d</button>
-            <button class="range-btn" data-range="90">90d</button>
-            <button class="range-btn" data-range="all">All</button>
-          </div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id={`total-chart-${safeId}`}></canvas>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Top {TOP_N} Packages Over Time</div>
-        <div class="chart-wrap">
-          <canvas id={`pkg-chart-${safeId}`}></canvas>
-        </div>
-      </div>
+      <ChartCard
+        title="Cumulative Installs Over Time"
+        canvasId={`total-chart-${safeId}`}
+        height={240}
+        rangeId={`range-btns-${safeId}`}
+        ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+        defaultRange="30"
+      />
+      <ChartCard
+        title={`Top ${TOP_N} Packages Over Time`}
+        canvasId={`pkg-chart-${safeId}`}
+        height={240}
+      />
     </div>
-    <script type="application/json" id={`downloads-data-${safeId}`} set:html={JSON.stringify({ tapName, relevant, COLOURS, TOP_N })}></script>
+    <script type="application/json" id={`downloads-data-${safeId}`} set:html={safeJson({ tapName, relevant, TOP_N })}></script>
   </>
 )}
 
 <script>
-  import Chart from 'chart.js/auto';
+  import '../lib/chart-registry.js';
+  import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
 
-  function getCSSVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-  function getChartColors() {
-    return {
-      text: getCSSVar('--text'),
-      muted: getCSSVar('--muted'),
-      grid: getCSSVar('--border'),
-    };
-  }
+  type DaySnap = { date: string; taps: Record<string, { downloads?: Record<string, number> }> };
+
 
   // Collect all chart instances so the theme-change listener can update them all.
-  const allCharts = [];
+  const allCharts: Array<{
+    chartA: Chart;
+    chartB: Chart;
+    getScales: () => ReturnType<typeof sharedScales>;
+  }> = [];
+
+  function sharedScales() {
+    const c = getChartColors();
+    return {
+      x: {
+        ticks: { color: c.muted, font: { size: 11 }, maxRotation: 45 },
+        grid: { color: c.grid },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { color: c.muted, font: { size: 11 }, callback: (v: number | string) => Number(v).toLocaleString() },
+        grid: { color: c.grid },
+      },
+    };
+  }
 
   // Each DownloadsChart instance emits a JSON data tag; scan them all so this
   // single deduplicated module script initialises every chart on the page.
   document.querySelectorAll('[id^="downloads-data-"]').forEach(el => {
-    const { tapName, relevant: allRelevant, COLOURS, TOP_N } = JSON.parse(el.textContent);
+    const { tapName, relevant: allRelevant, TOP_N } = JSON.parse((el as HTMLElement).textContent!);
     const safeId = tapName.replace(/\//g, '-');
 
     // Determine top N packages by most recent snapshot's download counts.
-    // Always based on the FULL dataset so the same packages appear across all ranges.
     const latest = allRelevant[allRelevant.length - 1].taps[tapName]?.downloads ?? {};
-    const ranked = Object.entries(latest)
+    const ranked = Object.entries(latest as Record<string, number>)
       .sort((a, b) => b[1] - a[1])
       .map(([name]) => name);
     const topPkgs = ranked.slice(0, TOP_N);
     const restPkgs = ranked.slice(TOP_N);
 
-    const sharedScales = () => {
-      const c = getChartColors();
-      return {
-        x: {
-          ticks: { color: c.muted, font: { size: 11 }, maxRotation: 45 },
-          grid: { color: c.grid },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: c.muted, font: { size: 11 }, callback: v => Number(v).toLocaleString() },
-          grid: { color: c.grid },
-        },
-      };
-    };
-
     // ── Cumulative installs helper ────────────────────────────────────────
-    // Each history snapshot holds 30-day rolling window totals from the
-    // Homebrew analytics API — not daily deltas.  To build a true running
-    // total we:
-    //   • Use day-0's 30d total as the starting baseline.
-    //   • For every subsequent day, add only the positive delta
-    //     (today's 30d total minus yesterday's 30d total, clamped ≥ 0).
-    //     Negative deltas (old installs aging out of the window) are
-    //     ignored — we never subtract from the cumulative count.
-    function computeCumulative(data) {
+    function computeCumulative(data: DaySnap[]) {
       let running = 0;
       return data.map((d, i) => {
         const curr = d.taps[tapName]?.downloads ?? {};
-        const currTotal = Object.values(curr).reduce((s, n) => s + n, 0);
+        const currTotal = Object.values(curr as Record<string, number>).reduce((s, n) => s + n, 0);
         if (i === 0) {
           running = currTotal;
         } else {
           const prev = data[i - 1].taps[tapName]?.downloads ?? {};
-          const prevTotal = Object.values(prev).reduce((s, n) => s + n, 0);
+          const prevTotal = Object.values(prev as Record<string, number>).reduce((s, n) => s + n, 0);
           running += Math.max(0, currTotal - prevTotal);
         }
         return running;
       });
     }
 
-    function buildPkgDatasets(data) {
-      const sets = topPkgs.map((name, i) => ({
+    function buildPkgDatasets(data: DaySnap[]) {
+      const sets = topPkgs.map((name: string, i: number) => ({
         label: name,
-        data: data.map(d => d.taps[tapName]?.downloads?.[name] ?? null),
-        borderColor: COLOURS[i % COLOURS.length],
+        data: data.map(d => (d.taps[tapName]?.downloads as Record<string, number> | undefined)?.[name] ?? null),
+        borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
         backgroundColor: 'transparent',
         tension: 0.3,
         pointRadius: data.length < 15 ? 3 : 1,
@@ -144,8 +114,8 @@ const safeId = tapName.replace(/\//g, '-');
         sets.push({
           label: `other (${restPkgs.length} packages)`,
           data: data.map(d => {
-            const pkgs = d.taps[tapName]?.downloads ?? {};
-            return restPkgs.reduce((s, name) => s + (pkgs[name] ?? 0), 0);
+            const pkgs = d.taps[tapName]?.downloads as Record<string, number> | undefined ?? {};
+            return restPkgs.reduce((s: number, name: string) => s + (pkgs[name] ?? 0), 0);
           }),
           borderColor: '#7d8590',
           backgroundColor: 'transparent',
@@ -158,7 +128,7 @@ const safeId = tapName.replace(/\//g, '-');
       return sets;
     }
 
-    function getWindow(range) {
+    function getWindow(range: string) {
       if (range === '30') return allRelevant.slice(-30);
       if (range === '90') return allRelevant.slice(-90);
       return allRelevant;
@@ -167,19 +137,17 @@ const safeId = tapName.replace(/\//g, '-');
     let relevant = getWindow('30');
     const colors = getChartColors();
 
-    // ── Chart A: Cumulative installs over time ─────────────────────────
-    // ── Chart B: Top N packages + "other" aggregate ───────────────────
-    let chartA, chartB;
+    let chartA: Chart | undefined, chartB: Chart | undefined;
     try {
-      chartA = new Chart(document.getElementById(`total-chart-${safeId}`), {
+      chartA = new Chart(document.getElementById(`total-chart-${safeId}`) as HTMLCanvasElement, {
         type: 'line',
         data: {
-          labels: relevant.map(d => d.date),
+          labels: relevant.map((d: DaySnap) => d.date),
           datasets: [{
             label: 'Cumulative installs',
             data: computeCumulative(relevant),
-            borderColor: COLOURS[0],
-            backgroundColor: COLOURS[0] + '22',
+            borderColor: BRAND_COLOURS[0],
+            backgroundColor: BRAND_COLOURS[0] + '22',
             fill: true,
             tension: 0.3,
             pointRadius: relevant.length < 15 ? 4 : 2,
@@ -201,10 +169,10 @@ const safeId = tapName.replace(/\//g, '-');
         },
       });
 
-      chartB = new Chart(document.getElementById(`pkg-chart-${safeId}`), {
+      chartB = new Chart(document.getElementById(`pkg-chart-${safeId}`) as HTMLCanvasElement, {
         type: 'line',
         data: {
-          labels: relevant.map(d => d.date),
+          labels: relevant.map((d: DaySnap) => d.date),
           datasets: buildPkgDatasets(relevant),
         },
         options: {
@@ -233,39 +201,41 @@ const safeId = tapName.replace(/\//g, '-');
       btn.addEventListener('click', () => {
         if (!chartA || !chartB) return;
         document.querySelectorAll(`#range-btns-${safeId} .range-btn`).forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const data = getWindow(btn.dataset.range);
+        (btn as HTMLElement).classList.add('active');
+        const data = getWindow((btn as HTMLElement).dataset.range!);
 
-        chartA.data.labels = data.map(d => d.date);
+        chartA.data.labels = data.map((d: DaySnap) => d.date);
         chartA.data.datasets[0].data = computeCumulative(data);
-        chartA.data.datasets[0].pointRadius = data.length < 15 ? 4 : 2;
+        (chartA.data.datasets[0] as { pointRadius: number }).pointRadius = data.length < 15 ? 4 : 2;
         chartA.update();
 
-        chartB.data.labels = data.map(d => d.date);
+        chartB.data.labels = data.map((d: DaySnap) => d.date);
         chartB.data.datasets = buildPkgDatasets(data);
         chartB.update();
       });
     });
 
-    if (chartA && chartB) allCharts.push({ chartA, chartB, sharedScales, getColors: getChartColors });
+    if (chartA && chartB) {
+      allCharts.push({ chartA, chartB, getScales: sharedScales });
+    }
   });
 
   window.addEventListener('themechange', () => {
-    allCharts.forEach(({ chartA, chartB, sharedScales, getColors }) => {
-      const c = getColors();
-      const scales = sharedScales();
+    allCharts.forEach(({ chartA, chartB, getScales }) => {
+      const scales = getScales();
+      const c = getChartColors();
 
-      chartA.options.scales.x.ticks.color = scales.x.ticks.color;
-      chartA.options.scales.x.grid.color = scales.x.grid.color;
-      chartA.options.scales.y.ticks.color = scales.y.ticks.color;
-      chartA.options.scales.y.grid.color = scales.y.grid.color;
+      chartA.options.scales!.x!.ticks!.color = scales.x.ticks.color;
+      (chartA.options.scales!.x!.grid as { color: string }).color = scales.x.grid.color;
+      chartA.options.scales!.y!.ticks!.color = scales.y.ticks.color;
+      (chartA.options.scales!.y!.grid as { color: string }).color = scales.y.grid.color;
       chartA.update();
 
-      chartB.options.plugins.legend.labels.color = c.text;
-      chartB.options.scales.x.ticks.color = scales.x.ticks.color;
-      chartB.options.scales.x.grid.color = scales.x.grid.color;
-      chartB.options.scales.y.ticks.color = scales.y.ticks.color;
-      chartB.options.scales.y.grid.color = scales.y.grid.color;
+      (chartB.options.plugins!.legend!.labels as { color: string }).color = c.text;
+      chartB.options.scales!.x!.ticks!.color = scales.x.ticks.color;
+      (chartB.options.scales!.x!.grid as { color: string }).color = scales.x.grid.color;
+      chartB.options.scales!.y!.ticks!.color = scales.y.ticks.color;
+      (chartB.options.scales!.y!.grid as { color: string }).color = scales.y.grid.color;
       chartB.update();
     });
   });
@@ -287,65 +257,5 @@ const safeId = tapName.replace(/\//g, '-');
 
   @media (max-width: 900px) {
     .charts-row { grid-template-columns: 1fr; }
-  }
-
-  .chart-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px 20px;
-  }
-
-  .chart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .chart-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  /* Standalone title (not inside chart-header) needs its own bottom gap */
-  .chart-card > .chart-title {
-    margin-bottom: 12px;
-  }
-
-  .chart-wrap {
-    position: relative;
-    height: 240px;
-  }
-
-  .range-btns {
-    display: flex;
-    gap: 4px;
-  }
-
-  .range-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-  }
-
-  .range-btn:hover {
-    background: var(--bg);
-    color: var(--text);
-  }
-
-  .range-btn.active {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
   }
 </style>

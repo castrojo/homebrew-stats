@@ -1,4 +1,7 @@
 ---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
 interface OSEntry {
   os: string;
   count: number;
@@ -21,42 +24,29 @@ const period90  = osAnalytics.periods.find(p => p.period === '90d');
 const period365 = osAnalytics.periods.find(p => p.period === '365d');
 ---
 
-<div class="os-chart-card">
-  <div class="os-chart-header">
-    <div class="os-chart-title">Linux OS Distribution</div>
-    <div class="os-period-btns" id="os-period-btns">
-      <button class="os-period-btn active" data-period="30d">30d</button>
-      <button class="os-period-btn" data-period="90d">90d</button>
-      <button class="os-period-btn" data-period="365d">365d</button>
-    </div>
-  </div>
-  <div class="os-chart-wrap">
-    <canvas id="os-bar-chart"></canvas>
-  </div>
-</div>
-
-<script type="application/json" id="os-data" set:html={JSON.stringify({ periods: { '30d': period30 ? period30.items.slice(0, 10) : [], '90d': period90 ? period90.items.slice(0, 10) : [], '365d': period365 ? period365.items.slice(0, 10) : [] } })}></script>
+<ChartCard
+  title="Linux OS Distribution"
+  canvasId="os-bar-chart"
+  height={320}
+  rangeId="os-period-btns"
+  ranges={[{ label: '30d', value: '30d' }, { label: '90d', value: '90d' }, { label: '365d', value: '365d' }]}
+  defaultRange="30d"
+/>
+<script type="application/json" id="os-data" set:html={safeJson({ periods: {
+  '30d':  period30  ? period30.items.slice(0, 10)  : [],
+  '90d':  period90  ? period90.items.slice(0, 10)  : [],
+  '365d': period365 ? period365.items.slice(0, 10) : [],
+} })}></script>
 
 <script>
-import Chart from 'chart.js/auto';
+import '../lib/chart-registry.js';
+import { readChartData } from '../lib/inject.js';
+import { getCSSVar, getChartColors } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
 
-const dataEl = document.getElementById('os-data');
-if (!dataEl) throw new Error('os-data not found');
-
-const { periods } = JSON.parse(dataEl.textContent!);
-
-function getCSSVar(name: string) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-
-function getChartColors() {
-  return {
-    text:  getCSSVar('--text'),
-    muted: getCSSVar('--muted'),
-    grid:  getCSSVar('--border'),
-    blue:  getCSSVar('--blue'),
-  };
-}
+const { periods } = readChartData<{
+  periods: Record<string, { os: string; percent: number }[]>;
+}>('os-data');
 
 function buildData(items: { os: string; percent: number }[]) {
   return {
@@ -75,117 +65,66 @@ function buildData(items: { os: string; percent: number }[]) {
 let currentPeriod = '30d';
 const colors = getChartColors();
 
-const chart = new Chart(document.getElementById('os-bar-chart') as HTMLCanvasElement, {
-  type: 'bar',
-  data: buildData(periods[currentPeriod]),
-  options: {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx) => ` ${ctx.parsed.x.toFixed(2)}%`,
+let chart: Chart | undefined;
+try {
+  chart = new Chart(document.getElementById('os-bar-chart') as HTMLCanvasElement, {
+    type: 'bar',
+    data: buildData(periods[currentPeriod]),
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` ${ctx.parsed.x.toFixed(2)}%`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: { color: colors.grid },
+          ticks: {
+            color: colors.muted,
+            font: { size: 11 },
+            callback: (v) => `${v}%`,
+          },
+        },
+        y: {
+          grid: { display: false },
+          ticks: {
+            color: colors.text,
+            font: { size: 12 },
+          },
         },
       },
     },
-    scales: {
-      x: {
-        beginAtZero: true,
-        grid: { color: colors.grid },
-        ticks: {
-          color: colors.muted,
-          font: { size: 11 },
-          callback: (v) => `${v}%`,
-        },
-      },
-      y: {
-        grid: { display: false },
-        ticks: {
-          color: colors.text,
-          font: { size: 12 },
-        },
-      },
-    },
-  },
-});
+  });
+} catch (e) {
+  console.error('[OsSection] Chart.js init failed:', e);
+}
 
-document.querySelectorAll('.os-period-btn').forEach(btn => {
+document.querySelectorAll('#os-period-btns .range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.os-period-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const period = (btn as HTMLElement).dataset.period!;
+    if (!chart) return;
+    document.querySelectorAll('#os-period-btns .range-btn').forEach(b => b.classList.remove('active'));
+    (btn as HTMLElement).classList.add('active');
+    const period = (btn as HTMLElement).dataset.range!;
     chart.data = buildData(periods[period]);
     chart.update();
   });
 });
 
 window.addEventListener('themechange', () => {
+  if (!chart) return;
   const c = getChartColors();
-  chart.data.datasets[0].backgroundColor = c.blue + '99';
-  chart.data.datasets[0].borderColor = c.blue;
+  (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).backgroundColor = getCSSVar('--blue') + '99';
+  (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).borderColor = getCSSVar('--blue');
   chart.options.scales!.x!.grid!.color = c.grid;
   chart.options.scales!.x!.ticks!.color = c.muted;
   chart.options.scales!.y!.ticks!.color = c.text;
   chart.update();
 });
 </script>
-
-<style>
-  .os-chart-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px 20px;
-    margin-bottom: 32px;
-  }
-
-  .os-chart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-
-  .os-chart-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .os-chart-wrap {
-    position: relative;
-    height: 320px;
-  }
-
-  .os-period-btns {
-    display: flex;
-    gap: 4px;
-  }
-
-  .os-period-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-  }
-
-  .os-period-btn:hover {
-    background: var(--bg);
-    color: var(--text);
-  }
-
-  .os-period-btn.active {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-  }
-</style>

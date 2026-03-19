@@ -1,15 +1,14 @@
 ---
-interface WeekRecord {
-  distros: Record<string, number>;
-  total: number;
-}
+import { safeJson } from '../lib/inject.ts';
+import type { WeekRecord } from '../lib/types.ts';
+
 interface Props {
   currentWeek: WeekRecord | null;
 }
 const { currentWeek } = Astro.props;
 
 const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
-const LABELS = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
+const LABELS  = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
 const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
 ---
 
@@ -21,7 +20,7 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
       <div class="chart-title">Ecosystem Share (Current Week)</div>
       <div class="pie-layout">
         <div class="chart-wrap">
-          <canvas id="ecosystem-pie-chart"></canvas>
+          <canvas id="ecosystem-pie-chart" role="img" aria-label="Ecosystem Share chart"></canvas>
         </div>
         <div class="pie-legend" id="pie-legend">
           {DISTROS.map((d, i) => (
@@ -34,78 +33,83 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
         </div>
       </div>
     </div>
-    <script type="application/json" id="ecosystem-pie-data" set:html={JSON.stringify({ currentWeek, DISTROS, LABELS, COLOURS })}></script>
+    <script type="application/json" id="ecosystem-pie-data" set:html={safeJson({ currentWeek, DISTROS, LABELS, COLOURS })}></script>
   </>
 )}
 
 <script>
-import Chart from 'chart.js/auto';
+import '../lib/chart-registry.js';
+import { getCSSVar } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('ecosystem-pie-data');
 if (dataEl) {
   const { currentWeek, DISTROS, LABELS, COLOURS } = JSON.parse(dataEl.textContent!);
   const canvas = document.getElementById('ecosystem-pie-chart') as HTMLCanvasElement;
-  const getCSSVar = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
-  const data = DISTROS.map((d: string) => currentWeek.distros[d] ?? 0);
-  const total = currentWeek.total;
+  const total = currentWeek.total as number;
+  const data = (DISTROS as string[]).map((d: string) => currentWeek.distros[d] ?? 0);
 
-  // Center label plugin
+  // Center label drawn directly on the canvas — shows total count.
   const centerLabelPlugin = {
     id: 'centerLabel',
     afterDraw(chart: Chart) {
       const { ctx, chartArea } = chart;
       const cx = (chartArea.left + chartArea.right) / 2;
       const cy = (chartArea.top + chartArea.bottom) / 2;
-      const labelColor = getCSSVar('--text') || '#e6edf3';
+      const textColor  = getCSSVar('--text')  || '#e6edf3';
       const mutedColor = getCSSVar('--muted') || '#7d8590';
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = labelColor;
+      ctx.fillStyle = textColor;
       ctx.font = 'bold 20px sans-serif';
-      ctx.fillText(total >= 1000 ? `${(total/1000).toFixed(0)}k` : String(total), cx, cy - 8);
+      ctx.fillText(total >= 1000 ? `${(total / 1000).toFixed(0)}k` : String(total), cx, cy - 8);
       ctx.fillStyle = mutedColor;
       ctx.font = '11px sans-serif';
-      ctx.fillText('active users', cx, cy + 12);
+      ctx.fillText('active devices', cx, cy + 12);
       ctx.restore();
     },
   };
 
-  new Chart(canvas, {
-    type: 'doughnut',
-    data: {
-      labels: LABELS,
-      datasets: [{
-        data,
-        backgroundColor: COLOURS,
-        borderColor: getCSSVar('--bg2') || '#161b22',
-        borderWidth: 2,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '65%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx: { label: string; raw: number }) =>
-              ` ${ctx.label}: ${ctx.raw.toLocaleString()}`,
+  try {
+    new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: LABELS,
+        datasets: [{
+          data,
+          backgroundColor: COLOURS,
+          borderColor: getCSSVar('--bg2') || '#161b22',
+          borderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx: { label: string; raw: number }) =>
+                ` ${ctx.label}: ${(ctx.raw as number).toLocaleString()}`,
+            },
           },
         },
       },
-    },
-    plugins: [centerLabelPlugin],
-  });
+      plugins: [centerLabelPlugin],
+    });
+  } catch (e) {
+    console.error('[EcosystemPieChart] Chart.js init failed:', e);
+  }
 }
 </script>
 
 <style>
   .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
   .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-  .chart-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
   .pie-layout { display: flex; align-items: center; gap: 24px; }
   .chart-wrap { position: relative; height: 240px; width: 240px; flex-shrink: 0; }
   .pie-legend { display: flex; flex-direction: column; gap: 10px; }

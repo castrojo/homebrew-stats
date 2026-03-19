@@ -1,84 +1,62 @@
 ---
-interface TapSnapshot {
-  uniques: number;
-  count: number;
-  downloads?: Record<string, number>;
-}
-
-interface DaySnapshot {
-  date: string;
-  taps: Record<string, TapSnapshot>;
-}
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
 
 interface Props {
-  history: DaySnapshot[];
+  history: { date: string; taps: Record<string, { uniques: number; count: number; downloads?: Record<string, number> }> }[];
   tapNames: string[];
 }
 
 const { history, tapNames } = Astro.props;
 
-// Only include snapshots where at least one tap has download data.
 const relevant = history.filter(d => tapNames.some(t => d.taps[t]?.downloads));
 
-// Two distinct colours — blue for stable, purple for experimental.
-const COLOURS = ['#388bfd', '#a371f7'];
-
-// Short display names for chart legend.
 const displayNames: Record<string, string> = {
   'ublue-os/homebrew-tap': 'Stable',
   'ublue-os/homebrew-experimental-tap': 'Experimental',
 };
 ---
 
-{relevant.length < 2 ? (
-  <p class="chart-empty">Not enough history yet — charts will appear after a few daily syncs.</p>
-) : (
-  <div class="comparison-card">
-    <div class="comparison-header">
-      <div class="chart-title">Stable vs Experimental — Downloads</div>
-      <div class="range-btns" id="comparison-range-btns">
-        <button class="range-btn active" data-range="30">30d</button>
-        <button class="range-btn" data-range="90">90d</button>
-        <button class="range-btn" data-range="all">All</button>
-      </div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="tap-comparison-chart"></canvas>
-    </div>
-  </div>
-  <script type="application/json" id="comparison-data" set:html={JSON.stringify({ relevant, tapNames, COLOURS, displayNames })}></script>
+<ChartCard
+  title="Stable vs Experimental — Downloads"
+  canvasId="tap-comparison-chart"
+  height={260}
+  rangeId="comparison-range-btns"
+  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+  defaultRange="30"
+  isEmpty={relevant.length < 2}
+  emptyMsg="Not enough history yet — charts will appear after a few daily syncs."
+/>
+{relevant.length >= 2 && (
+  <script type="application/json" id="comparison-data" set:html={safeJson({ relevant, tapNames, displayNames })}></script>
 )}
 
 <script>
-  import Chart from 'chart.js/auto';
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
 
   const dataEl = document.getElementById('comparison-data');
   if (!dataEl) throw new Error('comparison-data not found');
 
-  const { relevant: allRelevant, tapNames, COLOURS, displayNames } = JSON.parse(dataEl.textContent!);
+  const { relevant: allRelevant, tapNames, displayNames } = readChartData<{
+    relevant: { date: string; taps: Record<string, { downloads?: Record<string, number> }> }[];
+    tapNames: string[];
+    displayNames: Record<string, string>;
+  }>('comparison-data');
 
-  function getCSSVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-  function getChartColors() {
-    return {
-      text: getCSSVar('--text'),
-      muted: getCSSVar('--muted'),
-      grid: getCSSVar('--border'),
-    };
-  }
-
-  function getTapTotal(snapshot, tapName) {
+  function getTapTotal(snapshot: (typeof allRelevant)[number], tapName: string) {
     const downloads = snapshot.taps[tapName]?.downloads ?? {};
     return Object.values(downloads).reduce((s, n) => s + n, 0);
   }
 
-  function buildDatasets(data) {
+  function buildDatasets(data: typeof allRelevant) {
     return tapNames.map((name, i) => ({
       label: displayNames[name] ?? name,
       data: data.map(d => getTapTotal(d, name)),
-      borderColor: COLOURS[i % COLOURS.length],
-      backgroundColor: COLOURS[i % COLOURS.length] + '22',
+      borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length] + '22',
       fill: false,
       tension: 0.3,
       pointRadius: data.length < 15 ? 4 : 2,
@@ -86,7 +64,7 @@ const displayNames: Record<string, string> = {
     }));
   }
 
-  function getWindow(range) {
+  function getWindow(range: string) {
     if (range === '30') return allRelevant.slice(-30);
     if (range === '90') return allRelevant.slice(-90);
     return allRelevant;
@@ -95,9 +73,9 @@ const displayNames: Record<string, string> = {
   let current = getWindow('30');
   const colors = getChartColors();
 
-  let chart;
+  let chart: Chart | undefined;
   try {
-    chart = new Chart(document.getElementById('tap-comparison-chart'), {
+    chart = new Chart(document.getElementById('tap-comparison-chart') as HTMLCanvasElement, {
       type: 'line',
       data: {
         labels: current.map(d => d.date),
@@ -144,13 +122,12 @@ const displayNames: Record<string, string> = {
     console.error('[TapComparisonChart] Chart.js init failed:', e);
   }
 
-  // Time range selector
   document.querySelectorAll('#comparison-range-btns .range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!chart) return;
       document.querySelectorAll('#comparison-range-btns .range-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const data = getWindow(btn.dataset.range);
+      (btn as HTMLElement).classList.add('active');
+      const data = getWindow((btn as HTMLElement).dataset.range!);
       chart.data.labels = data.map(d => d.date);
       chart.data.datasets = buildDatasets(data);
       chart.update();
@@ -159,77 +136,6 @@ const displayNames: Record<string, string> = {
 
   window.addEventListener('themechange', () => {
     if (!chart) return;
-    const c = getChartColors();
-    chart.options.plugins.legend.labels.color = c.text;
-    chart.options.scales.x.ticks.color = c.muted;
-    chart.options.scales.x.grid.color = c.grid;
-    chart.options.scales.y.ticks.color = c.muted;
-    chart.options.scales.y.grid.color = c.grid;
-    chart.options.scales.y.title.color = c.muted;
-    chart.update();
+    applyTheme(chart);
   });
 </script>
-
-<style>
-  .chart-empty {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 16px;
-  }
-
-  .comparison-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px 20px;
-    margin-bottom: 32px;
-  }
-
-  .comparison-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .chart-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .chart-wrap {
-    position: relative;
-    height: 260px;
-  }
-
-  .range-btns {
-    display: flex;
-    gap: 4px;
-  }
-
-  .range-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-  }
-
-  .range-btn:hover {
-    background: var(--bg);
-    color: var(--text);
-  }
-
-  .range-btn.active {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-  }
-</style>

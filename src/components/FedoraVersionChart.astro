@@ -1,4 +1,7 @@
 ---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
 interface Props {
   osVersionDist: Record<string, Record<string, number>>;
 }
@@ -6,7 +9,6 @@ const { osVersionDist } = Astro.props;
 
 const DISTRO_ORDER = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
 
-// Collect all unique Fedora versions and sort ascending.
 const allVersions = Array.from(
   new Set(
     Object.values(osVersionDist).flatMap(versions => Object.keys(versions))
@@ -15,35 +17,34 @@ const allVersions = Array.from(
 
 const hasData = Object.keys(osVersionDist).length > 0 && allVersions.length > 0;
 
-// A blue-family palette: one distinct colour per Fedora version.
+// Blue-family palette: one shade per Fedora version (older → darker, newer → lighter).
 const VERSION_COLOURS = [
-  '#1565c0', // deep blue (older)
-  '#1976d2',
-  '#388bfd',
-  '#64b5f6',
-  '#90caf9',
-  '#bbdefb', // light blue (newer/future)
+  '#1565c0', '#1976d2', '#388bfd', '#64b5f6', '#90caf9', '#bbdefb',
 ];
 ---
 
 {!hasData ? (
-  <p class="chart-empty">Collecting data…</p>
+  <ChartCard
+    title="Popular `bootc` Operating System Images"
+    canvasId="fedora-version-chart"
+    isEmpty
+    emptyMsg="Collecting data…"
+  />
 ) : (
   <>
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Popular <code>bootc</code> Operating System Images</div>
-      </div>
-      <div class="chart-wrap">
-        <canvas id="fedora-version-chart"></canvas>
-      </div>
-    </div>
-    <script type="application/json" id="fedora-version-data" set:html={JSON.stringify({ osVersionDist, DISTRO_ORDER, allVersions, VERSION_COLOURS })}></script>
+    <ChartCard
+      title="Popular `bootc` Operating System Images"
+      canvasId="fedora-version-chart"
+      height={300}
+    />
+    <script type="application/json" id="fedora-version-data" set:html={safeJson({ osVersionDist, DISTRO_ORDER, allVersions, VERSION_COLOURS })}></script>
   </>
 )}
 
 <script>
-import Chart from 'chart.js/auto';
+import '../lib/chart-registry.js';
+import { getChartColors } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('fedora-version-data');
 if (dataEl) {
@@ -51,67 +52,64 @@ if (dataEl) {
     JSON.parse(dataEl.textContent!);
 
   const canvas = document.getElementById('fedora-version-chart') as HTMLCanvasElement;
-  const getCSSVar = (v: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
   function buildChart() {
-    const gridColor  = getCSSVar('--border') || 'rgba(255,255,255,0.08)';
-    const labelColor = getCSSVar('--muted')  || '#7d8590';
+    const c = getChartColors();
+    const labels = (DISTRO_ORDER as string[]).filter((d: string) => d in osVersionDist);
 
-    // Labels on x-axis: distros (only those present in data, in preferred order).
-    const labels = DISTRO_ORDER.filter((d: string) => d in osVersionDist);
-
-    // One dataset per Fedora version.
     const datasets = (allVersions as string[]).map((ver: string, i: number) => ({
       label: `F${ver}`,
-      data: labels.map((distro: string) =>
-        (osVersionDist[distro] ?? {})[ver] ?? 0
-      ),
+      data: labels.map((distro: string) => (osVersionDist[distro] ?? {})[ver] ?? 0),
       backgroundColor: VERSION_COLOURS[i % VERSION_COLOURS.length],
       borderRadius: 3,
     }));
 
-    new Chart(canvas, {
-      type: 'bar',
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            labels: { color: labelColor, usePointStyle: true, boxWidth: 10 },
+    if (chart) {
+      chart.data.labels = labels;
+      chart.data.datasets = datasets;
+      chart.options.scales!.x!.ticks!.color = c.muted;
+      (chart.options.scales!.x!.grid as { color: string }).color = c.grid;
+      chart.options.scales!.y!.ticks!.color = c.muted;
+      (chart.options.scales!.y!.grid as { color: string }).color = c.grid;
+      (chart.options.plugins!.legend!.labels as { color: string }).color = c.muted;
+      chart.update();
+      return;
+    }
+
+    try {
+      chart = new Chart(canvas, {
+        type: 'bar',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: c.muted, usePointStyle: true, boxWidth: 10 } },
           },
-        },
-        scales: {
-          x: {
-            grid: { color: gridColor },
-            ticks: { color: labelColor },
-          },
-          y: {
-            grid: { color: gridColor },
-            ticks: {
-              color: labelColor,
-              callback: (v: number | string) =>
-                Number(v) >= 1000
-                  ? `${(Number(v) / 1000).toFixed(0)}k`
-                  : String(v),
+          scales: {
+            x: {
+              grid: { color: c.grid },
+              ticks: { color: c.muted },
             },
-            beginAtZero: true,
+            y: {
+              beginAtZero: true,
+              grid: { color: c.grid },
+              ticks: {
+                color: c.muted,
+                callback: (v: number | string) =>
+                  Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(0)}k` : String(v),
+              },
+            },
           },
         },
-      },
-    });
+      });
+    } catch (e) {
+      console.error('[FedoraVersionChart] Chart.js init failed:', e);
+    }
   }
 
+  let chart: Chart | undefined;
   buildChart();
   window.addEventListener('themechange', buildChart);
 }
 </script>
-
-<style>
-  .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
-  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .chart-title { font-size: 14px; font-weight: 600; color: var(--text); }
-  .chart-wrap { position: relative; height: 300px; }
-</style>

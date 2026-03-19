@@ -1,122 +1,113 @@
 ---
-interface Package { name: string; version?: string; }
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+import type { Package } from '../lib/types.ts';
+
 interface DaySnapshot {
   date: string;
   packages: Package[];
   build_counts: { app: string }[];
   last_run_id: number;
 }
+
 interface Props { history: DaySnapshot[]; }
 const { history } = Astro.props;
-const COLOURS = ['#388bfd','#a371f7','#3fb950','#d29922','#f78166','#79c0ff','#d2a8ff','#56d364','#e3b341','#ff7b72'];
 ---
 
 {history.length === 0 ? (
-  <p class="chart-empty">Collecting data…</p>
+  <ChartCard title="Version Change Timeline" canvasId="testhub-version-chart" isEmpty emptyMsg="Collecting data…" />
 ) : (
   <>
-    <div class="chart-card">
-      <div class="chart-title">Version Change Timeline</div>
-      <div class="chart-wrap">
-        <canvas id="testhub-version-chart"></canvas>
-      </div>
-    </div>
-    <script type="application/json" id="testhub-version-data" set:html={JSON.stringify({ history, COLOURS })}></script>
+    <ChartCard
+      title="Version Change Timeline"
+      canvasId="testhub-version-chart"
+      height={300}
+    />
+    <script type="application/json" id="testhub-version-data" set:html={safeJson({ history })}></script>
   </>
 )}
 
 <script>
-import Chart from 'chart.js/auto';
+import '../lib/chart-registry.js';
+import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('testhub-version-data');
 if (dataEl) {
-  const { history, COLOURS } = JSON.parse(dataEl.textContent!);
+  const { history } = JSON.parse(dataEl.textContent!);
   const canvas = document.getElementById('testhub-version-chart') as HTMLCanvasElement;
-  const getCSSVar = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
-  // Gather all app names from history
   const appSet = new Set<string>();
   for (const snap of history) {
     for (const pkg of snap.packages) appSet.add(pkg.name);
   }
   const apps = Array.from(appSet).sort();
 
-  // Detect version changes per app
-  interface VersionChange { date: string; version: string; app: string; appIdx: number }
+  interface VersionChange { date: string; version: string; app: string }
   const changes: VersionChange[] = [];
   for (const app of apps) {
-    const appIdx = apps.indexOf(app);
     let prevVer: string | undefined;
     for (const snap of history) {
       const pkg = snap.packages.find((p: { name: string }) => p.name === app);
       if (!pkg) continue;
       const ver = pkg.version ?? '';
       if (prevVer !== undefined && ver !== prevVer) {
-        changes.push({ date: snap.date, version: ver, app, appIdx });
+        changes.push({ date: snap.date, version: ver, app });
       }
       prevVer = ver;
     }
   }
 
-  const gridColor = getCSSVar('--border') || 'rgba(255,255,255,0.08)';
-  const labelColor = getCSSVar('--muted') || '#7d8590';
+  const c = getChartColors();
 
-  // Build datasets — one per app so each gets its own color in the legend
   const datasets = apps.map((app: string, i: number) => {
     const pts = changes
-      .filter((c: VersionChange) => c.app === app)
-      .map((c: VersionChange) => ({ x: c.date, y: i, label: c.version }));
+      .filter((ch: VersionChange) => ch.app === app)
+      .map((ch: VersionChange) => ({ x: ch.date, y: i, label: ch.version }));
     return {
       label: app,
       data: pts,
-      backgroundColor: COLOURS[i % COLOURS.length],
+      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
       pointRadius: 8,
       pointHoverRadius: 10,
     };
   }).filter((ds: { data: unknown[] }) => ds.data.length > 0);
 
-  new Chart(canvas, {
-    type: 'scatter',
-    data: { datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'category',
-          labels: history.map((s: { date: string }) => s.date),
-          grid: { color: gridColor },
-          ticks: { color: labelColor, maxTicksLimit: 10 },
+  try {
+    new Chart(canvas, {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'category',
+            labels: history.map((s: { date: string }) => s.date),
+            grid: { color: c.grid },
+            ticks: { color: c.muted, maxTicksLimit: 10 },
+          },
+          y: {
+            type: 'category',
+            labels: apps,
+            grid: { color: c.grid },
+            ticks: { color: c.muted },
+            offset: true,
+          },
         },
-        y: {
-          type: 'category',
-          labels: apps,
-          grid: { color: gridColor },
-          ticks: { color: labelColor },
-          offset: true,
-        },
-      },
-      plugins: {
-        legend: { labels: { color: labelColor, usePointStyle: true, boxWidth: 8 } },
-        tooltip: {
-          callbacks: {
-            label: (ctx: { raw: { label?: string; x: string } }) =>
-              `${ctx.raw.label ?? ''} (${ctx.raw.x})`,
+        plugins: {
+          legend: { labels: { color: c.text, usePointStyle: true, boxWidth: 8 } },
+          tooltip: {
+            callbacks: {
+              label: (ctx: { raw: { label?: string; x: string } }) =>
+                `${ctx.raw.label ?? ''} (${ctx.raw.x})`,
+            },
           },
         },
       },
-    },
-  });
-
-  window.addEventListener('themechange', () => {
-    // Re-render handled by chart instance (colors are re-read on repaint)
-  });
+    });
+  } catch (e) {
+    console.error('[TesthubVersionTimeline] Chart.js init failed:', e);
+  }
 }
 </script>
-
-<style>
-  .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
-  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-  .chart-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
-  .chart-wrap { position: relative; height: 300px; }
-</style>
