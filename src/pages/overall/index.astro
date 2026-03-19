@@ -3,10 +3,12 @@ import Layout from '../../layouts/Layout.astro';
 import CountmeKPIs from '../../components/CountmeKPIs.astro';
 import CountmeTrendChart from '../../components/CountmeTrendChart.astro';
 import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
+import FedoraVersionChart from '../../components/FedoraVersionChart.astro';
 import data from '../../data/countme.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
+const osVersionDist = (data as any).os_version_dist ?? {};
 ---
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">
@@ -30,6 +32,9 @@ const weekRecords = data.history.week_records ?? [];
 
     <h2>🌍 Ecosystem Share</h2>
     <EcosystemPieChart currentWeek={data.current_week as any} />
+
+    <h2>🐧 Fedora Version Distribution</h2>
+    <FedoraVersionChart osVersionDist={osVersionDist} />
   </section>
 </Layout>
 

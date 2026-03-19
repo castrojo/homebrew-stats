@@ -233,7 +233,7 @@ func TestFetchCSVLast30Days_MockServer(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	recs, err := fetchCSVFromURL(srv.URL)
+	recs, _, err := fetchCSVFromURL(srv.URL)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -256,5 +256,115 @@ func TestFetchCSVLast30Days_MockServer(t *testing.T) {
 	// sys_age=-1 rows should be excluded
 	if rec.Distros["bazzite"] == 550 {
 		t.Error("sys_age=-1 rows should be excluded from aggregate")
+	}
+}
+
+// --- parseOsVersionDist tests ---
+
+func TestParseOsVersionDist(t *testing.T) {
+	rows := []csvRow{
+		{osName: "Bazzite", osVersion: "41", sysAge: "0", hits: 100},
+		{osName: "Bazzite", osVersion: "40", sysAge: "0", hits: 50},
+		{osName: "Bluefin", osVersion: "41", sysAge: "0", hits: 30},
+		{osName: "Unknown", osVersion: "41", sysAge: "0", hits: 5},  // not a target distro
+		{osName: "Bazzite", osVersion: "41", sysAge: "-1", hits: 99}, // sys_age=-1 excluded
+		{osName: "Bazzite", osVersion: "", sysAge: "0", hits: 10},    // empty version excluded
+	}
+
+	got := parseOsVersionDist(rows)
+
+	// Unknown should be absent
+	if _, ok := got["Unknown"]; ok {
+		t.Error("Unknown should not appear in result")
+	}
+	// Bazzite/41 = 100 (sys_age=-1 row excluded)
+	if got["Bazzite"]["41"] != 100 {
+		t.Errorf("Bazzite/41: expected 100, got %d", got["Bazzite"]["41"])
+	}
+	// Bazzite/40 = 50
+	if got["Bazzite"]["40"] != 50 {
+		t.Errorf("Bazzite/40: expected 50, got %d", got["Bazzite"]["40"])
+	}
+	// Bluefin/41 = 30
+	if got["Bluefin"]["41"] != 30 {
+		t.Errorf("Bluefin/41: expected 30, got %d", got["Bluefin"]["41"])
+	}
+}
+
+func TestMergeOsVersionDist(t *testing.T) {
+	existing := map[string]map[string]int{
+		"Bazzite": {"41": 100},
+	}
+	newData := map[string]map[string]int{
+		"Bazzite": {"41": 20, "40": 50},
+		"Bluefin": {"41": 30},
+	}
+
+	result := MergeOsVersionDist(existing, newData)
+
+	// Bazzite/41 should be replaced (not summed) by newData value: 20
+	if result["Bazzite"]["41"] != 20 {
+		t.Errorf("Bazzite/41: expected 20 (new data wins), got %d", result["Bazzite"]["41"])
+	}
+	// Bazzite/40 from newData
+	if result["Bazzite"]["40"] != 50 {
+		t.Errorf("Bazzite/40: expected 50, got %d", result["Bazzite"]["40"])
+	}
+	// Bluefin from newData
+	if result["Bluefin"]["41"] != 30 {
+		t.Errorf("Bluefin/41: expected 30, got %d", result["Bluefin"]["41"])
+	}
+}
+
+func TestMergeOsVersionDist_NilExisting(t *testing.T) {
+	newData := map[string]map[string]int{
+		"Aurora": {"42": 5},
+	}
+	result := MergeOsVersionDist(nil, newData)
+	if result["Aurora"]["42"] != 5 {
+		t.Errorf("Aurora/42: expected 5, got %d", result["Aurora"]["42"])
+	}
+}
+
+func TestMergeOsVersionDist_PreservesUnaffectedDistros(t *testing.T) {
+	existing := map[string]map[string]int{
+		"Bazzite": {"41": 100},
+		"Bluefin": {"40": 200},
+	}
+	newData := map[string]map[string]int{
+		"Bazzite": {"41": 999},
+		// Bluefin not in newData — should be preserved
+	}
+	result := MergeOsVersionDist(existing, newData)
+	if result["Bluefin"]["40"] != 200 {
+		t.Errorf("Bluefin/40 should be preserved from existing, got %d", result["Bluefin"]["40"])
+	}
+}
+
+func TestParseOsVersionDist_WithCsvOsVersionColumn(t *testing.T) {
+	// Simulate a CSV that has an os_version column.
+	csvData := `week_start,week_end,os_name,os_version,sys_age,hits
+2024-01-01,2024-01-07,Bazzite,41,0,200
+2024-01-01,2024-01-07,Bazzite,40,0,80
+2024-01-01,2024-01-07,Bluefin LTS,42,0,15
+2024-01-01,2024-01-07,Bazzite,41,-1,999
+`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(csvData))
+	}))
+	defer srv.Close()
+
+	_, dist, err := fetchCSVFromURL(srv.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if dist["Bazzite"]["41"] != 200 {
+		t.Errorf("Bazzite/41: expected 200, got %d", dist["Bazzite"]["41"])
+	}
+	if dist["Bazzite"]["40"] != 80 {
+		t.Errorf("Bazzite/40: expected 80, got %d", dist["Bazzite"]["40"])
+	}
+	if dist["Bluefin LTS"]["42"] != 15 {
+		t.Errorf("Bluefin LTS/42: expected 15, got %d", dist["Bluefin LTS"]["42"])
 	}
 }

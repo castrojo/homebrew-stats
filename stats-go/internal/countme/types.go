@@ -18,4 +18,7 @@ type DayRecord struct {
 type HistoryStore struct {
 	WeekRecords []WeekRecord `json:"week_records"`
 	DayRecords  []DayRecord  `json:"day_records"`
+	// OsVersionDist maps os_name → os_version → total active user count
+	// accumulated from CSV data over all fetches.
+	OsVersionDist map[string]map[string]int `json:"os_version_dist,omitempty"`
 }

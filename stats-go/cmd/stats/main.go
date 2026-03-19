@@ -334,11 +334,12 @@ Total      float64 `json:"total"`
 }
 
 type countmeOutput struct {
-GeneratedAt string              `json:"generated_at"`
-CurrentWeek *countme.WeekRecord `json:"current_week,omitempty"`
-PrevWeek    *countme.WeekRecord `json:"prev_week,omitempty"`
-WoWGrowthPct *countmeWoW        `json:"wow_growth_pct,omitempty"`
-History     countme.HistoryStore `json:"history"`
+GeneratedAt   string                    `json:"generated_at"`
+CurrentWeek   *countme.WeekRecord       `json:"current_week,omitempty"`
+PrevWeek      *countme.WeekRecord       `json:"prev_week,omitempty"`
+WoWGrowthPct  *countmeWoW               `json:"wow_growth_pct,omitempty"`
+History       countme.HistoryStore      `json:"history"`
+OsVersionDist map[string]map[string]int `json:"os_version_dist,omitempty"`
 }
 
 func runFetchCountme() error {
@@ -358,16 +359,20 @@ fmt.Fprintf(os.Stderr, "  badges: %v\n", badge)
 }
 
 fmt.Fprintln(os.Stderr, "→ Fetching countme CSV (last 30d)…")
-csvRecs, err := countme.FetchCSVLast30Days()
+csvRecs, osVersionDist, err := countme.FetchCSVLast30Days()
 if err != nil {
 fmt.Fprintf(os.Stderr, "⚠️  countme CSV: %v\n", err)
 csvRecs = nil
+osVersionDist = nil
 } else {
 fmt.Fprintf(os.Stderr, "  CSV: %d week records\n", len(csvRecs))
 }
 
 if csvRecs != nil {
 store = countme.MergeIntoHistory(store, csvRecs)
+}
+if osVersionDist != nil {
+store.OsVersionDist = countme.MergeOsVersionDist(store.OsVersionDist, osVersionDist)
 }
 if badge != nil {
 store = countme.AppendDayRecord(store, badge)
@@ -413,6 +418,7 @@ out.PrevWeek = &w
 if out.CurrentWeek != nil && out.PrevWeek != nil {
 out.WoWGrowthPct = computeWoW(out.CurrentWeek, out.PrevWeek)
 }
+out.OsVersionDist = store.OsVersionDist
 return out
 }
 

@@ -61,6 +61,172 @@ func parseBadgeValue(s string) (int, error) {
 	}
 }
 
+// csvRow holds a single parsed row from the countme CSV.
+type csvRow struct {
+	weekStart string
+	weekEnd   string
+	osName    string
+	osVersion string
+	sysAge    string
+	hits      int
+}
+
+// parseOsVersionDist extracts os_name → os_version → count from CSV rows.
+// Only includes the 4 target distros; skips rows with sys_age == "-1" or empty os_version.
+func parseOsVersionDist(rows []csvRow) map[string]map[string]int {
+	result := make(map[string]map[string]int)
+	for _, row := range rows {
+		if row.sysAge == "-1" {
+			continue
+		}
+		if _, ok := validDistros[row.osName]; !ok {
+			continue
+		}
+		if row.osVersion == "" {
+			continue
+		}
+		if result[row.osName] == nil {
+			result[row.osName] = make(map[string]int)
+		}
+		result[row.osName][row.osVersion] += row.hits
+	}
+	return result
+}
+
+// MergeOsVersionDist replaces per-distro version data with new data (not additive).
+// New data wins for each distro present in newData — this is a current-snapshot view.
+func MergeOsVersionDist(existing, newData map[string]map[string]int) map[string]map[string]int {
+	result := make(map[string]map[string]int, len(existing))
+	for distro, versions := range existing {
+		cp := make(map[string]int, len(versions))
+		for ver, cnt := range versions {
+			cp[ver] = cnt
+		}
+		result[distro] = cp
+	}
+	// New data overwrites entire distro entries.
+	for distro, versions := range newData {
+		cp := make(map[string]int, len(versions))
+		for ver, cnt := range versions {
+			cp[ver] = cnt
+		}
+		result[distro] = cp
+	}
+	return result
+}
+
+// parseCSVRows parses raw CSV bytes into a slice of csvRow structs.
+// It tolerates a partial first line (from an HTTP Range request) by locating the header row.
+func parseCSVRows(body []byte) ([]csvRow, error) {
+	lines := strings.Split(string(body), "\n")
+	if len(lines) < 2 {
+		return nil, fmt.Errorf("CSV too short")
+	}
+
+	// Find the header line (starts with "week_start").
+	headerIdx := -1
+	for i, line := range lines {
+		if strings.HasPrefix(line, "week_start") {
+			headerIdx = i
+			break
+		}
+	}
+	if headerIdx < 0 {
+		return nil, fmt.Errorf("CSV header not found")
+	}
+
+	csvContent := strings.Join(lines[headerIdx:], "\n")
+	r := csv.NewReader(strings.NewReader(csvContent))
+	headers, err := r.Read()
+	if err != nil {
+		return nil, fmt.Errorf("read CSV header: %w", err)
+	}
+
+	// Build column index map.
+	colIdx := make(map[string]int, len(headers))
+	for i, h := range headers {
+		colIdx[strings.TrimSpace(h)] = i
+	}
+
+	required := []string{"week_start", "week_end", "os_name", "sys_age", "hits"}
+	for _, col := range required {
+		if _, ok := colIdx[col]; !ok {
+			return nil, fmt.Errorf("missing CSV column: %s", col)
+		}
+	}
+
+	// os_version is optional; track whether it exists.
+	osVersionIdx, hasOsVersion := colIdx["os_version"]
+
+	var rows []csvRow
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			continue // skip malformed rows
+		}
+
+		osVersion := ""
+		if hasOsVersion && osVersionIdx < len(row) {
+			osVersion = strings.TrimSpace(row[osVersionIdx])
+		}
+
+		hitsStr := strings.TrimSpace(row[colIdx["hits"]])
+		hits, err := strconv.Atoi(hitsStr)
+		if err != nil {
+			continue
+		}
+
+		rows = append(rows, csvRow{
+			weekStart: strings.TrimSpace(row[colIdx["week_start"]]),
+			weekEnd:   strings.TrimSpace(row[colIdx["week_end"]]),
+			osName:    row[colIdx["os_name"]],
+			osVersion: osVersion,
+			sysAge:    strings.TrimSpace(row[colIdx["sys_age"]]),
+			hits:      hits,
+		})
+	}
+	return rows, nil
+}
+
+// rowsToWeekRecords aggregates csvRows into WeekRecords, applying distro and sys_age filters.
+func rowsToWeekRecords(rows []csvRow) []WeekRecord {
+	type weekKey struct{ start, end string }
+	agg := make(map[weekKey]map[string]int)
+
+	for _, row := range rows {
+		if row.sysAge == "-1" {
+			continue
+		}
+		distroKey, ok := parseDistroName(row.osName)
+		if !ok {
+			continue
+		}
+		wk := weekKey{row.weekStart, row.weekEnd}
+		if agg[wk] == nil {
+			agg[wk] = make(map[string]int)
+		}
+		agg[wk][distroKey] += row.hits
+	}
+
+	records := make([]WeekRecord, 0, len(agg))
+	for wk, distros := range agg {
+		total := 0
+		for _, v := range distros {
+			total += v
+		}
+		records = append(records, WeekRecord{
+			WeekStart: wk.start,
+			WeekEnd:   wk.end,
+			Distros:   distros,
+			Total:     total,
+		})
+	}
+	return records
+}
+
 // parseDistroName does an exact-match lookup of os_name against the allowed distros.
 // Returns the canonical key and true if matched.
 func parseDistroName(osName string) (string, bool) {
@@ -133,123 +299,40 @@ func FetchBadgeCounts() (map[string]int, error) {
 }
 
 // fetchCSVFromURL fetches and parses the countme CSV from the given URL.
-// Skips sys_age == "-1" rows and filters to known distros by exact match.
-// Aggregates hits by distro per week_start/week_end pair.
-func fetchCSVFromURL(url string) ([]WeekRecord, error) {
+// Returns week records aggregated by (week_start, week_end) and an os_version
+// distribution map (os_name → os_version → hits).
+func fetchCSVFromURL(url string) ([]WeekRecord, map[string]map[string]int, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
+		return nil, nil, fmt.Errorf("create request: %w", err)
 	}
 	// Request only the last ~10 MB to avoid downloading the full CSV.
 	req.Header.Set("Range", "bytes=-10000000")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("GET countme CSV: %w", err)
+		return nil, nil, fmt.Errorf("GET countme CSV: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("read CSV body: %w", err)
+		return nil, nil, fmt.Errorf("read CSV body: %w", err)
 	}
 
-	// Split lines; skip first (potentially truncated by Range request).
-	lines := strings.Split(string(body), "\n")
-	if len(lines) < 2 {
-		return nil, fmt.Errorf("CSV too short")
-	}
-
-	// Find the header line (starts with "week_start").
-	headerIdx := -1
-	for i, line := range lines {
-		if strings.HasPrefix(line, "week_start") {
-			headerIdx = i
-			break
-		}
-	}
-	if headerIdx < 0 {
-		return nil, fmt.Errorf("CSV header not found")
-	}
-
-	csvContent := strings.Join(lines[headerIdx:], "\n")
-	r := csv.NewReader(strings.NewReader(csvContent))
-	headers, err := r.Read()
+	rows, err := parseCSVRows(body)
 	if err != nil {
-		return nil, fmt.Errorf("read CSV header: %w", err)
+		return nil, nil, err
 	}
 
-	// Build column index map.
-	colIdx := make(map[string]int, len(headers))
-	for i, h := range headers {
-		colIdx[strings.TrimSpace(h)] = i
-	}
-
-	required := []string{"week_start", "week_end", "os_name", "sys_age", "hits"}
-	for _, col := range required {
-		if _, ok := colIdx[col]; !ok {
-			return nil, fmt.Errorf("missing CSV column: %s", col)
-		}
-	}
-
-	// Aggregate: key = week_start+"|"+week_end → distro → hits
-	type weekKey struct{ start, end string }
-	agg := make(map[weekKey]map[string]int)
-
-	for {
-		row, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			continue // skip malformed rows
-		}
-
-		weekStart := strings.TrimSpace(row[colIdx["week_start"]])
-		weekEnd := strings.TrimSpace(row[colIdx["week_end"]])
-		osName := row[colIdx["os_name"]]
-		sysAge := strings.TrimSpace(row[colIdx["sys_age"]])
-		hitsStr := strings.TrimSpace(row[colIdx["hits"]])
-
-		// Apply filters
-		if sysAge == "-1" {
-			continue
-		}
-		distroKey, ok := parseDistroName(osName)
-		if !ok {
-			continue
-		}
-		hits, err := strconv.Atoi(hitsStr)
-		if err != nil {
-			continue
-		}
-
-		wk := weekKey{weekStart, weekEnd}
-		if agg[wk] == nil {
-			agg[wk] = make(map[string]int)
-		}
-		agg[wk][distroKey] += hits
-	}
-
-	records := make([]WeekRecord, 0, len(agg))
-	for wk, distros := range agg {
-		total := 0
-		for _, v := range distros {
-			total += v
-		}
-		records = append(records, WeekRecord{
-			WeekStart: wk.start,
-			WeekEnd:   wk.end,
-			Distros:   distros,
-			Total:     total,
-		})
-	}
-
-	return records, nil
+	weekRecords := rowsToWeekRecords(rows)
+	osVersionDist := parseOsVersionDist(rows)
+	return weekRecords, osVersionDist, nil
 }
 
 // FetchCSVLast30Days fetches and parses the countme CSV using the default URL.
-func FetchCSVLast30Days() ([]WeekRecord, error) {
+// Returns week records and the os_version distribution (os_name → os_version → hits).
+func FetchCSVLast30Days() ([]WeekRecord, map[string]map[string]int, error) {
 	return fetchCSVFromURL(countmeCSVURL)
 }
 
