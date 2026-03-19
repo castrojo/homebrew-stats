@@ -1,7 +1,13 @@
 ---
+interface TapSnapshot {
+  uniques: number;
+  count: number;
+  downloads?: Record<string, number>;
+}
+
 interface DaySnapshot {
   date: string;
-  taps: Record<string, { uniques: number; count: number }>;
+  taps: Record<string, TapSnapshot>;
 }
 
 interface Props {
@@ -11,31 +17,44 @@ interface Props {
 
 const { history, tapNames } = Astro.props;
 
-// Colours per tap (consistent ordering).
-const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
+// Only include snapshots where at least one tap has download data.
+const relevant = history.filter(d => tapNames.some(t => d.taps[t]?.downloads));
+
+// Two distinct colours — blue for stable, purple for experimental.
+const COLOURS = ['#388bfd', '#a371f7'];
+
+// Short display names for chart legend.
+const displayNames: Record<string, string> = {
+  'ublue-os/homebrew-tap': 'Stable',
+  'ublue-os/homebrew-experimental-tap': 'Experimental',
+};
 ---
 
-<div class="chart-card">
-  <div class="chart-header">
-    <div class="chart-title">Unique Tappers Over Time</div>
-    <div class="range-btns" id="traffic-range-btns">
-      <button class="range-btn active" data-range="30">30d</button>
-      <button class="range-btn" data-range="90">90d</button>
-      <button class="range-btn" data-range="all">All</button>
+{relevant.length < 2 ? (
+  <p class="chart-empty">Not enough history yet — charts will appear after a few daily syncs.</p>
+) : (
+  <div class="comparison-card">
+    <div class="comparison-header">
+      <div class="range-btns" id="comparison-range-btns">
+        <button class="range-btn active" data-range="30">30d</button>
+        <button class="range-btn" data-range="90">90d</button>
+        <button class="range-btn" data-range="all">All</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="tap-comparison-chart"></canvas>
     </div>
   </div>
-  <div class="chart-wrap">
-    <canvas id="traffic-chart"></canvas>
-  </div>
-</div>
-<script type="application/json" id="traffic-data">{JSON.stringify({ history, tapNames, COLOURS })}</script>
+  <script type="application/json" id="comparison-data">{JSON.stringify({ relevant, tapNames, COLOURS, displayNames })}</script>
+)}
 
 <script>
   import Chart from 'chart.js/auto';
 
-  const { history: allHistory, tapNames, COLOURS } = JSON.parse(
-    document.getElementById('traffic-data')!.textContent!
-  );
+  const dataEl = document.getElementById('comparison-data');
+  if (!dataEl) throw new Error('comparison-data not found');
+
+  const { relevant: allRelevant, tapNames, COLOURS, displayNames } = JSON.parse(dataEl.textContent!);
 
   function getCSSVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -48,13 +67,18 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
     };
   }
 
+  function getTapTotal(snapshot, tapName) {
+    const downloads = snapshot.taps[tapName]?.downloads ?? {};
+    return Object.values(downloads).reduce((s, n) => s + n, 0);
+  }
+
   function buildDatasets(data) {
     return tapNames.map((name, i) => ({
-      label: name,
-      data: data.map(s => s.taps[name]?.uniques ?? null),
+      label: displayNames[name] ?? name,
+      data: data.map(d => getTapTotal(d, name)),
       borderColor: COLOURS[i % COLOURS.length],
       backgroundColor: COLOURS[i % COLOURS.length] + '22',
-      fill: true,
+      fill: false,
       tension: 0.3,
       pointRadius: data.length < 15 ? 4 : 2,
       spanGaps: true,
@@ -62,18 +86,18 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
   }
 
   function getWindow(range) {
-    if (range === '30') return allHistory.slice(-30);
-    if (range === '90') return allHistory.slice(-90);
-    return allHistory;
+    if (range === '30') return allRelevant.slice(-30);
+    if (range === '90') return allRelevant.slice(-90);
+    return allRelevant;
   }
 
   let current = getWindow('30');
   const colors = getChartColors();
 
-  const chart = new Chart(document.getElementById('traffic-chart'), {
+  const chart = new Chart(document.getElementById('tap-comparison-chart'), {
     type: 'line',
     data: {
-      labels: current.map(s => s.date),
+      labels: current.map(d => d.date),
       datasets: buildDatasets(current),
     },
     options: {
@@ -86,7 +110,7 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
         },
         tooltip: {
           callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} unique tappers`,
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} downloads (30d window)`,
           },
         },
       },
@@ -100,22 +124,27 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
           ticks: {
             color: colors.muted,
             font: { size: 11 },
-            callback: v => v.toLocaleString(),
+            callback: v => Number(v).toLocaleString(),
           },
           grid: { color: colors.grid },
-          title: { display: true, text: 'Unique Tappers', color: colors.muted, font: { size: 11 } },
+          title: {
+            display: true,
+            text: 'Downloads (30d window)',
+            color: colors.muted,
+            font: { size: 11 },
+          },
         },
       },
     },
   });
 
   // Time range selector
-  document.querySelectorAll('#traffic-range-btns .range-btn').forEach(btn => {
+  document.querySelectorAll('#comparison-range-btns .range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#traffic-range-btns .range-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#comparison-range-btns .range-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const data = getWindow(btn.dataset.range);
-      chart.data.labels = data.map(s => s.date);
+      chart.data.labels = data.map(d => d.date);
       chart.data.datasets = buildDatasets(data);
       chart.update();
     });
@@ -134,31 +163,28 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
 </script>
 
 <style>
-  .chart-card {
+  .chart-empty {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .comparison-card {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 16px 20px;
-    margin-bottom: 0;
+    margin-bottom: 32px;
   }
 
-  .chart-header {
+  .comparison-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-bottom: 12px;
   }
 
-  .chart-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
   .chart-wrap {
-    max-height: 300px;
+    max-height: 320px;
   }
 
   .range-btns {

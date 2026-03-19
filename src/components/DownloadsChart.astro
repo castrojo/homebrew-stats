@@ -25,26 +25,36 @@ const COLOURS = [
   '#79c0ff', '#d2a8ff', '#56d364', '#e3b341', '#ff7b72',
 ];
 const TOP_N = 10;
+const safeId = tapName.replace(/\//g, '-');
 ---
 
 {relevant.length < 2 ? (
   <p class="chart-empty">Not enough history yet — charts will appear after a few daily syncs.</p>
 ) : (
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title">Cumulative Installs Over Time</div>
-      <div class="chart-wrap">
-        <canvas id={`total-chart-${tapName.replace(/\//g, '-')}`}></canvas>
+  <>
+    <div class="downloads-controls">
+      <div class="range-btns" id={`range-btns-${safeId}`}>
+        <button class="range-btn active" data-range="30">30d</button>
+        <button class="range-btn" data-range="90">90d</button>
+        <button class="range-btn" data-range="all">All</button>
       </div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">Top {TOP_N} Packages Over Time</div>
-      <div class="chart-wrap">
-        <canvas id={`pkg-chart-${tapName.replace(/\//g, '-')}`}></canvas>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Cumulative Installs Over Time</div>
+        <div class="chart-wrap">
+          <canvas id={`total-chart-${safeId}`}></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top {TOP_N} Packages Over Time</div>
+        <div class="chart-wrap">
+          <canvas id={`pkg-chart-${safeId}`}></canvas>
+        </div>
       </div>
     </div>
-  </div>
-  <script type="application/json" id={`downloads-data-${tapName.replace(/\//g, '-')}`}>{JSON.stringify({ tapName, relevant, COLOURS, TOP_N })}</script>
+    <script type="application/json" id={`downloads-data-${safeId}`}>{JSON.stringify({ tapName, relevant, COLOURS, TOP_N })}</script>
+  </>
 )}
 
 <script>
@@ -58,7 +68,6 @@ const TOP_N = 10;
       text: getCSSVar('--text'),
       muted: getCSSVar('--muted'),
       grid: getCSSVar('--border'),
-      bg2: getCSSVar('--bg2'),
     };
   }
 
@@ -68,19 +77,17 @@ const TOP_N = 10;
   // Each DownloadsChart instance emits a JSON data tag; scan them all so this
   // single deduplicated module script initialises every chart on the page.
   document.querySelectorAll('[id^="downloads-data-"]').forEach(el => {
-    const { tapName, relevant, COLOURS, TOP_N } = JSON.parse(el.textContent);
-
-    const labels = relevant.map(d => d.date);
+    const { tapName, relevant: allRelevant, COLOURS, TOP_N } = JSON.parse(el.textContent);
+    const safeId = tapName.replace(/\//g, '-');
 
     // Determine top N packages by most recent snapshot's download counts.
-    const latest = relevant[relevant.length - 1].taps[tapName]?.downloads ?? {};
+    // Always based on the FULL dataset so the same packages appear across all ranges.
+    const latest = allRelevant[allRelevant.length - 1].taps[tapName]?.downloads ?? {};
     const ranked = Object.entries(latest)
       .sort((a, b) => b[1] - a[1])
       .map(([name]) => name);
     const topPkgs = ranked.slice(0, TOP_N);
     const restPkgs = ranked.slice(TOP_N);
-
-    const colors = getChartColors();
 
     const sharedScales = () => {
       const c = getChartColors();
@@ -97,7 +104,7 @@ const TOP_N = 10;
       };
     };
 
-    // ── Chart A: Cumulative installs over time ────────────────────────────
+    // ── Cumulative installs helper ────────────────────────────────────────
     // Each history snapshot holds 30-day rolling window totals from the
     // Homebrew analytics API — not daily deltas.  To build a true running
     // total we:
@@ -106,27 +113,68 @@ const TOP_N = 10;
     //     (today's 30d total minus yesterday's 30d total, clamped ≥ 0).
     //     Negative deltas (old installs aging out of the window) are
     //     ignored — we never subtract from the cumulative count.
-    let running = 0;
-    const totalData = relevant.map((d, i) => {
-      const curr = d.taps[tapName]?.downloads ?? {};
-      const currTotal = Object.values(curr).reduce((s, n) => s + n, 0);
-      if (i === 0) {
-        running = currTotal;
-      } else {
-        const prev = relevant[i - 1].taps[tapName]?.downloads ?? {};
-        const prevTotal = Object.values(prev).reduce((s, n) => s + n, 0);
-        running += Math.max(0, currTotal - prevTotal);
-      }
-      return running;
-    });
+    function computeCumulative(data) {
+      let running = 0;
+      return data.map((d, i) => {
+        const curr = d.taps[tapName]?.downloads ?? {};
+        const currTotal = Object.values(curr).reduce((s, n) => s + n, 0);
+        if (i === 0) {
+          running = currTotal;
+        } else {
+          const prev = data[i - 1].taps[tapName]?.downloads ?? {};
+          const prevTotal = Object.values(prev).reduce((s, n) => s + n, 0);
+          running += Math.max(0, currTotal - prevTotal);
+        }
+        return running;
+      });
+    }
 
-    const chartA = new Chart(document.getElementById(`total-chart-${tapName.replace(/\//g, '-')}`), {
+    function buildPkgDatasets(data) {
+      const sets = topPkgs.map((name, i) => ({
+        label: name,
+        data: data.map(d => d.taps[tapName]?.downloads?.[name] ?? null),
+        borderColor: COLOURS[i % COLOURS.length],
+        backgroundColor: 'transparent',
+        tension: 0.3,
+        pointRadius: data.length < 15 ? 3 : 1,
+        spanGaps: true,
+      }));
+
+      if (restPkgs.length > 0) {
+        sets.push({
+          label: `other (${restPkgs.length} packages)`,
+          data: data.map(d => {
+            const pkgs = d.taps[tapName]?.downloads ?? {};
+            return restPkgs.reduce((s, name) => s + (pkgs[name] ?? 0), 0);
+          }),
+          borderColor: '#7d8590',
+          backgroundColor: 'transparent',
+          borderDash: [4, 4],
+          tension: 0.3,
+          pointRadius: 0,
+          spanGaps: true,
+        });
+      }
+      return sets;
+    }
+
+    function getWindow(range) {
+      if (range === '30') return allRelevant.slice(-30);
+      if (range === '90') return allRelevant.slice(-90);
+      return allRelevant;
+    }
+
+    let relevant = getWindow('30');
+    const colors = getChartColors();
+
+    // ── Chart A: Cumulative installs over time ─────────────────────────
+    const chartA = new Chart(document.getElementById(`total-chart-${safeId}`), {
       type: 'line',
       data: {
-        labels,
+        labels: relevant.map(d => d.date),
         datasets: [{
           label: 'Cumulative installs',
-          data: totalData,
+          data: computeCumulative(relevant),
           borderColor: COLOURS[0],
           backgroundColor: COLOURS[0] + '22',
           fill: true,
@@ -149,36 +197,13 @@ const TOP_N = 10;
       },
     });
 
-    // ── Chart B: Top N packages + "other" aggregate ──────────────────────
-    const pkgDatasets = topPkgs.map((name, i) => ({
-      label: name,
-      data: relevant.map(d => d.taps[tapName]?.downloads?.[name] ?? null),
-      borderColor: COLOURS[i % COLOURS.length],
-      backgroundColor: 'transparent',
-      tension: 0.3,
-      pointRadius: relevant.length < 15 ? 3 : 1,
-      spanGaps: true,
-    }));
-
-    if (restPkgs.length > 0) {
-      pkgDatasets.push({
-        label: `other (${restPkgs.length} packages)`,
-        data: relevant.map(d => {
-          const pkgs = d.taps[tapName]?.downloads ?? {};
-          return restPkgs.reduce((s, name) => s + (pkgs[name] ?? 0), 0);
-        }),
-        borderColor: '#7d8590',
-        backgroundColor: 'transparent',
-        borderDash: [4, 4],
-        tension: 0.3,
-        pointRadius: 0,
-        spanGaps: true,
-      });
-    }
-
-    const chartB = new Chart(document.getElementById(`pkg-chart-${tapName.replace(/\//g, '-')}`), {
+    // ── Chart B: Top N packages + "other" aggregate ───────────────────
+    const chartB = new Chart(document.getElementById(`pkg-chart-${safeId}`), {
       type: 'line',
-      data: { labels, datasets: pkgDatasets },
+      data: {
+        labels: relevant.map(d => d.date),
+        datasets: buildPkgDatasets(relevant),
+      },
       options: {
         responsive: true,
         interaction: { mode: 'index', intersect: false },
@@ -194,6 +219,24 @@ const TOP_N = 10;
         },
         scales: sharedScales(),
       },
+    });
+
+    // ── Time range selector ───────────────────────────────────────────
+    document.querySelectorAll(`#range-btns-${safeId} .range-btn`).forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll(`#range-btns-${safeId} .range-btn`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const data = getWindow(btn.dataset.range);
+
+        chartA.data.labels = data.map(d => d.date);
+        chartA.data.datasets[0].data = computeCumulative(data);
+        chartA.data.datasets[0].pointRadius = data.length < 15 ? 4 : 2;
+        chartA.update();
+
+        chartB.data.labels = data.map(d => d.date);
+        chartB.data.datasets = buildPkgDatasets(data);
+        chartB.update();
+      });
     });
 
     allCharts.push({ chartA, chartB, sharedScales, getColors: getChartColors });
@@ -227,6 +270,12 @@ const TOP_N = 10;
     margin-bottom: 16px;
   }
 
+  .downloads-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+
   .charts-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -256,5 +305,33 @@ const TOP_N = 10;
 
   .chart-wrap {
     max-height: 280px;
+  }
+
+  .range-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .range-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .range-btn:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .range-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
   }
 </style>

@@ -21,9 +21,10 @@ interface Props {
   traffic?: Traffic;
   packages: Package[];
   history: DaySnapshot[];
+  showDownloadsChart?: boolean;
 }
 
-const { name, url, traffic, packages, history } = Astro.props;
+const { name, url, traffic, packages, history, showDownloadsChart = true } = Astro.props;
 
 const sorted = sortPackages(packages);
 
@@ -80,7 +81,7 @@ const cumulativeByName = new Map<string, number>(
     </div>
   </div>
 
-  <DownloadsChart tapName={name} history={history} />
+  {showDownloadsChart && <DownloadsChart tapName={name} history={history} />}
 
   <table>
     <thead>

@@ -3,11 +3,14 @@ import Layout from '../layouts/Layout.astro';
 import TapSection from '../components/TapSection.astro';
 import TesthubSection from '../components/TesthubSection.astro';
 import TrafficChart from '../components/TrafficChart.astro';
+import DownloadsChart from '../components/DownloadsChart.astro';
+import TapComparisonChart from '../components/TapComparisonChart.astro';
 import OsSection from '../components/OsSection.astro';
 import stats from '../data/stats.json';
 
 const generatedAt = new Date(stats.generated_at).toUTCString();
 const tapNames = stats.taps.map((t: any) => t.name);
+const stableTap = stats.taps[0] as any;
 ---
 
 <Layout title="ublue-os Homebrew Tap Stats">
@@ -22,9 +25,20 @@ const tapNames = stats.taps.map((t: any) => t.name);
   </header>
 
   {stats.history.length > 1 && (
+    <section class="overview-charts">
+      <div class="overview-col">
+        <TrafficChart history={stats.history} tapNames={tapNames} />
+      </div>
+      <div class="overview-col">
+        <DownloadsChart tapName={stableTap.name} history={stats.history} />
+      </div>
+    </section>
+  )}
+
+  {stats.history.length > 1 && (
     <>
-      <h2>Unique Tappers Over Time</h2>
-      <TrafficChart history={stats.history} tapNames={tapNames} />
+      <h2>Stable vs Experimental — Download Trends</h2>
+      <TapComparisonChart history={stats.history} tapNames={tapNames} />
     </>
   )}
 
@@ -42,6 +56,7 @@ const tapNames = stats.taps.map((t: any) => t.name);
       traffic={tap.traffic}
       packages={tap.packages}
       history={stats.history}
+      showDownloadsChart={false}
     />
   ))}
 
@@ -57,3 +72,25 @@ const tapNames = stats.taps.map((t: any) => t.name);
     />
   ))}
 </Layout>
+
+<style>
+  /* Side-by-side overview: traffic chart + stable tap downloads chart */
+  .overview-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+    align-items: start;
+  }
+
+  @media (max-width: 1023px) {
+    .overview-charts {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Each column stretches to fill its grid cell */
+  .overview-col {
+    min-width: 0; /* prevent overflow in narrow columns */
+  }
+</style>
