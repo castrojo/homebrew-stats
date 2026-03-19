@@ -1,0 +1,125 @@
+---
+interface WeekRecord {
+  week_start: string;
+  week_end: string;
+  distros: Record<string, number>;
+  total: number;
+}
+interface Props {
+  weekRecords: WeekRecord[];
+}
+const { weekRecords } = Astro.props;
+
+const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
+const LABELS = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
+const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
+
+// Sort by week_start ascending for chart
+const sorted = [...weekRecords].sort((a, b) => a.week_start.localeCompare(b.week_start));
+---
+
+{weekRecords.length === 0 ? (
+  <p class="chart-empty">Collecting data…</p>
+) : (
+  <>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Active Users per Week</div>
+        <div class="range-btns" id="countme-range-btns">
+          <button class="range-btn active" data-range="30">30d</button>
+          <button class="range-btn" data-range="90">90d</button>
+          <button class="range-btn" data-range="all">All</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="countme-trend-chart"></canvas>
+      </div>
+    </div>
+    <script type="application/json" id="countme-trend-data">{JSON.stringify({ sorted, DISTROS, LABELS, COLOURS })}</script>
+  </>
+)}
+
+<script>
+import Chart from 'chart.js/auto';
+
+const dataEl = document.getElementById('countme-trend-data');
+if (dataEl) {
+  const { sorted, DISTROS, LABELS, COLOURS } = JSON.parse(dataEl.textContent!);
+  const canvas = document.getElementById('countme-trend-chart') as HTMLCanvasElement;
+  const getCSSVar = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  let chart: Chart | null = null;
+  let currentRange = '30';
+
+  function getFiltered(range: string) {
+    if (range === 'all') return sorted;
+    const days = Number(range);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    return sorted.filter((r: { week_start: string }) => r.week_start >= cutoffStr);
+  }
+
+  function buildChart(range: string) {
+    const filtered = getFiltered(range);
+    const labels = filtered.map((r: { week_start: string }) => r.week_start);
+    const gridColor = getCSSVar('--border') || 'rgba(255,255,255,0.08)';
+    const labelColor = getCSSVar('--muted') || '#7d8590';
+
+    const datasets = DISTROS.map((distro: string, i: number) => ({
+      label: LABELS[i],
+      data: filtered.map((r: { distros: Record<string, number> }) => r.distros[distro] ?? 0),
+      borderColor: COLOURS[i],
+      backgroundColor: 'transparent',
+      tension: 0.3,
+      pointRadius: 3,
+    }));
+
+    if (chart) chart.destroy();
+    chart = new Chart(canvas, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: labelColor, maxTicksLimit: 10 } },
+          y: {
+            grid: { color: gridColor },
+            ticks: {
+              color: labelColor,
+              callback: (v: number | string) => Number(v) >= 1000 ? `${(Number(v)/1000).toFixed(0)}k` : String(v),
+            },
+            beginAtZero: true,
+          },
+        },
+        plugins: { legend: { labels: { color: labelColor, usePointStyle: true, boxWidth: 8 } } },
+      },
+    });
+  }
+
+  buildChart(currentRange);
+
+  document.getElementById('countme-range-btns')?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('countme-range-btns')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = btn.dataset.range!;
+      buildChart(currentRange);
+    });
+  });
+
+  window.addEventListener('themechange', () => buildChart(currentRange));
+}
+</script>
+
+<style>
+  .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
+  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .chart-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .range-btns { display: flex; gap: 4px; }
+  .range-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 4px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
+  .range-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .chart-wrap { position: relative; height: 300px; }
+</style>

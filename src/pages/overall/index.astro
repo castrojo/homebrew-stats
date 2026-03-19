@@ -1,8 +1,38 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import CountmeKPIs from '../../components/CountmeKPIs.astro';
+import CountmeTrendChart from '../../components/CountmeTrendChart.astro';
+import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
+import data from '../../data/countme.json';
+
+const generatedAt = new Date(data.generated_at).toUTCString();
+const weekRecords = data.history.week_records;
 ---
+
 <Layout title="Overall — homebrew-stats" activeTab="overall">
-  <p style="color: var(--muted); text-align: center; padding: 4rem 0;">
-    🌐 Overall stats coming soon — data collection in progress.
-  </p>
+  <header>
+    <h1>🌐 Universal Blue Active Users</h1>
+    <div class="meta">
+      Updated {generatedAt} ·
+      <a href="https://github.com/ublue-os/countme">ublue-os/countme</a>
+    </div>
+    <button id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
+  </header>
+
+  <CountmeKPIs
+    currentWeek={data.current_week as any}
+    wowGrowthPct={data.wow_growth_pct as any}
+  />
+
+  <section class="charts-section">
+    <h2>📈 Weekly Trends</h2>
+    <CountmeTrendChart weekRecords={weekRecords as any} />
+
+    <h2>🌍 Ecosystem Share</h2>
+    <EcosystemPieChart currentWeek={data.current_week as any} />
+  </section>
 </Layout>
+
+<style>
+  .charts-section { margin-bottom: 48px; }
+</style>

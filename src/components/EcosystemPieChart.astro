@@ -1,0 +1,120 @@
+---
+interface WeekRecord {
+  distros: Record<string, number>;
+  total: number;
+}
+interface Props {
+  currentWeek: WeekRecord | null;
+}
+const { currentWeek } = Astro.props;
+
+const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
+const LABELS = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
+const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
+---
+
+{!currentWeek ? (
+  <p class="chart-empty">Collecting data…</p>
+) : (
+  <>
+    <div class="chart-card">
+      <div class="chart-title">Ecosystem Share (Current Week)</div>
+      <div class="pie-layout">
+        <div class="chart-wrap">
+          <canvas id="ecosystem-pie-chart"></canvas>
+        </div>
+        <div class="pie-legend" id="pie-legend">
+          {DISTROS.map((d, i) => (
+            <div class="legend-item">
+              <span class="legend-dot" style={`background:${COLOURS[i]}`}></span>
+              <span class="legend-label">{LABELS[i]}</span>
+              <span class="legend-value">{(currentWeek.distros[d] ?? 0).toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <script type="application/json" id="ecosystem-pie-data">{JSON.stringify({ currentWeek, DISTROS, LABELS, COLOURS })}</script>
+  </>
+)}
+
+<script>
+import Chart from 'chart.js/auto';
+
+const dataEl = document.getElementById('ecosystem-pie-data');
+if (dataEl) {
+  const { currentWeek, DISTROS, LABELS, COLOURS } = JSON.parse(dataEl.textContent!);
+  const canvas = document.getElementById('ecosystem-pie-chart') as HTMLCanvasElement;
+  const getCSSVar = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  const data = DISTROS.map((d: string) => currentWeek.distros[d] ?? 0);
+  const total = currentWeek.total;
+
+  // Center label plugin
+  const centerLabelPlugin = {
+    id: 'centerLabel',
+    afterDraw(chart: Chart) {
+      const { ctx, chartArea } = chart;
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top + chartArea.bottom) / 2;
+      const labelColor = getCSSVar('--text') || '#e6edf3';
+      const mutedColor = getCSSVar('--muted') || '#7d8590';
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = labelColor;
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText(total >= 1000 ? `${(total/1000).toFixed(0)}k` : String(total), cx, cy - 8);
+      ctx.fillStyle = mutedColor;
+      ctx.font = '11px sans-serif';
+      ctx.fillText('active users', cx, cy + 12);
+      ctx.restore();
+    },
+  };
+
+  new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: LABELS,
+      datasets: [{
+        data,
+        backgroundColor: COLOURS,
+        borderColor: getCSSVar('--bg2') || '#161b22',
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx: { label: string; raw: number }) =>
+              ` ${ctx.label}: ${ctx.raw.toLocaleString()}`,
+          },
+        },
+      },
+    },
+    plugins: [centerLabelPlugin],
+  });
+}
+</script>
+
+<style>
+  .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
+  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+  .chart-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+  .pie-layout { display: flex; align-items: center; gap: 24px; }
+  .chart-wrap { position: relative; height: 240px; width: 240px; flex-shrink: 0; }
+  .pie-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { color: var(--text); flex: 1; }
+  .legend-value { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  @media (max-width: 500px) {
+    .pie-layout { flex-direction: column; }
+    .chart-wrap { width: 200px; height: 200px; }
+  }
+</style>

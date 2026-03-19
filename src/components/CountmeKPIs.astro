@@ -1,0 +1,102 @@
+---
+interface WeekRecord {
+  distros: Record<string, number>;
+  total: number;
+}
+interface WoWGrowth {
+  bazzite: number;
+  bluefin: number;
+  "bluefin-lts": number;
+  aurora: number;
+  total: number;
+}
+interface Props {
+  currentWeek: WeekRecord | null;
+  wowGrowthPct: WoWGrowth | null;
+}
+const { currentWeek, wowGrowthPct } = Astro.props;
+
+function trendArrow(pct: number | null): string {
+  if (pct === null) return '—';
+  if (pct > 0) return '▲';
+  if (pct < 0) return '▼';
+  return '→';
+}
+function trendClass(pct: number | null): string {
+  if (pct === null) return 'trend-neutral';
+  if (pct > 0) return 'trend-up';
+  if (pct < 0) return 'trend-down';
+  return 'trend-neutral';
+}
+function fmt(n: number | undefined): string {
+  return (n ?? 0).toLocaleString();
+}
+---
+
+<div class="hero-kpis">
+  <div class="kpi-card">
+    <div class="kpi-value">
+      {fmt(currentWeek?.total)}
+      {wowGrowthPct && (
+        <span class={`kpi-trend ${trendClass(wowGrowthPct.total)}`}>
+          {trendArrow(wowGrowthPct.total)} {Math.abs(wowGrowthPct.total).toFixed(1)}%
+        </span>
+      )}
+    </div>
+    <div class="kpi-label">Total Active Users</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">
+      {fmt(currentWeek?.distros?.bazzite)}
+      {wowGrowthPct && (
+        <span class={`kpi-trend ${trendClass(wowGrowthPct.bazzite)}`}>
+          {trendArrow(wowGrowthPct.bazzite)}
+        </span>
+      )}
+    </div>
+    <div class="kpi-label">Bazzite</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">
+      {fmt(currentWeek?.distros?.bluefin)}
+      {wowGrowthPct && (
+        <span class={`kpi-trend ${trendClass(wowGrowthPct.bluefin)}`}>
+          {trendArrow(wowGrowthPct.bluefin)}
+        </span>
+      )}
+    </div>
+    <div class="kpi-label">Bluefin</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">
+      {fmt(currentWeek?.distros?.aurora)}
+      {wowGrowthPct && (
+        <span class={`kpi-trend ${trendClass(wowGrowthPct.aurora)}`}>
+          {trendArrow(wowGrowthPct.aurora)}
+        </span>
+      )}
+    </div>
+    <div class="kpi-label">Aurora</div>
+  </div>
+</div>
+
+<style>
+  .hero-kpis { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
+  .kpi-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 20px 24px; flex: 1 1 130px;
+  }
+  .kpi-value {
+    font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1.1;
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-trend { font-size: 0.9rem; font-weight: 600; }
+  .trend-up { color: var(--green); }
+  .trend-down { color: var(--red); }
+  .trend-neutral { color: var(--muted); }
+  @media (max-width: 600px) { .kpi-card { flex: 1 1 calc(50% - 6px); } }
+</style>
