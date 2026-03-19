@@ -9,21 +9,49 @@ Quick orientation for AI coding agents and new contributors.
 ```
 homebrew-stats/
 ├── stats-go/              # Go data-collection backend
-│   ├── cmd/stats/         # CLI entry point (main.go)
+│   ├── cmd/stats/         # CLI entry point (main.go) — subcommand dispatch
 │   └── internal/
+│       ├── countme/       # Universal Blue countme badge + CSV fetcher
 │       ├── github/        # GitHub REST API client (traffic data)
 │       ├── history/       # Snapshot persistence (.sync-cache/)
 │       ├── metrics/       # Pure stats computation (see below)
 │       ├── osanalytics/   # OS-breakdown analytics
 │       ├── tap/           # Homebrew tap scraping
-│       └── tapanalytics/  # Per-tap aggregation
-├── src/                   # Astro + Chart.js frontend
-│   ├── components/        # Astro components (charts, KPI widgets)
+│       ├── tapanalytics/  # Per-tap aggregation
+│       └── testhub/       # projectbluefin/testhub container package stats
+├── src/                   # Astro + Chart.js frontend (3 tabs)
+│   ├── components/        # Astro components (charts, KPI widgets, TabNav)
+│   ├── layouts/           # Layout.astro — shared layout with TabNav
 │   ├── lib/               # Pure TS utility functions + unit tests
-│   └── data/stats.json    # Generated — do NOT edit by hand
+│   ├── pages/
+│   │   ├── index.astro    # 🍺 Homebrew tab
+│   │   ├── testhub/       # 🧪 Testhub tab
+│   │   └── overall/       # 🌐 Overall tab
+│   └── data/
+│       ├── stats.json     # Homebrew tap data — do NOT edit by hand
+│       ├── testhub.json   # Testhub package/build data — do NOT edit by hand
+│       └── countme.json   # Universal Blue active user data — do NOT edit by hand
+├── .sync-cache/           # Persistent GitHub Actions cache (history stores)
+│   ├── history.json           # Homebrew tap history
+│   ├── testhub-history.json   # Testhub snapshot history
+│   └── countme-history.json   # Countme week/day record history
 ├── .github/workflows/     # CI/CD (see daily-build.yml)
 └── public/                # Static assets
 ```
+
+---
+
+## stats-go subcommands
+
+The `stats` binary is built from `stats-go/cmd/stats/`. It dispatches on `os.Args[1]`:
+
+| Subcommand | Writes | Source |
+|---|---|---|
+| `stats fetch-homebrew` | `src/data/stats.json` + `.sync-cache/history.json` | GitHub API (tap traffic) |
+| `stats fetch-testhub` | `src/data/testhub.json` + `.sync-cache/testhub-history.json` | GitHub Packages + Actions API |
+| `stats fetch-countme` | `src/data/countme.json` + `.sync-cache/countme-history.json` | ublue-os/countme CSV + badges |
+
+No-arg default = `fetch-homebrew` (backward compat for `just sync`).
 
 ---
 
@@ -124,11 +152,15 @@ The Go binary writes `src/data/stats.json`. New top-level fields:
 
 The build runs daily at 06:00 UTC:
 
-1. **Sync tap data** — builds the Go binary and runs it; falls back to cached `stats-latest.json` on failure
-2. **Build Astro site** — `npm run build`
-3. **Verify charts have data** — fails if any `chart-empty` marker appears in the built HTML
-4. **Verify summary KPIs** — asserts `summary.total_packages > 0`; catches Go binary failures that produce empty output
-5. **Deploy to GitHub Pages**
+1. **Build stats binary** — `go build ./cmd/stats/`
+2. **`stats fetch-homebrew`** — writes `stats.json`; falls back to cached `stats-latest.json` on failure
+3. **`stats fetch-testhub`** — writes `testhub.json`; `continue-on-error: true` (stub data used on failure)
+4. **`stats fetch-countme`** — writes `countme.json`; `continue-on-error: true` (stub data used on failure)
+5. **Build Astro site** — `npm run build` (3 pages: `/`, `/testhub/`, `/overall/`)
+6. **Verify charts have data** — fails if `chart-empty` appears in `dist/index.html`
+7. **Verify summary KPIs** — asserts `summary.total_packages > 0`
+8. **Verify testhub/countme data** — warn-only (new data sources may be empty initially)
+9. **Deploy to GitHub Pages**
 
 ### Running locally
 
@@ -138,10 +170,15 @@ cd stats-go
 go build -o stats ./cmd/stats/
 go test ./...
 
+# Sync each data source
+GITHUB_TOKEN=... ./stats-go/stats fetch-homebrew
+GITHUB_TOKEN=... ./stats-go/stats fetch-testhub
+GITHUB_TOKEN=... ./stats-go/stats fetch-countme
+
 # Frontend
 npm ci
 npm run build
-npx vitest run
+npm test
 ```
 
 ---

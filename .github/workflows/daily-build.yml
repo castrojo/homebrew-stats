@@ -42,28 +42,41 @@ jobs:
           key: tap-history-v1-${{ github.run_id }}
           restore-keys: tap-history-v1-
 
-      - name: Sync tap data
-        id: sync
+      - name: Build stats binary
+        run: cd stats-go && go build -o stats ./cmd/stats/
+
+      - name: Fetch Homebrew tap data
+        id: sync-homebrew
         continue-on-error: true
         env:
-          # GH_TRAFFIC_TOKEN needs push access to ublue-os/* repos for traffic data.
-          # Store a PAT with repo scope as GH_TRAFFIC_TOKEN secret.
           GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
-        run: |
-          (cd stats-go && go build -o stats ./cmd/stats/)
-          ./stats-go/stats
+        run: ./stats-go/stats fetch-homebrew
 
-      - name: Restore stats fallback if sync failed
-        if: steps.sync.outcome == 'failure'
+      - name: Restore stats fallback if homebrew sync failed
+        if: steps.sync-homebrew.outcome == 'failure'
         run: |
           if [ -f ".sync-cache/stats-latest.json" ]; then
-            echo "⚠️ Sync failed — using cached stats-latest.json"
+            echo "⚠️ Homebrew sync failed — using cached stats-latest.json"
             mkdir -p src/data
             cp .sync-cache/stats-latest.json src/data/stats.json
           else
             echo "❌ Sync failed and no cached stats available"
             exit 1
           fi
+
+      - name: Fetch Testhub package stats
+        id: sync-testhub
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-testhub
+
+      - name: Fetch countme active-user stats
+        id: sync-countme
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-countme
 
       - name: Save traffic history cache
         if: always()
@@ -98,6 +111,26 @@ jobs:
             exit 1
           fi
           echo "✅ summary.total_packages = $total"
+
+      - name: Verify testhub data (warn-only)
+        if: steps.sync-testhub.outcome == 'success'
+        run: |
+          count=$(jq '.packages | length' src/data/testhub.json 2>/dev/null || echo 0)
+          if [ "$count" -gt 0 ]; then
+            echo "✅ testhub.packages = $count"
+          else
+            echo "⚠️ testhub.packages is empty — data collection may still be bootstrapping"
+          fi
+
+      - name: Verify countme data (warn-only)
+        if: steps.sync-countme.outcome == 'success'
+        run: |
+          total=$(jq '.current_week.total // 0' src/data/countme.json 2>/dev/null || echo 0)
+          if [ "$total" -gt 0 ]; then
+            echo "✅ countme current_week.total = $total"
+          else
+            echo "⚠️ countme current_week is empty — data collection may still be bootstrapping"
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
