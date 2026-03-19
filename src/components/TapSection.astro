@@ -90,6 +90,7 @@ const cumulativeByName = new Map<string, number>(
         <th>Version</th>
         <th>Latest</th>
         <th>Total Installs</th>
+        <th>Downloads (30d)</th>
         <th>Description</th>
       </tr>
     </thead>
@@ -114,6 +115,11 @@ const cumulativeByName = new Map<string, number>(
             {(cumulativeByName.get(pkg.name) ?? 0) > 0
               ? <span class="downloads">{(cumulativeByName.get(pkg.name) ?? 0).toLocaleString()}</span>
               : <span class="muted">—</span>}
+          </td>
+          <td>
+            {pkg.downloads
+              ? <span class="downloads">{pkg.downloads.toLocaleString()}</span>
+              : <span class="muted" title="Not in Homebrew analytics top-N">—</span>}
           </td>
           <td class="pkg-desc">{pkg.description ?? ''}</td>
         </tr>

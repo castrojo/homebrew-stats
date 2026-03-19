@@ -18,81 +18,85 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
 <div class="chart-wrap">
   <canvas id="traffic-chart"></canvas>
 </div>
+<script type="application/json" id="traffic-data">{JSON.stringify({ history, tapNames, COLOURS })}</script>
 
-<script define:vars={{ history, tapNames, COLOURS }}>
-  // Dynamically import Chart.js from the bundled package.
-  import('chart.js/auto').then(({ default: Chart }) => {
-    function getCSSVar(name) {
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
-    function getChartColors() {
-      return {
-        text: getCSSVar('--text'),
-        muted: getCSSVar('--muted'),
-        grid: getCSSVar('--border'),
-        bg2: getCSSVar('--bg2'),
-      };
-    }
+<script>
+  import Chart from 'chart.js/auto';
 
-    const labels = history.map(s => s.date);
+  const { history, tapNames, COLOURS } = JSON.parse(
+    document.getElementById('traffic-data')!.textContent!
+  );
 
-    const datasets = tapNames.map((name, i) => ({
-      label: name,
-      data: history.map(s => s.taps[name]?.uniques ?? null),
-      borderColor: COLOURS[i % COLOURS.length],
-      backgroundColor: COLOURS[i % COLOURS.length] + '22',
-      fill: true,
-      tension: 0.3,
-      pointRadius: history.length < 15 ? 4 : 2,
-      spanGaps: true,
-    }));
+  function getCSSVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function getChartColors() {
+    return {
+      text: getCSSVar('--text'),
+      muted: getCSSVar('--muted'),
+      grid: getCSSVar('--border'),
+      bg2: getCSSVar('--bg2'),
+    };
+  }
 
-    const colors = getChartColors();
-    const chart = new Chart(document.getElementById('traffic-chart'), {
-      type: 'line',
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            labels: { color: colors.text, font: { size: 12 } },
-          },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} unique tappers`,
-            },
-          },
+  const labels = history.map(s => s.date);
+
+  const datasets = tapNames.map((name, i) => ({
+    label: name,
+    data: history.map(s => s.taps[name]?.uniques ?? null),
+    borderColor: COLOURS[i % COLOURS.length],
+    backgroundColor: COLOURS[i % COLOURS.length] + '22',
+    fill: true,
+    tension: 0.3,
+    pointRadius: history.length < 15 ? 4 : 2,
+    spanGaps: true,
+  }));
+
+  const colors = getChartColors();
+  const chart = new Chart(document.getElementById('traffic-chart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: colors.text, font: { size: 12 } },
         },
-        scales: {
-          x: {
-            ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
-            grid: { color: colors.grid },
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              color: colors.muted,
-              font: { size: 11 },
-              callback: v => v.toLocaleString(),
-            },
-            grid: { color: colors.grid },
-            title: { display: true, text: 'Unique Tappers', color: colors.muted, font: { size: 11 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} unique tappers`,
           },
         },
       },
-    });
+      scales: {
+        x: {
+          ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
+          grid: { color: colors.grid },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: colors.muted,
+            font: { size: 11 },
+            callback: v => v.toLocaleString(),
+          },
+          grid: { color: colors.grid },
+          title: { display: true, text: 'Unique Tappers', color: colors.muted, font: { size: 11 } },
+        },
+      },
+    },
+  });
 
-    window.addEventListener('themechange', () => {
-      const c = getChartColors();
-      chart.options.plugins.legend.labels.color = c.text;
-      chart.options.scales.x.ticks.color = c.muted;
-      chart.options.scales.x.grid.color = c.grid;
-      chart.options.scales.y.ticks.color = c.muted;
-      chart.options.scales.y.grid.color = c.grid;
-      chart.options.scales.y.title.color = c.muted;
-      chart.update();
-    });
+  window.addEventListener('themechange', () => {
+    const c = getChartColors();
+    chart.options.plugins.legend.labels.color = c.text;
+    chart.options.scales.x.ticks.color = c.muted;
+    chart.options.scales.x.grid.color = c.grid;
+    chart.options.scales.y.ticks.color = c.muted;
+    chart.options.scales.y.grid.color = c.grid;
+    chart.options.scales.y.title.color = c.muted;
+    chart.update();
   });
 </script>
 
