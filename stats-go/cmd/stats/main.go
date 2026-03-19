@@ -247,7 +247,15 @@ buildMetrics = append(buildMetrics, m)
 }
 
 if pkgs == nil {
-pkgs = []testhub.Package{}
+	// Package listing failed (e.g. missing read:packages scope on GITHUB_TOKEN).
+	// Fall back to the committed src/data/testhub.json so the site always has
+	// package data instead of rendering an empty table.
+	if fallback := loadFallbackTesthubPackages(); len(fallback) > 0 {
+		pkgs = fallback
+		fmt.Fprintf(os.Stderr, "  using %d fallback packages from committed testhub.json\n", len(pkgs))
+	} else {
+		pkgs = []testhub.Package{}
+	}
 }
 if store.Snapshots == nil {
 store.Snapshots = []testhub.DaySnapshot{}
@@ -263,6 +271,22 @@ return err
 }
 fmt.Fprintln(os.Stderr, "✓ Wrote src/data/testhub.json")
 return nil
+}
+
+
+// loadFallbackTesthubPackages reads the package list from the committed
+// src/data/testhub.json. Used when the GitHub API call fails (e.g. missing
+// read:packages scope) so the rendered site always has package data.
+func loadFallbackTesthubPackages() []testhub.Package {
+	data, err := os.ReadFile("src/data/testhub.json")
+	if err != nil {
+		return nil
+	}
+	var out testhubOutput
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil
+	}
+	return out.Packages
 }
 
 type lastStatus struct {
