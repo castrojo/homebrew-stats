@@ -1,6 +1,7 @@
 ---
 import { safeJson } from '../lib/inject.ts';
 import type { WeekRecord } from '../lib/types.ts';
+import { BRAND_COLOURS } from '../lib/chart-theme.ts';
 
 interface Props {
   currentWeek: WeekRecord | null;
@@ -9,7 +10,6 @@ const { currentWeek } = Astro.props;
 
 const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
 const LABELS  = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
-const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
 ---
 
 {!currentWeek ? (
@@ -20,12 +20,12 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
       <div class="chart-title">Ecosystem Share (Current Week)</div>
       <div class="pie-layout">
         <div class="chart-wrap">
-          <canvas id="ecosystem-pie-chart" role="img" aria-label="Ecosystem Share chart"></canvas>
+          <canvas id="ecosystem-pie-chart" role="img" aria-label="Ecosystem Share (Current Week) chart"></canvas>
         </div>
         <div class="pie-legend" id="pie-legend">
           {DISTROS.map((d, i) => (
             <div class="legend-item">
-              <span class="legend-dot" style={`background:${COLOURS[i]}`}></span>
+              <span class="legend-dot" style={`background:${BRAND_COLOURS[i]}`}></span>
               <span class="legend-label">{LABELS[i]}</span>
               <span class="legend-value">{(currentWeek.distros[d] ?? 0).toLocaleString()}</span>
             </div>
@@ -33,76 +33,81 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
         </div>
       </div>
     </div>
-    <script type="application/json" id="ecosystem-pie-data" set:html={safeJson({ currentWeek, DISTROS, LABELS, COLOURS })}></script>
+    <script type="application/json" id="ecosystem-pie-data" set:html={safeJson({ currentWeek, DISTROS, LABELS })}></script>
   </>
 )}
 
 <script>
 import '../lib/chart-registry.js';
-import { getCSSVar } from '../lib/chart-theme.js';
+import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('ecosystem-pie-data');
-if (dataEl) {
-  const { currentWeek, DISTROS, LABELS, COLOURS } = JSON.parse(dataEl.textContent!);
-  const canvas = document.getElementById('ecosystem-pie-chart') as HTMLCanvasElement;
+if (!dataEl) throw new Error('ecosystem-pie-data not found');
 
-  const total = currentWeek.total as number;
-  const data = (DISTROS as string[]).map((d: string) => currentWeek.distros[d] ?? 0);
+const { currentWeek, DISTROS, LABELS } = readChartData<{
+  currentWeek: { distros: Record<string, number>; total: number };
+  DISTROS: string[];
+  LABELS: string[];
+}>('ecosystem-pie-data');
 
-  // Center label drawn directly on the canvas — shows total count.
-  const centerLabelPlugin = {
-    id: 'centerLabel',
-    afterDraw(chart: Chart) {
-      const { ctx, chartArea } = chart;
-      const cx = (chartArea.left + chartArea.right) / 2;
-      const cy = (chartArea.top + chartArea.bottom) / 2;
-      const textColor  = getCSSVar('--text')  || '#e6edf3';
-      const mutedColor = getCSSVar('--muted') || '#7d8590';
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = textColor;
-      ctx.font = 'bold 20px sans-serif';
-      ctx.fillText(total >= 1000 ? `${(total / 1000).toFixed(0)}k` : String(total), cx, cy - 8);
-      ctx.fillStyle = mutedColor;
-      ctx.font = '11px sans-serif';
-      ctx.fillText('active devices', cx, cy + 12);
-      ctx.restore();
+const canvas = document.getElementById('ecosystem-pie-chart') as HTMLCanvasElement;
+const total = currentWeek.total;
+const data = DISTROS.map((d: string) => currentWeek.distros[d] ?? 0);
+const colours = [...BRAND_COLOURS].slice(0, DISTROS.length);
+
+// Center label drawn directly on the canvas — shows total count.
+const centerLabelPlugin = {
+  id: 'centerLabel',
+  afterDraw(chart: Chart) {
+    const { ctx, chartArea } = chart;
+    const cx = (chartArea.left + chartArea.right) / 2;
+    const cy = (chartArea.top + chartArea.bottom) / 2;
+    const c = getChartColors();
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = c.text || '#e6edf3';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText(total >= 1000 ? `${(total / 1000).toFixed(0)}k` : String(total), cx, cy - 8);
+    ctx.fillStyle = c.muted || '#7d8590';
+    ctx.font = '11px sans-serif';
+    ctx.fillText('active devices', cx, cy + 12);
+    ctx.restore();
+  },
+};
+
+try {
+  new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: LABELS,
+      datasets: [{
+        data,
+        backgroundColor: colours,
+        borderColor: getChartColors().grid || '#161b22',
+        borderWidth: 2,
+      }],
     },
-  };
-
-  try {
-    new Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        labels: LABELS,
-        datasets: [{
-          data,
-          backgroundColor: COLOURS,
-          borderColor: getCSSVar('--bg2') || '#161b22',
-          borderWidth: 2,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (ctx: { label: string; raw: number }) =>
-                ` ${ctx.label}: ${(ctx.raw as number).toLocaleString()}`,
-            },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx: { label: string; raw: unknown }) =>
+              ` ${ctx.label}: ${(ctx.raw as number).toLocaleString()}`,
           },
         },
       },
-      plugins: [centerLabelPlugin],
-    });
-  } catch (e) {
-    console.error('[EcosystemPieChart] Chart.js init failed:', e);
-  }
+    },
+    plugins: [centerLabelPlugin],
+  });
+} catch (e) {
+  console.error('[EcosystemPieChart] Chart.js init failed:', e);
 }
 </script>
 

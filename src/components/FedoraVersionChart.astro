@@ -18,7 +18,7 @@ const allVersions = Array.from(
 const hasData = Object.keys(osVersionDist).length > 0 && allVersions.length > 0;
 
 // Blue-family palette: one shade per Fedora version (older → darker, newer → lighter).
-const VERSION_COLOURS = [
+const FEDORA_VERSION_PALETTE = [
   '#1565c0', '#1976d2', '#388bfd', '#64b5f6', '#90caf9', '#bbdefb',
 ];
 ---
@@ -37,7 +37,7 @@ const VERSION_COLOURS = [
       canvasId="fedora-version-chart"
       height={300}
     />
-    <script type="application/json" id="fedora-version-data" set:html={safeJson({ osVersionDist, DISTRO_ORDER, allVersions, VERSION_COLOURS })}></script>
+    <script type="application/json" id="fedora-version-data" set:html={safeJson({ osVersionDist, DISTRO_ORDER, allVersions, FEDORA_VERSION_PALETTE })}></script>
   </>
 )}
 
@@ -48,7 +48,7 @@ import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('fedora-version-data');
 if (dataEl) {
-  const { osVersionDist, DISTRO_ORDER, allVersions, VERSION_COLOURS } =
+  const { osVersionDist, DISTRO_ORDER, allVersions, FEDORA_VERSION_PALETTE } =
     JSON.parse(dataEl.textContent!);
 
   const canvas = document.getElementById('fedora-version-chart') as HTMLCanvasElement;
@@ -60,7 +60,7 @@ if (dataEl) {
     const datasets = (allVersions as string[]).map((ver: string, i: number) => ({
       label: `F${ver}`,
       data: labels.map((distro: string) => (osVersionDist[distro] ?? {})[ver] ?? 0),
-      backgroundColor: VERSION_COLOURS[i % VERSION_COLOURS.length],
+      backgroundColor: FEDORA_VERSION_PALETTE[i % FEDORA_VERSION_PALETTE.length],
       borderRadius: 3,
     }));
 

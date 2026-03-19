@@ -41,7 +41,7 @@ const period365 = osAnalytics.periods.find(p => p.period === '365d');
 <script>
 import '../lib/chart-registry.js';
 import { readChartData } from '../lib/inject.js';
-import { getCSSVar, getChartColors } from '../lib/chart-theme.js';
+import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
 import { Chart } from 'chart.js';
 
 const { periods } = readChartData<{
@@ -54,8 +54,8 @@ function buildData(items: { os: string; percent: number }[]) {
     datasets: [{
       label: '% of installs',
       data: items.map(i => i.percent),
-      backgroundColor: getCSSVar('--blue') + '99',
-      borderColor: getCSSVar('--blue'),
+      backgroundColor: BRAND_COLOURS[0] + '99',
+      borderColor: BRAND_COLOURS[0],
       borderWidth: 1,
       borderRadius: 3,
     }],
@@ -120,8 +120,8 @@ document.querySelectorAll('#os-period-btns .range-btn').forEach(btn => {
 window.addEventListener('themechange', () => {
   if (!chart) return;
   const c = getChartColors();
-  (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).backgroundColor = getCSSVar('--blue') + '99';
-  (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).borderColor = getCSSVar('--blue');
+  (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).backgroundColor = BRAND_COLOURS[0] + '99';
+  (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).borderColor = BRAND_COLOURS[0];
   chart.options.scales!.x!.grid!.color = c.grid;
   chart.options.scales!.x!.ticks!.color = c.muted;
   chart.options.scales!.y!.ticks!.color = c.text;
