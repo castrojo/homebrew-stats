@@ -21,7 +21,7 @@ const COLOURS = ['#388bfd','#a371f7','#3fb950','#d29922','#f78166','#79c0ff','#d
         <canvas id="testhub-version-chart"></canvas>
       </div>
     </div>
-    <script type="application/json" id="testhub-version-data">{JSON.stringify({ history, COLOURS })}</script>
+    <script type="application/json" id="testhub-version-data" set:html={JSON.stringify({ history, COLOURS })}></script>
   </>
 )}
 

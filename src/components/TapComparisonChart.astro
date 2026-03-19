@@ -46,7 +46,7 @@ const displayNames: Record<string, string> = {
       <canvas id="tap-comparison-chart"></canvas>
     </div>
   </div>
-  <script type="application/json" id="comparison-data">{JSON.stringify({ relevant, tapNames, COLOURS, displayNames })}</script>
+  <script type="application/json" id="comparison-data" set:html={JSON.stringify({ relevant, tapNames, COLOURS, displayNames })}></script>
 )}
 
 <script>

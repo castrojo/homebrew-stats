@@ -53,7 +53,7 @@ const safeId = tapName.replace(/\//g, '-');
         </div>
       </div>
     </div>
-    <script type="application/json" id={`downloads-data-${safeId}`}>{JSON.stringify({ tapName, relevant, COLOURS, TOP_N })}</script>
+    <script type="application/json" id={`downloads-data-${safeId}`} set:html={JSON.stringify({ tapName, relevant, COLOURS, TOP_N })}></script>
   </>
 )}
 

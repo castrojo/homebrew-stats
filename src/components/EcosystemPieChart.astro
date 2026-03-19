@@ -34,7 +34,7 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
         </div>
       </div>
     </div>
-    <script type="application/json" id="ecosystem-pie-data">{JSON.stringify({ currentWeek, DISTROS, LABELS, COLOURS })}</script>
+    <script type="application/json" id="ecosystem-pie-data" set:html={JSON.stringify({ currentWeek, DISTROS, LABELS, COLOURS })}></script>
   </>
 )}
 

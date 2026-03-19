@@ -35,13 +35,7 @@ const period365 = osAnalytics.periods.find(p => p.period === '365d');
   </div>
 </div>
 
-<script type="application/json" id="os-data">{JSON.stringify({
-  periods: {
-    '30d':  period30  ? period30.items.slice(0, 10)  : [],
-    '90d':  period90  ? period90.items.slice(0, 10)  : [],
-    '365d': period365 ? period365.items.slice(0, 10) : [],
-  }
-})}</script>
+<script type="application/json" id="os-data" set:html={JSON.stringify({ periods: { '30d': period30 ? period30.items.slice(0, 10) : [], '90d': period90 ? period90.items.slice(0, 10) : [], '365d': period365 ? period365.items.slice(0, 10) : [] } })}></script>
 
 <script>
 import Chart from 'chart.js/auto';

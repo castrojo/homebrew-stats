@@ -35,7 +35,7 @@ const sorted = [...weekRecords].sort((a, b) => a.week_start.localeCompare(b.week
         <canvas id="countme-trend-chart"></canvas>
       </div>
     </div>
-    <script type="application/json" id="countme-trend-data">{JSON.stringify({ sorted, DISTROS, LABELS, COLOURS })}</script>
+    <script type="application/json" id="countme-trend-data" set:html={JSON.stringify({ sorted, DISTROS, LABELS, COLOURS })}></script>
   </>
 )}
 

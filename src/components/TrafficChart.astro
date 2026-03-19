@@ -28,7 +28,7 @@ const COLOURS = ['#388bfd', '#a371f7', '#3fb950', '#d29922'];
     <canvas id="traffic-chart"></canvas>
   </div>
 </div>
-<script type="application/json" id="traffic-data">{JSON.stringify({ history, tapNames, COLOURS })}</script>
+<script type="application/json" id="traffic-data" set:html={JSON.stringify({ history, tapNames, COLOURS })}></script>
 
 <script>
   import Chart from 'chart.js/auto';

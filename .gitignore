@@ -4,3 +4,5 @@ dist/
 stats-go/stats
 .sync-cache/
 autoresearch-results.tsv
+test-results/
+playwright-report/

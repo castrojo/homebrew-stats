@@ -38,9 +38,7 @@ const VERSION_COLOURS = [
         <canvas id="fedora-version-chart"></canvas>
       </div>
     </div>
-    <script type="application/json" id="fedora-version-data">
-      {JSON.stringify({ osVersionDist, DISTRO_ORDER, allVersions, VERSION_COLOURS })}
-    </script>
+    <script type="application/json" id="fedora-version-data" set:html={JSON.stringify({ osVersionDist, DISTRO_ORDER, allVersions, VERSION_COLOURS })}></script>
   </>
 )}
 

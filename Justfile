@@ -50,3 +50,10 @@ test:
 # Install npm dependencies
 install:
     npm install
+
+# Run Playwright E2E browser tests (requires built site)
+test-e2e: build
+    npm run test:e2e
+
+# Run all tests: unit + E2E
+test-all: test test-e2e
