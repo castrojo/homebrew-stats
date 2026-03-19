@@ -1,0 +1,187 @@
+---
+// Summary fields added by the Go backend (may not be present in older snapshots).
+// When absent, we derive equivalent values from taps[].packages[] and taps[].traffic.
+interface Summary {
+  total_installs_30d?: number;
+  total_unique_tappers?: number;
+  total_packages?: number;
+  fresh_count?: number;
+  stale_count?: number;
+  unknown_freshness_count?: number;
+  /** WoW growth percentage; null when insufficient history. */
+  wow_growth_pct?: number | null;
+}
+
+interface PackageData {
+  downloads?: number;
+  is_stale?: boolean;
+  freshness_known?: boolean;
+}
+
+interface TapData {
+  traffic?: { uniques: number; count: number };
+  packages: PackageData[];
+}
+
+interface Props {
+  summary?: Summary;
+  taps: TapData[];
+}
+
+const { summary, taps } = Astro.props;
+
+// Flatten all packages for cross-tap aggregation.
+const allPkgs = taps.flatMap(t => t.packages);
+
+// Prefer backend-provided values; fall back to on-the-fly computation.
+const totalInstalls30d =
+  summary?.total_installs_30d ??
+  allPkgs.reduce((sum, p) => sum + (p.downloads ?? 0), 0);
+
+const totalUniqueTappers =
+  summary?.total_unique_tappers ??
+  taps.reduce((sum, t) => sum + (t.traffic?.uniques ?? 0), 0);
+
+const totalPackages = summary?.total_packages ?? allPkgs.length;
+
+const freshCount =
+  summary?.fresh_count ??
+  allPkgs.filter(p => p.freshness_known && !p.is_stale).length;
+
+const staleCount =
+  summary?.stale_count ??
+  allPkgs.filter(p => p.is_stale).length;
+
+const unknownCount =
+  summary?.unknown_freshness_count ??
+  allPkgs.filter(p => !p.freshness_known).length;
+
+// wow_growth_pct: null means "no data yet" — show neutral dash.
+const wowGrowth: number | null = summary?.wow_growth_pct ?? null;
+
+function trendArrow(pct: number | null): string {
+  if (pct === null) return '—';
+  if (pct > 0)  return '↑';
+  if (pct < 0)  return '↓';
+  return '→';
+}
+
+function trendClass(pct: number | null): string {
+  if (pct === null) return 'trend-neutral';
+  if (pct > 0)  return 'trend-up';
+  if (pct < 0)  return 'trend-down';
+  return 'trend-neutral';
+}
+
+// Stale severity: red if staleCount > 3, yellow if > 0, no override if 0.
+const staleClass =
+  staleCount > 3 ? 'kpi-danger' :
+  staleCount > 0 ? 'kpi-warn'   : '';
+---
+
+<div class="hero-kpis">
+
+  <!-- Downloads (30d) — headline metric with WoW trend arrow -->
+  <div class="kpi-card">
+    <div class="kpi-value">
+      {totalInstalls30d.toLocaleString()}
+      <span class={`kpi-trend ${trendClass(wowGrowth)}`}>
+        {wowGrowth !== null
+          ? `${trendArrow(wowGrowth)} ${Math.abs(wowGrowth).toFixed(1)}%`
+          : trendArrow(null)}
+      </span>
+    </div>
+    <div class="kpi-label">Downloads (30d)</div>
+  </div>
+
+  <!-- Unique Tappers -->
+  <div class="kpi-card">
+    <div class="kpi-value">{totalUniqueTappers.toLocaleString()}</div>
+    <div class="kpi-label">Unique Tappers</div>
+  </div>
+
+  <!-- Packages Tracked -->
+  <div class="kpi-card">
+    <div class="kpi-value">{totalPackages.toLocaleString()}</div>
+    <div class="kpi-label">Packages Tracked</div>
+  </div>
+
+  <!-- Up to Date — green -->
+  <div class="kpi-card kpi-fresh">
+    <div class="kpi-value">{freshCount.toLocaleString()}</div>
+    <div class="kpi-label">Up to Date</div>
+  </div>
+
+  <!-- Stale — yellow/red depending on severity -->
+  <div class={`kpi-card ${staleClass}`}>
+    <div class="kpi-value">{staleCount.toLocaleString()}</div>
+    <div class="kpi-label">Stale</div>
+  </div>
+
+  <!-- Unknown freshness — muted -->
+  <div class="kpi-card kpi-unknown">
+    <div class="kpi-value">{unknownCount.toLocaleString()}</div>
+    <div class="kpi-label">Unknown</div>
+  </div>
+
+</div>
+
+<style>
+  .hero-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    /* Each card takes an equal share but is never narrower than 130px */
+    flex: 1 1 130px;
+  }
+
+  .kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Trend indicators */
+  .kpi-trend {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .trend-up      { color: var(--green); }
+  .trend-down    { color: var(--red); }
+  .trend-neutral { color: var(--muted); }
+
+  /* Card accent variants */
+  .kpi-fresh   .kpi-value { color: var(--green); }
+  .kpi-warn    .kpi-value { color: var(--yellow); }
+  .kpi-danger  .kpi-value { color: var(--red); }
+  .kpi-unknown .kpi-value { color: var(--muted); }
+
+  /* On narrow screens drop to 2-column layout */
+  @media (max-width: 600px) {
+    .kpi-card {
+      flex: 1 1 calc(50% - 6px);
+    }
+  }
+</style>

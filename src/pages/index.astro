@@ -6,6 +6,8 @@ import TrafficChart from '../components/TrafficChart.astro';
 import DownloadsChart from '../components/DownloadsChart.astro';
 import TapComparisonChart from '../components/TapComparisonChart.astro';
 import OsSection from '../components/OsSection.astro';
+import HeroKPIs from '../components/HeroKPIs.astro';
+import PackageLeaderboard from '../components/PackageLeaderboard.astro';
 import stats from '../data/stats.json';
 
 const generatedAt = new Date(stats.generated_at).toUTCString();
@@ -23,6 +25,12 @@ const stableTap = stats.taps[0] as any;
     </div>
     <button id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
   </header>
+
+  <!-- Hero KPI row: aggregated stats across all taps at a glance -->
+  <HeroKPIs summary={(stats as any).summary} taps={stats.taps as any} />
+
+  <!-- Sortable leaderboard: all packages across both taps -->
+  <PackageLeaderboard taps={stats.taps as any} />
 
   {stats.history.length > 1 && (
     <section class="overview-charts">

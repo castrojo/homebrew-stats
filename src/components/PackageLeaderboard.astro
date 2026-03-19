@@ -1,0 +1,320 @@
+---
+interface Package {
+  name: string;
+  type: string;
+  version?: string;
+  downloads?: number;
+  /** Added by newer backend builds; absent in older snapshots. */
+  velocity7d?: number;
+  is_stale?: boolean;
+  freshness_known?: boolean;
+  homepage?: string;
+}
+
+interface Tap {
+  name: string;
+  url: string;
+  packages: Package[];
+}
+
+interface Props {
+  taps: Tap[];
+}
+
+const { taps } = Astro.props;
+
+/** Map full tap names to human-readable short labels. */
+function shortTapName(tapName: string): string {
+  if (tapName.includes('experimental')) return 'experimental';
+  return 'stable';
+}
+
+/** Construct the GitHub blob URL for the formula/cask file. */
+function tapFileUrl(tapUrl: string, pkg: Package): string {
+  const folder = pkg.type === 'cask' ? 'Casks' : 'Formula';
+  return `${tapUrl}/blob/main/${folder}/${pkg.name}.rb`;
+}
+
+type Freshness = 'fresh' | 'stale' | 'unknown';
+
+interface Row {
+  name: string;
+  type: string;
+  tap: string;
+  tapUrl: string;
+  tapFileUrl: string;
+  downloads: number;
+  velocity7d: number | null;
+  freshness: Freshness;
+  version: string;
+}
+
+const rows: Row[] = taps.flatMap(tap =>
+  tap.packages.map(pkg => ({
+    name:       pkg.name,
+    type:       pkg.type,
+    tap:        shortTapName(tap.name),
+    tapUrl:     tap.url,
+    tapFileUrl: tapFileUrl(tap.url, pkg),
+    downloads:  pkg.downloads ?? 0,
+    velocity7d: pkg.velocity7d ?? null,
+    freshness:  (!pkg.freshness_known ? 'unknown' : pkg.is_stale ? 'stale' : 'fresh') as Freshness,
+    version:    pkg.version ?? '—',
+  }))
+);
+
+// Default sort: downloads descending so the most-popular packages appear first.
+rows.sort((a, b) => b.downloads - a.downloads);
+---
+
+<section class="leaderboard-section">
+  <h2>All Packages</h2>
+
+  <div class="leaderboard-wrap">
+    <table id="pkg-leaderboard">
+      <thead>
+        <tr>
+          <th data-col="name"      class="sortable">Package    <span class="sort-icon"></span></th>
+          <th data-col="tap"       class="sortable">Tap        <span class="sort-icon"></span></th>
+          <th data-col="downloads" class="sortable sort-active sort-desc">Downloads (30d) <span class="sort-icon">↓</span></th>
+          <th data-col="velocity7d" class="sortable hide-mobile">Velocity (7d)  <span class="sort-icon"></span></th>
+          <th data-col="freshness" class="sortable">Freshness  <span class="sort-icon"></span></th>
+          <th data-col="version"   class="sortable hide-mobile">Version        <span class="sort-icon"></span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(row => (
+          <tr
+            data-name={row.name}
+            data-tap={row.tap}
+            data-downloads={row.downloads}
+            data-velocity={row.velocity7d !== null ? String(row.velocity7d) : ''}
+            data-freshness={row.freshness}
+            data-version={row.version}
+          >
+            <!-- Package: name links to tap file; type badge inline -->
+            <td>
+              <div class="pkg-name-cell">
+                <a href={row.tapFileUrl} title={`View ${row.name} in tap`}>{row.name}</a>
+                <span class={`badge badge-${row.type}`}>{row.type}</span>
+              </div>
+            </td>
+
+            <!-- Tap short name -->
+            <td>
+              <a href={row.tapUrl} class="tap-link">{row.tap}</a>
+            </td>
+
+            <!-- Downloads (30d): show number or em-dash -->
+            <td class="num-cell">
+              {row.downloads > 0
+                ? <span class="downloads">{row.downloads.toLocaleString()}</span>
+                : <span class="muted">—</span>}
+            </td>
+
+            <!-- Velocity (7d): hidden on mobile -->
+            <td class="num-cell hide-mobile">
+              {row.velocity7d !== null && row.velocity7d > 0
+                ? <span class="velocity">+{row.velocity7d.toFixed(1)}/day</span>
+                : <span class="muted">—</span>}
+            </td>
+
+            <!-- Freshness badge -->
+            <td>
+              {row.freshness === 'fresh'   && <span class="badge badge-fresh">✅ Fresh</span>}
+              {row.freshness === 'stale'   && <span class="badge badge-stale">⚠ Stale</span>}
+              {row.freshness === 'unknown' && <span class="badge badge-unknown">❓ Unknown</span>}
+            </td>
+
+            <!-- Version: hidden on mobile -->
+            <td class="hide-mobile">
+              <span class="version">{row.version}</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+  // ── Sortable leaderboard — vanilla JS, no framework ──────────────────────
+  const table = document.getElementById('pkg-leaderboard') as HTMLTableElement | null;
+  if (table) {
+    const headers = Array.from(table.querySelectorAll<HTMLElement>('th[data-col]'));
+    let currentCol = 'downloads';
+    let currentDir: 'asc' | 'desc' = 'desc';
+
+    headers.forEach(th => {
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', () => {
+        const col = th.dataset.col!;
+        if (col === currentCol) {
+          currentDir = currentDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentCol = col;
+          // Numeric columns default to descending; string columns to ascending.
+          currentDir = (col === 'downloads' || col === 'velocity7d') ? 'desc' : 'asc';
+        }
+        sortTable(currentCol, currentDir);
+        refreshHeaders(currentCol, currentDir);
+      });
+    });
+
+    /** Extract a sortable scalar from a row for the given column key. */
+    function getValue(row: HTMLTableRowElement, col: string): string | number {
+      switch (col) {
+        case 'downloads':  return parseInt(row.dataset.downloads  ?? '0', 10);
+        case 'velocity7d': return parseFloat(row.dataset.velocity ?? '0') || 0;
+        case 'name':       return (row.dataset.name      ?? '').toLowerCase();
+        case 'tap':        return (row.dataset.tap       ?? '').toLowerCase();
+        case 'freshness':  return (row.dataset.freshness ?? '').toLowerCase();
+        case 'version':    return (row.dataset.version   ?? '').toLowerCase();
+        default:           return '';
+      }
+    }
+
+    function sortTable(col: string, dir: 'asc' | 'desc'): void {
+      const tbody = table!.querySelector('tbody')!;
+      const rows  = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+
+      rows.sort((a, b) => {
+        const va = getValue(a, col);
+        const vb = getValue(b, col);
+        if (typeof va === 'number' && typeof vb === 'number') {
+          return dir === 'asc' ? va - vb : vb - va;
+        }
+        const sa = String(va);
+        const sb = String(vb);
+        return dir === 'asc' ? sa.localeCompare(sb) : sb.localeCompare(sa);
+      });
+
+      // Re-append in sorted order — avoids full re-render.
+      rows.forEach(r => tbody.appendChild(r));
+    }
+
+    function refreshHeaders(activeCol: string, dir: 'asc' | 'desc'): void {
+      headers.forEach(th => {
+        const icon = th.querySelector<HTMLElement>('.sort-icon');
+        th.classList.remove('sort-active', 'sort-asc', 'sort-desc');
+        if (icon) icon.textContent = '';
+
+        if (th.dataset.col === activeCol) {
+          th.classList.add('sort-active', dir === 'asc' ? 'sort-asc' : 'sort-desc');
+          if (icon) icon.textContent = dir === 'asc' ? '↑' : '↓';
+        }
+      });
+    }
+  }
+</script>
+
+<style>
+  .leaderboard-section {
+    margin-bottom: 48px;
+  }
+
+  /* Horizontal scroll on small viewports rather than breaking layout */
+  .leaderboard-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 13px;
+    /* Ensure the table respects the wrapper's overflow, not the border-radius */
+    min-width: 560px;
+  }
+
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  th.sortable:hover { color: var(--text); }
+
+  th.sort-active { color: var(--blue); }
+
+  .sort-icon {
+    display: inline-block;
+    width: 12px;
+    margin-left: 2px;
+    font-style: normal;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(48, 54, 61, 0.5); }
+
+  /* Package cell: name + badge on same line */
+  .pkg-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pkg-name-cell a {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .pkg-name-cell a:hover { color: var(--link); }
+
+  .tap-link {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .tap-link:hover { color: var(--link); }
+
+  /* Numeric columns: tabular digits so values align */
+  .num-cell {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .downloads { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; }
+  .velocity  { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: var(--green); }
+  .version   { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: var(--muted); }
+  .muted     { color: var(--muted); }
+
+  /* ── Badges ───────────────────────────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Type badges — matches TapSection.astro */
+  .badge-cask    { background: rgba(88,166,255,0.15);  color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
+  .badge-formula { background: rgba(163,113,247,0.15); color: #a371f7; border: 1px solid rgba(163,113,247,0.3); }
+
+  /* Freshness badges */
+  .badge-fresh   { background: rgba(63,185,80,0.15);   color: var(--green);  border: 1px solid rgba(63,185,80,0.3); }
+  .badge-stale   { background: rgba(210,153,34,0.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+  .badge-unknown { background: rgba(125,133,144,0.15); color: var(--muted);  border: 1px solid rgba(125,133,144,0.3); }
+
+  /* Hide verbose columns on mobile — table still horizontally scrollable */
+  @media (max-width: 700px) {
+    .hide-mobile { display: none; }
+  }
+</style>
