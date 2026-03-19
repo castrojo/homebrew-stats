@@ -1,0 +1,123 @@
+---
+interface BuildMetrics {
+  app: string;
+  last_status: string;
+  last_build_at: string;
+  pass_rate_7d: number;
+}
+
+interface Package {
+  name: string;
+  version?: string;
+  html_url?: string;
+  version_count: number;
+  updated_at?: string;
+}
+
+interface Props {
+  packages: Package[];
+  buildMetrics: BuildMetrics[];
+}
+
+const { packages, buildMetrics } = Astro.props;
+
+const metricsByApp = Object.fromEntries(buildMetrics.map(m => [m.app, m]));
+
+function statusBadge(status: string): string {
+  if (status === "passing") return "🟢 Pass";
+  if (status === "failing") return "🔴 Fail";
+  return "⚪ —";
+}
+---
+
+<section class="testhub-table-section">
+  <h2>📦 Packages</h2>
+  {packages.length === 0 ? (
+    <p class="chart-empty">Collecting data…</p>
+  ) : (
+    <div class="table-wrap">
+      <table id="testhub-table">
+        <thead>
+          <tr>
+            <th data-sort-key="name" class="sortable">Package ↕</th>
+            <th data-sort-key="version" class="sortable">Version ↕</th>
+            <th data-sort-key="updated_at" class="sortable">Last Updated ↕</th>
+            <th data-sort-key="last_status" class="sortable">Build Status ↕</th>
+            <th data-sort-key="version_count" class="sortable">Version Count ↕</th>
+          </tr>
+        </thead>
+        <tbody id="testhub-tbody">
+          {packages.map(pkg => {
+            const m = metricsByApp[pkg.name];
+            const status = m?.last_status ?? "unknown";
+            return (
+              <tr
+                data-name={pkg.name}
+                data-version={pkg.version ?? ""}
+                data-updated_at={pkg.updated_at ?? ""}
+                data-last_status={status}
+                data-version_count={pkg.version_count}
+              >
+                <td>
+                  {pkg.html_url
+                    ? <a href={pkg.html_url} target="_blank" rel="noopener">{pkg.name}</a>
+                    : pkg.name}
+                </td>
+                <td>{pkg.version ?? "—"}</td>
+                <td>{pkg.updated_at ? pkg.updated_at.slice(0, 10) : "—"}</td>
+                <td>{statusBadge(status)}</td>
+                <td>{pkg.version_count.toLocaleString()}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  )}
+</section>
+
+<script>
+  const table = document.getElementById('testhub-table');
+  if (table) {
+    const tbody = document.getElementById('testhub-tbody')!;
+    let sortKey = 'name';
+    let sortDir = 1;
+
+    table.querySelectorAll<HTMLTableCellElement>('th[data-sort-key]').forEach(th => {
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', () => {
+        const key = th.dataset.sortKey!;
+        if (key === sortKey) { sortDir = -sortDir; } else { sortKey = key; sortDir = 1; }
+        sortTable();
+      });
+    });
+
+    function sortTable() {
+      const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+      rows.sort((a, b) => {
+        const aVal = a.dataset[sortKey] ?? '';
+        const bVal = b.dataset[sortKey] ?? '';
+        // Numeric sort for version_count
+        if (sortKey === 'version_count') {
+          return (Number(aVal) - Number(bVal)) * sortDir;
+        }
+        return aVal.localeCompare(bVal) * sortDir;
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    }
+  }
+</script>
+
+<style>
+  .testhub-table-section { margin-bottom: 48px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+  th.sortable:hover { color: var(--text); }
+  td { color: var(--text); }
+  tr:hover td { background: var(--bg2); }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
+</style>

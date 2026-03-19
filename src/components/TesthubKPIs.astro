@@ -1,0 +1,105 @@
+---
+interface BuildMetrics {
+  app: string;
+  pass_rate_7d: number;
+  pass_rate_30d: number;
+  last_status: string;
+  last_build_at: string;
+}
+
+interface Package {
+  name: string;
+  version_count: number;
+  updated_at?: string;
+}
+
+interface DaySnapshot {
+  date: string;
+  build_counts: { app: string; passed: number; failed: number; total: number }[];
+  last_run_id: number;
+}
+
+interface Props {
+  packages: Package[];
+  buildMetrics: BuildMetrics[];
+  history: DaySnapshot[];
+  generatedAt: string;
+}
+
+const { packages, buildMetrics, history } = Astro.props;
+
+const totalPackages = packages.length;
+
+// Latest build status: passing if all apps with known status pass, else failing
+const knownStatuses = buildMetrics.filter(m => m.last_status !== "unknown");
+const latestBuildStatus = knownStatuses.length === 0
+  ? "—"
+  : knownStatuses.every(m => m.last_status === "passing") ? "🟢 Passing" : "🔴 Failing";
+
+// Updated this week: packages with updated_at within last 7 days
+const weekAgo = new Date();
+weekAgo.setDate(weekAgo.getDate() - 7);
+const updatedThisWeek = packages.filter(p => {
+  if (!p.updated_at) return false;
+  return new Date(p.updated_at) >= weekAgo;
+}).length;
+
+// Total build runs in last 30 days: sum of all total counts across last 30 snapshots
+const thirtyDaysAgo = new Date();
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10);
+const totalRuns30d = history
+  .filter(s => s.date >= thirtyDaysAgoStr)
+  .reduce((sum, s) => sum + s.build_counts.reduce((a, c) => a + c.total, 0), 0);
+---
+
+<div class="hero-kpis">
+  <div class="kpi-card">
+    <div class="kpi-value">{totalPackages}</div>
+    <div class="kpi-label">Total Packages</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{latestBuildStatus}</div>
+    <div class="kpi-label">Latest Build Status</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{updatedThisWeek}</div>
+    <div class="kpi-label">Updated This Week</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{totalRuns30d.toLocaleString()}</div>
+    <div class="kpi-label">Build Runs (30d)</div>
+  </div>
+</div>
+
+<style>
+  .hero-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    flex: 1 1 130px;
+  }
+  .kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  @media (max-width: 600px) {
+    .kpi-card { flex: 1 1 calc(50% - 6px); }
+  }
+</style>

@@ -1,8 +1,46 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import TesthubKPIs from '../../components/TesthubKPIs.astro';
+import TesthubPackageTable from '../../components/TesthubPackageTable.astro';
+import TesthubBuildChart from '../../components/TesthubBuildChart.astro';
+import TesthubVersionTimeline from '../../components/TesthubVersionTimeline.astro';
+import data from '../../data/testhub.json';
+
+const generatedAt = new Date(data.generated_at).toUTCString();
 ---
+
 <Layout title="Testhub — homebrew-stats" activeTab="testhub">
-  <p style="color: var(--muted); text-align: center; padding: 4rem 0;">
-    🧪 Testhub stats coming soon — data collection in progress.
-  </p>
+  <header>
+    <h1>🧪 projectbluefin/testhub</h1>
+    <div class="meta">
+      Updated {generatedAt} ·
+      <a href="https://github.com/projectbluefin/testhub">projectbluefin/testhub</a>
+    </div>
+    <button id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
+  </header>
+
+  <TesthubKPIs
+    packages={data.packages as any}
+    buildMetrics={data.build_metrics as any}
+    history={data.history as any}
+    generatedAt={data.generated_at}
+  />
+
+  <TesthubPackageTable
+    packages={data.packages as any}
+    buildMetrics={data.build_metrics as any}
+  />
+
+  {data.history.length > 0 && (
+    <section class="charts-section">
+      <h2>📈 Build Trends</h2>
+      <TesthubBuildChart history={data.history as any} />
+      <h2>🔖 Version Timeline</h2>
+      <TesthubVersionTimeline history={data.history as any} />
+    </section>
+  )}
 </Layout>
+
+<style>
+  .charts-section { margin-bottom: 48px; }
+</style>
