@@ -22,17 +22,18 @@ type Traffic struct {
 
 // Package represents a single cask or formula in the tap.
 type Package struct {
-	Name           string `json:"name"`
-	Type           string `json:"type"` // "cask" or "formula"
-	Version        string `json:"version,omitempty"`
-	LatestVersion  string `json:"latest_version,omitempty"`
-	IsStale        bool   `json:"is_stale"`
-	FreshnessKnown bool   `json:"freshness_known"`
-	Downloads      int64  `json:"downloads"`     // Homebrew 30d installs (kept for history compat)
-	Installs90d    int64  `json:"installs_90d"`  // Homebrew 90d installs
-	Installs365d   int64  `json:"installs_365d"` // Homebrew 365d installs
-	Description    string `json:"description,omitempty"`
-	Homepage       string `json:"homepage,omitempty"`
+	Name           string  `json:"name"`
+	Type           string  `json:"type"` // "cask" or "formula"
+	Version        string  `json:"version,omitempty"`
+	LatestVersion  string  `json:"latest_version,omitempty"`
+	IsStale        bool    `json:"is_stale"`
+	FreshnessKnown bool    `json:"freshness_known"`
+	Downloads      int64   `json:"downloads"`     // Homebrew 30d installs (kept for history compat)
+	Installs90d    int64   `json:"installs_90d"`  // Homebrew 90d installs
+	Installs365d   int64   `json:"installs_365d"` // Homebrew 365d installs
+	Velocity7d     float64 `json:"velocity7d"`    // avg daily installs over last 7-day delta
+	Description    string  `json:"description,omitempty"`
+	Homepage       string  `json:"homepage,omitempty"`
 	// SourceOwner/SourceRepo point to the upstream project for freshness checks.
 	SourceOwner string `json:"source_owner,omitempty"`
 	SourceRepo  string `json:"source_repo,omitempty"`
@@ -51,9 +52,10 @@ func (p *Package) StatusString() string {
 
 // TapStats holds all collected data for one tap.
 type TapStats struct {
-	Name      string    `json:"name"`
-	URL       string    `json:"url"`
-	Traffic   *Traffic  `json:"traffic,omitempty"`
+	Name      string   `json:"name"`
+	URL       string   `json:"url"`
+	Traffic   *Traffic `json:"traffic,omitempty"`
+	GrowthPct *float64 `json:"growth_pct"` // WoW % change in total downloads; null if insufficient history
 	Packages  []Package `json:"packages"`
 	UpdatedAt string    `json:"updated_at"`
 }

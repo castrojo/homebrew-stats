@@ -9,6 +9,7 @@ import (
 
 	ghclient "github.com/castrojo/homebrew-stats/internal/github"
 	"github.com/castrojo/homebrew-stats/internal/history"
+	"github.com/castrojo/homebrew-stats/internal/metrics"
 	"github.com/castrojo/homebrew-stats/internal/osanalytics"
 	"github.com/castrojo/homebrew-stats/internal/tap"
 	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
@@ -24,7 +25,9 @@ type TesthubStats struct {
 // Output is the full JSON written to src/data/stats.json.
 type Output struct {
 	GeneratedAt string                 `json:"generated_at"`
+	Summary     metrics.Summary        `json:"summary"`
 	Taps        []tap.TapStats         `json:"taps"`
+	TopPackages []metrics.TopPackage   `json:"top_packages"`
 	History     []history.DaySnapshot  `json:"history"`
 	Testhub     *TesthubStats          `json:"testhub,omitempty"`
 	OSAnalytics *osanalytics.Analytics `json:"os_analytics,omitempty"`
@@ -101,6 +104,18 @@ func main() {
 		}
 	}
 
+	// Compute derived metrics now that both tapStats and the full history are ready.
+	for i := range tapStats {
+		ts := &tapStats[i]
+		ts.GrowthPct = metrics.GrowthPct(hist.Snapshots, ts.Name)
+		for j := range ts.Packages {
+			pkg := &ts.Packages[j]
+			pkg.Velocity7d = metrics.Velocity7d(hist.Snapshots, ts.Name, pkg.Name)
+		}
+	}
+	summary := metrics.ComputeSummary(tapStats, hist.Snapshots)
+	topPkgs := metrics.ComputeTopPackages(tapStats, hist.Snapshots)
+
 	// Collect testhub Flatpak packages from projectbluefin org.
 	var testhub *TesthubStats
 	fmt.Fprintln(os.Stderr, "→ Collecting projectbluefin/testhub…")
@@ -134,7 +149,9 @@ func main() {
 	// Write src/data/stats.json.
 	out := Output{
 		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		Summary:     summary,
 		Taps:        tapStats,
+		TopPackages: topPkgs,
 		History:     hist.Snapshots,
 		Testhub:     testhub,
 		OSAnalytics: osData,
