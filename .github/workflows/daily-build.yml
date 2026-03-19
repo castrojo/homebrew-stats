@@ -90,6 +90,15 @@ jobs:
           fi
           echo "✅ All charts have data (no chart-empty found)"
 
+      - name: Verify summary KPIs are populated
+        run: |
+          total=$(jq '.summary.total_packages // 0' src/data/stats.json)
+          if [ "$total" -eq 0 ]; then
+            echo "❌ summary.total_packages is 0 — Go binary may not have run correctly"
+            exit 1
+          fi
+          echo "✅ summary.total_packages = $total"
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:

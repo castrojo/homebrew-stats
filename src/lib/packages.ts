@@ -6,6 +6,8 @@ export interface Package {
   is_stale: boolean;
   freshness_known: boolean;
   downloads: number;
+  /** Average daily install momentum over the last 7-day delta (0 = insufficient history). */
+  velocity7d?: number;
   description?: string;
   homepage?: string;
 }
