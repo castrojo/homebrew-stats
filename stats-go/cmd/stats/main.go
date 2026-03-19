@@ -246,6 +246,12 @@ m.LastBuildAt = ls.at
 buildMetrics = append(buildMetrics, m)
 }
 
+if pkgs == nil {
+pkgs = []testhub.Package{}
+}
+if store.Snapshots == nil {
+store.Snapshots = []testhub.DaySnapshot{}
+}
 out := testhubOutput{
 GeneratedAt:  time.Now().UTC().Format(time.RFC3339),
 Packages:     pkgs,
@@ -379,6 +385,13 @@ return nil
 }
 
 func buildCountmeOutput(store *countme.HistoryStore) countmeOutput {
+// Ensure nil slices marshal as [] not null in JSON.
+if store.WeekRecords == nil {
+store.WeekRecords = []countme.WeekRecord{}
+}
+if store.DayRecords == nil {
+store.DayRecords = []countme.DayRecord{}
+}
 out := countmeOutput{
 GeneratedAt: time.Now().UTC().Format(time.RFC3339),
 History:     *store,

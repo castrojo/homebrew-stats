@@ -6,7 +6,7 @@ import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
 import data from '../../data/countme.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
-const weekRecords = data.history.week_records;
+const weekRecords = data.history.week_records ?? [];
 ---
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">

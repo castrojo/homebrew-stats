@@ -7,6 +7,9 @@ import TesthubVersionTimeline from '../../components/TesthubVersionTimeline.astr
 import data from '../../data/testhub.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
+const packages = (data.packages as any) ?? [];
+const buildMetrics = (data.build_metrics as any) ?? [];
+const history = (data.history as any) ?? [];
 ---
 
 <Layout title="Testhub — homebrew-stats" activeTab="testhub">
@@ -20,23 +23,23 @@ const generatedAt = new Date(data.generated_at).toUTCString();
   </header>
 
   <TesthubKPIs
-    packages={data.packages as any}
-    buildMetrics={data.build_metrics as any}
-    history={data.history as any}
+    packages={packages}
+    buildMetrics={buildMetrics}
+    history={history}
     generatedAt={data.generated_at}
   />
 
   <TesthubPackageTable
-    packages={data.packages as any}
-    buildMetrics={data.build_metrics as any}
+    packages={packages}
+    buildMetrics={buildMetrics}
   />
 
-  {data.history.length > 0 && (
+  {history.length > 0 && (
     <section class="charts-section">
       <h2>📈 Build Trends</h2>
-      <TesthubBuildChart history={data.history as any} />
+      <TesthubBuildChart history={history} />
       <h2>🔖 Version Timeline</h2>
-      <TesthubVersionTimeline history={data.history as any} />
+      <TesthubVersionTimeline history={history} />
     </section>
   )}
 </Layout>
