@@ -19,160 +19,179 @@ const { osAnalytics } = Astro.props;
 const period30  = osAnalytics.periods.find(p => p.period === '30d');
 const period90  = osAnalytics.periods.find(p => p.period === '90d');
 const period365 = osAnalytics.periods.find(p => p.period === '365d');
-
-const periods = [
-  { label: 'Last 30 Days',  data: period30  },
-  { label: 'Last 90 Days',  data: period90  },
-  { label: 'Last 365 Days', data: period365 },
-];
 ---
 
-<div class="os-grid">
-  {periods.map(({ label, data }) => (
-    <div class="os-col">
-      <div class="os-col-header">
-        <span class="os-window-label">{label}</span>
-      </div>
-      {data ? (
-        <table class="os-table">
-          <thead>
-            <tr>
-              <th class="os-rank">#</th>
-              <th>OS</th>
-              <th></th>
-              <th class="os-count">Count</th>
-              <th class="os-pct">%</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.map((entry, i) => {
-              const max = data.items[0]?.percent ?? 1;
-              const barWidth = max > 0 ? Math.round((entry.percent / max) * 100) : 0;
-              return (
-                <tr>
-                  <td class="os-rank">{i + 1}</td>
-                  <td class="os-name">{entry.os}</td>
-                  <td class="os-bar-cell">
-                    <div class="os-bar-track">
-                      <div class="os-bar-fill" style={`width:${barWidth}%`}></div>
-                    </div>
-                  </td>
-                  <td class="os-count">{entry.count.toLocaleString()}</td>
-                  <td class="os-pct">{entry.percent.toFixed(2)}%</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      ) : (
-        <p class="no-data">No data available.</p>
-      )}
+<div class="os-chart-card">
+  <div class="os-chart-header">
+    <div class="os-chart-title">Linux OS Distribution</div>
+    <div class="os-period-btns" id="os-period-btns">
+      <button class="os-period-btn active" data-period="30d">30d</button>
+      <button class="os-period-btn" data-period="90d">90d</button>
+      <button class="os-period-btn" data-period="365d">365d</button>
     </div>
-  ))}
+  </div>
+  <div class="os-chart-wrap">
+    <canvas id="os-bar-chart"></canvas>
+  </div>
 </div>
 
+<script type="application/json" id="os-data">{JSON.stringify({
+  periods: {
+    '30d':  period30  ? period30.items.slice(0, 10)  : [],
+    '90d':  period90  ? period90.items.slice(0, 10)  : [],
+    '365d': period365 ? period365.items.slice(0, 10) : [],
+  }
+})}</script>
+
+<script>
+import Chart from 'chart.js/auto';
+
+const dataEl = document.getElementById('os-data');
+if (!dataEl) throw new Error('os-data not found');
+
+const { periods } = JSON.parse(dataEl.textContent!);
+
+function getCSSVar(name: string) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function getChartColors() {
+  return {
+    text:  getCSSVar('--text'),
+    muted: getCSSVar('--muted'),
+    grid:  getCSSVar('--border'),
+    blue:  getCSSVar('--blue'),
+  };
+}
+
+function buildData(items: { os: string; percent: number }[]) {
+  return {
+    labels: items.map(i => i.os),
+    datasets: [{
+      label: '% of installs',
+      data: items.map(i => i.percent),
+      backgroundColor: getCSSVar('--blue') + '99',
+      borderColor: getCSSVar('--blue'),
+      borderWidth: 1,
+      borderRadius: 3,
+    }],
+  };
+}
+
+let currentPeriod = '30d';
+const colors = getChartColors();
+
+const chart = new Chart(document.getElementById('os-bar-chart') as HTMLCanvasElement, {
+  type: 'bar',
+  data: buildData(periods[currentPeriod]),
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` ${ctx.parsed.x.toFixed(2)}%`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: { color: colors.grid },
+        ticks: {
+          color: colors.muted,
+          font: { size: 11 },
+          callback: (v) => `${v}%`,
+        },
+      },
+      y: {
+        grid: { display: false },
+        ticks: {
+          color: colors.text,
+          font: { size: 12 },
+        },
+      },
+    },
+  },
+});
+
+document.querySelectorAll('.os-period-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.os-period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const period = (btn as HTMLElement).dataset.period!;
+    chart.data = buildData(periods[period]);
+    chart.update();
+  });
+});
+
+window.addEventListener('themechange', () => {
+  const c = getChartColors();
+  chart.data.datasets[0].backgroundColor = c.blue + '99';
+  chart.data.datasets[0].borderColor = c.blue;
+  chart.options.scales!.x!.grid!.color = c.grid;
+  chart.options.scales!.x!.ticks!.color = c.muted;
+  chart.options.scales!.y!.ticks!.color = c.text;
+  chart.update();
+});
+</script>
+
 <style>
-  .os-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  @media (max-width: 900px) {
-    .os-grid { grid-template-columns: 1fr; }
-  }
-
-  .os-col-header {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .os-window-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .os-table {
-    width: 100%;
-    border-collapse: collapse;
+  .os-chart-card {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 6px;
-    overflow: hidden;
-    font-size: 13px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
   }
 
-  .os-table th {
-    background: var(--bg);
-    padding: 8px 10px;
-    text-align: left;
-    font-size: 10px;
+  .os-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .os-chart-title {
+    font-size: 12px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
-  .os-table td {
-    padding: 7px 10px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
+  .os-chart-wrap {
+    position: relative;
+    height: 320px;
+  }
+
+  .os-period-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .os-period-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .os-period-btn:hover {
+    background: var(--bg);
     color: var(--text);
   }
 
-  .os-table tr:last-child td { border-bottom: none; }
-  .os-table tr:hover td { background: rgba(48, 54, 61, 0.5); }
-
-  .os-rank {
-    color: var(--muted);
-    font-size: 11px;
-    width: 24px;
-    text-align: right;
-    padding-right: 6px !important;
-  }
-
-  .os-name { color: var(--text); }
-
-  .os-count {
-    color: var(--muted);
-    font-size: 11px;
-    white-space: nowrap;
-    text-align: right;
-  }
-
-  .os-pct {
-    color: var(--muted);
-    font-size: 11px;
-    white-space: nowrap;
-    text-align: right;
-  }
-
-  .os-bar-cell {
-    width: 60px;
-    padding: 0 8px !important;
-  }
-
-  .os-bar-track {
-    background: var(--border);
-    border-radius: 2px;
-    height: 6px;
-    overflow: hidden;
-  }
-
-  .os-bar-fill {
+  .os-period-btn.active {
     background: var(--blue);
-    height: 6px;
-    border-radius: 2px;
-  }
-
-  .no-data {
-    color: var(--muted);
-    font-size: 13px;
+    border-color: var(--blue);
+    color: #fff;
   }
 </style>

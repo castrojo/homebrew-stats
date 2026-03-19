@@ -9,6 +9,7 @@ interface Package {
   is_stale?: boolean;
   freshness_known?: boolean;
   homepage?: string;
+  description?: string;
 }
 
 interface Tap {
@@ -35,8 +36,6 @@ function tapFileUrl(tapUrl: string, pkg: Package): string {
   return `${tapUrl}/blob/main/${folder}/${pkg.name}.rb`;
 }
 
-type Freshness = 'fresh' | 'stale' | 'unknown';
-
 interface Row {
   name: string;
   type: string;
@@ -45,21 +44,23 @@ interface Row {
   tapFileUrl: string;
   downloads: number;
   velocity7d: number | null;
-  freshness: Freshness;
   version: string;
+  description: string;
+  homepage: string;
 }
 
 const rows: Row[] = taps.flatMap(tap =>
   tap.packages.map(pkg => ({
-    name:       pkg.name,
-    type:       pkg.type,
-    tap:        shortTapName(tap.name),
-    tapUrl:     tap.url,
-    tapFileUrl: tapFileUrl(tap.url, pkg),
-    downloads:  pkg.downloads ?? 0,
-    velocity7d: pkg.velocity7d ?? null,
-    freshness:  (!pkg.freshness_known ? 'unknown' : pkg.is_stale ? 'stale' : 'fresh') as Freshness,
-    version:    pkg.version ?? '—',
+    name:        pkg.name,
+    type:        pkg.type,
+    tap:         shortTapName(tap.name),
+    tapUrl:      tap.url,
+    tapFileUrl:  tapFileUrl(tap.url, pkg),
+    downloads:   pkg.downloads ?? 0,
+    velocity7d:  pkg.velocity7d ?? null,
+    version:     pkg.version ?? '—',
+    description: pkg.description ?? '',
+    homepage:    pkg.homepage    ?? '',
   }))
 );
 
@@ -68,7 +69,16 @@ rows.sort((a, b) => b.downloads - a.downloads);
 ---
 
 <section class="leaderboard-section">
-  <h2>All Packages</h2>
+  <h2>📦 All Packages</h2>
+
+  <div class="leaderboard-toolbar">
+    <input
+      id="pkg-search"
+      type="search"
+      placeholder="Filter packages…"
+      autocomplete="off"
+    />
+  </div>
 
   <div class="leaderboard-wrap">
     <table id="pkg-leaderboard">
@@ -78,7 +88,6 @@ rows.sort((a, b) => b.downloads - a.downloads);
           <th data-col="tap"       class="sortable">Tap        <span class="sort-icon"></span></th>
           <th data-col="downloads" class="sortable sort-active sort-desc">Downloads (30d) <span class="sort-icon">↓</span></th>
           <th data-col="velocity7d" class="sortable hide-mobile">Velocity (7d)  <span class="sort-icon"></span></th>
-          <th data-col="freshness" class="sortable">Freshness  <span class="sort-icon"></span></th>
           <th data-col="version"   class="sortable hide-mobile">Version        <span class="sort-icon"></span></th>
         </tr>
       </thead>
@@ -89,15 +98,20 @@ rows.sort((a, b) => b.downloads - a.downloads);
             data-tap={row.tap}
             data-downloads={row.downloads}
             data-velocity={row.velocity7d !== null ? String(row.velocity7d) : ''}
-            data-freshness={row.freshness}
             data-version={row.version}
           >
-            <!-- Package: name links to tap file; type badge inline -->
+            <!-- Package: name links to tap file; type badge inline; homepage + description -->
             <td>
               <div class="pkg-name-cell">
                 <a href={row.tapFileUrl} title={`View ${row.name} in tap`}>{row.name}</a>
                 <span class={`badge badge-${row.type}`}>{row.type}</span>
+                {row.homepage && (
+                  <a href={row.homepage} class="pkg-homepage" title="Homepage">↗</a>
+                )}
               </div>
+              {row.description && (
+                <div class="pkg-desc">{row.description}</div>
+              )}
             </td>
 
             <!-- Tap short name -->
@@ -117,13 +131,6 @@ rows.sort((a, b) => b.downloads - a.downloads);
               {row.velocity7d !== null && row.velocity7d > 0
                 ? <span class="velocity">+{row.velocity7d.toFixed(1)}/day</span>
                 : <span class="muted">—</span>}
-            </td>
-
-            <!-- Freshness badge -->
-            <td>
-              {row.freshness === 'fresh'   && <span class="badge badge-fresh">✅ Fresh</span>}
-              {row.freshness === 'stale'   && <span class="badge badge-stale">⚠ Stale</span>}
-              {row.freshness === 'unknown' && <span class="badge badge-unknown">❓ Unknown</span>}
             </td>
 
             <!-- Version: hidden on mobile -->
@@ -166,10 +173,9 @@ rows.sort((a, b) => b.downloads - a.downloads);
       switch (col) {
         case 'downloads':  return parseInt(row.dataset.downloads  ?? '0', 10);
         case 'velocity7d': return parseFloat(row.dataset.velocity ?? '0') || 0;
-        case 'name':       return (row.dataset.name      ?? '').toLowerCase();
-        case 'tap':        return (row.dataset.tap       ?? '').toLowerCase();
-        case 'freshness':  return (row.dataset.freshness ?? '').toLowerCase();
-        case 'version':    return (row.dataset.version   ?? '').toLowerCase();
+        case 'name':       return (row.dataset.name    ?? '').toLowerCase();
+        case 'tap':        return (row.dataset.tap     ?? '').toLowerCase();
+        case 'version':    return (row.dataset.version ?? '').toLowerCase();
         default:           return '';
       }
     }
@@ -205,6 +211,20 @@ rows.sort((a, b) => b.downloads - a.downloads);
         }
       });
     }
+  }
+
+  // ── Search / filter ──────────────────────────────────────────────────────
+  const searchInput = document.getElementById('pkg-search') as HTMLInputElement | null;
+  if (searchInput && table) {
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim();
+      const tbody = table.querySelector('tbody')!;
+      Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr')).forEach(row => {
+        const name = (row.dataset.name ?? '').toLowerCase();
+        const tap  = (row.dataset.tap  ?? '').toLowerCase();
+        row.style.display = (!q || name.includes(q) || tap.includes(q)) ? '' : 'none';
+      });
+    });
   }
 </script>
 
@@ -308,10 +328,51 @@ rows.sort((a, b) => b.downloads - a.downloads);
   .badge-cask    { background: rgba(88,166,255,0.15);  color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
   .badge-formula { background: rgba(163,113,247,0.15); color: #a371f7; border: 1px solid rgba(163,113,247,0.3); }
 
-  /* Freshness badges */
-  .badge-fresh   { background: rgba(63,185,80,0.15);   color: var(--green);  border: 1px solid rgba(63,185,80,0.3); }
-  .badge-stale   { background: rgba(210,153,34,0.15);  color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
-  .badge-unknown { background: rgba(125,133,144,0.15); color: var(--muted);  border: 1px solid rgba(125,133,144,0.3); }
+  .pkg-homepage {
+    color: var(--muted);
+    font-size: 11px;
+    text-decoration: none;
+    margin-left: 2px;
+  }
+  .pkg-homepage:hover { color: var(--link); }
+
+  .pkg-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    max-width: 380px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .leaderboard-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  #pkg-search {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    width: 260px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  #pkg-search:focus {
+    border-color: var(--blue);
+  }
+
+  #pkg-search::placeholder {
+    color: var(--muted);
+  }
 
   /* Hide verbose columns on mobile — table still horizontally scrollable */
   @media (max-width: 700px) {

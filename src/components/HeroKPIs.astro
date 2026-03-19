@@ -5,9 +5,6 @@ interface Summary {
   total_installs_30d?: number;
   total_unique_tappers?: number;
   total_packages?: number;
-  fresh_count?: number;
-  stale_count?: number;
-  unknown_freshness_count?: number;
   /** WoW growth percentage; null when insufficient history. */
   wow_growth_pct?: number | null;
 }
@@ -44,18 +41,6 @@ const totalUniqueTappers =
 
 const totalPackages = summary?.total_packages ?? allPkgs.length;
 
-const freshCount =
-  summary?.fresh_count ??
-  allPkgs.filter(p => p.freshness_known && !p.is_stale).length;
-
-const staleCount =
-  summary?.stale_count ??
-  allPkgs.filter(p => p.is_stale).length;
-
-const unknownCount =
-  summary?.unknown_freshness_count ??
-  allPkgs.filter(p => !p.freshness_known).length;
-
 // wow_growth_pct: null means "no data yet" — show neutral dash.
 const wowGrowth: number | null = summary?.wow_growth_pct ?? null;
 
@@ -72,11 +57,6 @@ function trendClass(pct: number | null): string {
   if (pct < 0)  return 'trend-down';
   return 'trend-neutral';
 }
-
-// Stale severity: red if staleCount > 3, yellow if > 0, no override if 0.
-const staleClass =
-  staleCount > 3 ? 'kpi-danger' :
-  staleCount > 0 ? 'kpi-warn'   : '';
 ---
 
 <div class="hero-kpis">
@@ -104,24 +84,6 @@ const staleClass =
   <div class="kpi-card">
     <div class="kpi-value">{totalPackages.toLocaleString()}</div>
     <div class="kpi-label">Packages Tracked</div>
-  </div>
-
-  <!-- Up to Date — green -->
-  <div class="kpi-card kpi-fresh">
-    <div class="kpi-value">{freshCount.toLocaleString()}</div>
-    <div class="kpi-label">Up to Date</div>
-  </div>
-
-  <!-- Stale — yellow/red depending on severity -->
-  <div class={`kpi-card ${staleClass}`}>
-    <div class="kpi-value">{staleCount.toLocaleString()}</div>
-    <div class="kpi-label">Stale</div>
-  </div>
-
-  <!-- Unknown freshness — muted -->
-  <div class="kpi-card kpi-unknown">
-    <div class="kpi-value">{unknownCount.toLocaleString()}</div>
-    <div class="kpi-label">Unknown</div>
   </div>
 
 </div>
@@ -171,12 +133,6 @@ const staleClass =
   .trend-up      { color: var(--green); }
   .trend-down    { color: var(--red); }
   .trend-neutral { color: var(--muted); }
-
-  /* Card accent variants */
-  .kpi-fresh   .kpi-value { color: var(--green); }
-  .kpi-warn    .kpi-value { color: var(--yellow); }
-  .kpi-danger  .kpi-value { color: var(--red); }
-  .kpi-unknown .kpi-value { color: var(--muted); }
 
   /* On narrow screens drop to 2-column layout */
   @media (max-width: 600px) {

@@ -1,6 +1,6 @@
 ---
 import DownloadsChart from './DownloadsChart.astro';
-import { sortPackages, filterByType, countStale, countUpToDate, type Package } from '../lib/packages';
+import { sortPackages, filterByType, type Package } from '../lib/packages';
 import { computePackageCumulative, type DaySnapshot } from '../lib/charts';
 
 interface Traffic {
@@ -71,14 +71,6 @@ const cumulativeByName = new Map<string, number>(
         <div class="stat-label">Traffic unavailable</div>
       </div>
     )}
-    <div class="stat-card stat-current">
-      <div class="stat-value">{countUpToDate(packages)}</div>
-      <div class="stat-label">Up to Date</div>
-    </div>
-    <div class="stat-card stat-stale">
-      <div class="stat-value">{countStale(packages)}</div>
-      <div class="stat-label">Stale</div>
-    </div>
   </div>
 
   {showDownloadsChart && <DownloadsChart tapName={name} history={history} />}
@@ -165,8 +157,6 @@ const cumulativeByName = new Map<string, number>(
 
   .stat-highlight { border-color: var(--blue); }
   .stat-highlight .stat-value { color: var(--blue); }
-  .stat-current .stat-value { color: var(--green); }
-  .stat-stale .stat-value { color: var(--yellow); }
   .stat-muted .stat-value { color: var(--muted); }
 
   table {

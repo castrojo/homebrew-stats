@@ -1,7 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import TapSection from '../components/TapSection.astro';
-import TesthubSection from '../components/TesthubSection.astro';
 import TrafficChart from '../components/TrafficChart.astro';
 import DownloadsChart from '../components/DownloadsChart.astro';
 import TapComparisonChart from '../components/TapComparisonChart.astro';
@@ -29,76 +27,51 @@ const stableTap = stats.taps[0] as any;
   <!-- Hero KPI row: aggregated stats across all taps at a glance -->
   <HeroKPIs summary={(stats as any).summary} taps={stats.taps as any} />
 
+  <hr class="section-divider" />
+
   <!-- Sortable leaderboard: all packages across both taps -->
   <PackageLeaderboard taps={stats.taps as any} />
 
   {stats.history.length > 1 && (
-    <section class="overview-charts">
-      <div class="overview-col">
+    <section class="charts-section">
+      <h2>📈 Trends</h2>
+      <div class="charts-zone-full">
         <TrafficChart history={stats.history} tapNames={tapNames} />
       </div>
-      <div class="overview-col">
+      <div class="charts-zone-two">
         <DownloadsChart tapName={stableTap.name} history={stats.history} />
+      </div>
+      <div class="charts-zone-full">
+        <TapComparisonChart history={stats.history} tapNames={tapNames} />
       </div>
     </section>
   )}
 
-  {stats.history.length > 1 && (
-    <>
-      <h2>Stable vs Experimental — Download Trends</h2>
-      <TapComparisonChart history={stats.history} tapNames={tapNames} />
-    </>
-  )}
-
   {(stats as any).os_analytics && (
     <>
-      <h2>OS Analytics (Linux)</h2>
+      <h2>🐧 OS Analytics (Linux)</h2>
       <OsSection osAnalytics={(stats as any).os_analytics} />
     </>
   )}
 
-  {stats.taps.slice(0, 1).map((tap: any) => (
-    <TapSection
-      name={tap.name}
-      url={tap.url}
-      traffic={tap.traffic}
-      packages={tap.packages}
-      history={stats.history}
-      showDownloadsChart={false}
-    />
-  ))}
-
-  {(stats as any).testhub && <TesthubSection testhub={(stats as any).testhub} />}
-
-  {stats.taps.slice(1).map((tap: any) => (
-    <TapSection
-      name={tap.name}
-      url={tap.url}
-      traffic={tap.traffic}
-      packages={tap.packages}
-      history={stats.history}
-    />
-  ))}
 </Layout>
 
 <style>
-  /* Side-by-side overview: traffic chart + stable tap downloads chart */
-  .overview-charts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-bottom: 32px;
-    align-items: start;
+  .charts-section {
+    margin-bottom: 48px;
   }
 
-  @media (max-width: 1023px) {
-    .overview-charts {
-      grid-template-columns: 1fr;
-    }
+  .charts-zone-full {
+    margin-bottom: 20px;
   }
 
-  /* Each column stretches to fill its grid cell */
-  .overview-col {
-    min-width: 0; /* prevent overflow in narrow columns */
+  .charts-zone-two {
+    margin-bottom: 20px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 8px 0 32px;
   }
 </style>

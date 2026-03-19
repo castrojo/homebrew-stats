@@ -32,16 +32,16 @@ const safeId = tapName.replace(/\//g, '-');
   <p class="chart-empty">Not enough history yet — charts will appear after a few daily syncs.</p>
 ) : (
   <>
-    <div class="downloads-controls">
-      <div class="range-btns" id={`range-btns-${safeId}`}>
-        <button class="range-btn active" data-range="30">30d</button>
-        <button class="range-btn" data-range="90">90d</button>
-        <button class="range-btn" data-range="all">All</button>
-      </div>
-    </div>
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title">Cumulative Installs Over Time</div>
+        <div class="chart-header">
+          <div class="chart-title">Cumulative Installs Over Time</div>
+          <div class="range-btns" id={`range-btns-${safeId}`}>
+            <button class="range-btn active" data-range="30">30d</button>
+            <button class="range-btn" data-range="90">90d</button>
+            <button class="range-btn" data-range="all">All</button>
+          </div>
+        </div>
         <div class="chart-wrap">
           <canvas id={`total-chart-${safeId}`}></canvas>
         </div>
@@ -168,62 +168,70 @@ const safeId = tapName.replace(/\//g, '-');
     const colors = getChartColors();
 
     // ── Chart A: Cumulative installs over time ─────────────────────────
-    const chartA = new Chart(document.getElementById(`total-chart-${safeId}`), {
-      type: 'line',
-      data: {
-        labels: relevant.map(d => d.date),
-        datasets: [{
-          label: 'Cumulative installs',
-          data: computeCumulative(relevant),
-          borderColor: COLOURS[0],
-          backgroundColor: COLOURS[0] + '22',
-          fill: true,
-          tension: 0.3,
-          pointRadius: relevant.length < 15 ? 4 : 2,
-        }],
-      },
-      options: {
-        responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.parsed.y?.toLocaleString() ?? '—'} cumulative installs`,
-            },
-          },
-        },
-        scales: sharedScales(),
-      },
-    });
-
     // ── Chart B: Top N packages + "other" aggregate ───────────────────
-    const chartB = new Chart(document.getElementById(`pkg-chart-${safeId}`), {
-      type: 'line',
-      data: {
-        labels: relevant.map(d => d.date),
-        datasets: buildPkgDatasets(relevant),
-      },
-      options: {
-        responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            labels: { color: colors.text, font: { size: 11 }, boxWidth: 12 },
-          },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'}`,
+    let chartA, chartB;
+    try {
+      chartA = new Chart(document.getElementById(`total-chart-${safeId}`), {
+        type: 'line',
+        data: {
+          labels: relevant.map(d => d.date),
+          datasets: [{
+            label: 'Cumulative installs',
+            data: computeCumulative(relevant),
+            borderColor: COLOURS[0],
+            backgroundColor: COLOURS[0] + '22',
+            fill: true,
+            tension: 0.3,
+            pointRadius: relevant.length < 15 ? 4 : 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.parsed.y?.toLocaleString() ?? '—'} cumulative installs`,
+              },
             },
           },
+          scales: sharedScales(),
         },
-        scales: sharedScales(),
-      },
-    });
+      });
+
+      chartB = new Chart(document.getElementById(`pkg-chart-${safeId}`), {
+        type: 'line',
+        data: {
+          labels: relevant.map(d => d.date),
+          datasets: buildPkgDatasets(relevant),
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              labels: { color: colors.text, font: { size: 11 }, boxWidth: 12 },
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'}`,
+              },
+            },
+          },
+          scales: sharedScales(),
+        },
+      });
+    } catch (e) {
+      console.error('[DownloadsChart] Chart.js init failed:', e);
+    }
 
     // ── Time range selector ───────────────────────────────────────────
     document.querySelectorAll(`#range-btns-${safeId} .range-btn`).forEach(btn => {
       btn.addEventListener('click', () => {
+        if (!chartA || !chartB) return;
         document.querySelectorAll(`#range-btns-${safeId} .range-btn`).forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const data = getWindow(btn.dataset.range);
@@ -239,7 +247,7 @@ const safeId = tapName.replace(/\//g, '-');
       });
     });
 
-    allCharts.push({ chartA, chartB, sharedScales, getColors: getChartColors });
+    if (chartA && chartB) allCharts.push({ chartA, chartB, sharedScales, getColors: getChartColors });
   });
 
   window.addEventListener('themechange', () => {
@@ -270,12 +278,6 @@ const safeId = tapName.replace(/\//g, '-');
     margin-bottom: 16px;
   }
 
-  .downloads-controls {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-  }
-
   .charts-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -294,17 +296,29 @@ const safeId = tapName.replace(/\//g, '-');
     padding: 16px 20px;
   }
 
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
   .chart-title {
     font-size: 12px;
     font-weight: 600;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
+  }
+
+  /* Standalone title (not inside chart-header) needs its own bottom gap */
+  .chart-card > .chart-title {
     margin-bottom: 12px;
   }
 
   .chart-wrap {
-    max-height: 280px;
+    position: relative;
+    height: 240px;
   }
 
   .range-btns {

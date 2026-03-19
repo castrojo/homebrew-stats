@@ -35,6 +35,7 @@ const displayNames: Record<string, string> = {
 ) : (
   <div class="comparison-card">
     <div class="comparison-header">
+      <div class="chart-title">Stable vs Experimental — Downloads</div>
       <div class="range-btns" id="comparison-range-btns">
         <button class="range-btn active" data-range="30">30d</button>
         <button class="range-btn" data-range="90">90d</button>
@@ -94,53 +95,59 @@ const displayNames: Record<string, string> = {
   let current = getWindow('30');
   const colors = getChartColors();
 
-  const chart = new Chart(document.getElementById('tap-comparison-chart'), {
-    type: 'line',
-    data: {
-      labels: current.map(d => d.date),
-      datasets: buildDatasets(current),
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          labels: { color: colors.text, font: { size: 12 } },
+  let chart;
+  try {
+    chart = new Chart(document.getElementById('tap-comparison-chart'), {
+      type: 'line',
+      data: {
+        labels: current.map(d => d.date),
+        datasets: buildDatasets(current),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: { color: colors.text, font: { size: 12 } },
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} downloads (30d window)`,
+            },
+          },
         },
-        tooltip: {
-          callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} downloads (30d window)`,
+        scales: {
+          x: {
+            ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
+            grid: { color: colors.grid },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: colors.muted,
+              font: { size: 11 },
+              callback: v => Number(v).toLocaleString(),
+            },
+            grid: { color: colors.grid },
+            title: {
+              display: true,
+              text: 'Downloads (30d window)',
+              color: colors.muted,
+              font: { size: 11 },
+            },
           },
         },
       },
-      scales: {
-        x: {
-          ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
-          grid: { color: colors.grid },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: colors.muted,
-            font: { size: 11 },
-            callback: v => Number(v).toLocaleString(),
-          },
-          grid: { color: colors.grid },
-          title: {
-            display: true,
-            text: 'Downloads (30d window)',
-            color: colors.muted,
-            font: { size: 11 },
-          },
-        },
-      },
-    },
-  });
+    });
+  } catch (e) {
+    console.error('[TapComparisonChart] Chart.js init failed:', e);
+  }
 
   // Time range selector
   document.querySelectorAll('#comparison-range-btns .range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (!chart) return;
       document.querySelectorAll('#comparison-range-btns .range-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const data = getWindow(btn.dataset.range);
@@ -151,6 +158,7 @@ const displayNames: Record<string, string> = {
   });
 
   window.addEventListener('themechange', () => {
+    if (!chart) return;
     const c = getChartColors();
     chart.options.plugins.legend.labels.color = c.text;
     chart.options.scales.x.ticks.color = c.muted;
@@ -179,12 +187,22 @@ const displayNames: Record<string, string> = {
 
   .comparison-header {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 12px;
   }
 
+  .chart-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
   .chart-wrap {
-    max-height: 320px;
+    position: relative;
+    height: 260px;
   }
 
   .range-btns {
