@@ -37,20 +37,24 @@ All functions are **pure** (no I/O, no global state). Safe to test in isolation.
 // Summary — aggregate KPIs across all tracked taps
 type Summary struct {
     TotalInstalls30d       int64
-    TotalUniqueTappers     int64
+    TotalUniqueTappers     int      // sum of traffic.Uniques per tap
     TotalPackages          int
     StaleCount             int
     FreshCount             int
     UnknownFreshnessCount  int
-    WoWGrowthPct           *float64  // nil when insufficient history
+    WoWGrowthPct           *float64 // nil when insufficient history
 }
 
 // TopPackage — one entry in the top-10 leaderboard
 type TopPackage struct {
-    TapName   string
-    Name      string
+    Name    string
+    Tap     string
+    History []PackageHistoryPoint
+}
+
+type PackageHistoryPoint struct {
+    Date      string
     Downloads int64
-    History   []HistoryPoint
 }
 ```
 
@@ -61,7 +65,7 @@ type TopPackage struct {
 | `Velocity7d(history, tapName, pkgName)` | Average daily install momentum over the trailing 7 days. Returns 0 when `< 8` qualifying snapshots exist. Negative deltas are clamped to 0. |
 | `GrowthPct(history, tapName)` | Week-over-week % change in total tap downloads (`*float64`). Returns `nil` on insufficient history (< 8 snapshots) or zero denominator. |
 | `ComputeSummary(taps, history)` | Builds the `Summary` struct from tap stats and snapshot history. |
-| `ComputeTopPackages(taps, history, n)` | Returns the top `n` packages ranked by current download count, with full history series attached. |
+| `ComputeTopPackages(taps, history)` | Returns the top 10 packages ranked by current download count, with full history series attached. |
 
 ### Edge-case contracts (enforced by tests)
 

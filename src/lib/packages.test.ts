@@ -89,3 +89,54 @@ describe("countUpToDate", () => {
     expect(countUpToDate(pkgs)).toBe(1);
   });
 });
+
+describe("velocity7d field", () => {
+  it("packages with velocity7d are accepted by the Package type", () => {
+    const pkg: Package = {
+      name: "goose-linux",
+      type: "cask",
+      is_stale: false,
+      freshness_known: true,
+      downloads: 5000,
+      velocity7d: 10.4,
+    };
+    expect(pkg.velocity7d).toBe(10.4);
+  });
+
+  it("sortPackages sorts by downloads regardless of velocity7d value", () => {
+    const pkgs: Package[] = [
+      { name: "fast-growth", type: "cask", is_stale: false, freshness_known: true, downloads: 100, velocity7d: 99.9 },
+      { name: "high-total",  type: "cask", is_stale: false, freshness_known: true, downloads: 9000, velocity7d: 0 },
+    ];
+    const result = sortPackages(pkgs);
+    // Sort is by downloads descending; high-total wins despite velocity7d=0
+    expect(result[0].name).toBe("high-total");
+    expect(result[1].name).toBe("fast-growth");
+  });
+
+  it("packages without velocity7d (omitted) are still valid", () => {
+    const pkg: Package = {
+      name: "legacy-pkg",
+      type: "cask",
+      is_stale: false,
+      freshness_known: false,
+      downloads: 0,
+    };
+    expect(pkg.velocity7d).toBeUndefined();
+  });
+
+  it("velocity7d of 0 indicates insufficient snapshot history", () => {
+    // Go clamps negative deltas and returns 0 when < 8 snapshots exist.
+    // The UI should treat 0 as 'no data' (display as '–').
+    const pkg: Package = {
+      name: "new-pkg",
+      type: "cask",
+      is_stale: false,
+      freshness_known: true,
+      downloads: 250,
+      velocity7d: 0,
+    };
+    const displayValue = pkg.velocity7d === 0 ? "–" : `${pkg.velocity7d}/day`;
+    expect(displayValue).toBe("–");
+  });
+});
