@@ -1,0 +1,130 @@
+---
+interface RangeOption {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  /** Chart title shown in card header. Also used as canvas aria-label. */
+  title: string;
+  /** ID attribute for the <canvas> element. Must match what the chart script references. */
+  canvasId: string;
+  /** Height of the chart area in pixels. Default: 260. */
+  height?: number;
+  /** ID for the range buttons container. Required if ranges is provided. */
+  rangeId?: string;
+  /** Time-range selector buttons. If omitted, no range buttons are rendered. */
+  ranges?: RangeOption[];
+  /** Default selected range value (matches a RangeOption.value). Default: first range. */
+  defaultRange?: string;
+  /** If true, renders the empty state instead of the canvas. */
+  isEmpty?: boolean;
+  /** Message shown in the empty state. Default: "Collecting data…" */
+  emptyMsg?: string;
+}
+
+const {
+  title,
+  canvasId,
+  height = 260,
+  rangeId,
+  ranges,
+  defaultRange,
+  isEmpty = false,
+  emptyMsg = 'Collecting data…',
+} = Astro.props;
+---
+
+{isEmpty ? (
+  <p class="chart-empty">{emptyMsg}</p>
+) : (
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">{title}</div>
+      {ranges && rangeId && (
+        <div class="range-btns" id={rangeId}>
+          {ranges.map(r => (
+            <button
+              class={`range-btn${r.value === (defaultRange ?? ranges[0].value) ? ' active' : ''}`}
+              data-range={r.value}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+    <div class="chart-wrap" style={`height:${height}px`}>
+      <canvas
+        id={canvasId}
+        role="img"
+        aria-label={`${title} chart`}
+      ></canvas>
+    </div>
+    <slot />
+  </div>
+)}
+
+<style>
+  .chart-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 0;
+    font-size: 14px;
+  }
+
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chart-wrap {
+    position: relative;
+  }
+
+  .range-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .range-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .range-btn:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .range-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+</style>
