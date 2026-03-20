@@ -84,7 +84,6 @@ jobs:
         with:
           path: .sync-cache
           key: tap-history-v2-${{ github.run_id }}
-          retention-days: 90
 
       - name: Install npm dependencies
         run: npm ci
