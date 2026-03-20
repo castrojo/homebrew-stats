@@ -1,0 +1,62 @@
+name: Smoke Test — Live Site
+
+on:
+  workflow_run:
+    workflows: ["Build and Deploy to GitHub Pages"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  smoke-test:
+    # Only run when the triggering workflow succeeded
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Poll for CDN propagation
+        run: |
+          today=$(date -u +%Y-%m-%d)
+          echo "Waiting for generated_at=$today at live site…"
+          for i in $(seq 1 18); do
+            gen=$(curl -sf --max-time 10 \
+              "https://castrojo.github.io/homebrew-stats/meta.json?cb=$RANDOM" \
+              | jq -r '.generated_at // empty' 2>/dev/null || echo "")
+            if [ "$gen" = "$today" ]; then
+              echo "✅ CDN propagated — generated_at=$gen"
+              break
+            fi
+            echo "  ⏳ Attempt $i/18: generated_at=${gen:-<empty>} (want $today), retrying in 10s…"
+            if [ "$i" -eq 18 ]; then
+              echo "⚠️  CDN propagation timeout after 3 min — proceeding anyway"
+            fi
+            sleep 10
+          done
+
+      - name: Run Playwright smoke tests against live site
+        env:
+          BASE_URL: https://castrojo.github.io
+        run: npx playwright test --reporter=list
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-smoke-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 7
