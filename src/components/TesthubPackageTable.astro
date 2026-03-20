@@ -69,7 +69,7 @@ function statusBadge(status: string): string {
                 <td>{pkg.version ?? "—"}</td>
                 <td>{pkg.updated_at ? pkg.updated_at.slice(0, 10) : "—"}</td>
                 <td>{statusBadge(status)}</td>
-                <td>{pkg.pull_count != null ? pkg.pull_count.toLocaleString() : "—"}</td>
+                <td>{(pkg.pull_count != null && pkg.pull_count > 0) ? pkg.pull_count.toLocaleString() : "—"}</td>
                 <td>{pkg.version_count.toLocaleString()}</td>
               </tr>
             );

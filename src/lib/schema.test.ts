@@ -197,6 +197,11 @@ describe("src/data/testhub.json schema", () => {
       expect((pkg.name as string).length).toBeGreaterThan(0);
       expect(typeof pkg.version_count).toBe("number");
       expect(pkg.version_count as number).toBeGreaterThanOrEqual(0);
+      // pull_count is optional (GitHub Packages API may not expose it yet); when present must be a non-negative number
+      if (pkg.pull_count !== undefined && pkg.pull_count !== null) {
+        expect(typeof pkg.pull_count).toBe("number");
+        expect(pkg.pull_count as number).toBeGreaterThanOrEqual(0);
+      }
     }
   });
 
