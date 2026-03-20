@@ -313,17 +313,25 @@ All must pass before merging. CI runs: typecheck → build → verify data → E
 
 ## DEFINITION OF DONE — Non-Negotiable
 
-A task is **not complete** until GitHub Actions CI shows a green ✅ deploy on `main`.
+A task is complete only when ALL three layers pass:
 
-**Before declaring any task done:**
-1. Push the commit
-2. Run `gh run watch` or check `gh run list` until the deploy workflow completes
-3. Confirm conclusion is `success` — not just that local tests pass
+### Layer 1 — Local tests
+- `just test-all` passes (unit tests + E2E against local preview)
+- `npm run lint` passes (no TS errors, no `set:text` violations)
+- `actionlint` passes on all `.github/workflows/*.yml` files
+- Go: `cd stats-go && go test ./...` passes
 
-**If CI is red when you pick up a task:** Stop. Read the failure log (`gh run view <id> --log-failed`). Fix the CI before adding any new commits. Never build on a broken baseline.
+### Layer 2 — CI green
+- Push to `main` and confirm `gh run list --limit 5` shows ✅ green for:
+  - "Build and Deploy to GitHub Pages" workflow
+  - "Smoke Test — Live Site" workflow (triggers ~30–60s after deploy)
 
-**Rationale:** Local tests run against local data in a local environment. CI runs against a clean checkout, a fresh environment, and real GitHub API data. These are not equivalent. A green local test suite does not mean CI will pass.
+### Layer 3 — Live site verified
+- Run `just verify-live` after CI is green
+- This checks the live URL `https://castrojo.github.io/homebrew-stats/`:
+  - HTTP 200 on all 3 pages
+  - Canvas elements present
+  - No `class="chart-empty"` elements
+  - `public/meta.json` reflects today's date (freshness check)
 
-### CI verify step — common false-positive trap
-
-The "Verify charts have data" step greps for `class="chart-empty"` (element attribute, with quotes). Do NOT change this to `chart-empty` without quotes — that matches the CSS class definition in Astro's inlined `<style>` tag and produces a false positive on every healthy build.
+**"CI green" is not done. "It should work" is not done. `just verify-live` passing is done.**
