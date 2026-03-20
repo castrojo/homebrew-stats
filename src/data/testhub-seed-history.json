@@ -1,0 +1,4024 @@
+{
+  "snapshots": [
+    {
+      "date": "2026-02-18",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        }
+      ],
+      "last_run_id": 1000100
+    },
+    {
+      "date": "2026-02-19",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        }
+      ],
+      "last_run_id": 1000200
+    },
+    {
+      "date": "2026-02-20",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "lmstudio",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1000300
+    },
+    {
+      "date": "2026-02-21",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1000400
+    },
+    {
+      "date": "2026-02-22",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        }
+      ],
+      "last_run_id": 1000500
+    },
+    {
+      "date": "2026-02-23",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1000600
+    },
+    {
+      "date": "2026-02-24",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1000700
+    },
+    {
+      "date": "2026-02-25",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1000800
+    },
+    {
+      "date": "2026-02-26",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1000900
+    },
+    {
+      "date": "2026-02-27",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        }
+      ],
+      "last_run_id": 1001000
+    },
+    {
+      "date": "2026-02-28",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        }
+      ],
+      "last_run_id": 1001100
+    },
+    {
+      "date": "2026-03-01",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1001200
+    },
+    {
+      "date": "2026-03-02",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "goose",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1001300
+    },
+    {
+      "date": "2026-03-03",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "lmstudio",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1001400
+    },
+    {
+      "date": "2026-03-04",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1001500
+    },
+    {
+      "date": "2026-03-05",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1001600
+    },
+    {
+      "date": "2026-03-06",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "ghostty",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1001700
+    },
+    {
+      "date": "2026-03-07",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1001800
+    },
+    {
+      "date": "2026-03-08",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "virtualbox",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        }
+      ],
+      "last_run_id": 1001900
+    },
+    {
+      "date": "2026-03-09",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        }
+      ],
+      "last_run_id": 1002000
+    },
+    {
+      "date": "2026-03-10",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "ghostty",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "lmstudio",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1002100
+    },
+    {
+      "date": "2026-03-11",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "ghostty",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1002200
+    },
+    {
+      "date": "2026-03-12",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        }
+      ],
+      "last_run_id": 1002300
+    },
+    {
+      "date": "2026-03-13",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        }
+      ],
+      "last_run_id": 1002400
+    },
+    {
+      "date": "2026-03-14",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        }
+      ],
+      "last_run_id": 1002500
+    },
+    {
+      "date": "2026-03-15",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "ghostty",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "goose",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "virtualbox",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1002600
+    },
+    {
+      "date": "2026-03-16",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "ghostty",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "goose",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1002700
+    },
+    {
+      "date": "2026-03-17",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 4,
+          "failed": 0,
+          "total": 4
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "virtualbox",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        }
+      ],
+      "last_run_id": 1002800
+    },
+    {
+      "date": "2026-03-18",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "goose",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "lmstudio",
+          "passed": 3,
+          "failed": 1,
+          "total": 4
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        }
+      ],
+      "last_run_id": 1002900
+    },
+    {
+      "date": "2026-03-19",
+      "packages": [
+        {
+          "name": "firefox-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Ffirefox-nightly",
+          "version_count": 22,
+          "updated_at": "2026-03-18T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "ghostty",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fghostty",
+          "version_count": 18,
+          "updated_at": "2026-03-16T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "goose",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fgoose",
+          "version_count": 31,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "io.github.denysmb.kontainer",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fio.github.denysmb.kontainer",
+          "version_count": 9,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "lmstudio",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Flmstudio",
+          "version_count": 14,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "org.altlinux.tuner",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Forg.altlinux.tuner",
+          "version_count": 7,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "rancher-desktop",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Francher-desktop",
+          "version_count": 19,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "thunderbird-nightly",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fthunderbird-nightly",
+          "version_count": 28,
+          "updated_at": "2026-03-17T00:00:00Z",
+          "created_at": ""
+        },
+        {
+          "name": "virtualbox",
+          "version": "latest",
+          "html_url": "https://github.com/orgs/projectbluefin/packages/container/package/testhub%2Fvirtualbox",
+          "version_count": 11,
+          "updated_at": "2026-03-15T00:00:00Z",
+          "created_at": ""
+        }
+      ],
+      "build_counts": [
+        {
+          "app": "firefox-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "ghostty",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "goose",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "io.github.denysmb.kontainer",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "lmstudio",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "org.altlinux.tuner",
+          "passed": 3,
+          "failed": 0,
+          "total": 3
+        },
+        {
+          "app": "rancher-desktop",
+          "passed": 2,
+          "failed": 0,
+          "total": 2
+        },
+        {
+          "app": "thunderbird-nightly",
+          "passed": 1,
+          "failed": 0,
+          "total": 1
+        },
+        {
+          "app": "virtualbox",
+          "passed": 1,
+          "failed": 1,
+          "total": 2
+        }
+      ],
+      "last_run_id": 1003000
+    }
+  ]
+}

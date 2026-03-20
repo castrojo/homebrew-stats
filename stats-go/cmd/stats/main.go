@@ -212,18 +212,22 @@ fmt.Fprintf(os.Stderr, "  packages: %d\n", len(pkgs))
 }
 
 fmt.Fprintf(os.Stderr, "→ Fetching testhub build counts (since run %d)…\n", lastRunID)
-counts, newLastRunID, err := testhub.FetchBuildCounts(client.Context(), client.GitHub(), lastRunID)
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  testhub build counts: %v\n", err)
+counts, newLastRunID, fetchErr := testhub.FetchBuildCounts(client.Context(), client.GitHub(), lastRunID)
+if fetchErr != nil {
+fmt.Fprintf(os.Stderr, "⚠️  testhub build counts: %v\n", fetchErr)
 counts = nil
 newLastRunID = lastRunID
 } else {
 fmt.Fprintf(os.Stderr, "  build counts: %d apps, new max run_id=%d\n", len(counts), newLastRunID)
 }
 
+if fetchErr != nil {
+fmt.Fprintf(os.Stderr, "⚠️  skipping testhub history save — fetch failed: %v\n", fetchErr)
+} else {
 store = testhub.AppendSnapshot(store, pkgs, counts, newLastRunID)
 if err := saveTesthubHistory(store); err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  testhub history save: %v\n", err)
+fmt.Fprintf(os.Stderr, "⚠️  failed to save testhub history: %v\n", err)
+}
 }
 
 // Compute build metrics for 7d and 30d windows; merge PassRate30d into results.
@@ -319,19 +323,30 @@ result[c.App] = lastStatus{status: status, at: snap.Date}
 return result
 }
 
-func loadTesthubHistory() (*testhub.HistoryStore, error) {
-data, err := os.ReadFile(testhubCacheFile)
-if os.IsNotExist(err) {
+func loadTesthubHistoryFrom(cacheFile, seedFile string) (*testhub.HistoryStore, error) {
+data, err := os.ReadFile(cacheFile)
+if err == nil {
+var store testhub.HistoryStore
+if jsonErr := json.Unmarshal(data, &store); jsonErr == nil {
+return &store, nil
+}
+}
+if os.IsNotExist(err) || err != nil {
+// Try seed file
+if seed, seedErr := os.ReadFile(seedFile); seedErr == nil {
+var store testhub.HistoryStore
+if json.Unmarshal(seed, &store) == nil {
+fmt.Fprintf(os.Stderr, "  loaded %d snapshots from seed file\n", len(store.Snapshots))
+return &store, nil
+}
+}
 return &testhub.HistoryStore{}, nil
 }
-if err != nil {
-return nil, err
+return &testhub.HistoryStore{}, nil
 }
-var store testhub.HistoryStore
-if err := json.Unmarshal(data, &store); err != nil {
-return nil, err
-}
-return &store, nil
+
+func loadTesthubHistory() (*testhub.HistoryStore, error) {
+	return loadTesthubHistoryFrom(testhubCacheFile, "src/data/testhub-seed-history.json")
 }
 
 func saveTesthubHistory(store *testhub.HistoryStore) error {
