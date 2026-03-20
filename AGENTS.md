@@ -183,7 +183,43 @@ npm test
 
 ---
 
-## Testing conventions
+## Cache Key Strategy
+
+The `.sync-cache/` directory persists incremental history between daily CI runs via `actions/cache`.
+
+### What is cached
+- `history.json` — Homebrew tap download history (accumulates daily)
+- `testhub-history.json` — Testhub build run history (accumulates daily)
+- `countme-history.json` — CountMe active device history (accumulates daily)
+- `stats-latest.json` — Latest stats snapshot
+
+### Current cache key
+`tap-history-v2-{run_id}` (restore key: `tap-history-v2-`)
+
+### When to bump the version (v2 → v3, etc.)
+Bump the version number in BOTH `key` and `restore-keys` in `daily-build.yml` when:
+- Testhub packages show all `⚪ —` (unknown build status) on the live site
+- Any structural change to the JSON schema of a history file
+- A corrupted cache entry is suspected (e.g., `build_counts: []` despite non-zero `lastRunID`)
+
+### How to detect a stale/corrupted cache
+In CI logs, look for:
+```
+→ Fetching testhub build counts (since run XXXXXXX)…
+  build counts: 0 apps, new max run_id=XXXXXXX   ← same ID = no new runs (may be normal)
+```
+If `new max run_id` never advances across multiple days AND testhub shows all-unknown on the live site → bump the cache key.
+
+### Bumping procedure
+1. Increment the version suffix in `.github/workflows/daily-build.yml`:
+   - `key: tap-history-vN-${{ github.run_id }}`
+   - `restore-keys: tap-history-vN-`
+2. Commit and push — the next run starts with a cold cache
+3. The committed `src/data/testhub-seed-history.json` bootstraps testhub history immediately
+4. Homebrew history re-accumulates from GitHub API (14-day window) on the first run
+
+---
+
 
 - **Go**: table-driven tests in `*_test.go` next to the package under test. Run `go test ./...` from `stats-go/`.
 - **TypeScript**: vitest unit tests in `src/lib/*.test.ts` covering pure chart/package utility functions. Run `npx vitest run` from the repo root.
