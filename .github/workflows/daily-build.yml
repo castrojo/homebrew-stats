@@ -101,10 +101,10 @@ jobs:
           # bare grep for 'chart-empty' produces false positives even when all charts
           # are healthy. We need to match the rendered element: class="chart-empty".
           for page in dist/index.html dist/testhub/index.html dist/overall/index.html; do
-            count=$(grep -c 'class=chart-empty' "$page" || true)
+            count=$(grep -c 'class="chart-empty"' "$page" || true)
             if [ "$count" -gt 0 ]; then
               echo "❌ $page: $count chart(s) rendered in empty state"
-              echo "   Run: grep -n 'class="chart-empty"' $page"
+              echo "   Run: grep -n 'class=\"chart-empty\"' $page"
               exit 1
             fi
             echo "✅ $page: no empty charts"
