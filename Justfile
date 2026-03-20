@@ -57,3 +57,50 @@ test-e2e: build
 
 # Run all tests: unit + E2E
 test-all: test test-e2e
+
+# Verify the live GitHub Pages site is healthy
+verify-live:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    BASE="https://castrojo.github.io/homebrew-stats"
+    echo "=== Verifying live site: $BASE ==="
+
+    for path in "" "/testhub/" "/overall/"; do
+      code=$(curl -sf -o /dev/null -w "%{http_code}" "$BASE$path" || echo "000")
+      if [ "$code" = "200" ]; then
+        echo "✅ $BASE$path → HTTP $code"
+      else
+        echo "❌ $BASE$path → HTTP $code"
+        exit 1
+      fi
+    done
+
+    echo "--- Checking canvas IDs ---"
+    html=$(curl -sf "$BASE/")
+    for id in traffic-chart tap-comparison-chart os-bar-chart; do
+      if echo "$html" | grep -q "id=\"$id\""; then
+        echo "✅ canvas#$id found"
+      else
+        echo "❌ canvas#$id MISSING"
+        exit 1
+      fi
+    done
+
+    echo "--- Checking no chart-empty ---"
+    if echo "$html" | grep -q 'class="chart-empty"'; then
+      echo "❌ chart-empty element found on homepage"
+      exit 1
+    fi
+    echo "✅ No chart-empty on homepage"
+
+    echo "--- Checking freshness (meta.json) ---"
+    today=$(date -u +%Y-%m-%d)
+    gen=$(curl -sf "$BASE/meta.json" | python3 -c "import sys,json; print(json.load(sys.stdin).get('generated_at',''))" 2>/dev/null || echo "")
+    if [ "$gen" = "$today" ]; then
+      echo "✅ meta.json generated_at=$gen (fresh)"
+    else
+      echo "⚠️  meta.json generated_at=${gen:-<missing>} (expected $today) — site may be stale or meta.json not yet deployed"
+    fi
+
+    echo "=== Live site verification PASSED ==="
+
