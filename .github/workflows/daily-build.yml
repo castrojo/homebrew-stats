@@ -128,11 +128,24 @@ jobs:
       - name: Verify testhub data (warn-only)
         if: steps.sync-testhub.outcome == 'success'
         run: |
-          count=$(jq '.packages | length' src/data/testhub.json 2>/dev/null || echo 0)
-          if [ "$count" -gt 0 ]; then
-            echo "✅ testhub.packages = $count"
+          pkg_count=$(jq '.packages | length' src/data/testhub.json 2>/dev/null || echo 0)
+          metric_count=$(jq '.build_metrics | length' src/data/testhub.json 2>/dev/null || echo 0)
+          known=$(jq '[.build_metrics[] | select(.last_status != "unknown" and .last_status != "")] | length' src/data/testhub.json 2>/dev/null || echo 0)
+          echo "  packages: $pkg_count"
+          echo "  build_metrics: $metric_count"
+          if [ "$pkg_count" -gt 0 ]; then
+            echo "✅ testhub.packages = $pkg_count"
           else
-            echo "⚠️ testhub.packages is empty — data collection may still be bootstrapping"
+            echo "⚠️  testhub.packages is empty — data collection may still be bootstrapping"
+          fi
+          if [ "$metric_count" -gt 0 ]; then
+            echo "✅ $known/$metric_count packages have known build status"
+            if [ "$known" -eq 0 ]; then
+              echo "⚠️  All packages show unknown build status — cache may be stale or lastRunID may be stuck"
+              echo "     Tip: check 'build counts: 0 apps' in logs above; if lastRunID isn't advancing, bump cache version"
+            fi
+          else
+            echo "⚠️  build_metrics is empty — testhub build status will show ⚪ — for all packages"
           fi
 
       - name: Verify countme data (warn-only)
