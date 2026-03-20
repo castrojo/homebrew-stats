@@ -1,5 +1,6 @@
 ---
 import TabNav from '../components/TabNav.astro';
+import IssueButton from '../components/IssueButton.astro';
 
 interface Props {
   title?: string;
@@ -128,6 +129,7 @@ const base = import.meta.env.BASE_URL;
   <body>
     <div class="container">
       {activeTab && <TabNav activeTab={activeTab} />}
+      {activeTab && <IssueButton />}
       <slot />
       <footer>
         Data refreshed daily via GitHub Actions · 

@@ -5,6 +5,7 @@ type Package struct {
 	Version      string `json:"version,omitempty"`
 	HTMLURL      string `json:"html_url,omitempty"`
 	VersionCount int64  `json:"version_count"`
+	PullCount    int64  `json:"pull_count"`
 	CreatedAt    string `json:"created_at,omitempty"`
 	UpdatedAt    string `json:"updated_at,omitempty"`
 }

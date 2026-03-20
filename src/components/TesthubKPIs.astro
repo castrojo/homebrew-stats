@@ -10,6 +10,7 @@ interface BuildMetrics {
 interface Package {
   name: string;
   version_count: number;
+  pull_count?: number;
   updated_at?: string;
 }
 
@@ -51,6 +52,8 @@ const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10);
 const totalRuns30d = history
   .filter(s => s.date >= thirtyDaysAgoStr)
   .reduce((sum, s) => sum + s.build_counts.reduce((a, c) => a + c.total, 0), 0);
+// Total OCI pulls across all packages
+const totalPulls = packages.reduce((sum, p) => sum + (p.pull_count ?? 0), 0);
 ---
 
 <div class="hero-kpis">
@@ -69,6 +72,10 @@ const totalRuns30d = history
   <div class="kpi-card">
     <div class="kpi-value">{totalRuns30d.toLocaleString()}</div>
     <div class="kpi-label">Build Runs (30d)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{totalPulls.toLocaleString()}</div>
+    <div class="kpi-label">Total Pulls</div>
   </div>
 </div>
 

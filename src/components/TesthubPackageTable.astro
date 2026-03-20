@@ -11,6 +11,7 @@ interface Package {
   version?: string;
   html_url?: string;
   version_count: number;
+  pull_count?: number;
   updated_at?: string;
 }
 
@@ -43,6 +44,7 @@ function statusBadge(status: string): string {
             <th data-sort-key="version" class="sortable">Version ↕</th>
             <th data-sort-key="updated_at" class="sortable">Last Updated ↕</th>
             <th data-sort-key="last_status" class="sortable">Build Status ↕</th>
+            <th data-sort-key="pull_count" class="sortable">Pulls ↕</th>
             <th data-sort-key="version_count" class="sortable">Version Count ↕</th>
           </tr>
         </thead>
@@ -56,6 +58,7 @@ function statusBadge(status: string): string {
                 data-version={pkg.version ?? ""}
                 data-updated_at={pkg.updated_at ?? ""}
                 data-last_status={status}
+                data-pull_count={pkg.pull_count ?? 0}
                 data-version_count={pkg.version_count}
               >
                 <td>
@@ -66,6 +69,7 @@ function statusBadge(status: string): string {
                 <td>{pkg.version ?? "—"}</td>
                 <td>{pkg.updated_at ? pkg.updated_at.slice(0, 10) : "—"}</td>
                 <td>{statusBadge(status)}</td>
+                <td>{pkg.pull_count != null ? pkg.pull_count.toLocaleString() : "—"}</td>
                 <td>{pkg.version_count.toLocaleString()}</td>
               </tr>
             );
@@ -97,8 +101,8 @@ function statusBadge(status: string): string {
       rows.sort((a, b) => {
         const aVal = a.dataset[sortKey] ?? '';
         const bVal = b.dataset[sortKey] ?? '';
-        // Numeric sort for version_count
-        if (sortKey === 'version_count') {
+        // Numeric sort for version_count and pull_count
+        if (sortKey === 'version_count' || sortKey === 'pull_count') {
           return (Number(aVal) - Number(bVal)) * sortDir;
         }
         return aVal.localeCompare(bVal) * sortDir;

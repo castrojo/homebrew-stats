@@ -1,0 +1,31 @@
+---
+// No props needed — links are hardcoded to this repo
+---
+<div class="issue-bar">
+  <a
+    href="https://github.com/castrojo/homebrew-stats/issues/new"
+    class="issue-link"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    🐛 File an issue
+  </a>
+</div>
+
+<style>
+  .issue-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.25rem 1rem 0;
+  }
+  .issue-link {
+    font-size: 0.8rem;
+    color: var(--color-muted, #888);
+    text-decoration: none;
+    opacity: 0.75;
+  }
+  .issue-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+</style>

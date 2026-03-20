@@ -32,6 +32,7 @@ export interface Package {
   version?: string;
   html_url?: string;
   version_count: number;
+  pull_count?: number;
   created_at?: string;
   updated_at?: string;
 }

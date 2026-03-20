@@ -32,6 +32,18 @@ const period365 = osAnalytics.periods.find(p => p.period === '365d');
   ranges={[{ label: '30d', value: '30d' }, { label: '90d', value: '90d' }, { label: '365d', value: '365d' }]}
   defaultRange="30d"
 />
+
+<div class="os-extra-controls">
+  <div class="btn-group" id="os-focus-btns" role="group" aria-label="Distro filter">
+    <button class="range-btn active" data-focus="all">All</button>
+    <button class="range-btn" data-focus="atomic">Atomic</button>
+  </div>
+  <div class="btn-group" id="os-scale-btns" role="group" aria-label="Scale type">
+    <button class="range-btn active" data-scale="linear">Linear</button>
+    <button class="range-btn" data-scale="log">Log</button>
+  </div>
+</div>
+
 <script type="application/json" id="os-data" set:html={safeJson({ periods: {
   '30d':  period30  ? period30.items.slice(0, 10)  : [],
   '90d':  period90  ? period90.items.slice(0, 10)  : [],
@@ -44,16 +56,36 @@ import { readChartData } from '../lib/inject.js';
 import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
 import { Chart } from 'chart.js';
 
+const ATOMIC_DISTROS = new Set([
+  'Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora', 'Nobara Linux',
+  'uCore', 'Fedora Linux', 'Universal Blue',
+]);
+
 const { periods } = readChartData<{
-  periods: Record<string, { os: string; percent: number }[]>;
+  periods: Record<string, { os: string; count: number; percent: number }[]>;
 }>('os-data');
 
-function buildData(items: { os: string; percent: number }[]) {
+let currentPeriod = '30d';
+let currentFocus: 'all' | 'atomic' = 'all';
+let currentScale: 'linear' | 'log' = 'linear';
+
+const colors = getChartColors();
+
+function filterItems(items: { os: string; count: number; percent: number }[]) {
+  if (currentFocus === 'atomic') {
+    return items.filter(i => ATOMIC_DISTROS.has(i.os));
+  }
+  return items;
+}
+
+function buildData(rawItems: { os: string; count: number; percent: number }[]) {
+  const items = filterItems(rawItems);
+  const useCount = currentScale === 'log';
   return {
     labels: items.map(i => i.os),
     datasets: [{
-      label: '% of installs',
-      data: items.map(i => i.percent),
+      label: useCount ? 'Install count' : '% of installs',
+      data: items.map(i => useCount ? i.count : i.percent),
       backgroundColor: BRAND_COLOURS[0] + '99',
       borderColor: BRAND_COLOURS[0],
       borderWidth: 1,
@@ -62,8 +94,34 @@ function buildData(items: { os: string; percent: number }[]) {
   };
 }
 
-let currentPeriod = '30d';
-const colors = getChartColors();
+function getScaleOptions(c: ReturnType<typeof getChartColors>) {
+  const isLog = currentScale === 'log';
+  return {
+    x: {
+      type: isLog ? ('logarithmic' as const) : ('linear' as const),
+      beginAtZero: !isLog,
+      min: isLog ? 1 : 0,
+      grid: { color: c.grid },
+      ticks: {
+        color: c.muted,
+        font: { size: 11 as number },
+        callback: isLog
+          ? (v: number | string) => {
+              const n = Number(v);
+              return n >= 1000 ? `${(n / 1000).toFixed(0)}k` : String(n);
+            }
+          : (v: number | string) => `${v}%`,
+      },
+    },
+    y: {
+      grid: { display: false },
+      ticks: {
+        color: c.text,
+        font: { size: 12 as number },
+      },
+    },
+  };
+}
 
 let chart: Chart | undefined;
 try {
@@ -78,42 +136,59 @@ try {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => ` ${ctx.parsed.x.toFixed(2)}%`,
+            label: (ctx) => {
+              if (currentScale === 'log') {
+                return ` ${Number(ctx.parsed.x).toLocaleString()} installs`;
+              }
+              return ` ${ctx.parsed.x.toFixed(2)}%`;
+            },
           },
         },
       },
-      scales: {
-        x: {
-          beginAtZero: true,
-          grid: { color: colors.grid },
-          ticks: {
-            color: colors.muted,
-            font: { size: 11 },
-            callback: (v) => `${v}%`,
-          },
-        },
-        y: {
-          grid: { display: false },
-          ticks: {
-            color: colors.text,
-            font: { size: 12 },
-          },
-        },
-      },
+      scales: getScaleOptions(colors),
     },
   });
 } catch (e) {
   console.error('[OsSection] Chart.js init failed:', e);
 }
 
+function refreshChart() {
+  if (!chart) return;
+  const c = getChartColors();
+  chart.data = buildData(periods[currentPeriod]);
+  const scales = getScaleOptions(c);
+  chart.options.scales = scales as typeof chart.options.scales;
+  chart.update();
+}
+
+// Period buttons (rendered by ChartCard)
 document.querySelectorAll('#os-period-btns .range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (!chart) return;
     document.querySelectorAll('#os-period-btns .range-btn').forEach(b => b.classList.remove('active'));
     (btn as HTMLElement).classList.add('active');
-    const period = (btn as HTMLElement).dataset.range!;
-    chart.data = buildData(periods[period]);
-    chart.update();
+    currentPeriod = (btn as HTMLElement).dataset.range!;
+    refreshChart();
+  });
+});
+
+// Focus buttons
+document.querySelectorAll('#os-focus-btns .range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#os-focus-btns .range-btn').forEach(b => b.classList.remove('active'));
+    (btn as HTMLElement).classList.add('active');
+    currentFocus = (btn as HTMLElement).dataset.focus as 'all' | 'atomic';
+    refreshChart();
+  });
+});
+
+// Scale buttons
+document.querySelectorAll('#os-scale-btns .range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#os-scale-btns .range-btn').forEach(b => b.classList.remove('active'));
+    (btn as HTMLElement).classList.add('active');
+    currentScale = (btn as HTMLElement).dataset.scale as 'linear' | 'log';
+    refreshChart();
   });
 });
 
@@ -122,9 +197,35 @@ window.addEventListener('themechange', () => {
   const c = getChartColors();
   (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).backgroundColor = BRAND_COLOURS[0] + '99';
   (chart.data.datasets[0] as { backgroundColor: string; borderColor: string }).borderColor = BRAND_COLOURS[0];
-  chart.options.scales!.x!.grid!.color = c.grid;
-  chart.options.scales!.x!.ticks!.color = c.muted;
-  chart.options.scales!.y!.ticks!.color = c.text;
+  const scales = getScaleOptions(c);
+  chart.options.scales = scales as typeof chart.options.scales;
   chart.update();
 });
 </script>
+
+<style>
+  .os-extra-controls {
+    display: flex;
+    gap: 8px;
+    padding: 6px 12px 0;
+    flex-wrap: wrap;
+  }
+  .btn-group {
+    display: flex;
+    gap: 4px;
+  }
+  /* range-btn styles match ChartCard's generated buttons */
+  .range-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .range-btn:hover { color: var(--text); background: var(--bg2); }
+  .range-btn.active { color: var(--text); background: var(--bg2); border-color: var(--blue); font-weight: 600; }
+</style>
+

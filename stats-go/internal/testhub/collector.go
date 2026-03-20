@@ -64,6 +64,9 @@ func ListPackages(ctx context.Context, client *gh.Client, org string) ([]Package
 			p := Package{
 				Name:    name,
 				HTMLURL: pkg.GetHTMLURL(),
+				// PullCount: the GitHub Packages API (go-github v60) does not expose
+				// a pull/download count for container packages. The field is reserved
+				// for when that data becomes available via the API.
 			}
 			if t := pkg.GetCreatedAt(); !t.IsZero() {
 				p.CreatedAt = t.UTC().Format(time.RFC3339)

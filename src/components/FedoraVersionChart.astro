@@ -37,6 +37,12 @@ const FEDORA_VERSION_PALETTE = [
       canvasId="fedora-version-chart"
       height={300}
     />
+    <div class="fedora-scale-controls">
+      <div class="btn-group" id="fedora-scale-btns" role="group" aria-label="Scale type">
+        <button class="range-btn active" data-scale="linear">Linear</button>
+        <button class="range-btn" data-scale="log">Log</button>
+      </div>
+    </div>
     <script type="application/json" id="fedora-version-data" set:html={safeJson({ osVersionDist, DISTRO_ORDER, allVersions, FEDORA_VERSION_PALETTE })}></script>
   </>
 )}
@@ -52,6 +58,7 @@ if (dataEl) {
     JSON.parse(dataEl.textContent!);
 
   const canvas = document.getElementById('fedora-version-chart') as HTMLCanvasElement;
+  let currentScale: 'linear' | 'log' = 'linear';
 
   function buildChart() {
     const c = getChartColors();
@@ -64,13 +71,37 @@ if (dataEl) {
       borderRadius: 3,
     }));
 
+    const yAxis = currentScale === 'log'
+      ? {
+          type: 'logarithmic' as const,
+          min: 1,
+          grid: { color: c.grid },
+          ticks: {
+            color: c.muted,
+            callback: (v: number | string) => {
+              const n = Number(v);
+              return n >= 1000 ? `${(n / 1000).toFixed(0)}k` : String(n);
+            },
+          },
+        }
+      : {
+          type: 'linear' as const,
+          beginAtZero: true,
+          grid: { color: c.grid },
+          ticks: {
+            color: c.muted,
+            callback: (v: number | string) =>
+              Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(0)}k` : String(v),
+          },
+        };
+
     if (chart) {
       chart.data.labels = labels;
       chart.data.datasets = datasets;
       chart.options.scales!.x!.ticks!.color = c.muted;
       (chart.options.scales!.x!.grid as { color: string }).color = c.grid;
-      chart.options.scales!.y!.ticks!.color = c.muted;
-      (chart.options.scales!.y!.grid as { color: string }).color = c.grid;
+      // Update y-axis type and options in place
+      chart.options.scales!.y = yAxis as typeof chart.options.scales.y;
       (chart.options.plugins!.legend!.labels as { color: string }).color = c.muted;
       chart.update();
       return;
@@ -91,15 +122,7 @@ if (dataEl) {
               grid: { color: c.grid },
               ticks: { color: c.muted },
             },
-            y: {
-              beginAtZero: true,
-              grid: { color: c.grid },
-              ticks: {
-                color: c.muted,
-                callback: (v: number | string) =>
-                  Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(0)}k` : String(v),
-              },
-            },
+            y: yAxis,
           },
         },
       });
@@ -110,6 +133,43 @@ if (dataEl) {
 
   let chart: Chart | undefined;
   buildChart();
+
+  // Scale toggle
+  document.querySelectorAll('#fedora-scale-btns .range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#fedora-scale-btns .range-btn').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      currentScale = (btn as HTMLElement).dataset.scale as 'linear' | 'log';
+      buildChart();
+    });
+  });
+
   window.addEventListener('themechange', buildChart);
 }
 </script>
+
+<style>
+  .fedora-scale-controls {
+    display: flex;
+    gap: 8px;
+    padding: 6px 12px 0;
+    flex-wrap: wrap;
+  }
+  .btn-group {
+    display: flex;
+    gap: 4px;
+  }
+  .range-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .range-btn:hover { color: var(--text); background: var(--bg2); }
+  .range-btn.active { color: var(--text); background: var(--bg2); border-color: var(--blue); font-weight: 600; }
+</style>
+

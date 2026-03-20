@@ -9,7 +9,7 @@ import (
 
 func TestAppendSnapshot_NewDay(t *testing.T) {
 	store := &HistoryStore{}
-	pkgs := []Package{{Name: "ghostty", VersionCount: 5}}
+	pkgs := []Package{{Name: "ghostty", VersionCount: 5, PullCount: 42}}
 	counts := []AppDayCount{{App: "ghostty", Passed: 3, Failed: 1, Total: 4}}
 
 	result := AppendSnapshot(store, pkgs, counts, 100)
@@ -22,6 +22,10 @@ func TestAppendSnapshot_NewDay(t *testing.T) {
 	}
 	if len(result.Snapshots[0].BuildCounts) != 1 {
 		t.Errorf("expected 1 build count, got %d", len(result.Snapshots[0].BuildCounts))
+	}
+	// PullCount must survive the snapshot round-trip.
+	if result.Snapshots[0].Packages[0].PullCount != 42 {
+		t.Errorf("expected PullCount=42, got %d", result.Snapshots[0].Packages[0].PullCount)
 	}
 }
 
