@@ -91,6 +91,12 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Write build metadata sentinel
+        run: |
+          mkdir -p public
+          echo "{\"generated_at\": \"$(date -u +%Y-%m-%d)\"}" > public/meta.json
+          echo "✅ wrote public/meta.json: $(cat public/meta.json)"
+
       - name: Build Astro site
         run: npm run build
 
