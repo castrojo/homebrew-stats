@@ -205,3 +205,69 @@ test.describe('No empty charts contract', () => {
     await assertNoEmptyCharts(page, '/homebrew-stats/overall/');
   });
 });
+
+// ─── IssueButton ─────────────────────────────────────────────────────────────
+
+test.describe('IssueButton', () => {
+  for (const [tab, url] of [
+    ['Homebrew', '/homebrew-stats/'],
+    ['Testhub', '/homebrew-stats/testhub/'],
+    ['Overall', '/homebrew-stats/overall/'],
+  ]) {
+    test(`${tab} tab has a "File an issue" link`, async ({ page }) => {
+      await page.goto(url as string);
+      const link = page.locator('a[href*="castrojo/homebrew-stats/issues/new"]');
+      await expect(link, `${tab} tab must have a file-an-issue link`).toBeVisible();
+    });
+  }
+});
+
+// ─── Interactive chart controls ───────────────────────────────────────────────
+// These tests click the new toggle buttons added in batch-issue session and
+// verify the chart canvas survives the interaction (not destroyed, still has
+// a non-zero bounding box).
+
+test.describe('OsSection interactive controls', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/homebrew-stats/');
+  });
+
+  test('Atomic Focus toggle switches active button and keeps canvas rendered', async ({ page }) => {
+    const atomicBtn = page.locator('#os-focus-btns .range-btn[data-focus="atomic"]');
+    const allBtn    = page.locator('#os-focus-btns .range-btn[data-focus="all"]');
+
+    await expect(allBtn).toHaveClass(/active/);
+    await atomicBtn.click();
+    await expect(atomicBtn).toHaveClass(/active/);
+    await expect(allBtn).not.toHaveClass(/active/);
+    await expectCanvasRendered(page, 'os-bar-chart');
+  });
+
+  test('Log scale toggle switches active button and keeps canvas rendered', async ({ page }) => {
+    const logBtn    = page.locator('#os-scale-btns .range-btn[data-scale="log"]');
+    const linearBtn = page.locator('#os-scale-btns .range-btn[data-scale="linear"]');
+
+    await expect(linearBtn).toHaveClass(/active/);
+    await logBtn.click();
+    await expect(logBtn).toHaveClass(/active/);
+    await expect(linearBtn).not.toHaveClass(/active/);
+    await expectCanvasRendered(page, 'os-bar-chart');
+  });
+});
+
+test.describe('FedoraVersionChart log scale toggle', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/homebrew-stats/overall/');
+  });
+
+  test('Log scale toggle switches active button and keeps canvas rendered', async ({ page }) => {
+    const logBtn    = page.locator('#fedora-scale-btns .range-btn[data-scale="log"]');
+    const linearBtn = page.locator('#fedora-scale-btns .range-btn[data-scale="linear"]');
+
+    await expect(linearBtn).toHaveClass(/active/);
+    await logBtn.click();
+    await expect(logBtn).toHaveClass(/active/);
+    await expect(linearBtn).not.toHaveClass(/active/);
+    await expectCanvasRendered(page, 'fedora-version-chart');
+  });
+});
