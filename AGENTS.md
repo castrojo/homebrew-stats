@@ -218,6 +218,28 @@ If `new max run_id` never advances across multiple days AND testhub shows all-un
 3. The committed `src/data/testhub-seed-history.json` bootstraps testhub history immediately
 4. Homebrew history re-accumulates from GitHub API (14-day window) on the first run
 
+### ⚠️ After bumping the cache key — mandatory warm-up procedure
+
+A cache key bump forces a cold start on the next CI run. This creates a bootstrap
+period where testhub data may be incomplete (⚪ — build statuses).
+
+**NEVER add new data-quality tests in the same batch as a cache key bump.**
+
+Doing so guarantees a predictable outage:
+1. Cache bump → cold start on next run
+2. Cold start → empty `build_metrics` (bootstrap period)
+3. Strict data-quality test → fails on empty `build_metrics`
+4. Deploy blocked
+
+Procedure after any cache key bump:
+1. Push the bump commit **alone** (no other changes in the same PR/batch)
+2. Run `gh workflow run .github/workflows/daily-build.yml` to warm the cache
+3. Confirm CI is green and testhub shows real statuses on the live site
+4. **THEN** add new tests that depend on non-empty testhub data
+
+This rule was established after the 2026-03-21 production outage where 12 commits
+were blocked because cache key v2 + a strict build-status test landed together.
+
 ---
 
 
@@ -225,6 +247,23 @@ If `new max run_id` never advances across multiple days AND testhub shows all-un
 - **TypeScript**: vitest unit tests in `src/lib/*.test.ts` covering pure chart/package utility functions. Run `npx vitest run` from the repo root.
 - **Do not add `console.log` debugging** to committed code.
 - **Do not push** from automated agents — commit only.
+
+### Pre-deploy vs. post-deploy test classification
+
+**Pre-deploy E2E (`charts.spec.ts`)** — tests RENDERING only. Must pass even on cold cache:
+- Canvas elements rendered (non-zero bounding box)
+- JSON data scripts present and parseable
+- Component structure (KPI cards exist, table has correct headers)
+- No `class="chart-empty"` on structural charts
+
+**Post-deploy smoke-test (`smoke-test.yml`)** — tests DATA QUALITY. May warn on cold cache:
+- At least one testhub package has a known (non-⚪) build status
+- KPI numeric values are non-zero
+- `meta.json` freshness reflects today's date
+
+**The rule:** If a test can fail due to API data being unavailable or cache being cold,
+it belongs in `smoke-test.yml`, NOT in the pre-deploy E2E suite. Data-quality tests
+in the pre-deploy gate caused the 2026-03-21 production outage.
 
 ---
 
