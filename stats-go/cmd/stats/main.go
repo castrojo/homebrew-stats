@@ -323,16 +323,27 @@ result[c.App] = lastStatus{status: status, at: snap.Date}
 return result
 }
 
+// hasBuildCounts returns true if at least one snapshot has non-empty build data.
+// Used to detect caches that exist but were written before build counts were available.
+func hasBuildCounts(snapshots []testhub.DaySnapshot) bool {
+for _, snap := range snapshots {
+if len(snap.BuildCounts) > 0 {
+return true
+}
+}
+return false
+}
+
 func loadTesthubHistoryFrom(cacheFile, seedFile string) (*testhub.HistoryStore, error) {
 data, err := os.ReadFile(cacheFile)
 if err == nil {
 var store testhub.HistoryStore
-if jsonErr := json.Unmarshal(data, &store); jsonErr == nil && len(store.Snapshots) > 0 {
-// Cache is valid and has data — use it.
+if jsonErr := json.Unmarshal(data, &store); jsonErr == nil && hasBuildCounts(store.Snapshots) {
+// Cache is valid and has snapshots with build data — use it.
 return &store, nil
 }
-// Cache exists but is empty or malformed — fall through to seed.
-fmt.Fprintf(os.Stderr, "  cache file empty or invalid, trying seed file\n")
+// Cache exists but is empty, malformed, or all snapshots lack build data — fall through to seed.
+fmt.Fprintf(os.Stderr, "  cache file empty or missing build data, trying seed file\n")
 }
 // Try seed file (covers: file-not-found, read error, empty/malformed cache).
 if seed, seedErr := os.ReadFile(seedFile); seedErr == nil {
