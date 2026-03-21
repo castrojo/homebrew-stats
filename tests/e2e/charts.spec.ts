@@ -271,3 +271,39 @@ test.describe('FedoraVersionChart log scale toggle', () => {
     await expectCanvasRendered(page, 'fedora-version-chart');
   });
 });
+
+// ─── Testhub data quality ─────────────────────────────────────────────────────
+
+test.describe('Testhub data quality', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/homebrew-stats/testhub/');
+  });
+
+  test('KPI cards have all expected labels', async ({ page }) => {
+    const labels = await page.locator('.kpi-label').allTextContents();
+    const normalized = labels.map(l => l.trim().toUpperCase());
+    expect(normalized).toContain('TOTAL PACKAGES');
+    expect(normalized).toContain('LATEST BUILD STATUS');
+    expect(normalized).toContain('UPDATED THIS WEEK');
+    expect(normalized).toContain('BUILD RUNS (30D)');
+    // 'TOTAL PULLS' is conditional — omitted until OCI pull API available (#13)
+  });
+
+  test('Package table has all expected column headers', async ({ page }) => {
+    const headers = await page.locator('#testhub-table thead th').allTextContents();
+    const text = headers.join(' ');
+    expect(text).toContain('Package');
+    expect(text).toContain('Build Status');
+    expect(text).toContain('Version Count');
+    expect(text).toContain('Pulls');
+  });
+
+  test('At least one package has a known build status', async ({ page }) => {
+    const statusCells = await page.locator('#testhub-tbody td:nth-child(4)').allTextContents();
+    const known = statusCells.filter(s => s.includes('🟢') || s.includes('🔴'));
+    expect(
+      known.length,
+      'At least one package must have known build status — all ⚪ — means stale cache'
+    ).toBeGreaterThan(0);
+  });
+});
