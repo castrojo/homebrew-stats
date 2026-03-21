@@ -16,11 +16,18 @@ func ComputeBusFactor(authorCommits map[string]int, threshold float64) int {
 		return 1
 	}
 	total := 0
-	for _, c := range authorCommits {
-		total += c
+	humanCount := 0
+	for login, c := range authorCommits {
+		if !IsBot(login) {
+			total += c
+			humanCount++
+		}
+	}
+	if humanCount == 0 {
+		return 0 // only bots, no human contributors
 	}
 	if total == 0 {
-		return 1
+		return 1 // humans exist but no commits yet
 	}
 
 	// Build sorted slice (descending by commits), excluding bots.

@@ -187,7 +187,7 @@ func FetchRepoPRs(ctx context.Context, client *gh.Client, owner, repo string, si
 				done = true
 				break
 			}
-			if !pr.GetMerged() || pr.MergedAt == nil {
+			if pr.MergedAt == nil || pr.MergedAt.IsZero() {
 				continue
 			}
 			if pr.MergedAt.Before(since) {
