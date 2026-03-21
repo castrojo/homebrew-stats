@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-21T05:39:49Z",
+  "generated_at": "2026-03-21T05:43:06Z",
   "period": {
     "start": "2026-02-19",
     "end": "2026-03-21"
@@ -162,13 +162,28 @@
       "is_bot": false
     },
     {
-      "login": "Copilot",
+      "login": "jfmongrain",
+      "name": "JF",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54219775?v=4",
+      "location": "Canada",
       "commits_30d": 1,
       "prs_merged_30d": 1,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
-        "projectbluefin/testhub"
+        "projectbluefin/documentation"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "rpassmore",
+      "avatar_url": "https://avatars.githubusercontent.com/u/635850?v=4",
+      "commits_30d": 1,
+      "prs_merged_30d": 1,
+      "issues_opened_30d": 1,
+      "discussion_posts_30d": 0,
+      "repos_active": [
+        "projectbluefin/finpilot"
       ],
       "is_bot": false
     },
@@ -183,6 +198,31 @@
       "discussion_posts_30d": 0,
       "repos_active": [
         "ublue-os/bluefin-lts"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "KiKaraage",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10529881?v=4",
+      "location": "Indonesia",
+      "commits_30d": 1,
+      "prs_merged_30d": 2,
+      "issues_opened_30d": 0,
+      "discussion_posts_30d": 0,
+      "repos_active": [
+        "projectbluefin/common"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "buggerman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11626756?v=4",
+      "commits_30d": 1,
+      "prs_merged_30d": 1,
+      "issues_opened_30d": 0,
+      "discussion_posts_30d": 0,
+      "repos_active": [
+        "ublue-os/bluefin"
       ],
       "is_bot": false
     },
@@ -202,53 +242,13 @@
       "is_bot": false
     },
     {
-      "login": "rpassmore",
-      "avatar_url": "https://avatars.githubusercontent.com/u/635850?v=4",
-      "commits_30d": 1,
-      "prs_merged_30d": 1,
-      "issues_opened_30d": 1,
-      "discussion_posts_30d": 0,
-      "repos_active": [
-        "projectbluefin/finpilot"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "buggerman",
-      "avatar_url": "https://avatars.githubusercontent.com/u/11626756?v=4",
+      "login": "Copilot",
       "commits_30d": 1,
       "prs_merged_30d": 1,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
-        "ublue-os/bluefin"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "jfmongrain",
-      "name": "JF",
-      "avatar_url": "https://avatars.githubusercontent.com/u/54219775?v=4",
-      "location": "Canada",
-      "commits_30d": 1,
-      "prs_merged_30d": 1,
-      "issues_opened_30d": 0,
-      "discussion_posts_30d": 0,
-      "repos_active": [
-        "projectbluefin/documentation"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "KiKaraage",
-      "avatar_url": "https://avatars.githubusercontent.com/u/10529881?v=4",
-      "location": "Indonesia",
-      "commits_30d": 1,
-      "prs_merged_30d": 2,
-      "issues_opened_30d": 0,
-      "discussion_posts_30d": 0,
-      "repos_active": [
-        "projectbluefin/common"
+        "projectbluefin/testhub"
       ],
       "is_bot": false
     }
@@ -9493,6 +9493,32 @@
     "total_discussion_comments_30d": 43,
     "unique_discussion_authors_30d": 21,
     "answered_rate": 0,
-    "weekly_trend": []
+    "weekly_trend": [
+      {
+        "week": "2026-02-16",
+        "discussions": 5,
+        "comments": 9
+      },
+      {
+        "week": "2026-02-23",
+        "discussions": 6,
+        "comments": 16
+      },
+      {
+        "week": "2026-03-02",
+        "discussions": 5,
+        "comments": 7
+      },
+      {
+        "week": "2026-03-09",
+        "discussions": 4,
+        "comments": 6
+      },
+      {
+        "week": "2026-03-16",
+        "discussions": 3,
+        "comments": 5
+      }
+    ]
   }
 }
