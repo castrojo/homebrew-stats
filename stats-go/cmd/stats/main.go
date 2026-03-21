@@ -872,6 +872,32 @@ func runFetchContributors() error {
 		WeeklyTrend:                []contributors.DiscussionWeek{},
 	}
 
+	// Build weekly trend: bucket discussions by Monday of their creation week.
+	if len(allDiscussions) > 0 {
+		weekMap := make(map[string]*contributors.DiscussionWeek)
+		for _, d := range allDiscussions {
+			// Truncate to Monday of that week.
+			wd := int(d.CreatedAt.Weekday())
+			if wd == 0 {
+				wd = 7 // Sunday → 7 so Monday offset = wd-1
+			}
+			monday := d.CreatedAt.AddDate(0, 0, -(wd - 1))
+			key := monday.Format("2006-01-02")
+			if weekMap[key] == nil {
+				weekMap[key] = &contributors.DiscussionWeek{Week: key}
+			}
+			weekMap[key].Discussions++
+			weekMap[key].Comments += d.CommentCount
+		}
+		// Sort weeks ascending.
+		weeks := make([]contributors.DiscussionWeek, 0, len(weekMap))
+		for _, w := range weekMap {
+			weeks = append(weeks, *w)
+		}
+		sort.Slice(weeks, func(i, j int) bool { return weeks[i].Week < weeks[j].Week })
+		discSummary.WeeklyTrend = weeks
+	}
+
 	summary := contributors.ContributorSummary{
 		ActiveContributors:      len(activeLogins),
 		NewContributors:         len(newContribs),
