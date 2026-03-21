@@ -1,0 +1,181 @@
+name: Sync Contributor Data
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"  # Weekly Sunday 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Fetch mode: incremental (since last run) or full (last 30 days)'
+        required: false
+        default: 'incremental'
+        type: choice
+        options:
+          - incremental
+          - full
+
+permissions:
+  contents: write   # needed to commit contributors.json back
+
+concurrency:
+  group: contributor-sync
+  cancel-in-progress: false  # NEVER cancel — partial data is worse than waiting
+
+jobs:
+  fetch-contributors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: stats-go/go.mod
+          cache-dependency-path: stats-go/go.sum
+
+      - name: Restore contributor history cache
+        id: cache-restore
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: contributor-history-v1-${{ github.run_id }}
+          restore-keys: contributor-history-v1-
+
+      - name: Build stats binary
+        run: cd stats-go && go build -o stats ./cmd/stats/
+
+      - name: Detect fetch mode
+        id: mode
+        run: |
+          MODE="${{ github.event.inputs.mode || 'incremental' }}"
+          # First run: cold cache → force full mode to bootstrap 30 days of history
+          if [ "${{ steps.cache-restore.outputs.cache-hit }}" != "true" ]; then
+            echo "⚠️  No cache found — switching to full mode for bootstrap"
+            MODE="full"
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "Fetch mode: $MODE"
+
+      - name: Fetch LFX Insights metrics
+        id: sync-lfx
+        continue-on-error: true
+        env:
+          LFX_SLUG: ublue-os-bluefin
+          FETCH_MODE: ${{ steps.mode.outputs.mode }}
+        run: |
+          BASE="https://insights.linuxfoundation.org/api/project/${LFX_SLUG}"
+          mkdir -p .sync-cache/lfx-raw
+
+          # Date range: always last 90 days for LFX (it's fast and public)
+          START=$(date -u -d '90 days ago' +%Y-%m-%d)
+          END=$(date -u +%Y-%m-%d)
+          DATES="startDate=${START}&endDate=${END}"
+
+          fetch_lfx() {
+            local name="$1"; local url="$2"
+            echo "→ LFX: $name"
+            HTTP=$(curl -sf --max-time 30 --retry 3 --retry-delay 5 \
+              -w "%{http_code}" -o ".sync-cache/lfx-raw/${name}.json" "$url" 2>&1)
+            [ "$HTTP" = "200" ] && echo "  ✅ $name" || echo "  ⚠️  $name: HTTP $HTTP"
+          }
+
+          fetch_lfx "project"                   "${BASE}"
+          fetch_lfx "active-contributors"        "${BASE}/contributors/active-contributors?granularity=monthly&${DATES}"
+          fetch_lfx "contributor-dependency"     "${BASE}/contributors/contributor-dependency?platform=github&activityType=commit&${DATES}"
+          fetch_lfx "organization-dependency"    "${BASE}/contributors/organization-dependency?platform=github&activityType=commit&${DATES}"
+          fetch_lfx "retention"                  "${BASE}/contributors/retention?granularity=quarterly&type=contributor&${DATES}"
+          fetch_lfx "geographical-distribution"  "${BASE}/contributors/geographical-distribution?type=contributor&platform=github&activityType=commit&${DATES}"
+          fetch_lfx "contributor-leaderboard"    "${BASE}/contributors/contributor-leaderboard?${DATES}&limit=10&offset=0&platform=github"
+          fetch_lfx "commit-activities"          "${BASE}/development/commit-activities?granularity=weekly&type=total&countType=cumulative&activityType=commit&${DATES}"
+          fetch_lfx "pull-requests"              "${BASE}/development/pull-requests?granularity=weekly&${DATES}"
+          fetch_lfx "merge-lead-time"            "${BASE}/development/merge-lead-time?${DATES}"
+          fetch_lfx "review-efficiency"          "${BASE}/development/review-efficiency?granularity=monthly&platform=github&${DATES}"
+          fetch_lfx "issues-resolution"          "${BASE}/development/issues-resolution?granularity=monthly&${DATES}"
+          fetch_lfx "median-time-to-close"       "${BASE}/development/median-time-to-close?granularity=monthly&platform=github&${DATES}"
+          fetch_lfx "active-days"                "${BASE}/development/active-days?granularity=monthly&${DATES}"
+          fetch_lfx "contribution-outside"       "${BASE}/development/contribution-outside?${DATES}"
+          fetch_lfx "stars"                      "${BASE}/popularity/stars?granularity=monthly&type=total&countType=cumulative&${DATES}"
+          fetch_lfx "forks"                      "${BASE}/popularity/forks?granularity=monthly&type=total&countType=cumulative&${DATES}"
+
+          echo "✅ LFX fetch complete"
+
+      - name: Merge LFX data into contributor cache
+        if: steps.sync-lfx.outcome == 'success'
+        run: |
+          python3 << 'PYEOF'
+          import json, os, glob, datetime
+
+          cache_file = ".sync-cache/contributors-history.json"
+          raw_dir = ".sync-cache/lfx-raw"
+
+          history = {}
+          if os.path.exists(cache_file):
+              with open(cache_file) as f:
+                  history = json.load(f)
+          if "lfx" not in history:
+              history["lfx"] = {}
+
+          for path in sorted(glob.glob(f"{raw_dir}/*.json")):
+              name = os.path.basename(path).replace(".json", "")
+              try:
+                  with open(path) as f:
+                      data = json.load(f)
+                  history["lfx"][name] = data
+                  print(f"  ✅ merged lfx/{name}")
+              except Exception as e:
+                  print(f"  ⚠️  skipping lfx/{name}: {e}")
+
+          history["last_fetched_at"] = datetime.date.today().isoformat()
+          os.makedirs(".sync-cache", exist_ok=True)
+          with open(cache_file, "w") as f:
+              json.dump(history, f, indent=2)
+          print(f"✓ Updated {cache_file}")
+          PYEOF
+
+      - name: Fetch GitHub contributor metrics
+        id: sync-github
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-contributors
+
+      - name: Fallback on sync failure
+        if: steps.sync-github.outcome == 'failure' && steps.sync-lfx.outcome == 'failure'
+        run: |
+          if [ -f "src/data/contributors.json" ]; then
+            echo "⚠️  Both syncs failed — committed contributors.json will be used"
+          else
+            echo "❌ Both syncs failed and no committed contributors.json"
+            echo '{"generated_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","period":{"start":"","end":""},"summary":{"active_contributors":0,"new_contributors":0,"total_commits":0,"total_prs_merged":0,"total_issues_opened":0,"total_issues_closed":0,"bus_factor":0,"review_participation_rate":0,"active_repos":0,"total_discussions":0,"discussion_answer_rate":0},"top_contributors":[],"repos":[],"discussions_summary":{"total_discussions_30d":0,"total_discussion_comments_30d":0,"unique_discussion_authors_30d":0,"answered_rate":0,"weekly_trend":[]}}' \
+              > src/data/contributors.json
+          fi
+
+      - name: Save contributor history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: contributor-history-v1-${{ github.run_id }}
+
+      - name: Verify contributors data
+        run: |
+          contrib_count=$(jq '.top_contributors | length' src/data/contributors.json 2>/dev/null || echo 0)
+          active=$(jq '.summary.active_contributors // 0' src/data/contributors.json 2>/dev/null || echo 0)
+          echo "  top_contributors: $contrib_count"
+          echo "  active_contributors: $active"
+          if [ "$contrib_count" -gt 0 ]; then
+            echo "✅ contributors.json has data"
+          else
+            echo "⚠️  contributors.json is empty — first run or all APIs failed"
+          fi
+
+      - name: Commit contributors.json back to repo
+        uses: stefanzweifel/git-auto-commit-action@e348103e667707ab5f52da95f888e7a41de43d7d # v5.0.1
+        with:
+          commit_message: "chore: update contributor analytics [skip ci]"
+          file_pattern: "src/data/contributors.json"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"

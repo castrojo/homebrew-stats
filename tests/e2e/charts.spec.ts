@@ -298,3 +298,101 @@ test.describe('Testhub data quality', () => {
     expect(text).toContain('Pulls');
   });
 });
+
+// ─── Contributors tab ─────────────────────────────────────────────────────────
+
+test.describe('Contributors tab', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/homebrew-stats/contributors/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  // ── Data script validation ────────────────────────────────────────────────
+
+  test('commit-activity-data has valid JSON with non-empty repos array', async ({ page }) => {
+    const data = await getScriptJSON(page, 'commit-activity-data') as Record<string, unknown>;
+    expect(Array.isArray(data.repos), 'commit-activity-data.repos must be an array').toBe(true);
+    expect((data.repos as unknown[]).length, 'repos must be non-empty').toBeGreaterThan(0);
+  });
+
+  test('contributor-leaderboard-data has valid JSON with non-empty topContributors array', async ({ page }) => {
+    const data = await getScriptJSON(page, 'contributor-leaderboard-data') as Record<string, unknown>;
+    expect(Array.isArray(data.topContributors), 'contributor-leaderboard-data.topContributors must be an array').toBe(true);
+    expect((data.topContributors as unknown[]).length, 'topContributors must be non-empty').toBeGreaterThan(0);
+  });
+
+  test('bus-factor-data has valid JSON with summary.bus_factor', async ({ page }) => {
+    const data = await getScriptJSON(page, 'bus-factor-data') as Record<string, unknown>;
+    const summary = data.summary as Record<string, unknown>;
+    expect(typeof summary, 'bus-factor-data.summary must be an object').toBe('object');
+    expect(typeof summary.bus_factor, 'summary.bus_factor must be a number').toBe('number');
+    expect(summary.bus_factor as number, 'bus_factor must be > 0').toBeGreaterThan(0);
+  });
+
+  test('contribution-heatmap-data has valid JSON with repos array', async ({ page }) => {
+    const data = await getScriptJSON(page, 'contribution-heatmap-data') as Record<string, unknown>;
+    expect(Array.isArray(data.repos), 'contribution-heatmap-data.repos must be an array').toBe(true);
+    expect((data.repos as unknown[]).length, 'repos must be non-empty').toBeGreaterThan(0);
+  });
+
+  test('discussion-activity-data has valid JSON with non-empty trend array', async ({ page }) => {
+    const data = await getScriptJSON(page, 'discussion-activity-data') as Record<string, unknown>;
+    expect(Array.isArray(data.trend), 'discussion-activity-data.trend must be an array').toBe(true);
+    expect((data.trend as unknown[]).length, 'discussion trend must be non-empty').toBeGreaterThan(0);
+  });
+
+  // ── Canvas rendering ──────────────────────────────────────────────────────
+
+  test('CommitActivityChart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'commit-activity-chart');
+  });
+
+  test('ContributorLeaderboardChart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'contributor-leaderboard-chart');
+  });
+
+  test('BusFactorChart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'bus-factor-chart');
+  });
+
+  test('ContributionHeatmapChart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'contribution-heatmap-chart');
+  });
+
+  test('DiscussionActivityChart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'discussion-activity-chart');
+  });
+
+  // ── LFX-gated charts: empty-state when lfx data is absent ────────────────
+  // OrgDependencyChart, PRHealthChart, and NewVsReturningChart all require LFX
+  // Insights data. With lfx={} (seed data), they render a .chart-empty <p>
+  // element instead of a canvas. We assert the empty state is visible and that
+  // no canvas is mistakenly rendered.
+
+  test('OrgDependencyChart shows empty-state (no canvas) when lfx data is absent', async ({ page }) => {
+    // The canvas must NOT be present — ChartCard renders <p class="chart-empty"> instead
+    const canvas = page.locator('canvas#org-dependency-chart');
+    await expect(canvas, 'org-dependency-chart canvas must NOT exist when lfx data is absent').not.toBeAttached();
+    // At least one .chart-empty element must be visible
+    const emptyEl = page.locator('.chart-empty').first();
+    await expect(emptyEl, '.chart-empty element must be visible').toBeVisible();
+  });
+
+  test('PRHealthChart shows empty-state (no canvas) when lfx data is absent', async ({ page }) => {
+    const canvas = page.locator('canvas#pr-health-chart');
+    await expect(canvas, 'pr-health-chart canvas must NOT exist when lfx data is absent').not.toBeAttached();
+  });
+
+  test('NewVsReturningChart shows empty-state (no canvas) when lfx data is absent', async ({ page }) => {
+    const canvas = page.locator('canvas#new-vs-returning-chart');
+    await expect(canvas, 'new-vs-returning-chart canvas must NOT exist when lfx data is absent').not.toBeAttached();
+  });
+
+  // ── Page structure ────────────────────────────────────────────────────────
+
+  test('Contributors page has an explainer section', async ({ page }) => {
+    const explainer = page.locator('.explainer');
+    await expect(explainer).toBeVisible();
+    await expect(explainer).toContainText('Project Bluefin');
+  });
+});

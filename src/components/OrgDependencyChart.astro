@@ -1,0 +1,83 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface Props {
+  lfx: any;
+}
+
+const { lfx } = Astro.props;
+
+const orgList = lfx?.organization_dependency?.list ?? [];
+const isEmpty = !Array.isArray(orgList) || orgList.length === 0;
+---
+
+<ChartCard
+  title="Organization Dependency"
+  canvasId="org-dependency-chart"
+  height={260}
+  isEmpty={isEmpty}
+  emptyMsg="Organization data not yet available — enable LFX Insights to populate this chart."
+/>
+{!isEmpty && (
+  <script type="application/json" id="org-dependency-data" set:html={safeJson({ orgList })}></script>
+)}
+
+{!isEmpty && (
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { orgList } = readChartData<{
+    orgList: { name: string; percent: number }[];
+  }>('org-dependency-data');
+
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(document.getElementById('org-dependency-chart') as HTMLCanvasElement, {
+      type: 'doughnut',
+      data: {
+        labels: orgList.map(o => o.name),
+        datasets: [
+          {
+            data: orgList.map(o => o.percent),
+            backgroundColor: BRAND_COLOURS.slice(0, orgList.length) as string[],
+            borderColor: 'transparent',
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { color: colors.text, font: { size: 12 }, padding: 16 },
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.label}: ${ctx.parsed.toFixed(1)}%`,
+            },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[OrgDependencyChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    const c = getChartColors();
+    if (chart.options.plugins?.legend?.labels) {
+      chart.options.plugins.legend.labels.color = c.text;
+    }
+    chart.update();
+  });
+</script>
+)}

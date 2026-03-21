@@ -65,7 +65,7 @@ verify-live:
     BASE="https://castrojo.github.io/homebrew-stats"
     echo "=== Verifying live site: $BASE ==="
 
-    for path in "" "/testhub/" "/overall/"; do
+    for path in "" "/testhub/" "/overall/" "/contributors/"; do
       code=$(curl -sf -o /dev/null -w "%{http_code}" "$BASE$path" || echo "000")
       if [ "$code" = "200" ]; then
         echo "✅ $BASE$path → HTTP $code"
@@ -77,7 +77,7 @@ verify-live:
 
     echo "--- Checking canvas IDs ---"
     html=$(curl -sf "$BASE/")
-    for id in traffic-chart tap-comparison-chart os-bar-chart; do
+    for id in traffic-chart tap-comparison-chart os-bar-chart commit-activity-chart; do
       if echo "$html" | grep -q "id=\"$id\""; then
         echo "✅ canvas#$id found"
       else
@@ -100,6 +100,16 @@ verify-live:
       echo "✅ meta.json generated_at=$gen (fresh)"
     else
       echo "⚠️  meta.json generated_at=${gen:-<missing>} (expected $today) — site may be stale or meta.json not yet deployed"
+    fi
+
+    echo "--- Checking contributors data ---"
+    contrib_html=$(curl -sf "$BASE/contributors/" 2>/dev/null || echo "")
+    # contributors.json is not a static asset served by the site — skip remote check
+    # Instead just verify the contributors page loaded correctly
+    if echo "$contrib_html" | grep -q 'commit-activity-chart'; then
+      echo "✅ Contributors page has commit-activity-chart canvas"
+    else
+      echo "⚠️  Contributors page missing commit-activity-chart canvas (may be empty state)"
     fi
 
     echo "=== Live site verification PASSED ==="

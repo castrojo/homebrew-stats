@@ -265,3 +265,152 @@ describe("src/data/testhub.json schema", () => {
     }
   });
 });
+
+// ── contributors.json ─────────────────────────────────────────────────────────
+
+describe("src/data/contributors.json schema", () => {
+  const raw = loadJSON("src/data/contributors.json") as Record<string, unknown>;
+
+  it("has required top-level fields", () => {
+    expect(raw).toHaveProperty("generated_at");
+    expect(raw).toHaveProperty("period");
+    expect(raw).toHaveProperty("summary");
+    expect(raw).toHaveProperty("top_contributors");
+    expect(raw).toHaveProperty("repos");
+    expect(raw).toHaveProperty("discussions_summary");
+  });
+
+  it("generated_at is a non-empty string", () => {
+    expect(typeof raw.generated_at).toBe("string");
+    expect((raw.generated_at as string).length).toBeGreaterThan(0);
+  });
+
+  it("period has start and end date strings", () => {
+    const period = raw.period as Record<string, unknown>;
+    expect(typeof period.start).toBe("string");
+    expect(typeof period.end).toBe("string");
+  });
+
+  it("summary fields are non-negative numbers", () => {
+    const s = raw.summary as Record<string, unknown>;
+    const numFields = [
+      "active_contributors", "new_contributors", "total_commits",
+      "total_prs_merged", "total_issues_opened", "total_issues_closed",
+      "bus_factor", "active_repos", "total_discussions",
+    ];
+    for (const f of numFields) {
+      expect(typeof s[f], `summary.${f} must be a number`).toBe("number");
+      expect(s[f] as number, `summary.${f} must be >= 0`).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("summary.bus_factor is an integer >= 1 when contributors exist", () => {
+    const s = raw.summary as Record<string, number>;
+    const contribs = raw.top_contributors as unknown[];
+    if (contribs.length > 0) {
+      expect(s.bus_factor).toBeGreaterThanOrEqual(1);
+      expect(Number.isInteger(s.bus_factor)).toBe(true);
+    }
+  });
+
+  it("summary.review_participation_rate is in [0, 1]", () => {
+    const s = raw.summary as Record<string, number>;
+    expect(s.review_participation_rate).toBeGreaterThanOrEqual(0);
+    expect(s.review_participation_rate).toBeLessThanOrEqual(1);
+  });
+
+  it("summary.discussion_answer_rate is in [0, 1]", () => {
+    const s = raw.summary as Record<string, number>;
+    expect(s.discussion_answer_rate).toBeGreaterThanOrEqual(0);
+    expect(s.discussion_answer_rate).toBeLessThanOrEqual(1);
+  });
+
+  it("top_contributors is an array (never null)", () => {
+    expect(Array.isArray(raw.top_contributors)).toBe(true);
+  });
+
+  it("top_contributors entries have required fields with correct types", () => {
+    const contribs = raw.top_contributors as Array<Record<string, unknown>>;
+    if (contribs.length === 0) return;
+    for (const c of contribs) {
+      expect(typeof c.login, `login must be string`).toBe("string");
+      expect((c.login as string).length, `login must be non-empty`).toBeGreaterThan(0);
+      expect(typeof c.commits_30d, `commits_30d must be number`).toBe("number");
+      expect(c.commits_30d as number).toBeGreaterThanOrEqual(0);
+      expect(typeof c.prs_merged_30d).toBe("number");
+      expect(typeof c.issues_opened_30d).toBe("number");
+      expect(typeof c.is_bot).toBe("boolean");
+      expect(Array.isArray(c.repos_active)).toBe(true);
+    }
+  });
+
+  it("top_contributors bot flag: logins ending in [bot] must have is_bot=true", () => {
+    const contribs = raw.top_contributors as Array<{ login: string; is_bot: boolean }>;
+    for (const c of contribs) {
+      if (c.login.endsWith("[bot]")) {
+        expect(c.is_bot, `${c.login} must have is_bot=true`).toBe(true);
+      }
+    }
+  });
+
+  it("repos is an array (never null)", () => {
+    expect(Array.isArray(raw.repos)).toBe(true);
+  });
+
+  it("repos entries have required fields", () => {
+    const repos = raw.repos as Array<Record<string, unknown>>;
+    if (repos.length === 0) return;
+    for (const r of repos) {
+      expect(typeof r.name).toBe("string");
+      expect((r.name as string).length).toBeGreaterThan(0);
+      expect(typeof r.commits_30d).toBe("number");
+      expect(typeof r.bus_factor).toBe("number");
+      expect(Array.isArray(r.weekly_commits_52w)).toBe(true);
+    }
+  });
+
+  it("repos weekly_commits_52w has at most 52 entries", () => {
+    const repos = raw.repos as Array<{ weekly_commits_52w: number[] }>;
+    for (const r of repos) {
+      expect(r.weekly_commits_52w.length).toBeLessThanOrEqual(52);
+      for (const count of r.weekly_commits_52w) {
+        expect(typeof count).toBe("number");
+        expect(count).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+
+  it("repos human_commits_30d + bot_commits_30d <= commits_30d", () => {
+    const repos = raw.repos as Array<{
+      commits_30d: number;
+      human_commits_30d: number;
+      bot_commits_30d: number;
+    }>;
+    for (const r of repos) {
+      // Allow a small tolerance for unlinked commits not counted in either bucket
+      expect(r.human_commits_30d + r.bot_commits_30d).toBeLessThanOrEqual(r.commits_30d);
+    }
+  });
+
+  it("discussions_summary has required fields", () => {
+    const ds = raw.discussions_summary as Record<string, unknown>;
+    expect(typeof ds.total_discussions_30d).toBe("number");
+    expect(typeof ds.total_discussion_comments_30d).toBe("number");
+    expect(Array.isArray(ds.weekly_trend)).toBe(true);
+  });
+
+  it("discussions_summary.answered_rate is in [0, 1]", () => {
+    const ds = raw.discussions_summary as Record<string, number>;
+    expect(ds.answered_rate).toBeGreaterThanOrEqual(0);
+    expect(ds.answered_rate).toBeLessThanOrEqual(1);
+  });
+
+  it("discussions_summary.weekly_trend entries have week + counts", () => {
+    const ds = raw.discussions_summary as { weekly_trend: Array<Record<string, unknown>> };
+    for (const entry of ds.weekly_trend) {
+      expect(typeof entry.week).toBe("string");
+      expect(typeof entry.discussions).toBe("number");
+      expect(typeof entry.comments).toBe("number");
+    }
+  });
+});

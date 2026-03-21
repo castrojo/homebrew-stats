@@ -1,0 +1,96 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface RepoStats {
+  name: string;
+  commits_by_day_of_week: Record<string, number>;
+}
+
+interface Props {
+  repos: RepoStats[];
+}
+
+const { repos } = Astro.props;
+---
+
+<ChartCard
+  title="Community Activity by Day of Week"
+  canvasId="contribution-heatmap-chart"
+  height={260}
+/>
+<script type="application/json" id="contribution-heatmap-data" set:html={safeJson({ repos })}></script>
+
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { repos } = readChartData<{
+    repos: { name: string; commits_by_day_of_week: Record<string, number> }[];
+  }>('contribution-heatmap-data');
+
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  const totals = days.map(day =>
+    repos.reduce((sum, repo) => sum + (repo.commits_by_day_of_week[day] ?? 0), 0)
+  );
+
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(document.getElementById('contribution-heatmap-chart') as HTMLCanvasElement, {
+      type: 'radar',
+      data: {
+        labels: days,
+        datasets: [
+          {
+            label: 'Commits by day',
+            data: totals,
+            backgroundColor: BRAND_COLOURS[0] + '33',
+            borderColor: BRAND_COLOURS[0],
+            borderWidth: 2,
+            fill: true,
+            pointBackgroundColor: BRAND_COLOURS[0],
+            pointRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: colors.text, font: { size: 12 } } },
+        },
+        scales: {
+          r: {
+            beginAtZero: true,
+            ticks: { color: colors.muted, font: { size: 10 }, backdropColor: 'transparent' },
+            grid: { color: colors.grid },
+            pointLabels: { color: colors.text, font: { size: 12 } },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[ContributionHeatmapChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    const c = getChartColors();
+    if (chart.options.plugins?.legend?.labels) {
+      chart.options.plugins.legend.labels.color = c.text;
+    }
+    const scales = chart.options.scales as Record<string, { ticks?: { color: string }; grid?: { color: string }; pointLabels?: { color: string } }>;
+    const r = scales?.r;
+    if (r) {
+      if (r.ticks) r.ticks.color = c.muted;
+      if (r.grid) r.grid.color = c.grid;
+      if (r.pointLabels) r.pointLabels.color = c.text;
+    }
+    chart.update();
+  });
+</script>

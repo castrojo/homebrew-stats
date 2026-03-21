@@ -1,0 +1,106 @@
+---
+interface Props {
+  summary: {
+    active_contributors: number;
+    new_contributors: number;
+    total_commits: number;
+    total_prs_merged: number;
+    bus_factor: number;
+    review_participation_rate: number;
+    total_discussions: number;
+    discussion_answer_rate: number;
+  };
+}
+
+const { summary } = Astro.props;
+
+function busFactorClass(factor: number): string {
+  if (factor >= 4) return 'value-green';
+  if (factor >= 2) return 'value-yellow';
+  return 'value-red';
+}
+---
+
+<div class="hero-kpis">
+  <div class="kpi-card">
+    <div class="kpi-value">👥 {summary.active_contributors}</div>
+    <div class="kpi-label">Active Contributors</div>
+    <div class="kpi-sub">in the last 30 days</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">🆕 {summary.new_contributors}</div>
+    <div class="kpi-label">New Contributors</div>
+    <div class="kpi-sub">first-time contributors</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">📝 {summary.total_commits.toLocaleString()}</div>
+    <div class="kpi-label">Commits</div>
+    <div class="kpi-sub">across all repos</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">🔀 {summary.total_prs_merged}</div>
+    <div class="kpi-label">PRs Merged</div>
+    <div class="kpi-sub">merged in 30 days</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class={`kpi-value ${busFactorClass(summary.bus_factor)}`}>🚌 {summary.bus_factor}</div>
+    <div class="kpi-label">Bus Factor</div>
+    <div class="kpi-sub">people hold 80% of commits</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">💬 {summary.total_discussions}</div>
+    <div class="kpi-label">Discussions</div>
+    <div class="kpi-sub">{Math.round(summary.discussion_answer_rate * 100)}% answered</div>
+  </div>
+</div>
+
+<style>
+  .hero-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    flex: 1 1 140px;
+  }
+
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .value-green { color: var(--green); }
+  .value-yellow { color: var(--yellow); }
+  .value-red { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .kpi-card { flex: 1 1 calc(50% - 6px); }
+  }
+</style>

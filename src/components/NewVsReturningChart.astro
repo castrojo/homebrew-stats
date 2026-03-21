@@ -1,0 +1,96 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface Props {
+  lfx: any;
+}
+
+const { lfx } = Astro.props;
+
+const activeContribData = lfx?.['active-contributors']?.data ?? [];
+const isEmpty = !Array.isArray(activeContribData) || activeContribData.length === 0;
+---
+
+<ChartCard
+  title="New vs Returning Contributors"
+  canvasId="new-vs-returning-chart"
+  height={260}
+  isEmpty={isEmpty}
+  emptyMsg="Contributor retention data not yet available — enable LFX Insights to populate this chart."
+/>
+{!isEmpty && (
+  <script type="application/json" id="new-vs-returning-data" set:html={safeJson({ activeContribData })}></script>
+)}
+
+{!isEmpty && (
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { activeContribData } = readChartData<{
+    activeContribData: { period: string; new: number; returning: number }[];
+  }>('new-vs-returning-data');
+
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(document.getElementById('new-vs-returning-chart') as HTMLCanvasElement, {
+      type: 'bar',
+      data: {
+        labels: activeContribData.map(d => d.period),
+        datasets: [
+          {
+            label: 'New',
+            data: activeContribData.map(d => d.new),
+            backgroundColor: BRAND_COLOURS[2],
+            borderColor: BRAND_COLOURS[2],
+            borderWidth: 1,
+            stack: 'contribs',
+          },
+          {
+            label: 'Returning',
+            data: activeContribData.map(d => d.returning),
+            backgroundColor: BRAND_COLOURS[0],
+            borderColor: BRAND_COLOURS[0],
+            borderWidth: 1,
+            stack: 'contribs',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: colors.text, font: { size: 12 } } },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+            title: { display: true, text: 'Contributors', color: colors.muted, font: { size: 11 } },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[NewVsReturningChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    applyTheme(chart);
+  });
+</script>
+)}

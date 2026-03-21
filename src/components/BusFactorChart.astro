@@ -1,0 +1,111 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface ContributorEntry {
+  login: string;
+  commits_30d: number;
+}
+
+interface ContributorSummary {
+  bus_factor: number;
+  total_commits: number;
+}
+
+interface Props {
+  topContributors: ContributorEntry[];
+  summary: ContributorSummary;
+}
+
+const { topContributors, summary } = Astro.props;
+---
+
+<ChartCard
+  title="Commit Share — Top Contributors"
+  canvasId="bus-factor-chart"
+  height={260}
+>
+  <p class="bus-factor-label">Bus factor: <strong>{summary.bus_factor}</strong> — {summary.bus_factor >= 4 ? '✅ healthy' : summary.bus_factor >= 2 ? '⚠️ moderate risk' : '🚨 critical risk'}</p>
+</ChartCard>
+<script type="application/json" id="bus-factor-data" set:html={safeJson({ topContributors, summary })}></script>
+
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { topContributors, summary } = readChartData<{
+    topContributors: { login: string; commits_30d: number }[];
+    summary: { total_commits: number; bus_factor: number };
+  }>('bus-factor-data');
+
+  const top5 = topContributors.slice(0, 5);
+  const top5Total = top5.reduce((s, c) => s + c.commits_30d, 0);
+  const others = Math.max(0, summary.total_commits - top5Total);
+
+  const labels = [...top5.map(c => c.login), 'Others'];
+  const dataValues = [...top5.map(c => c.commits_30d), others];
+  const bgColors = [...BRAND_COLOURS.slice(0, 5), '#444d56'];
+
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(document.getElementById('bus-factor-chart') as HTMLCanvasElement, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [
+          {
+            data: dataValues,
+            backgroundColor: bgColors as string[],
+            borderColor: 'transparent',
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { color: colors.text, font: { size: 12 }, padding: 16 },
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const pct = ((ctx.parsed / summary.total_commits) * 100).toFixed(1);
+                return `${ctx.label}: ${ctx.parsed} commits (${pct}%)`;
+              },
+            },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[BusFactorChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    const c = getChartColors();
+    if (chart.options.plugins?.legend?.labels) {
+      chart.options.plugins.legend.labels.color = c.text;
+    }
+    chart.update();
+  });
+</script>
+
+<style>
+  .bus-factor-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px;
+  }
+  .bus-factor-label strong {
+    color: var(--text);
+  }
+</style>

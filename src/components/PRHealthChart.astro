@@ -1,0 +1,92 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface Props {
+  lfx: any;
+}
+
+const { lfx } = Astro.props;
+
+const prData = lfx?.['pull-requests']?.data ?? [];
+const isEmpty = !Array.isArray(prData) || prData.length === 0;
+---
+
+<ChartCard
+  title="PR Health — Opened vs Merged"
+  canvasId="pr-health-chart"
+  height={260}
+  isEmpty={isEmpty}
+  emptyMsg="PR trend data not yet available — enable LFX Insights to populate this chart."
+/>
+{!isEmpty && (
+  <script type="application/json" id="pr-health-data" set:html={safeJson({ prData })}></script>
+)}
+
+{!isEmpty && (
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { prData } = readChartData<{
+    prData: { period: string; opened: number; merged: number }[];
+  }>('pr-health-data');
+
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(document.getElementById('pr-health-chart') as HTMLCanvasElement, {
+      type: 'bar',
+      data: {
+        labels: prData.map(d => d.period),
+        datasets: [
+          {
+            label: 'Opened',
+            data: prData.map(d => d.opened),
+            backgroundColor: BRAND_COLOURS[1],
+            borderColor: BRAND_COLOURS[1],
+            borderWidth: 1,
+          },
+          {
+            label: 'Merged',
+            data: prData.map(d => d.merged),
+            backgroundColor: BRAND_COLOURS[0],
+            borderColor: BRAND_COLOURS[0],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: colors.text, font: { size: 12 } } },
+        },
+        scales: {
+          x: {
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+            title: { display: true, text: 'Pull Requests', color: colors.muted, font: { size: 11 } },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[PRHealthChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    applyTheme(chart);
+  });
+</script>
+)}

@@ -6,9 +6,11 @@ import (
 "os"
 "path/filepath"
 "sort"
+"strings"
 "time"
 
 ghclient "github.com/castrojo/homebrew-stats/internal/github"
+"github.com/castrojo/homebrew-stats/internal/contributors"
 "github.com/castrojo/homebrew-stats/internal/countme"
 "github.com/castrojo/homebrew-stats/internal/history"
 "github.com/castrojo/homebrew-stats/internal/metrics"
@@ -40,9 +42,14 @@ if err := runFetchCountme(); err != nil {
 fmt.Fprintln(os.Stderr, "❌", err)
 os.Exit(1)
 }
+case "fetch-contributors":
+if err := runFetchContributors(); err != nil {
+fmt.Fprintln(os.Stderr, "❌", err)
+os.Exit(1)
+}
 default:
 fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme]")
+fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors]")
 os.Exit(1)
 }
 }
@@ -559,4 +566,421 @@ return &countme.HistoryStore{
 WeekRecords:  out.History.WeekRecords,
 OsVersionDist: out.OsVersionDist,
 }
+}
+
+// ── fetch-contributors ──────────────────────────────────────────────────────
+
+const contributorsCacheFile   = ".sync-cache/contributors-history.json"
+const contributorProfilesFile = ".sync-cache/contributor-profiles.json"
+
+type contributorsOutput struct {
+	GeneratedAt string `json:"generated_at"`
+	Period      struct {
+		Start string `json:"start"`
+		End   string `json:"end"`
+	} `json:"period"`
+	Summary            contributors.ContributorSummary `json:"summary"`
+	TopContributors    []contributors.ContributorEntry `json:"top_contributors"`
+	Repos              []contributors.RepoStats        `json:"repos"`
+	DiscussionsSummary contributors.DiscussionSummary  `json:"discussions_summary"`
+}
+
+func loadContributorsHistory() (*contributors.ContribHistoryStore, error) {
+	data, err := os.ReadFile(contributorsCacheFile)
+	if os.IsNotExist(err) {
+		return &contributors.ContribHistoryStore{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var store contributors.ContribHistoryStore
+	if err := json.Unmarshal(data, &store); err != nil {
+		return nil, err
+	}
+	return &store, nil
+}
+
+func saveContributorsHistory(store *contributors.ContribHistoryStore) error {
+	data, err := json.MarshalIndent(store, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(".sync-cache", 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(contributorsCacheFile, data, 0o644)
+}
+
+func loadContributorProfiles() (*contributors.ContributorProfileCache, error) {
+	data, err := os.ReadFile(contributorProfilesFile)
+	if os.IsNotExist(err) {
+		return &contributors.ContributorProfileCache{Profiles: make(map[string]*contributors.CachedProfile)}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var cache contributors.ContributorProfileCache
+	if err := json.Unmarshal(data, &cache); err != nil {
+		return nil, err
+	}
+	if cache.Profiles == nil {
+		cache.Profiles = make(map[string]*contributors.CachedProfile)
+	}
+	return &cache, nil
+}
+
+func saveContributorProfiles(cache *contributors.ContributorProfileCache) error {
+	data, err := json.MarshalIndent(cache, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(contributorProfilesFile, data, 0o644)
+}
+
+func runFetchContributors() error {
+	client, err := ghclient.NewClient()
+	if err != nil {
+		return err
+	}
+	ghClient := client.GitHub()
+	ctx := client.Context()
+
+	since := time.Now().UTC().AddDate(0, 0, -30)
+	until := time.Now().UTC()
+
+	hist, err := loadContributorsHistory()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  contributors history: %v\n", err)
+		hist = &contributors.ContribHistoryStore{}
+	}
+
+	profileCache, err := loadContributorProfiles()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  contributor profiles: %v\n", err)
+		profileCache = &contributors.ContributorProfileCache{Profiles: make(map[string]*contributors.CachedProfile)}
+	}
+
+	// Per-repo accumulators.
+	var repoStats []contributors.RepoStats
+
+	// Cross-repo accumulators.
+	allAuthorCommits := make(map[string]int)           // login → total commits across all repos
+	allAuthorPRs := make(map[string]int)               // login → total PRs merged
+	allAuthorIssues := make(map[string]int)            // login → total issues opened
+	allAuthorDiscussions := make(map[string]int)       // login → discussion posts
+	authorRepos := make(map[string]map[string]bool)    // login → set of repos active in
+	repoAuthorSets := make(map[string]map[string]bool) // repo → set of human author logins
+
+	// Discussion accumulators.
+	var allDiscussions []contributors.DiscussionRecord
+	totalIssuesOpened := 0
+	totalIssuesClosed := 0
+	totalPRsMerged := 0
+	totalPRsWithReview := 0
+	activeRepoCount := 0
+
+	for _, fullName := range contributors.TrackedRepos {
+		parts := strings.SplitN(fullName, "/", 2)
+		if len(parts) != 2 {
+			fmt.Fprintf(os.Stderr, "⚠️  skipping malformed repo name: %s\n", fullName)
+			continue
+		}
+		owner, repoName := parts[0], parts[1]
+		fmt.Fprintf(os.Stderr, "→ Processing %s/%s…\n", owner, repoName)
+
+		// ── Commits ──────────────────────────────────────────────────────
+		commits, err := contributors.FetchRepoCommits(ctx, ghClient, owner, repoName, since, until)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ⚠️  commits: %v\n", err)
+			commits = nil
+		}
+
+		repoAuthorCommits := make(map[string]int)
+		humanAuthors := make(map[string]bool)
+		botCommits := 0
+		humanCommits := 0
+		for _, c := range commits {
+			if c.Login == "" {
+				continue
+			}
+			repoAuthorCommits[c.Login]++
+			allAuthorCommits[c.Login]++
+			if contributors.IsBot(c.Login) {
+				botCommits++
+			} else {
+				humanCommits++
+				humanAuthors[c.Login] = true
+				if authorRepos[c.Login] == nil {
+					authorRepos[c.Login] = make(map[string]bool)
+				}
+				authorRepos[c.Login][fullName] = true
+			}
+		}
+		repoAuthorSets[fullName] = humanAuthors
+
+		// ── Issues ───────────────────────────────────────────────────────
+		issues, err := contributors.FetchRepoIssues(ctx, ghClient, owner, repoName, since)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ⚠️  issues: %v\n", err)
+			issues = nil
+		}
+
+		issuesOpened := 0
+		issuesClosed := 0
+		issueLabelDist := make(map[string]int)
+		for _, iss := range issues {
+			issuesOpened++
+			totalIssuesOpened++
+			allAuthorIssues[iss.Login]++
+			if iss.State == "closed" {
+				issuesClosed++
+				totalIssuesClosed++
+			}
+			for _, l := range iss.Labels {
+				issueLabelDist[l.GetName()]++
+			}
+		}
+
+		// ── PRs ──────────────────────────────────────────────────────────
+		prs, err := contributors.FetchRepoPRs(ctx, ghClient, owner, repoName, since)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ⚠️  PRs: %v\n", err)
+			prs = nil
+		}
+
+		prsMerged := 0
+		for _, pr := range prs {
+			prsMerged++
+			totalPRsMerged++
+			allAuthorPRs[pr.Login]++
+			if pr.HasReviewers {
+				totalPRsWithReview++
+			}
+		}
+
+		// ── Discussions ───────────────────────────────────────────────────
+		discs, err := contributors.FetchDiscussions(client, owner, repoName, since)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ⚠️  discussions: %v\n", err)
+			discs = nil
+		}
+		for _, d := range discs {
+			allDiscussions = append(allDiscussions, d)
+			if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
+				allAuthorDiscussions[d.AuthorLogin]++
+			}
+		}
+
+		// ── Participation (52w weekly) ────────────────────────────────────
+		weekly, err := contributors.FetchParticipation(ctx, ghClient, owner, repoName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ⚠️  participation: %v\n", err)
+			weekly = []int{}
+		}
+
+		// ── Punch card (heatmap) ─────────────────────────────────────────
+		heatmap, err := contributors.FetchPunchCard(ctx, ghClient, owner, repoName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ⚠️  punch card: %v\n", err)
+			heatmap = [][]int{}
+		}
+
+		// Compute day-of-week breakdown from punch card.
+		dayNames := []string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
+		dayOfWeek := make(map[string]int, 7)
+		for _, row := range heatmap {
+			if len(row) == 3 && row[0] >= 0 && row[0] < 7 {
+				dayOfWeek[dayNames[row[0]]] += row[2]
+			}
+		}
+
+		busFactor := contributors.ComputeBusFactor(repoAuthorCommits, 0.8)
+		streak := contributors.ComputeActiveWeeksStreak(weekly)
+
+		if len(commits) > 0 || issuesOpened > 0 || prsMerged > 0 {
+			activeRepoCount++
+		}
+
+		rs := contributors.RepoStats{
+			Name:                  fullName,
+			Commits30d:            len(commits),
+			UniqueHumanAuthors30d: len(humanAuthors),
+			PRsMerged30d:          prsMerged,
+			IssuesOpened30d:       issuesOpened,
+			BusFactor:             busFactor,
+			BotCommits30d:         botCommits,
+			HumanCommits30d:       humanCommits,
+			ActiveWeeksStreak:     streak,
+			WeeklyCommits52w:      weekly,
+			CommitsByDayOfWeek:    dayOfWeek,
+			ContributionHeatmap:   heatmap,
+			IssueLabelDist:        issueLabelDist,
+		}
+		repoStats = append(repoStats, rs)
+	}
+
+	// ── Compute summary ───────────────────────────────────────────────────────
+
+	// Gather all unique human logins active in the period.
+	activeLogins := make([]string, 0, len(allAuthorCommits))
+	for login := range allAuthorCommits {
+		if !contributors.IsBot(login) {
+			activeLogins = append(activeLogins, login)
+		}
+	}
+	// Also include humans who only opened issues or discussions.
+	for login := range allAuthorIssues {
+		if !contributors.IsBot(login) {
+			allAuthorCommits[login] = allAuthorCommits[login] // ensure present
+		}
+	}
+
+	// Build historical login set from prior snapshots (for new contributor detection).
+	historicalLogins := make(map[string]bool)
+	for _, snap := range hist.Snapshots {
+		for _, l := range snap.TopContributors {
+			historicalLogins[l] = true
+		}
+	}
+
+	newContribs := contributors.ComputeNewContributors(activeLogins, historicalLogins)
+	reviewRate := contributors.ComputeReviewParticipationRate(totalPRsWithReview, totalPRsMerged)
+
+	// Global bus factor across all repos.
+	globalBusFactor := contributors.ComputeBusFactor(allAuthorCommits, 0.8)
+
+	// Total commits (human + bot).
+	totalCommits := 0
+	for _, c := range allAuthorCommits {
+		totalCommits += c
+	}
+
+	// ── Discussion summary ────────────────────────────────────────────────────
+	discAuthors := make(map[string]bool)
+	totalDiscComments := 0
+	for _, d := range allDiscussions {
+		if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
+			discAuthors[d.AuthorLogin] = true
+		}
+		totalDiscComments += d.CommentCount
+	}
+
+	discSummary := contributors.DiscussionSummary{
+		TotalDiscussions30d:        len(allDiscussions),
+		TotalDiscussionComments30d: totalDiscComments,
+		UniqueDiscussionAuthors30d: len(discAuthors),
+		WeeklyTrend:                []contributors.DiscussionWeek{},
+	}
+
+	summary := contributors.ContributorSummary{
+		ActiveContributors:      len(activeLogins),
+		NewContributors:         len(newContribs),
+		TotalCommits:            totalCommits,
+		TotalPRsMerged:          totalPRsMerged,
+		TotalIssuesOpened:       totalIssuesOpened,
+		TotalIssuesClosed:       totalIssuesClosed,
+		BusFactor:               globalBusFactor,
+		ReviewParticipationRate: reviewRate,
+		ActiveRepos:             activeRepoCount,
+		TotalDiscussions:        len(allDiscussions),
+		DiscussionAnswerRate:     discSummary.AnsweredRate,
+	}
+
+	// ── Top contributors (fetch profiles, build entries) ──────────────────────
+
+	// Sort active logins by commit count descending.
+	type loginCount struct{ login string; count int }
+	ranked := make([]loginCount, 0, len(activeLogins))
+	for _, login := range activeLogins {
+		ranked = append(ranked, loginCount{login, allAuthorCommits[login]})
+	}
+	sort.Slice(ranked, func(i, j int) bool { return ranked[i].count > ranked[j].count })
+
+	const maxTop = 25
+	if len(ranked) > maxTop {
+		ranked = ranked[:maxTop]
+	}
+
+	topContribs := make([]contributors.ContributorEntry, 0, len(ranked))
+	topLogins := make([]string, 0, len(ranked))
+	for _, rc := range ranked {
+		topLogins = append(topLogins, rc.login)
+
+		// Fetch profile (uses cache).
+		profile, err := contributors.FetchUserProfile(ctx, ghClient, rc.login, profileCache)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ⚠️  profile %s: %v\n", rc.login, err)
+		}
+
+		entry := contributors.ContributorEntry{
+			Login:           rc.login,
+			Commits30d:      rc.count,
+			PRsMerged30d:    allAuthorPRs[rc.login],
+			IssuesOpened30d: allAuthorIssues[rc.login],
+			DiscussionPosts30d: allAuthorDiscussions[rc.login],
+			IsBot:           false,
+		}
+
+		// Collect repos this login was active in.
+		if repos, ok := authorRepos[rc.login]; ok {
+			for r := range repos {
+				entry.ReposActive = append(entry.ReposActive, r)
+			}
+			sort.Strings(entry.ReposActive)
+		}
+
+		if profile != nil {
+			entry.Name = profile.Name
+			entry.AvatarURL = profile.AvatarURL
+			entry.Company = profile.Company
+			entry.Location = profile.Location
+		}
+		topContribs = append(topContribs, entry)
+	}
+
+	// ── Persist history snapshot ──────────────────────────────────────────────
+	snap := contributors.ContribDaySnapshot{
+		Date:            time.Now().UTC().Format("2006-01-02"),
+		ActiveContribs:  len(activeLogins),
+		TotalCommits:    totalCommits,
+		TopContributors: topLogins,
+	}
+	hist.Snapshots = append(hist.Snapshots, snap)
+	hist.LastFetchedAt = time.Now().UTC().Format(time.RFC3339)
+
+	if err := saveContributorsHistory(hist); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  save contributors history: %v\n", err)
+	}
+	if err := saveContributorProfiles(profileCache); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  save contributor profiles: %v\n", err)
+	}
+
+	// ── Assemble and write output ─────────────────────────────────────────────
+	if repoStats == nil {
+		repoStats = []contributors.RepoStats{}
+	}
+	if topContribs == nil {
+		topContribs = []contributors.ContributorEntry{}
+	}
+	if discSummary.WeeklyTrend == nil {
+		discSummary.WeeklyTrend = []contributors.DiscussionWeek{}
+	}
+
+	out := contributorsOutput{
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		Summary:     summary,
+		TopContributors: topContribs,
+		Repos:       repoStats,
+		DiscussionsSummary: discSummary,
+	}
+	out.Period.Start = since.Format("2006-01-02")
+	out.Period.End = until.Format("2006-01-02")
+
+	if err := writeJSON("src/data/contributors.json", out); err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/contributors.json")
+	fmt.Fprintf(os.Stderr, "  active contributors: %d, repos: %d, commits: %d\n",
+		len(activeLogins), activeRepoCount, totalCommits)
+	return nil
 }

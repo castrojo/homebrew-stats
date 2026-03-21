@@ -1,0 +1,109 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ContributorsKPIs from '../../components/ContributorsKPIs.astro';
+import CommitActivityChart from '../../components/CommitActivityChart.astro';
+import ContributorLeaderboardChart from '../../components/ContributorLeaderboardChart.astro';
+import BusFactorChart from '../../components/BusFactorChart.astro';
+import OrgDependencyChart from '../../components/OrgDependencyChart.astro';
+import ContributionHeatmapChart from '../../components/ContributionHeatmapChart.astro';
+import DiscussionActivityChart from '../../components/DiscussionActivityChart.astro';
+import NewVsReturningChart from '../../components/NewVsReturningChart.astro';
+import PRHealthChart from '../../components/PRHealthChart.astro';
+import data from '../../data/contributors.json';
+
+const generatedAt = new Date(data.generated_at).toUTCString();
+const summary = data.summary as any;
+const topContributors = (data.top_contributors ?? []) as any[];
+const repos = (data.repos ?? []) as any[];
+const discussionsSummary = data.discussions_summary as any;
+const lfx = (data as any).lfx ?? {};
+---
+
+<Layout title="Contributors — homebrew-stats" activeTab="contributors">
+  <header>
+    <h1>👥 Project Contributors</h1>
+    <div class="meta">
+      Updated {generatedAt} ·
+      <a href="https://insights.linuxfoundation.org/project/ublue-os-bluefin" target="_blank" rel="noopener">LFX Insights ↗</a>
+    </div>
+    <button id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
+  </header>
+
+  <div class="explainer">
+    <p>
+      Health dashboard for the entire Project Bluefin ecosystem — commits, pull requests, issues, and
+      discussions across all active repositories over the last 30 days. Data sources:
+      <a href="https://github.com/ublue-os/bluefin" target="_blank" rel="noopener">ublue-os/bluefin</a>,
+      <a href="https://github.com/ublue-os/bluefin-lts" target="_blank" rel="noopener">bluefin-lts</a>,
+      and all active <a href="https://github.com/projectbluefin" target="_blank" rel="noopener">projectbluefin</a> repos.
+    </p>
+  </div>
+
+  <ContributorsKPIs summary={summary} />
+
+  <section class="charts-section">
+    <h2>📊 Commit Activity by Repository</h2>
+    <CommitActivityChart repos={repos} />
+
+    <h2>🏆 Contributor Leaderboard</h2>
+    <ContributorLeaderboardChart topContributors={topContributors} />
+
+    <div class="chart-row">
+      <div class="chart-col">
+        <h2>🚌 Bus Factor</h2>
+        <BusFactorChart topContributors={topContributors} summary={summary} />
+      </div>
+      <div class="chart-col">
+        <h2>🏢 Organization Breakdown</h2>
+        <OrgDependencyChart lfx={lfx} />
+      </div>
+    </div>
+
+    <h2>📅 When Does the Community Work?</h2>
+    <ContributionHeatmapChart repos={repos} />
+
+    <div class="chart-row">
+      <div class="chart-col">
+        <h2>💬 Discussion Activity</h2>
+        <DiscussionActivityChart discussionsSummary={discussionsSummary} />
+      </div>
+      <div class="chart-col">
+        <h2>🔀 PR Health</h2>
+        <PRHealthChart lfx={lfx} />
+      </div>
+    </div>
+
+    <h2>🆕 New vs Returning Contributors</h2>
+    <NewVsReturningChart lfx={lfx} />
+  </section>
+</Layout>
+
+<style>
+  .explainer {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .explainer a { color: var(--link); }
+  .charts-section { margin-bottom: 48px; }
+  .charts-section h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem;
+    color: var(--text);
+  }
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .chart-row { grid-template-columns: 1fr; }
+  }
+</style>

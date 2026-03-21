@@ -43,6 +43,27 @@ jobs:
           key: tap-history-v2-${{ github.run_id }}
           restore-keys: tap-history-v2-
 
+      - name: Restore contributor history cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: contributor-history-v1-${{ github.run_id }}
+          restore-keys: contributor-history-v1-
+
+      - name: Ensure contributors.json exists
+        run: |
+          if [ ! -f "src/data/contributors.json" ]; then
+            echo "⚠️  contributors.json not found in cache or repo — using empty seed"
+            mkdir -p src/data
+            # This should not happen if seed file is committed, but guard against it
+            echo '{"generated_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","period":{"start":"","end":""},"summary":{"active_contributors":0,"new_contributors":0,"total_commits":0,"total_prs_merged":0,"total_issues_opened":0,"total_issues_closed":0,"bus_factor":0,"review_participation_rate":0,"active_repos":0,"total_discussions":0,"discussion_answer_rate":0},"top_contributors":[],"repos":[],"discussions_summary":{"total_discussions_30d":0,"total_discussion_comments_30d":0,"unique_discussion_authors_30d":0,"answered_rate":0,"weekly_trend":[]}}' \
+              > src/data/contributors.json
+            echo "✅ wrote empty contributors.json sentinel"
+          else
+            contrib_count=$(jq '.top_contributors | length' src/data/contributors.json 2>/dev/null || echo 0)
+            echo "✅ contributors.json found: $contrib_count top contributors"
+          fi
+
       - name: Build stats binary
         run: cd stats-go && go build -o stats ./cmd/stats/
 
@@ -107,7 +128,7 @@ jobs:
           # Astro inlines .chart-empty{} CSS rules into the HTML <style> tag, so a
           # bare grep for 'chart-empty' produces false positives even when all charts
           # are healthy. We need to match the rendered element: class="chart-empty".
-          for page in dist/index.html dist/testhub/index.html dist/overall/index.html; do
+          for page in dist/index.html dist/testhub/index.html dist/overall/index.html dist/contributors/index.html; do
             count=$(grep -c 'class="chart-empty"' "$page" || true)
             if [ "$count" -gt 0 ]; then
               echo "❌ $page: $count chart(s) rendered in empty state"
@@ -157,6 +178,20 @@ jobs:
             echo "✅ countme current_week.total = $total"
           else
             echo "⚠️ countme current_week is empty — data collection may still be bootstrapping"
+          fi
+
+      - name: Verify contributors data (warn-only)
+        run: |
+          if [ -f "src/data/contributors.json" ]; then
+            contrib_count=$(jq '.top_contributors | length' src/data/contributors.json 2>/dev/null || echo 0)
+            active=$(jq '.summary.active_contributors // 0' src/data/contributors.json 2>/dev/null || echo 0)
+            if [ "$contrib_count" -gt 0 ]; then
+              echo "✅ contributors: $contrib_count contributors, $active active"
+            else
+              echo "⚠️  contributors.json has no top_contributors — run contributor-sync.yml to populate"
+            fi
+          else
+            echo "⚠️  contributors.json missing — contributor-sync.yml has not run yet"
           fi
 
       - name: Install Playwright browsers
