@@ -1,0 +1,122 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+import type { WeekRecord } from '../lib/types.ts';
+
+interface Props {
+  /** Lowercase distro key matching the distros record (e.g. 'bazzite'). */
+  distroKey: string;
+  /** Human-readable distro label (e.g. 'Bazzite'). */
+  distroLabel: string;
+  /** Index into BRAND_COLOURS to keep colours consistent with the combined chart. */
+  colorIndex: number;
+  weekRecords: WeekRecord[];
+}
+
+const { distroKey, distroLabel, colorIndex, weekRecords } = Astro.props;
+
+const canvasId = `${distroKey}-trend-chart`;
+const rangeId  = `${distroKey}-range-btns`;
+const dataId   = `${distroKey}-trend-data`;
+
+const sorted = [...weekRecords].sort((a, b) => a.week_start.localeCompare(b.week_start));
+---
+
+{weekRecords.length === 0 ? (
+  <ChartCard title={`${distroLabel} Active Devices`} canvasId={canvasId} isEmpty emptyMsg="Collecting data…" />
+) : (
+  <>
+    <ChartCard
+      title={`${distroLabel} Active Devices`}
+      canvasId={canvasId}
+      height={200}
+      rangeId={rangeId}
+      ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+      defaultRange="30"
+    />
+    <script type="application/json" id={dataId} data-distro-chart set:html={safeJson({ sorted, distroKey, distroLabel, colorIndex })}></script>
+  </>
+)}
+
+<script>
+import '../lib/chart-registry.js';
+import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
+
+// Astro deduplicates this script — handle all instances via querySelectorAll.
+document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEach(dataEl => {
+  const { sorted, distroKey, distroLabel, colorIndex } = JSON.parse(dataEl.textContent!);
+  const canvas = document.getElementById(`${distroKey}-trend-chart`) as HTMLCanvasElement | null;
+  if (!canvas) return;
+
+  function getFiltered(range: string) {
+    if (range === 'all') return sorted;
+    const days = Number(range);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    return sorted.filter((r: { week_start: string }) => r.week_start >= cutoffStr);
+  }
+
+  let currentRange = '30';
+  let filtered = getFiltered(currentRange);
+  const c = getChartColors();
+  const color = BRAND_COLOURS[colorIndex % BRAND_COLOURS.length];
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: filtered.map((r: { week_start: string }) => r.week_start),
+        datasets: [{
+          label: distroLabel,
+          data: filtered.map((r: { distros: Record<string, number> }) => r.distros[distroKey] ?? 0),
+          borderColor: color,
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: c.grid }, ticks: { color: c.muted, maxTicksLimit: 10 } },
+          y: {
+            beginAtZero: true,
+            grid: { color: c.grid },
+            ticks: {
+              color: c.muted,
+              callback: (v: number | string) =>
+                Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(0)}k` : String(v),
+            },
+          },
+        },
+        plugins: { legend: { labels: { color: c.text, usePointStyle: true, boxWidth: 8 } } },
+      },
+    });
+  } catch (e) {
+    console.error(`[DistroTrendChart:${distroKey}] Chart.js init failed:`, e);
+  }
+
+  const rangeContainerId = `${distroKey}-range-btns`;
+  document.getElementById(rangeContainerId)?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      document.getElementById(rangeContainerId)?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = btn.dataset.range!;
+      const data = getFiltered(currentRange);
+      chart.data.labels = data.map((r: { week_start: string }) => r.week_start);
+      chart.data.datasets[0].data = data.map((r: { distros: Record<string, number> }) => r.distros[distroKey] ?? 0);
+      chart.update();
+    });
+  });
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    applyTheme(chart);
+  });
+});
+</script>

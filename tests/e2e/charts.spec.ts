@@ -164,6 +164,18 @@ test.describe('Overall tab', () => {
     await expectCanvasRendered(page, 'fedora-version-chart');
   });
 
+  test('Bazzite individual trend chart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'bazzite-trend-chart');
+  });
+
+  test('Bluefin individual trend chart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'bluefin-trend-chart');
+  });
+
+  test('Aurora individual trend chart canvas is rendered by Chart.js', async ({ page }) => {
+    await expectCanvasRendered(page, 'aurora-trend-chart');
+  });
+
   test('Countme explainer callout is visible and mentions countme', async ({ page }) => {
     const callout = page.locator('.explainer');
     await expect(callout).toBeVisible();
