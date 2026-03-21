@@ -297,23 +297,4 @@ test.describe('Testhub data quality', () => {
     expect(text).toContain('Version Count');
     expect(text).toContain('Pulls');
   });
-
-  test('At least one package has a known build status', async ({ page }) => {
-    // DATA QUALITY: this assertion depends on cache warmth and live API data.
-    // Pre-deploy E2E only tests RENDERING; data quality belongs in smoke-test.yml.
-    // On a cold cache (e.g. after a cache key bump), build_metrics legitimately
-    // starts empty — blocking deploy here causes outages. Warn and skip instead.
-    await page.goto('/homebrew-stats/testhub/');
-    const statusCells = await page.locator('#testhub-tbody td:nth-child(4)').allTextContents();
-    const known = statusCells.filter(s => s.includes('🟢') || s.includes('🔴'));
-    if (known.length === 0) {
-      console.warn(
-        '⚠️  All packages show unknown build status — testhub cache may be cold. ' +
-        'This is expected on the first run after a cache key bump. ' +
-        'DATA QUALITY checks belong in smoke-test.yml (post-deploy), not here.'
-      );
-      test.skip();
-    }
-    expect(known.length).toBeGreaterThan(0);
-  });
 });

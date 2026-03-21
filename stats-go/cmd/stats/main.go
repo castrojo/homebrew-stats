@@ -327,20 +327,20 @@ func loadTesthubHistoryFrom(cacheFile, seedFile string) (*testhub.HistoryStore, 
 data, err := os.ReadFile(cacheFile)
 if err == nil {
 var store testhub.HistoryStore
-if jsonErr := json.Unmarshal(data, &store); jsonErr == nil {
+if jsonErr := json.Unmarshal(data, &store); jsonErr == nil && len(store.Snapshots) > 0 {
+// Cache is valid and has data — use it.
 return &store, nil
 }
+// Cache exists but is empty or malformed — fall through to seed.
+fmt.Fprintf(os.Stderr, "  cache file empty or invalid, trying seed file\n")
 }
-if os.IsNotExist(err) || err != nil {
-// Try seed file
+// Try seed file (covers: file-not-found, read error, empty/malformed cache).
 if seed, seedErr := os.ReadFile(seedFile); seedErr == nil {
 var store testhub.HistoryStore
-if json.Unmarshal(seed, &store) == nil {
+if json.Unmarshal(seed, &store) == nil && len(store.Snapshots) > 0 {
 fmt.Fprintf(os.Stderr, "  loaded %d snapshots from seed file\n", len(store.Snapshots))
 return &store, nil
 }
-}
-return &testhub.HistoryStore{}, nil
 }
 return &testhub.HistoryStore{}, nil
 }

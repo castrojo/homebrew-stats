@@ -82,3 +82,43 @@ func TestLoadTesthubHistoryFrom_CorruptSeed(t *testing.T) {
 		t.Errorf("want empty store on corrupt seed, got %d snapshots", len(got.Snapshots))
 	}
 }
+
+// TestLoadTesthubHistoryFrom_EmptyCacheFallsToSeed verifies that when the cache
+// file exists but contains a zero-snapshot store (e.g. after a cache key bump
+// creates an empty cache entry), the seed file is used instead.
+func TestLoadTesthubHistoryFrom_EmptyCacheFallsToSeed(t *testing.T) {
+	dir := t.TempDir()
+	emptyStore := testhub.HistoryStore{Snapshots: []testhub.DaySnapshot{}}
+	cacheFile := writeTempFile(t, dir, "cache.json", emptyStore)
+	seed := testhub.HistoryStore{Snapshots: []testhub.DaySnapshot{{Date: "2026-03-01"}, {Date: "2026-03-02"}}}
+	seedFile := writeTempFile(t, dir, "seed.json", seed)
+
+	got, err := loadTesthubHistoryFrom(cacheFile, seedFile)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got.Snapshots) != 2 {
+		t.Errorf("want 2 snapshots from seed (cache was empty), got %d", len(got.Snapshots))
+	}
+}
+
+// TestLoadTesthubHistoryFrom_CorruptCacheFallsToSeed verifies that when the cache
+// file exists but contains invalid JSON (e.g. zero-byte after a failed write),
+// the seed file is used instead.
+func TestLoadTesthubHistoryFrom_CorruptCacheFallsToSeed(t *testing.T) {
+	dir := t.TempDir()
+	cacheFile := filepath.Join(dir, "cache.json")
+	if err := os.WriteFile(cacheFile, []byte(""), 0600); err != nil { // zero-byte file
+		t.Fatal(err)
+	}
+	seed := testhub.HistoryStore{Snapshots: []testhub.DaySnapshot{{Date: "2026-03-01"}}}
+	seedFile := writeTempFile(t, dir, "seed.json", seed)
+
+	got, err := loadTesthubHistoryFrom(cacheFile, seedFile)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got.Snapshots) != 1 {
+		t.Errorf("want 1 snapshot from seed (cache was corrupt), got %d", len(got.Snapshots))
+	}
+}
