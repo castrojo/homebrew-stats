@@ -265,6 +265,15 @@ were blocked because cache key v2 + a strict build-status test landed together.
 it belongs in `smoke-test.yml`, NOT in the pre-deploy E2E suite. Data-quality tests
 in the pre-deploy gate caused the 2026-03-21 production outage.
 
+### Smoke test architecture note
+
+The smoke test (`smoke-test.yml`) is a **separate workflow** triggered by `workflow_run`, NOT a job inside `daily-build.yml`. This is intentional:
+
+- `daily-build.yml` has `concurrency: { group: pages, cancel-in-progress: true }`
+- Any job inside that workflow would be cancelled if a new push arrives while the smoke-test is running
+- A `workflow_run`-triggered workflow has its own lifecycle and is not cancelled by the triggering workflow's concurrency group
+- Smoke-test failures do not block the deploy (post-deploy gate only)
+
 ---
 
 ## MANDATORY PATTERNS — Chart Components
