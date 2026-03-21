@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-03-21T03:59:05Z",
+  "generated_at": "2026-03-21T05:39:49Z",
   "period": {
     "start": "2026-02-19",
     "end": "2026-03-21"
   },
   "summary": {
     "active_contributors": 16,
-    "new_contributors": 16,
-    "total_commits": 693,
-    "total_prs_merged": 0,
+    "new_contributors": 0,
+    "total_commits": 692,
+    "total_prs_merged": 260,
     "total_issues_opened": 98,
     "total_issues_closed": 25,
-    "bus_factor": 34,
-    "review_participation_rate": 0,
+    "bus_factor": 1,
+    "review_participation_rate": 0.6307692307692307,
     "active_repos": 10,
     "total_discussions": 23,
     "discussion_answer_rate": 0
@@ -25,7 +25,7 @@
       "company": "Cloud Native Computing Foundation",
       "location": "Ann Arbor, MI",
       "commits_30d": 447,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 45,
       "issues_opened_30d": 52,
       "discussion_posts_30d": 2,
       "repos_active": [
@@ -48,7 +48,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/16531710?v=4",
       "location": "Greece",
       "commits_30d": 26,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 14,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
@@ -62,7 +62,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/1892225?v=4",
       "location": "Ottawa, Ontario, Canada",
       "commits_30d": 17,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 3,
       "issues_opened_30d": 1,
       "discussion_posts_30d": 0,
       "repos_active": [
@@ -78,12 +78,11 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/5840441?v=4",
       "company": "@fossunited",
       "location": "India",
-      "commits_30d": 10,
-      "prs_merged_30d": 0,
+      "commits_30d": 9,
+      "prs_merged_30d": 9,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
-        "projectbluefin/dakota",
         "projectbluefin/documentation",
         "ublue-os/bluefin-lts"
       ],
@@ -107,7 +106,7 @@
       "company": "looking for work",
       "location": "Germany",
       "commits_30d": 4,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 3,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
@@ -138,7 +137,7 @@
       "company": "Microsoft",
       "location": "San Francisco Bay Area",
       "commits_30d": 2,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 2,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
@@ -153,7 +152,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/4763770?v=4",
       "location": "Amsterdam",
       "commits_30d": 2,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 2,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
@@ -165,7 +164,7 @@
     {
       "login": "Copilot",
       "commits_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 1,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
@@ -174,14 +173,16 @@
       "is_bot": false
     },
     {
-      "login": "buggerman",
-      "avatar_url": "https://avatars.githubusercontent.com/u/11626756?v=4",
+      "login": "jumpyvi",
+      "name": "JumpyVi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62212220?v=4",
+      "location": "Canada",
       "commits_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 1,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
-        "ublue-os/bluefin"
+        "ublue-os/bluefin-lts"
       ],
       "is_bot": false
     },
@@ -192,11 +193,35 @@
       "company": "Microsoft",
       "location": "Woodinville, WA",
       "commits_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 1,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
         "projectbluefin/common"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "rpassmore",
+      "avatar_url": "https://avatars.githubusercontent.com/u/635850?v=4",
+      "commits_30d": 1,
+      "prs_merged_30d": 1,
+      "issues_opened_30d": 1,
+      "discussion_posts_30d": 0,
+      "repos_active": [
+        "projectbluefin/finpilot"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "buggerman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11626756?v=4",
+      "commits_30d": 1,
+      "prs_merged_30d": 1,
+      "issues_opened_30d": 0,
+      "discussion_posts_30d": 0,
+      "repos_active": [
+        "ublue-os/bluefin"
       ],
       "is_bot": false
     },
@@ -206,7 +231,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/54219775?v=4",
       "location": "Canada",
       "commits_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 1,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
@@ -219,37 +244,11 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/10529881?v=4",
       "location": "Indonesia",
       "commits_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 2,
       "issues_opened_30d": 0,
       "discussion_posts_30d": 0,
       "repos_active": [
         "projectbluefin/common"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "jumpyvi",
-      "name": "JumpyVi",
-      "avatar_url": "https://avatars.githubusercontent.com/u/62212220?v=4",
-      "location": "Canada",
-      "commits_30d": 1,
-      "prs_merged_30d": 0,
-      "issues_opened_30d": 0,
-      "discussion_posts_30d": 0,
-      "repos_active": [
-        "ublue-os/bluefin-lts"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "rpassmore",
-      "avatar_url": "https://avatars.githubusercontent.com/u/635850?v=4",
-      "commits_30d": 1,
-      "prs_merged_30d": 0,
-      "issues_opened_30d": 1,
-      "discussion_posts_30d": 0,
-      "repos_active": [
-        "projectbluefin/finpilot"
       ],
       "is_bot": false
     }
@@ -259,9 +258,9 @@
       "name": "ublue-os/bluefin",
       "commits_30d": 79,
       "unique_human_authors_30d": 5,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 79,
       "issues_opened_30d": 13,
-      "bus_factor": 5,
+      "bus_factor": 4,
       "bot_commits_30d": 74,
       "human_commits_30d": 5,
       "active_weeks_streak": 52,
@@ -1191,9 +1190,9 @@
       "name": "ublue-os/bluefin-lts",
       "commits_30d": 84,
       "unique_human_authors_30d": 5,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 80,
       "issues_opened_30d": 0,
-      "bus_factor": 5,
+      "bus_factor": 3,
       "bot_commits_30d": 49,
       "human_commits_30d": 35,
       "active_weeks_streak": 43,
@@ -2106,13 +2105,13 @@
     },
     {
       "name": "projectbluefin/dakota",
-      "commits_30d": 64,
-      "unique_human_authors_30d": 4,
-      "prs_merged_30d": 0,
+      "commits_30d": 63,
+      "unique_human_authors_30d": 3,
+      "prs_merged_30d": 30,
       "issues_opened_30d": 15,
       "bus_factor": 3,
       "bot_commits_30d": 11,
-      "human_commits_30d": 53,
+      "human_commits_30d": 52,
       "active_weeks_streak": 2,
       "weekly_commits_52w": [
         0,
@@ -3029,7 +3028,7 @@
       "name": "projectbluefin/common",
       "commits_30d": 17,
       "unique_human_authors_30d": 7,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 8,
       "issues_opened_30d": 14,
       "bus_factor": 4,
       "bot_commits_30d": 0,
@@ -3959,7 +3958,7 @@
       "name": "projectbluefin/finpilot",
       "commits_30d": 4,
       "unique_human_authors_30d": 2,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 2,
       "issues_opened_30d": 3,
       "bus_factor": 2,
       "bot_commits_30d": 1,
@@ -4878,9 +4877,9 @@
       "name": "projectbluefin/documentation",
       "commits_30d": 96,
       "unique_human_authors_30d": 4,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 29,
       "issues_opened_30d": 3,
-      "bus_factor": 4,
+      "bus_factor": 1,
       "bot_commits_30d": 19,
       "human_commits_30d": 77,
       "active_weeks_streak": 18,
@@ -5795,7 +5794,7 @@
       "name": "projectbluefin/bluefin-mcp",
       "commits_30d": 34,
       "unique_human_authors_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 2,
       "issues_opened_30d": 30,
       "bus_factor": 1,
       "bot_commits_30d": 1,
@@ -6730,7 +6729,7 @@
       "name": "projectbluefin/testhub",
       "commits_30d": 288,
       "unique_human_authors_30d": 3,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 20,
       "issues_opened_30d": 19,
       "bus_factor": 1,
       "bot_commits_30d": 9,
@@ -7656,7 +7655,7 @@
       "name": "projectbluefin/iso",
       "commits_30d": 18,
       "unique_human_authors_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 5,
       "issues_opened_30d": 1,
       "bus_factor": 1,
       "bot_commits_30d": 1,
@@ -8575,7 +8574,7 @@
       "name": "projectbluefin/website",
       "commits_30d": 9,
       "unique_human_authors_30d": 1,
-      "prs_merged_30d": 0,
+      "prs_merged_30d": 5,
       "issues_opened_30d": 0,
       "bus_factor": 1,
       "bot_commits_30d": 1,
