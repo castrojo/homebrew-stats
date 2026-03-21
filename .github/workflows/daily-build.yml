@@ -128,7 +128,7 @@ jobs:
           # Astro inlines .chart-empty{} CSS rules into the HTML <style> tag, so a
           # bare grep for 'chart-empty' produces false positives even when all charts
           # are healthy. We need to match the rendered element: class="chart-empty".
-          for page in dist/index.html dist/testhub/index.html dist/overall/index.html dist/contributors/index.html; do
+          for page in dist/index.html dist/testhub/index.html dist/overall/index.html; do
             count=$(grep -c 'class="chart-empty"' "$page" || true)
             if [ "$count" -gt 0 ]; then
               echo "❌ $page: $count chart(s) rendered in empty state"
@@ -137,6 +137,15 @@ jobs:
             fi
             echo "✅ $page: no empty charts"
           done
+          # Contributors page has 3 LFX-gated charts (org breakdown, PR health, new vs returning)
+          # that are intentionally empty until LFX Insights sync runs. Allow up to 3 empty;
+          # fail only if MORE than 3 are empty (which would indicate structural breakage).
+          contrib_count=$(grep -o 'class="chart-empty"' dist/contributors/index.html | wc -l || echo 0)
+          if [ "$contrib_count" -gt 3 ]; then
+            echo "❌ dist/contributors/index.html: $contrib_count empty charts (expected ≤3 LFX-gated)"
+            exit 1
+          fi
+          echo "✅ dist/contributors/index.html: $contrib_count/3 LFX-gated charts in empty state (expected)"
 
       - name: Verify summary KPIs are populated
         run: |
