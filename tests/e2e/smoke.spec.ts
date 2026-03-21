@@ -36,8 +36,8 @@ test.describe('Smoke — data quality (live site only)', () => {
 
   test('testhub: at least one package has a known build status', async ({ page }) => {
     await page.goto('/homebrew-stats/testhub/');
-    // tbody is SSR'd — wait for it to be present (no client-side rendering needed)
-    await page.waitForSelector('#testhub-tbody', { timeout: 15_000 });
+    // tbody is SSR'd — wait for it to be attached (script/hidden elements need state: 'attached')
+    await page.waitForSelector('#testhub-tbody', { state: 'attached', timeout: 15_000 });
 
     const statusCells = await page.locator('#testhub-tbody td:nth-child(4)').allTextContents();
     const known = statusCells.filter(s => s.includes('🟢') || s.includes('🔴'));
@@ -64,8 +64,8 @@ test.describe('Smoke — data quality (live site only)', () => {
 
   test('homebrew: traffic history has data', async ({ page }) => {
     await page.goto('/homebrew-stats/');
-    // traffic-data is a SSR'd <script type="application/json"> element
-    await page.waitForSelector('#traffic-data', { timeout: 15_000 });
+    // traffic-data is a SSR'd <script type="application/json"> element — use 'attached' not 'visible'
+    await page.waitForSelector('#traffic-data', { state: 'attached', timeout: 15_000 });
 
     const data = await getScriptJSON(page, 'traffic-data') as { history?: unknown[] };
     expect(
