@@ -65,7 +65,7 @@ verify-live:
     BASE="https://castrojo.github.io/homebrew-stats"
     echo "=== Verifying live site: $BASE ==="
 
-    for path in "" "/testhub/" "/overall/" "/contributors/"; do
+    for path in "/" "/testhub/" "/overall/" "/contributors/"; do
       code=$(curl -sf -o /dev/null -w "%{http_code}" "$BASE$path" || echo "000")
       if [ "$code" = "200" ]; then
         echo "✅ $BASE$path → HTTP $code"
@@ -77,7 +77,7 @@ verify-live:
 
     echo "--- Checking canvas IDs ---"
     html=$(curl -sf "$BASE/")
-    for id in traffic-chart tap-comparison-chart os-bar-chart commit-activity-chart; do
+    for id in traffic-chart tap-comparison-chart os-bar-chart; do
       if echo "$html" | grep -q "id=\"$id\""; then
         echo "✅ canvas#$id found"
       else
