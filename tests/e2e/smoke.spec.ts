@@ -11,16 +11,33 @@
  * charts.spec.ts tests RENDERING only (structure, canvas, JSON parseable).
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const isLiveSite = !!process.env.BASE_URL;
+
+/** Extract and parse JSON from a SSR'd <script type="application/json"> element. */
+async function getScriptJSON(page: Page, id: string): Promise<unknown> {
+  const result = await page.evaluate((scriptId: string) => {
+    const el = document.getElementById(scriptId);
+    if (!el) return { error: `Element #${scriptId} not found` };
+    try {
+      return { data: JSON.parse(el.textContent ?? '') };
+    } catch (e) {
+      return { error: `JSON.parse failed: ${String(e)}` };
+    }
+  }, id);
+  const r = result as { error?: string; data?: unknown };
+  if (r.error) throw new Error(`script#${id}: ${r.error}`);
+  return r.data;
+}
 
 test.describe('Smoke — data quality (live site only)', () => {
   test.skip(!isLiveSite, 'Smoke tests only run against the live deployed site (BASE_URL must be set)');
 
   test('testhub: at least one package has a known build status', async ({ page }) => {
     await page.goto('/homebrew-stats/testhub/');
-    await page.waitForLoadState('networkidle');
+    // tbody is SSR'd — wait for it to be present (no client-side rendering needed)
+    await page.waitForSelector('#testhub-tbody', { timeout: 15_000 });
 
     const statusCells = await page.locator('#testhub-tbody td:nth-child(4)').allTextContents();
     const known = statusCells.filter(s => s.includes('🟢') || s.includes('🔴'));
@@ -45,18 +62,15 @@ test.describe('Smoke — data quality (live site only)', () => {
     ).toBe(today);
   });
 
-  test('homebrew: KPI total packages is non-zero', async ({ page }) => {
+  test('homebrew: traffic history has data', async ({ page }) => {
     await page.goto('/homebrew-stats/');
-    await page.waitForLoadState('networkidle');
+    // traffic-data is a SSR'd <script type="application/json"> element
+    await page.waitForSelector('#traffic-data', { timeout: 15_000 });
 
-    // The stats-data script is always present; parse it to check summary.
-    const raw = await page.locator('#stats-data').textContent();
-    const stats = JSON.parse(raw ?? '{}') as { summary?: { total_packages?: number } };
-    const totalPackages = stats.summary?.total_packages ?? 0;
-
+    const data = await getScriptJSON(page, 'traffic-data') as { history?: unknown[] };
     expect(
-      totalPackages,
-      'summary.total_packages is 0 — homebrew data may be missing or sync failed.'
+      (data.history ?? []).length,
+      'traffic-data.history is empty — homebrew data may be missing or sync failed.'
     ).toBeGreaterThan(0);
   });
 });
