@@ -13,10 +13,11 @@ import (
 
 // CollectorConfig holds configuration for the builds data collector.
 type CollectorConfig struct {
-	Repos        []RepoConfig
-	LookbackDays int
-	HistoryPath  string
-	OutputPath   string
+	Repos           []RepoConfig
+	LookbackDays    int
+	MaxRunsPerWf    int // max new runs to fetch per workflow file (0 = unlimited)
+	HistoryPath     string
+	OutputPath      string
 }
 
 // Collector fetches GitHub Actions data and writes builds.json.
@@ -134,6 +135,11 @@ func (c *Collector) fetchRuns(ctx context.Context, repo RepoConfig, wfFile strin
 			id := run.GetID()
 			if knownIDs[id] {
 				continue
+			}
+
+			// Apply per-workflow run cap to bound cold-start API usage
+			if c.cfg.MaxRunsPerWf > 0 && len(records) >= c.cfg.MaxRunsPerWf {
+				return records, nil
 			}
 
 			startedAt := run.GetRunStartedAt().Time
