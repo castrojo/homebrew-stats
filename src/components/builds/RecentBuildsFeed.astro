@@ -1,0 +1,268 @@
+---
+import type { RecentBuild } from '../../lib/types.ts';
+
+interface Props {
+  builds: RecentBuild[];
+}
+
+const { builds } = Astro.props;
+
+function conclusionIcon(conclusion: string): string {
+  switch (conclusion) {
+    case 'success':   return '🟢';
+    case 'failure':   return '🔴';
+    case 'cancelled': return '🟡';
+    default:          return '⚪';
+  }
+}
+
+function eventIcon(event: string): string {
+  switch (event) {
+    case 'schedule':          return '📅';
+    case 'push':              return '🔀';
+    case 'workflow_dispatch': return '🔧';
+    case 'pull_request':      return '👤';
+    default:                  return '❓';
+  }
+}
+
+function repoBadgeClass(repo: string): string {
+  switch (repo) {
+    case 'bluefin':     return 'repo-badge--blue';
+    case 'bluefin-lts': return 'repo-badge--purple';
+    default:            return 'repo-badge--grey';
+  }
+}
+
+function formatDuration(min: number): string {
+  return min < 1 ? '<1m' : `${min.toFixed(0)}m`;
+}
+
+function truncate(str: string, max: number): string {
+  return str.length > max ? str.slice(0, max) + '…' : str;
+}
+---
+
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">Recent Builds</div>
+  </div>
+
+  {builds.length === 0 ? (
+    <p class="chart-empty">No recent build data yet.</p>
+  ) : (
+    <div class="recent-builds-table-wrap">
+      <table class="recent-builds-table">
+        <thead>
+          <tr>
+            <th class="col-status"></th>
+            <th>Repo</th>
+            <th>Workflow</th>
+            <th>Branch</th>
+            <th>Trigger</th>
+            <th>Duration</th>
+            <th>Started</th>
+            <th>Jobs</th>
+            <th class="col-link"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {builds.map((build, i) => (
+            <tr class={i % 2 === 0 ? 'row-even' : 'row-odd'} data-conclusion={build.conclusion}>
+              <td class="col-status" title={build.conclusion}>{conclusionIcon(build.conclusion)}</td>
+              <td>
+                <span class={`repo-badge ${repoBadgeClass(build.repo)}`}>{build.repo}</span>
+              </td>
+              <td class="col-workflow" title={build.workflow}>{truncate(build.workflow, 30)}</td>
+              <td class="col-branch">{build.branch}</td>
+              <td class="col-trigger" title={build.event}>{eventIcon(build.event)}</td>
+              <td class="col-duration">{formatDuration(build.duration_min)}</td>
+              <td class="col-started" data-iso={build.started_at}>{build.started_at}</td>
+              <td class="col-jobs">
+                {(build.job_count - build.failed_jobs)}/{build.job_count}
+                {build.failed_jobs > 0 ? ' ✗' : ' ✓'}
+              </td>
+              <td class="col-link">
+                <a href={build.html_url} target="_blank" rel="noopener" aria-label="View build">🔗</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
+<script>
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return `${Math.floor(diff / 60000)}m ago`;
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+// Replace raw ISO timestamps with relative times
+document.querySelectorAll<HTMLTableCellElement>('.col-started[data-iso]').forEach(cell => {
+  const iso = cell.dataset.iso;
+  if (iso) cell.textContent = timeAgo(iso);
+});
+</script>
+
+<style>
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chart-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 0;
+    font-size: 14px;
+  }
+
+  .recent-builds-table-wrap {
+    overflow-x: auto;
+  }
+
+  .recent-builds-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+
+  .recent-builds-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .recent-builds-table td {
+    padding: 7px 10px;
+    color: var(--text);
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .recent-builds-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .row-even {
+    background: var(--bg2);
+  }
+
+  .row-odd {
+    background: var(--bg);
+  }
+
+  .recent-builds-table tbody tr:hover {
+    background: color-mix(in srgb, var(--blue) 10%, var(--bg2));
+  }
+
+  .col-status {
+    text-align: center;
+    width: 32px;
+  }
+
+  .col-link {
+    text-align: center;
+    width: 32px;
+  }
+
+  .col-link a {
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .col-link a:hover {
+    opacity: 0.7;
+  }
+
+  .col-trigger {
+    text-align: center;
+  }
+
+  .col-workflow {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  .col-branch {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .col-duration {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .col-started {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .col-jobs {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+  }
+
+  /* Repo badges */
+  .repo-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: monospace;
+  }
+
+  .repo-badge--blue {
+    background: color-mix(in srgb, var(--blue) 20%, transparent);
+    color: var(--blue);
+  }
+
+  .repo-badge--purple {
+    background: color-mix(in srgb, #a371f7 20%, transparent);
+    color: #a371f7;
+  }
+
+  .repo-badge--grey {
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+</style>

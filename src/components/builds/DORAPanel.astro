@@ -1,0 +1,179 @@
+---
+import type { DORAMetrics } from '../../lib/types.ts';
+
+interface Props {
+  dora: DORAMetrics;
+}
+
+const { dora } = Astro.props;
+
+function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${Math.round(minutes)}m`;
+  return `${(minutes / 60).toFixed(1)}h`;
+}
+
+function doraLevelColor(level: string): string {
+  switch (level) {
+    case 'elite':  return 'var(--blue)';
+    case 'high':   return 'var(--green)';
+    case 'medium': return 'var(--yellow)';
+    case 'low':    return 'var(--red)';
+    default:       return 'var(--muted)';
+  }
+}
+
+function deployFreqLevel(perWeek: number): string {
+  if (perWeek > 7)                  return 'elite';
+  if (perWeek >= 1 && perWeek <= 7) return 'high';
+  if (perWeek > 0)                  return 'medium';
+  return 'low';
+}
+
+function leadTimeLevel(minutes: number): string {
+  if (minutes < 60)          return 'elite';   // < 1h
+  if (minutes < 1440)        return 'high';    // < 1d
+  if (minutes < 10080)       return 'medium';  // < 1wk
+  return 'low';
+}
+
+function cfrLevel(pct: number): string {
+  if (pct < 5)   return 'elite';
+  if (pct < 10)  return 'high';
+  if (pct < 15)  return 'medium';
+  return 'low';
+}
+
+function mttrLevel(minutes: number): string {
+  if (minutes < 60)    return 'elite';   // < 1h
+  if (minutes < 1440)  return 'high';    // < 1d
+  if (minutes < 10080) return 'medium';  // < 1wk
+  return 'low';
+}
+
+const deployLevel = deployFreqLevel(dora.deploy_freq_per_week);
+const ltLevel     = leadTimeLevel(dora.lead_time_minutes);
+const cfrLvl      = cfrLevel(dora.change_failure_rate_pct);
+const mttrLvl     = mttrLevel(dora.mttr_minutes);
+---
+
+<section class="dora-panel">
+  <div class="dora-grid">
+
+    <!-- Deployment Frequency -->
+    <div class="dora-card">
+      <div class="dora-metric-label">Deployment Frequency</div>
+      <div class="dora-metric-value">{dora.deploy_freq_per_week.toFixed(1)}<span class="dora-unit"> / week</span></div>
+      <div class="dora-level-row">
+        <span class="dora-dot" style={`background:${doraLevelColor(deployLevel)}`}></span>
+        <span class="dora-level-text" style={`color:${doraLevelColor(deployLevel)}`}>{deployLevel}</span>
+      </div>
+      <div class="dora-tooltip">How often builds are deployed. Elite: &gt;7×/week, High: 1–7×/week, Medium: monthly, Low: less than monthly.</div>
+    </div>
+
+    <!-- Lead Time -->
+    <div class="dora-card">
+      <div class="dora-metric-label">Lead Time</div>
+      <div class="dora-metric-value">{formatMinutes(dora.lead_time_minutes)}</div>
+      <div class="dora-level-row">
+        <span class="dora-dot" style={`background:${doraLevelColor(ltLevel)}`}></span>
+        <span class="dora-level-text" style={`color:${doraLevelColor(ltLevel)}`}>{ltLevel}</span>
+      </div>
+      <div class="dora-tooltip">Time from commit to production. Elite: &lt;1h, High: &lt;1d, Medium: &lt;1wk, Low: &gt;1wk.</div>
+    </div>
+
+    <!-- Change Failure Rate -->
+    <div class="dora-card">
+      <div class="dora-metric-label">Change Failure Rate</div>
+      <div class="dora-metric-value">{dora.change_failure_rate_pct.toFixed(1)}<span class="dora-unit">%</span></div>
+      <div class="dora-level-row">
+        <span class="dora-dot" style={`background:${doraLevelColor(cfrLvl)}`}></span>
+        <span class="dora-level-text" style={`color:${doraLevelColor(cfrLvl)}`}>{cfrLvl}</span>
+      </div>
+      <div class="dora-tooltip">Percentage of deployments causing a failure. Elite: &lt;5%, High: &lt;10%, Medium: &lt;15%, Low: ≥15%.</div>
+    </div>
+
+    <!-- MTTR -->
+    <div class="dora-card">
+      <div class="dora-metric-label">MTTR</div>
+      <div class="dora-metric-value">{formatMinutes(dora.mttr_minutes)}</div>
+      <div class="dora-level-row">
+        <span class="dora-dot" style={`background:${doraLevelColor(mttrLvl)}`}></span>
+        <span class="dora-level-text" style={`color:${doraLevelColor(mttrLvl)}`}>{mttrLvl}</span>
+      </div>
+      <div class="dora-tooltip">Mean time to restore service after a failure. Elite: &lt;1h, High: &lt;1d, Medium: &lt;1wk, Low: &gt;1wk.</div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .dora-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .dora-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+
+  .dora-metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .dora-metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .dora-unit {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .dora-level-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .dora-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dora-level-text {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .dora-tooltip {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 600px) {
+    .dora-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

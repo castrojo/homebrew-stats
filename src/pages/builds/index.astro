@@ -1,0 +1,93 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import type { BuildsData } from '../../lib/types.ts';
+import rawData from '../../data/builds.json';
+
+import BuildsHealthBar from '../../components/builds/BuildsHealthBar.astro';
+import DORAPanel from '../../components/builds/DORAPanel.astro';
+import BuildSuccessChart from '../../components/builds/BuildSuccessChart.astro';
+import BuildDurationChart from '../../components/builds/BuildDurationChart.astro';
+import FailureAnalysisChart from '../../components/builds/FailureAnalysisChart.astro';
+import FlakinessLeaderboard from '../../components/builds/FlakinessLeaderboard.astro';
+import PipelineThroughputChart from '../../components/builds/PipelineThroughputChart.astro';
+import BuilderComparison from '../../components/builds/BuilderComparison.astro';
+import MatrixCoverageChart from '../../components/builds/MatrixCoverageChart.astro';
+import PublishReliabilityChart from '../../components/builds/PublishReliabilityChart.astro';
+import RecentBuildsFeed from '../../components/builds/RecentBuildsFeed.astro';
+
+const builds = rawData as unknown as BuildsData;
+const generatedAt = new Date(builds.generated_at).toUTCString();
+const isBootstrap = builds.summary.health_status === 'unknown';
+---
+
+<Layout title="Bluefin CI/CD Build Metrics" activeTab="builds">
+  <header class="page-header">
+    <div>
+      <h1>🏗️ Bluefin Build Pipeline</h1>
+      <div class="meta">
+        Updated {generatedAt} ·
+        <a href="https://github.com/ublue-os/bluefin/actions" target="_blank" rel="noopener">bluefin</a> ·
+        <a href="https://github.com/ublue-os/bluefin-lts/actions" target="_blank" rel="noopener">bluefin-lts</a> ·
+        <a href="https://github.com/projectbluefin" target="_blank" rel="noopener">projectbluefin</a>
+      </div>
+    </div>
+  </header>
+
+  {isBootstrap ? (
+    <p class="collecting">📡 Collecting build data — check back after the next CI run.</p>
+  ) : (
+    <>
+      <!-- Section 1: Summary KPIs + DORA -->
+      <BuildsHealthBar summary={builds.summary} doraLevel={builds.dora_metrics.dora_level} />
+      <DORAPanel dora={builds.dora_metrics} />
+
+      <!-- Section 2: Success rate + Duration trends -->
+      <BuildSuccessChart history={builds.history} />
+      <BuildDurationChart trend={builds.duration_trend} repos={builds.repos} />
+
+      <!-- Section 3: Failure analysis + Flakiness -->
+      <FailureAnalysisChart breakdown={builds.failure_breakdown} mttr={builds.dora_metrics.mttr_minutes} mtbf={builds.dora_metrics.mtbf_hours} />
+      <FlakinessLeaderboard flaky={builds.top_flaky} />
+
+      <!-- Section 4: Throughput + Triggers -->
+      <PipelineThroughputChart history={builds.history} triggers={builds.trigger_breakdown} />
+
+      <!-- Section 5: Cross-builder view -->
+      <BuilderComparison repos={builds.repos} />
+      <MatrixCoverageChart repos={builds.repos} history={builds.history} />
+      <PublishReliabilityChart repos={builds.repos} />
+
+      <!-- Section 6: Recent builds feed -->
+      <RecentBuildsFeed builds={builds.recent_builds} />
+    </>
+  )}
+</Layout>
+
+<style>
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .meta a {
+    color: var(--link);
+    text-decoration: none;
+  }
+  .meta a:hover { text-decoration: underline; }
+  .collecting {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+</style>

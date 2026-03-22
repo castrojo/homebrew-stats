@@ -1,0 +1,273 @@
+---
+import ChartCard from '../ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import type { BuildDailySnapshot } from '../../lib/types.ts';
+
+interface Props {
+  history: BuildDailySnapshot[];
+}
+
+const { history } = Astro.props;
+const isEmpty = history.length === 0;
+---
+
+<div class="success-section">
+  <ChartCard
+    title="Build Success Rate"
+    canvasId="build-success-chart"
+    height={220}
+    isEmpty={isEmpty}
+    emptyMsg="Collecting build history…"
+  />
+  <ChartCard
+    title="Daily Build Outcomes"
+    canvasId="build-outcomes-chart"
+    height={220}
+    rangeId="outcomes-range"
+    ranges={[
+      { label: '7d',  value: '7'  },
+      { label: '30d', value: '30' },
+      { label: '90d', value: '90' },
+    ]}
+    defaultRange="30"
+    isEmpty={isEmpty}
+    emptyMsg="Collecting build history…"
+  />
+</div>
+
+{!isEmpty && (
+  <script type="application/json" id="build-success-data" set:html={safeJson(history)}></script>
+)}
+
+<script>
+import '../../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+import { BRAND_COLOURS, getChartColors, applyTheme } from '../../lib/chart-theme.js';
+import { readChartData } from '../../lib/inject.js';
+import type { BuildDailySnapshot } from '../../lib/types.js';
+
+const dataEl = document.getElementById('build-success-data');
+if (!dataEl) {
+  // Empty state — no charts to initialise
+} else {
+  const allHistory = readChartData<BuildDailySnapshot[]>('build-success-data');
+
+  const SUCCESS   = BRAND_COLOURS[2]; // green
+  const FAILURE   = BRAND_COLOURS[4]; // red-orange
+  const CANCELLED = BRAND_COLOURS[3]; // yellow
+  const GOAL      = BRAND_COLOURS[0]; // blue (95% goal line)
+
+  function filterByRange(days: number): BuildDailySnapshot[] {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    return allHistory.filter(s => s.date >= cutoffStr);
+  }
+
+  function computeRolling7d(
+    data: BuildDailySnapshot[],
+    ratePerDay: number[],
+  ): (number | null)[] {
+    return ratePerDay.map((_, i) => {
+      const slice = ratePerDay.slice(Math.max(0, i - 6), i + 1);
+      if (slice.length === 0) return null;
+      return slice.reduce((a, b) => a + b, 0) / slice.length;
+    });
+  }
+
+  let currentRange = 30;
+  let successChart: Chart | undefined;
+  let outcomesChart: Chart | undefined;
+
+  function getSuccessRate(s: BuildDailySnapshot): number {
+    if (s.total_runs === 0) return 0;
+    return (s.success_count / s.total_runs) * 100;
+  }
+
+  function buildSuccessDatasets(data: BuildDailySnapshot[]) {
+    const rates = data.map(getSuccessRate);
+    const rolling = computeRolling7d(data, rates);
+    const colors = getChartColors();
+    return {
+      labels: data.map(s => s.date),
+      datasets: [
+        {
+          label: 'Success Rate %',
+          data: rates,
+          borderColor: SUCCESS,
+          backgroundColor: SUCCESS + '22',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+        },
+        {
+          label: '7d Rolling Avg',
+          data: rolling,
+          borderColor: GOAL,
+          backgroundColor: 'transparent',
+          borderDash: [5, 3],
+          tension: 0.3,
+          pointRadius: 0,
+          spanGaps: true,
+        },
+        {
+          label: '95% Goal',
+          data: data.map(() => 95),
+          borderColor: colors.muted,
+          backgroundColor: 'transparent',
+          borderDash: [2, 4],
+          pointRadius: 0,
+        },
+      ],
+    };
+  }
+
+  function buildOutcomesDatasets(data: BuildDailySnapshot[]) {
+    return {
+      labels: data.map(s => s.date),
+      datasets: [
+        {
+          label: 'Success',
+          data: data.map(s => s.success_count),
+          backgroundColor: SUCCESS,
+          stack: 'outcomes',
+        },
+        {
+          label: 'Failure',
+          data: data.map(s => s.failure_count),
+          backgroundColor: FAILURE,
+          stack: 'outcomes',
+        },
+        {
+          label: 'Cancelled',
+          data: data.map(s => s.cancelled_count),
+          backgroundColor: CANCELLED,
+          stack: 'outcomes',
+        },
+      ],
+    };
+  }
+
+  function initCharts() {
+    const data = filterByRange(currentRange);
+    const colors = getChartColors();
+
+    const successCanvas = document.getElementById('build-success-chart') as HTMLCanvasElement | null;
+    const outcomesCanvas = document.getElementById('build-outcomes-chart') as HTMLCanvasElement | null;
+
+    if (successCanvas) {
+      try {
+        successChart = new Chart(successCanvas, {
+          type: 'line',
+          data: buildSuccessDatasets(data),
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: colors.text, font: { size: 11 }, usePointStyle: true, boxWidth: 8 } },
+            },
+            scales: {
+              x: {
+                ticks: { color: colors.muted, font: { size: 10 }, maxTicksLimit: 10 },
+                grid: { color: colors.grid },
+              },
+              y: {
+                min: 0,
+                max: 100,
+                ticks: {
+                  color: colors.muted,
+                  font: { size: 10 },
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  callback: (v: any) => `${v}%`,
+                },
+                grid: { color: colors.grid },
+              },
+            },
+          },
+        });
+      } catch (e) {
+        console.error('[BuildSuccessChart] Success rate chart init failed:', e);
+      }
+    }
+
+    if (outcomesCanvas) {
+      try {
+        outcomesChart = new Chart(outcomesCanvas, {
+          type: 'bar',
+          data: buildOutcomesDatasets(data),
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: colors.text, font: { size: 11 }, usePointStyle: true, boxWidth: 8 } },
+            },
+            scales: {
+              x: {
+                stacked: true,
+                ticks: { color: colors.muted, font: { size: 10 }, maxTicksLimit: 10 },
+                grid: { color: colors.grid },
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                ticks: { color: colors.muted, font: { size: 10 } },
+                grid: { color: colors.grid },
+              },
+            },
+          },
+        });
+      } catch (e) {
+        console.error('[BuildSuccessChart] Outcomes chart init failed:', e);
+      }
+    }
+  }
+
+  function updateCharts(range: number) {
+    const data = filterByRange(range);
+    if (successChart) {
+      const updated = buildSuccessDatasets(data);
+      successChart.data.labels = updated.labels;
+      successChart.data.datasets = updated.datasets;
+      successChart.update();
+    }
+    if (outcomesChart) {
+      const updated = buildOutcomesDatasets(data);
+      outcomesChart.data.labels = updated.labels;
+      outcomesChart.data.datasets = updated.datasets;
+      outcomesChart.update();
+    }
+  }
+
+  initCharts();
+
+  // Range selector — shared for both charts
+  document.getElementById('outcomes-range')?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('outcomes-range')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = Number(btn.dataset.range);
+      updateCharts(currentRange);
+    });
+  });
+
+  window.addEventListener('themechange', () => {
+    if (successChart) applyTheme(successChart);
+    if (outcomesChart) applyTheme(outcomesChart);
+  });
+}
+</script>
+
+<style>
+  .success-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 800px) {
+    .success-section {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

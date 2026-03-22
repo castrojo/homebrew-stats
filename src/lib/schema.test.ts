@@ -488,3 +488,66 @@ describe("src/data/contributors.json schema", () => {
   });
 });
 
+import buildsData from '../data/builds.json';
+
+describe('builds.json schema', () => {
+  const data = buildsData as Record<string, unknown>;
+
+  it('has required top-level keys', () => {
+    expect(buildsData).toHaveProperty('generated_at');
+    expect(buildsData).toHaveProperty('summary');
+    expect(buildsData).toHaveProperty('dora_metrics');
+    expect(buildsData).toHaveProperty('repos');
+    expect(buildsData).toHaveProperty('top_flaky');
+    expect(buildsData).toHaveProperty('recent_builds');
+    expect(buildsData).toHaveProperty('duration_trend');
+    expect(buildsData).toHaveProperty('failure_breakdown');
+    expect(buildsData).toHaveProperty('trigger_breakdown');
+    expect(buildsData).toHaveProperty('history');
+  });
+
+  it('summary has required fields with correct types', () => {
+    const s = data.summary as Record<string, unknown>;
+    expect(typeof s.overall_success_rate_7d).toBe('number');
+    expect(typeof s.overall_success_rate_30d).toBe('number');
+    expect(typeof s.total_builds_7d).toBe('number');
+    expect(typeof s.avg_duration_min).toBe('number');
+    expect(typeof s.health_status).toBe('string');
+  });
+
+  it('dora_metrics has required fields with correct types', () => {
+    const d = data.dora_metrics as Record<string, unknown>;
+    expect(typeof d.deploy_freq_per_week).toBe('number');
+    expect(typeof d.lead_time_minutes).toBe('number');
+    expect(typeof d.change_failure_rate_pct).toBe('number');
+    expect(typeof d.mttr_minutes).toBe('number');
+    expect(typeof d.mtbf_hours).toBe('number');
+    expect(typeof d.dora_level).toBe('string');
+  });
+
+  it('repos is an array', () => {
+    expect(Array.isArray(data.repos)).toBe(true);
+  });
+
+  it('recent_builds is an array', () => {
+    expect(Array.isArray(data.recent_builds)).toBe(true);
+  });
+
+  it('history is an array', () => {
+    expect(Array.isArray(data.history)).toBe(true);
+  });
+
+  it('top_flaky is an array', () => {
+    expect(Array.isArray(data.top_flaky)).toBe(true);
+  });
+
+  it('trigger_breakdown has correct shape', () => {
+    const t = data.trigger_breakdown as Record<string, unknown>;
+    expect(typeof t.scheduled).toBe('number');
+    expect(typeof t.push).toBe('number');
+    expect(typeof t.pull_request).toBe('number');
+    expect(typeof t.workflow_dispatch).toBe('number');
+    expect(typeof t.other).toBe('number');
+  });
+});
+

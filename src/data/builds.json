@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-01-01T00:00:00Z",
+  "repos": [],
+  "summary": {
+    "overall_success_rate_7d": 0,
+    "overall_success_rate_30d": 0,
+    "total_builds_7d": 0,
+    "total_builds_30d": 0,
+    "avg_duration_min": 0,
+    "p50_duration_min": 0,
+    "p95_duration_min": 0,
+    "p99_duration_min": 0,
+    "avg_queue_time_sec": 0,
+    "active_streams": 0,
+    "health_status": "unknown"
+  },
+  "dora_metrics": {
+    "deployment_frequency": "unknown",
+    "deploy_freq_per_week": 0,
+    "lead_time_minutes": 0,
+    "change_failure_rate_pct": 0,
+    "mttr_minutes": 0,
+    "mtbf_hours": 0,
+    "dora_level": "unknown"
+  },
+  "top_flaky": [],
+  "recent_builds": [],
+  "duration_trend": [],
+  "failure_breakdown": [],
+  "trigger_breakdown": {
+    "scheduled": 0,
+    "push": 0,
+    "pull_request": 0,
+    "workflow_dispatch": 0,
+    "other": 0
+  },
+  "history": []
+}

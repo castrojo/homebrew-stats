@@ -153,3 +153,131 @@ export interface ContributorsData {
   repos: RepoStats[];
   discussions_summary: DiscussionSummary;
 }
+
+// ── Builds tab types ──
+
+export interface BuildsData {
+  generated_at: string;
+  repos: BuildRepoMetrics[];
+  summary: PipelineSummary;
+  dora_metrics: DORAMetrics;
+  top_flaky: FlakyJob[];
+  recent_builds: RecentBuild[];
+  duration_trend: DurationBucket[];
+  failure_breakdown: FailureCategory[];
+  trigger_breakdown: TriggerBreakdown;
+  history: BuildDailySnapshot[];
+}
+
+export interface PipelineSummary {
+  overall_success_rate_7d: number;
+  overall_success_rate_30d: number;
+  total_builds_7d: number;
+  total_builds_30d: number;
+  avg_duration_min: number;
+  p50_duration_min: number;
+  p95_duration_min: number;
+  p99_duration_min: number;
+  avg_queue_time_sec: number;
+  active_streams: number;
+  health_status: string;
+}
+
+export interface DORAMetrics {
+  deployment_frequency: string;
+  deploy_freq_per_week: number;
+  lead_time_minutes: number;
+  change_failure_rate_pct: number;
+  mttr_minutes: number;
+  mtbf_hours: number;
+  dora_level: string;
+}
+
+export interface FlakyJob {
+  repo: string;
+  job_name: string;
+  total_runs: number;
+  failures: number;
+  failure_rate: number;
+  flakiness_index: number;
+  last_failure: string;
+  top_fail_step: string;
+}
+
+export interface RecentBuild {
+  run_id: number;
+  repo: string;
+  workflow: string;
+  branch: string;
+  event: string;
+  conclusion: string;
+  duration_min: number;
+  started_at: string;
+  html_url: string;
+  job_count: number;
+  failed_jobs: number;
+}
+
+export interface DurationBucket {
+  date: string;
+  p50: number;
+  p95: number;
+  p99: number;
+  avg: number;
+  min: number;
+  max: number;
+}
+
+export interface FailureCategory {
+  category: string;
+  count: number;
+  pct: number;
+}
+
+export interface TriggerBreakdown {
+  scheduled: number;
+  push: number;
+  pull_request: number;
+  workflow_dispatch: number;
+  other: number;
+}
+
+export interface BuildDailySnapshot {
+  date: string;
+  total_runs: number;
+  success_count: number;
+  failure_count: number;
+  cancelled_count: number;
+  avg_duration_min: number;
+  p95_duration_min: number;
+  avg_queue_time_sec: number;
+  repo_breakdown: Record<string, { runs: number; successes: number; failures: number }>;
+}
+
+export interface BuildRepoMetrics {
+  repo: string;
+  success_rate_7d: number;
+  success_rate_30d: number;
+  total_runs_7d: number;
+  total_runs_30d: number;
+  avg_duration_min: number;
+  streams: BuildStreamMetrics[];
+  architectures?: BuildArchMetrics[];
+}
+
+export interface BuildStreamMetrics {
+  name: string;
+  success_rate_7d: number;
+  success_rate_30d: number;
+  total_runs_7d: number;
+  avg_duration_min: number;
+  last_run_at: string;
+  last_conclusion: string;
+}
+
+export interface BuildArchMetrics {
+  platform: string;
+  success_rate_7d: number;
+  avg_duration_min: number;
+  total_jobs_7d: number;
+}

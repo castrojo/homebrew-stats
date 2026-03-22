@@ -10,6 +10,7 @@ import (
 "time"
 
 ghclient "github.com/castrojo/homebrew-stats/internal/github"
+"github.com/castrojo/homebrew-stats/internal/builds"
 "github.com/castrojo/homebrew-stats/internal/contributors"
 "github.com/castrojo/homebrew-stats/internal/countme"
 "github.com/castrojo/homebrew-stats/internal/history"
@@ -47,9 +48,14 @@ if err := runFetchContributors(); err != nil {
 fmt.Fprintln(os.Stderr, "❌", err)
 os.Exit(1)
 }
+case "fetch-builds":
+if err := runFetchBuilds(); err != nil {
+fmt.Fprintln(os.Stderr, "❌ fetch-builds:", err)
+os.Exit(1)
+}
 default:
 fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors]")
+fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds]")
 os.Exit(1)
 }
 }
@@ -1203,4 +1209,23 @@ func runFetchContributors() error {
 	fmt.Fprintf(os.Stderr, "  active contributors: %d, repos: %d, commits: %d\n",
 		len(activeLogins30d), activeRepoCount, totalCommits30d)
 	return nil
+}
+
+// ── fetch-builds ─────────────────────────────────────────────────────────────
+
+func runFetchBuilds() error {
+	client, err := ghclient.NewClient()
+	if err != nil {
+		return err
+	}
+
+	cfg := builds.CollectorConfig{
+		Repos:        builds.DefaultRepos,
+		LookbackDays: 90,
+		HistoryPath:  ".sync-cache/builds-history.json",
+		OutputPath:   "src/data/builds.json",
+	}
+
+	collector := builds.NewCollector(client.GitHub(), cfg)
+	return collector.Run(client.Context())
 }

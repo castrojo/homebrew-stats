@@ -1,0 +1,237 @@
+---
+import type { FlakyJob } from '../../lib/types.ts';
+
+interface Props {
+  flaky: FlakyJob[];
+}
+
+const { flaky } = Astro.props;
+
+function truncate(str: string, max: number): string {
+  return str.length > max ? str.slice(0, max - 1) + '…' : str;
+}
+
+function relativeDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return 'today';
+  if (diffDays === 1) return 'yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+  return `${Math.floor(diffDays / 365)}y ago`;
+}
+
+function flakinessBarColor(index: number): string {
+  if (index < 0.1) return 'var(--green)';
+  if (index < 0.2) return 'var(--yellow)';
+  if (index < 0.3) return '#f07030'; // orange
+  return 'var(--red)';
+}
+
+function failureRateColor(rate: number): string {
+  if (rate < 0.05) return 'var(--green)';
+  if (rate <= 0.15) return 'var(--yellow)';
+  return 'var(--red)';
+}
+---
+
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">
+      Flakiness Leaderboard{flaky.length > 0 ? ` — Top ${flaky.length} Flaky Jobs` : ''}
+    </div>
+  </div>
+
+  {flaky.length === 0 ? (
+    <p class="chart-empty">No flaky jobs detected.</p>
+  ) : (
+    <div class="table-wrap">
+      <table class="flakiness-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Job Name</th>
+            <th>Repo</th>
+            <th>Runs</th>
+            <th>Failures</th>
+            <th>Failure Rate</th>
+            <th>Flakiness Index</th>
+            <th>Last Failure</th>
+            <th>Top Failing Step</th>
+          </tr>
+        </thead>
+        <tbody>
+          {flaky.map((job, i) => (
+            <tr class={i % 2 === 0 ? 'row-even' : 'row-odd'}>
+              <td class="rank">{i + 1}</td>
+              <td class="job-name">
+                <span title={job.job_name}>{truncate(job.job_name, 40)}</span>
+              </td>
+              <td class="repo">{job.repo}</td>
+              <td class="num">{job.total_runs}</td>
+              <td class="num">{job.failures}</td>
+              <td class="num" style={`color:${failureRateColor(job.failure_rate)}`}>
+                {(job.failure_rate * 100).toFixed(1)}%
+              </td>
+              <td class="flakiness-cell">
+                <div class="bar-wrap">
+                  <div
+                    class="bar"
+                    style={`width:${Math.min(job.flakiness_index / 0.5, 1) * 100}%;background:${flakinessBarColor(job.flakiness_index)}`}
+                  ></div>
+                </div>
+                <span class="bar-label">{job.flakiness_index.toFixed(3)}</span>
+              </td>
+              <td class="last-failure">{relativeDate(job.last_failure)}</td>
+              <td class="top-step">
+                <span title={job.top_fail_step}>{truncate(job.top_fail_step, 32)}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
+<style>
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chart-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 0;
+    font-size: 14px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .flakiness-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .flakiness-table thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .flakiness-table th {
+    padding: 6px 10px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  .flakiness-table td {
+    padding: 7px 10px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .row-even {
+    background: var(--bg2);
+  }
+
+  .row-odd {
+    background: var(--bg);
+  }
+
+  .flakiness-table tbody tr:hover {
+    background: color-mix(in srgb, var(--blue) 8%, var(--bg2));
+  }
+
+  .rank {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    width: 28px;
+  }
+
+  .job-name span,
+  .top-step span {
+    cursor: default;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .repo {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .last-failure {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .top-step {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .flakiness-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+  }
+
+  .bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    min-width: 60px;
+  }
+
+  .bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  .bar-label {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+</style>

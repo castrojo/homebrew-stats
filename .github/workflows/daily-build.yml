@@ -100,6 +100,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-countme
 
+      - name: Fetch build pipeline metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds
+        continue-on-error: true
+
       - name: Save traffic history cache
         if: always()
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -187,6 +193,14 @@ jobs:
             echo "✅ countme current_week.total = $total"
           else
             echo "⚠️ countme current_week is empty — data collection may still be bootstrapping"
+          fi
+
+      - name: Verify builds page has data
+        run: |
+          if grep -q '"health_status":"unknown"' src/data/builds.json 2>/dev/null; then
+            echo "⚠️ builds.json is in bootstrap state (cold cache) — skipping strict check"
+          else
+            echo "✅ builds.json has real data"
           fi
 
       - name: Verify contributors data (warn-only)

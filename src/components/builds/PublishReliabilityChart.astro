@@ -1,0 +1,145 @@
+---
+import type { BuildRepoMetrics } from '../../lib/types.ts';
+
+interface Props {
+  repos: BuildRepoMetrics[];
+}
+
+const { repos } = Astro.props;
+
+const total = repos.length;
+const reposAtFullCoverage = repos.filter(r => r.success_rate_7d >= 95).length;
+const overallSuccessRate = total > 0
+  ? repos.reduce((sum, r) => sum + r.success_rate_7d, 0) / total
+  : 0;
+const reposWithActivity = repos.filter(r => r.total_runs_7d > 0).length;
+---
+
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">Publish Reliability</div>
+  </div>
+
+  {repos.length === 0 ? (
+    <p class="chart-empty">Collecting data…</p>
+  ) : (
+    <>
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-label">Repos at Full Coverage</div>
+          <div class="kpi-value">
+            {reposAtFullCoverage}<span class="kpi-denom">/{total}</span>
+          </div>
+          <div class="kpi-sub">≥95% success rate (7d)</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Overall 7d Success Rate</div>
+          <div class="kpi-value" style={`color: ${overallSuccessRate >= 95 ? 'var(--green)' : overallSuccessRate >= 80 ? 'var(--yellow)' : 'var(--red)'}`}>
+            {overallSuccessRate.toFixed(1)}%
+          </div>
+          <div class="kpi-sub">Avg across all repos</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Repos with Recent Activity</div>
+          <div class="kpi-value">
+            {reposWithActivity}<span class="kpi-denom">/{total}</span>
+          </div>
+          <div class="kpi-sub">Total runs &gt; 0 (7d)</div>
+        </div>
+      </div>
+
+      <p class="note">
+        Publish step tracking requires live build data — shown after first successful CI run.
+      </p>
+    </>
+  )}
+</div>
+
+<style>
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chart-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 0;
+    font-size: 14px;
+  }
+
+  .kpi-strip {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .kpi-card {
+    flex: 1;
+    min-width: 150px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .kpi-denom {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0;
+  }
+
+  @media (max-width: 700px) {
+    .kpi-card { flex: 1 1 calc(50% - 0.5rem); }
+  }
+</style>

@@ -1,0 +1,331 @@
+---
+import ChartCard from '../ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import type { BuildDailySnapshot, TriggerBreakdown } from '../../lib/types.ts';
+
+interface Props {
+  history: BuildDailySnapshot[];
+  triggers: TriggerBreakdown;
+}
+
+const { history, triggers } = Astro.props;
+
+const hasHistory = history.length > 0;
+const hasTrigggers = Object.values(triggers).some(v => v > 0);
+---
+
+<div class="throughput-grid">
+  <!-- Chart A: Builds Per Day -->
+  <ChartCard
+    title="Builds Per Day"
+    canvasId="throughput-builds-day"
+    height={220}
+    rangeId="throughput-range"
+    ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }]}
+    defaultRange="30"
+    isEmpty={!hasHistory}
+    emptyMsg="Collecting data…"
+  />
+
+  <!-- Chart B: Trigger Distribution -->
+  <ChartCard
+    title="Trigger Distribution"
+    canvasId="throughput-triggers"
+    height={220}
+    isEmpty={!hasTrigggers}
+    emptyMsg="Collecting data…"
+  />
+
+  <!-- Chart C: Avg Queue Wait Time -->
+  <ChartCard
+    title="Avg Queue Wait Time"
+    canvasId="throughput-queue"
+    height={220}
+    rangeId="queue-range"
+    ranges={[{ label: '7d', value: '7' }, { label: '30d', value: '30' }]}
+    defaultRange="7"
+    isEmpty={!hasHistory}
+    emptyMsg="Collecting data…"
+  />
+</div>
+
+<script type="application/json" id="throughput-data" set:html={safeJson({ history, triggers })}></script>
+
+<script>
+  import '../../lib/chart-registry.js';
+  import { readChartData } from '../../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { history, triggers } = readChartData<{
+    history: {
+      date: string;
+      total_runs: number;
+      success_count: number;
+      failure_count: number;
+      cancelled_count: number;
+      avg_duration_min: number;
+      p95_duration_min: number;
+      avg_queue_time_sec: number;
+    }[];
+    triggers: {
+      scheduled: number;
+      push: number;
+      pull_request: number;
+      workflow_dispatch: number;
+      other: number;
+    };
+  }>('throughput-data');
+
+  /** Compute 7-day rolling average over a numeric array. */
+  function rollingAvg(arr: number[], window: number): (number | null)[] {
+    return arr.map((_, i) => {
+      if (i < window - 1) return null;
+      const slice = arr.slice(i - window + 1, i + 1);
+      return slice.reduce((s, v) => s + v, 0) / window;
+    });
+  }
+
+  const colors = getChartColors();
+
+  // ── Chart A: Builds Per Day ────────────────────────────────────────────────
+  const buildsDayCanvas = document.getElementById('throughput-builds-day') as HTMLCanvasElement | null;
+  let buildsChart: Chart | undefined;
+
+  function sliceHistory(days: number) {
+    return history.slice(-days);
+  }
+
+  function buildBuildsDatasets(slice: typeof history) {
+    const totals = slice.map(h => h.total_runs);
+    const avg = rollingAvg(totals, 7);
+    return {
+      labels: slice.map(h => h.date),
+      datasets: [
+        {
+          type: 'bar' as const,
+          label: 'Total Runs',
+          data: totals,
+          backgroundColor: `${BRAND_COLOURS[0]}99`,
+          borderColor: BRAND_COLOURS[0],
+          borderWidth: 1,
+          order: 2,
+        },
+        {
+          type: 'line' as const,
+          label: '7-day Avg',
+          data: avg,
+          borderColor: BRAND_COLOURS[4],
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+          order: 1,
+          spanGaps: false,
+        },
+      ],
+    };
+  }
+
+  if (buildsDayCanvas && history.length > 0) {
+    try {
+      const initial = sliceHistory(30);
+      const { labels, datasets } = buildBuildsDatasets(initial);
+      buildsChart = new Chart(buildsDayCanvas, {
+        type: 'bar',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: colors.text, font: { size: 12 } } },
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted, font: { size: 11 }, maxTicksLimit: 10 },
+              grid: { color: colors.grid },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: colors.muted, font: { size: 11 } },
+              grid: { color: colors.grid },
+              title: { display: true, text: 'Builds', color: colors.muted, font: { size: 11 } },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[PipelineThroughputChart] Builds chart init failed:', e);
+    }
+
+    document.querySelectorAll('#throughput-range [data-range]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!buildsChart) return;
+        const days = parseInt((btn as HTMLElement).dataset.range ?? '30', 10);
+        document.querySelectorAll('#throughput-range [data-range]').forEach(b => b.classList.remove('active'));
+        (btn as HTMLElement).classList.add('active');
+        const slice = sliceHistory(days);
+        const { labels, datasets } = buildBuildsDatasets(slice);
+        buildsChart.data.labels = labels;
+        buildsChart.data.datasets = datasets;
+        buildsChart.update();
+      });
+    });
+  }
+
+  // ── Chart B: Trigger Distribution ────────────────────────────────────────────
+  const triggersCanvas = document.getElementById('throughput-triggers') as HTMLCanvasElement | null;
+  let triggersChart: Chart | undefined;
+
+  const hasTriggers = Object.values(triggers).some(v => v > 0);
+  if (triggersCanvas && hasTriggers) {
+    try {
+      triggersChart = new Chart(triggersCanvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['Scheduled', 'Push', 'Pull Request', 'Manual', 'Other'],
+          datasets: [
+            {
+              data: [
+                triggers.scheduled,
+                triggers.push,
+                triggers.pull_request,
+                triggers.workflow_dispatch,
+                triggers.other,
+              ],
+              backgroundColor: [
+                BRAND_COLOURS[0],
+                BRAND_COLOURS[1],
+                BRAND_COLOURS[2],
+                BRAND_COLOURS[3],
+                BRAND_COLOURS[4],
+              ],
+              borderColor: 'transparent',
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: colors.text, font: { size: 12 } },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[PipelineThroughputChart] Triggers chart init failed:', e);
+    }
+  }
+
+  // ── Chart C: Avg Queue Wait Time ─────────────────────────────────────────────
+  const queueCanvas = document.getElementById('throughput-queue') as HTMLCanvasElement | null;
+  let queueChart: Chart | undefined;
+
+  function buildQueueDataset(slice: typeof history) {
+    return {
+      labels: slice.map(h => h.date),
+      data: slice.map(h => h.avg_queue_time_sec),
+    };
+  }
+
+  if (queueCanvas && history.length > 0) {
+    try {
+      const initial = buildQueueDataset(sliceHistory(7));
+      queueChart = new Chart(queueCanvas, {
+        type: 'line',
+        data: {
+          labels: initial.labels,
+          datasets: [
+            {
+              label: 'Avg Queue Time',
+              data: initial.data,
+              borderColor: BRAND_COLOURS[2],
+              backgroundColor: `${BRAND_COLOURS[2]}22`,
+              borderWidth: 2,
+              pointRadius: 3,
+              fill: true,
+              tension: 0.3,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: colors.text, font: { size: 12 } } },
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted, font: { size: 11 }, maxTicksLimit: 10 },
+              grid: { color: colors.grid },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: colors.muted, font: { size: 11 } },
+              grid: { color: colors.grid },
+              title: { display: true, text: 'seconds', color: colors.muted, font: { size: 11 } },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[PipelineThroughputChart] Queue chart init failed:', e);
+    }
+
+    document.querySelectorAll('#queue-range [data-range]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!queueChart) return;
+        const days = parseInt((btn as HTMLElement).dataset.range ?? '7', 10);
+        document.querySelectorAll('#queue-range [data-range]').forEach(b => b.classList.remove('active'));
+        (btn as HTMLElement).classList.add('active');
+        const { labels, data } = buildQueueDataset(sliceHistory(days));
+        queueChart.data.labels = labels;
+        queueChart.data.datasets[0].data = data;
+        queueChart.update();
+      });
+    });
+  }
+
+  // ── Theme change ─────────────────────────────────────────────────────────────
+  window.addEventListener('themechange', () => {
+    if (buildsChart) applyTheme(buildsChart);
+    if (queueChart) applyTheme(queueChart);
+    if (triggersChart) {
+      const c = getChartColors();
+      if (triggersChart.options.plugins?.legend?.labels) {
+        triggersChart.options.plugins.legend.labels.color = c.text;
+      }
+      triggersChart.update();
+    }
+  });
+</script>
+
+<style>
+  .throughput-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    margin-bottom: 20px;
+  }
+
+  /* Queue chart spans full width on its own row */
+  .throughput-grid > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 700px) {
+    .throughput-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .throughput-grid > :last-child {
+      grid-column: 1;
+    }
+  }
+</style>

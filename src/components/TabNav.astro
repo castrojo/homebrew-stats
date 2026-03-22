@@ -1,5 +1,5 @@
 ---
-interface Props { activeTab: 'homebrew' | 'testhub' | 'overall' | 'contributors'; }
+interface Props { activeTab: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds'; }
 const { activeTab } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
@@ -8,6 +8,7 @@ const base = import.meta.env.BASE_URL;
   <a href={`${base}/testhub/`} data-astro-prefetch class:list={['tab', { active: activeTab === 'testhub' }]}>🧪 Testhub</a>
   <a href={`${base}/overall/`}       data-astro-prefetch class:list={['tab', { active: activeTab === 'overall'       }]}>🌐 Overall</a>
   <a href={`${base}/contributors/`}  data-astro-prefetch class:list={['tab', { active: activeTab === 'contributors'  }]}>👥 Contributors</a>
+  <a href={`${base}/builds/`}        data-astro-prefetch class:list={['tab', { active: activeTab === 'builds'        }]}>🏗️ Builds</a>
 </nav>
 <style>
 .tab-nav {

@@ -3,10 +3,16 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 default:
     just --list
 
+# Fetch Bluefin CI/CD build metrics from GitHub Actions API
+sync-builds:
+    cd stats-go && go build -o stats ./cmd/stats/
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds
+
 # Fetch latest data from GitHub API (requires GITHUB_TOKEN)
 sync:
     cd stats-go && go build -o stats ./cmd/stats/
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats
+    just sync-builds
 
 # Astro hot-reload dev server (uses existing synced data)
 dev:

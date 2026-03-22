@@ -1,0 +1,320 @@
+---
+import type { BuildRepoMetrics } from '../../lib/types.ts';
+
+interface Props {
+  repos: BuildRepoMetrics[];
+}
+
+const { repos } = Astro.props;
+
+// Helpers
+function rateColor(rate: number): string {
+  if (rate >= 95) return 'var(--green)';
+  if (rate >= 80) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function lastConclusionIcon(repo: BuildRepoMetrics): string {
+  if (!repo.streams.length) return '⚪';
+  // Find the most recent stream by last_run_at
+  const sorted = [...repo.streams].sort(
+    (a, b) => new Date(b.last_run_at).getTime() - new Date(a.last_run_at).getTime()
+  );
+  const latest = sorted[0];
+  if (latest.last_conclusion === 'success') return '🟢';
+  if (!latest.last_conclusion) return '⚪';
+  return '🔴';
+}
+
+function lastConclusionLabel(repo: BuildRepoMetrics): string {
+  if (!repo.streams.length) return 'No data';
+  const sorted = [...repo.streams].sort(
+    (a, b) => new Date(b.last_run_at).getTime() - new Date(a.last_run_at).getTime()
+  );
+  return sorted[0].last_conclusion || 'unknown';
+}
+
+// Stream health matrix — org grouping
+const UBLUE_REPOS = ['bluefin', 'bluefin-lts'];
+const PROJECTBLUEFIN_REPOS = ['common', 'dakota', 'iso', 'finpilot', 'testhub'];
+
+function reposByOrg(slugs: string[]): BuildRepoMetrics[] {
+  return slugs.flatMap(slug => repos.filter(r => r.repo === slug));
+}
+
+function streamIcon(conclusion: string): string {
+  if (conclusion === 'success') return '🟢';
+  if (!conclusion) return '⚪';
+  return '🔴';
+}
+---
+
+<!-- Section A: Comparison Table -->
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">Builder Comparison — All Repos</div>
+  </div>
+
+  {repos.length === 0 ? (
+    <p class="chart-empty">Collecting data…</p>
+  ) : (
+    <div class="table-wrap">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Repo</th>
+            <th>Success Rate 7d</th>
+            <th>Success Rate 30d</th>
+            <th>Avg Duration</th>
+            <th>Total Runs (7d)</th>
+            <th>Last Stream Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {repos.map(repo => (
+            <tr>
+              <td class="repo-name">{repo.repo}</td>
+              <td>
+                <span class="rate-badge" style={`color: ${rateColor(repo.success_rate_7d)}`}>
+                  {repo.success_rate_7d.toFixed(1)}%
+                </span>
+              </td>
+              <td>
+                <span class="rate-badge" style={`color: ${rateColor(repo.success_rate_30d)}`}>
+                  {repo.success_rate_30d.toFixed(1)}%
+                </span>
+              </td>
+              <td>{repo.avg_duration_min.toFixed(0)}m</td>
+              <td>{repo.total_runs_7d.toLocaleString()}</td>
+              <td class="status-cell">
+                <span class="status-badge">
+                  {lastConclusionIcon(repo)} {lastConclusionLabel(repo)}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
+<!-- Section B: Stream Health Matrix -->
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">Stream Health Matrix</div>
+  </div>
+
+  {repos.length === 0 ? (
+    <p class="chart-empty">Collecting data…</p>
+  ) : (
+    <div class="matrix-root">
+      <!-- ublue-os org -->
+      <div class="org-section">
+        <div class="org-label">ublue-os</div>
+        <div class="org-repos">
+          {reposByOrg(UBLUE_REPOS).map(repo => (
+            <div class="repo-block">
+              <div class="repo-block-name">{repo.repo}</div>
+              <div class="stream-tiles">
+                {repo.streams.length === 0 ? (
+                  <span class="stream-tile empty">⚪ No streams</span>
+                ) : repo.streams.map(s => (
+                  <div class="stream-tile">
+                    <span class="stream-icon">{streamIcon(s.last_conclusion)}</span>
+                    <span class="stream-name">{s.name}</span>
+                    <span class="stream-rate">{s.success_rate_7d.toFixed(0)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- projectbluefin org -->
+      <div class="org-section">
+        <div class="org-label">projectbluefin</div>
+        <div class="org-repos">
+          {reposByOrg(PROJECTBLUEFIN_REPOS).map(repo => (
+            <div class="repo-block">
+              <div class="repo-block-name">{repo.repo}</div>
+              <div class="stream-tiles">
+                {repo.streams.length === 0 ? (
+                  <span class="stream-tile empty">⚪ No streams</span>
+                ) : repo.streams.map(s => (
+                  <div class="stream-tile">
+                    <span class="stream-icon">{streamIcon(s.last_conclusion)}</span>
+                    <span class="stream-name">{s.name}</span>
+                    <span class="stream-rate">{s.success_rate_7d.toFixed(0)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+<style>
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chart-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 0;
+    font-size: 14px;
+  }
+
+  /* Table styles */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .comparison-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comparison-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .comparison-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .comparison-table tbody tr:hover {
+    background: var(--bg);
+  }
+
+  .repo-name {
+    font-weight: 600;
+    font-family: monospace;
+  }
+
+  .rate-badge {
+    font-weight: 700;
+  }
+
+  .status-cell {
+    white-space: nowrap;
+  }
+
+  .status-badge {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Stream health matrix */
+  .matrix-root {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .org-section {}
+
+  .org-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .org-repos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .repo-block {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .repo-block-name {
+    font-size: 12px;
+    font-weight: 700;
+    font-family: monospace;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .stream-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .stream-tile {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .stream-tile.empty {
+    color: var(--muted);
+  }
+
+  .stream-icon {
+    font-size: 10px;
+  }
+
+  .stream-name {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .stream-rate {
+    color: var(--muted);
+    font-size: 10px;
+  }
+</style>

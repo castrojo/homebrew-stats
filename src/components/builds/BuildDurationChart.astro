@@ -1,0 +1,239 @@
+---
+import ChartCard from '../ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import type { DurationBucket, BuildRepoMetrics } from '../../lib/types.ts';
+
+interface Props {
+  trend: DurationBucket[];
+  repos: BuildRepoMetrics[];
+}
+
+const { trend, repos } = Astro.props;
+const trendEmpty = trend.length === 0;
+const reposEmpty = repos.length === 0;
+---
+
+<div class="duration-section">
+  <ChartCard
+    title="Build Duration Trends"
+    canvasId="build-duration-trend"
+    height={260}
+    rangeId="duration-range"
+    ranges={[
+      { label: '7d',  value: '7'  },
+      { label: '30d', value: '30' },
+      { label: '90d', value: '90' },
+    ]}
+    defaultRange="30"
+    isEmpty={trendEmpty}
+    emptyMsg="Collecting duration data…"
+  />
+  <ChartCard
+    title="Avg Duration by Repo"
+    canvasId="build-duration-repo"
+    height={260}
+    isEmpty={reposEmpty}
+    emptyMsg="Collecting repo data…"
+  />
+</div>
+
+{!trendEmpty && (
+  <script type="application/json" id="build-duration-trend-data" set:html={safeJson(trend)}></script>
+)}
+{!reposEmpty && (
+  <script type="application/json" id="build-duration-repo-data" set:html={safeJson(repos)}></script>
+)}
+
+<script>
+import '../../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+import { BRAND_COLOURS, getChartColors, applyTheme } from '../../lib/chart-theme.js';
+import { readChartData } from '../../lib/inject.js';
+import type { DurationBucket, BuildRepoMetrics } from '../../lib/types.js';
+
+const P50_COLOR = BRAND_COLOURS[0]; // blue   — P50 solid
+const P95_COLOR = BRAND_COLOURS[1]; // purple — P95 dashed
+const P99_COLOR = BRAND_COLOURS[4]; // red    — P99 dotted
+
+// ── Duration trend chart ──────────────────────────────────────────────────────
+const trendDataEl = document.getElementById('build-duration-trend-data');
+let trendChart: Chart | undefined;
+
+if (trendDataEl) {
+  const allTrend = readChartData<DurationBucket[]>('build-duration-trend-data');
+  let currentRange = 30;
+
+  function filterTrend(days: number): DurationBucket[] {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    return allTrend.filter(b => b.date >= cutoffStr);
+  }
+
+  function buildTrendDatasets(data: DurationBucket[]) {
+    return {
+      labels: data.map(b => b.date),
+      datasets: [
+        {
+          label: 'P50',
+          data: data.map(b => b.p50),
+          borderColor: P50_COLOR,
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 2,
+          borderDash: [] as number[],
+        },
+        {
+          label: 'P95',
+          data: data.map(b => b.p95),
+          borderColor: P95_COLOR,
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 2,
+          borderDash: [6, 3],
+        },
+        {
+          label: 'P99',
+          data: data.map(b => b.p99),
+          borderColor: P99_COLOR,
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 2,
+          borderDash: [2, 4],
+        },
+      ],
+    };
+  }
+
+  const trendCanvas = document.getElementById('build-duration-trend') as HTMLCanvasElement | null;
+  if (trendCanvas) {
+    const colors = getChartColors();
+    const initialData = filterTrend(currentRange);
+
+    try {
+      trendChart = new Chart(trendCanvas, {
+        type: 'line',
+        data: buildTrendDatasets(initialData),
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: colors.text, font: { size: 11 }, usePointStyle: true, boxWidth: 8 } },
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted, font: { size: 10 }, maxTicksLimit: 10 },
+              grid: { color: colors.grid },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: colors.muted,
+                font: { size: 10 },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                callback: (v: any) => `${v}m`,
+              },
+              grid: { color: colors.grid },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[BuildDurationChart] Trend chart init failed:', e);
+    }
+
+    document.getElementById('duration-range')?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('duration-range')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentRange = Number(btn.dataset.range);
+        const data = filterTrend(currentRange);
+        if (trendChart) {
+          const updated = buildTrendDatasets(data);
+          trendChart.data.labels = updated.labels;
+          trendChart.data.datasets = updated.datasets;
+          trendChart.update();
+        }
+      });
+    });
+  }
+
+  window.addEventListener('themechange', () => {
+    if (trendChart) applyTheme(trendChart);
+  });
+}
+
+// ── Repo duration bar chart ───────────────────────────────────────────────────
+const repoDataEl = document.getElementById('build-duration-repo-data');
+let repoChart: Chart | undefined;
+
+if (repoDataEl) {
+  const repos = readChartData<BuildRepoMetrics[]>('build-duration-repo-data');
+  const repoCanvas = document.getElementById('build-duration-repo') as HTMLCanvasElement | null;
+
+  if (repoCanvas) {
+    const colors = getChartColors();
+
+    try {
+      repoChart = new Chart(repoCanvas, {
+        type: 'bar',
+        data: {
+          labels: repos.map(r => r.repo),
+          datasets: [
+            {
+              label: 'Avg Duration (min)',
+              data: repos.map(r => r.avg_duration_min),
+              backgroundColor: repos.map((_, i) => BRAND_COLOURS[i % BRAND_COLOURS.length]),
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y' as const,
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: {
+                color: colors.muted,
+                font: { size: 10 },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                callback: (v: any) => `${v}m`,
+              },
+              grid: { color: colors.grid },
+            },
+            y: {
+              ticks: { color: colors.muted, font: { size: 10 } },
+              grid: { color: colors.grid },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[BuildDurationChart] Repo chart init failed:', e);
+    }
+
+    window.addEventListener('themechange', () => {
+      if (repoChart) applyTheme(repoChart);
+    });
+  }
+}
+</script>
+
+<style>
+  .duration-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 800px) {
+    .duration-section {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
