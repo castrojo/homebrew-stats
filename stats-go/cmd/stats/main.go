@@ -1221,7 +1221,7 @@ func runFetchBuilds() error {
 
 	cfg := builds.CollectorConfig{
 		Repos:        builds.DefaultRepos,
-		LookbackDays: 90,
+		LookbackDays: 14, // cold-start bootstrap; warm runs use latest-1d automatically
 		HistoryPath:  ".sync-cache/builds-history.json",
 		OutputPath:   "src/data/builds.json",
 	}
