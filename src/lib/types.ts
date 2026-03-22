@@ -62,21 +62,37 @@ export interface ContributorEntry {
   company?: string;
   location?: string;
   commits_30d: number;
+  commits_60d?: number;
+  commits_365d?: number;
   prs_merged_30d: number;
+  prs_merged_60d?: number;
+  prs_merged_365d?: number;
   issues_opened_30d: number;
+  issues_opened_60d?: number;
+  issues_opened_365d?: number;
   discussion_posts_30d: number;
+  discussion_posts_60d?: number;
+  discussion_posts_365d?: number;
   repos_active: string[];
   is_bot: boolean;
 }
 
 export interface ContributorSummary {
   active_contributors: number;
+  active_contributors_60d?: number;
+  active_contributors_365d?: number;
   new_contributors: number;
   total_commits: number;
+  total_commits_60d?: number;
+  total_commits_365d?: number;
   total_prs_merged: number;
+  total_prs_merged_60d?: number;
+  total_prs_merged_365d?: number;
   total_issues_opened: number;
   total_issues_closed: number;
   bus_factor: number;
+  bus_factor_60d?: number;
+  bus_factor_365d?: number;
   review_participation_rate: number;
   active_repos: number;
   total_discussions: number;
@@ -86,12 +102,22 @@ export interface ContributorSummary {
 export interface RepoStats {
   name: string;
   commits_30d: number;
+  commits_60d?: number;
+  commits_365d?: number;
   unique_human_authors_30d: number;
   prs_merged_30d: number;
+  prs_merged_60d?: number;
+  prs_merged_365d?: number;
   issues_opened_30d: number;
+  issues_opened_60d?: number;
+  issues_opened_365d?: number;
   bus_factor: number;
+  bus_factor_60d?: number;
+  bus_factor_365d?: number;
   bot_commits_30d: number;
   human_commits_30d: number;
+  human_commits_60d?: number;
+  human_commits_365d?: number;
   active_weeks_streak: number;
   weekly_commits_52w: number[];
   commits_by_day_of_week: Record<string, number>;
@@ -107,8 +133,14 @@ export interface DiscussionWeek {
 
 export interface DiscussionSummary {
   total_discussions_30d: number;
+  total_discussions_60d?: number;
+  total_discussions_365d?: number;
   total_discussion_comments_30d: number;
+  total_discussion_comments_60d?: number;
+  total_discussion_comments_365d?: number;
   unique_discussion_authors_30d: number;
+  unique_discussion_authors_60d?: number;
+  unique_discussion_authors_365d?: number;
   answered_rate: number;
   weekly_trend: DiscussionWeek[];
 }

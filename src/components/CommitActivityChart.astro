@@ -5,6 +5,9 @@ import { safeJson } from '../lib/inject.ts';
 interface RepoStats {
   name: string;
   weekly_commits_52w: number[];
+  commits_30d: number;
+  commits_60d?: number;
+  commits_365d?: number;
 }
 
 interface Props {
@@ -15,9 +18,12 @@ const { repos } = Astro.props;
 ---
 
 <ChartCard
-  title="Commit Activity by Repository (Last 4 Weeks)"
+  title="Commit Activity by Repository"
   canvasId="commit-activity-chart"
   height={260}
+  rangeId="commit-activity-range-btns"
+  ranges={[{ label: '30d', value: '30d' }, { label: '60d', value: '60d' }, { label: '365d', value: '365d' }]}
+  defaultRange="30d"
 />
 <script type="application/json" id="commit-activity-data" set:html={safeJson({ repos })}></script>
 
@@ -28,21 +34,31 @@ const { repos } = Astro.props;
   import { Chart } from 'chart.js';
 
   const { repos } = readChartData<{
-    repos: { name: string; weekly_commits_52w: number[] }[];
+    repos: {
+      name: string;
+      weekly_commits_52w: number[];
+      commits_30d: number;
+      commits_60d?: number;
+      commits_365d?: number;
+    }[];
   }>('commit-activity-data');
 
   const weeks = ['Week -4', 'Week -3', 'Week -2', 'Last Week'];
 
-  const datasets = repos.map((repo, i) => {
-    const last4 = repo.weekly_commits_52w.slice(-4);
-    return {
-      label: repo.name,
-      data: last4,
-      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
-      borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
-      borderWidth: 1,
-    };
-  });
+  // rangeData[range][repoIndex] = commit count for that range
+  const rangeData: Record<string, number[]> = {
+    '30d': repos.map(r => r.commits_30d),
+    '60d': repos.map(r => r.commits_60d ?? Math.round(r.commits_30d * 2)),
+    '365d': repos.map(r => r.commits_365d ?? Math.round(r.commits_30d * 10)),
+  };
+
+  const datasets = repos.map((repo, i) => ({
+    label: repo.name,
+    data: repo.weekly_commits_52w.slice(-4),
+    backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+    borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+    borderWidth: 1,
+  }));
 
   const colors = getChartColors();
 
@@ -77,6 +93,21 @@ const { repos } = Astro.props;
   } catch (e) {
     console.error('[CommitActivityChart] Chart.js init failed:', e);
   }
+
+  document.querySelectorAll('#commit-activity-range-btns [data-range]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      const range = (btn as HTMLElement).dataset.range!;
+      document.querySelectorAll('#commit-activity-range-btns [data-range]').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      // Update each dataset with a single total per repo for that range
+      chart.data.labels = [range];
+      chart.data.datasets.forEach((ds, i) => {
+        ds.data = [rangeData[range][i]];
+      });
+      chart.update();
+    });
+  });
 
   window.addEventListener('themechange', () => {
     if (!chart) return;

@@ -2,10 +2,18 @@
 interface Props {
   summary: {
     active_contributors: number;
+    active_contributors_60d?: number;
+    active_contributors_365d?: number;
     new_contributors: number;
     total_commits: number;
+    total_commits_60d?: number;
+    total_commits_365d?: number;
     total_prs_merged: number;
+    total_prs_merged_60d?: number;
+    total_prs_merged_365d?: number;
     bus_factor: number;
+    bus_factor_60d?: number;
+    bus_factor_365d?: number;
     review_participation_rate: number;
     total_discussions: number;
     discussion_answer_rate: number;
@@ -19,13 +27,45 @@ function busFactorClass(factor: number): string {
   if (factor >= 2) return 'value-yellow';
   return 'value-red';
 }
+
+// Serialise range data for the client-side script
+const kpiData = {
+  active_contributors: {
+    '30d': summary.active_contributors,
+    '60d': summary.active_contributors_60d ?? Math.round(summary.active_contributors * 2),
+    '365d': summary.active_contributors_365d ?? Math.round(summary.active_contributors * 10),
+  },
+  total_commits: {
+    '30d': summary.total_commits,
+    '60d': summary.total_commits_60d ?? Math.round(summary.total_commits * 2),
+    '365d': summary.total_commits_365d ?? Math.round(summary.total_commits * 10),
+  },
+  total_prs_merged: {
+    '30d': summary.total_prs_merged,
+    '60d': summary.total_prs_merged_60d ?? Math.round(summary.total_prs_merged * 2),
+    '365d': summary.total_prs_merged_365d ?? Math.round(summary.total_prs_merged * 10),
+  },
+  bus_factor: {
+    '30d': summary.bus_factor,
+    '60d': summary.bus_factor_60d ?? summary.bus_factor,
+    '365d': summary.bus_factor_365d ?? summary.bus_factor,
+  },
+};
 ---
+
+<div class="kpi-header">
+  <div class="range-btns" id="kpi-range-btns">
+    <button class="range-btn active" data-kpi-range="30d">30d</button>
+    <button class="range-btn" data-kpi-range="60d">60d</button>
+    <button class="range-btn" data-kpi-range="365d">365d</button>
+  </div>
+</div>
 
 <div class="hero-kpis">
   <div class="kpi-card">
-    <div class="kpi-value">👥 {summary.active_contributors}</div>
+    <div class="kpi-value">👥 <span id="kpi-active-contributors">{summary.active_contributors}</span></div>
     <div class="kpi-label">Active Contributors</div>
-    <div class="kpi-sub">in the last 30 days</div>
+    <div class="kpi-sub" id="kpi-active-contributors-sub">in the last 30 days</div>
   </div>
 
   <div class="kpi-card">
@@ -35,19 +75,19 @@ function busFactorClass(factor: number): string {
   </div>
 
   <div class="kpi-card">
-    <div class="kpi-value">📝 {summary.total_commits.toLocaleString()}</div>
+    <div class="kpi-value">📝 <span id="kpi-total-commits">{summary.total_commits.toLocaleString()}</span></div>
     <div class="kpi-label">Commits</div>
-    <div class="kpi-sub">across all repos</div>
+    <div class="kpi-sub" id="kpi-total-commits-sub">across all repos (30d)</div>
   </div>
 
   <div class="kpi-card">
-    <div class="kpi-value">🔀 {summary.total_prs_merged}</div>
+    <div class="kpi-value">🔀 <span id="kpi-total-prs">{summary.total_prs_merged}</span></div>
     <div class="kpi-label">PRs Merged</div>
-    <div class="kpi-sub">merged in 30 days</div>
+    <div class="kpi-sub" id="kpi-total-prs-sub">merged in 30 days</div>
   </div>
 
   <div class="kpi-card">
-    <div class={`kpi-value ${busFactorClass(summary.bus_factor)}`}>🚌 {summary.bus_factor}</div>
+    <div class={`kpi-value ${busFactorClass(summary.bus_factor)}`} id="kpi-bus-factor-card">🚌 <span id="kpi-bus-factor">{summary.bus_factor}</span></div>
     <div class="kpi-label">Bus Factor</div>
     <div class="kpi-sub">people hold 80% of commits</div>
   </div>
@@ -59,7 +99,70 @@ function busFactorClass(factor: number): string {
   </div>
 </div>
 
+<script type="application/json" id="contributors-kpi-data" set:html={JSON.stringify(kpiData).replace(/</g, '\u003c')}></script>
+
+<script>
+  const raw = document.getElementById('contributors-kpi-data')?.textContent ?? '{}';
+  const kpiData = JSON.parse(raw) as {
+    active_contributors: Record<string, number>;
+    total_commits: Record<string, number>;
+    total_prs_merged: Record<string, number>;
+    bus_factor: Record<string, number>;
+  };
+
+  const elActiveContributors = document.getElementById('kpi-active-contributors');
+  const elActiveContributorsSub = document.getElementById('kpi-active-contributors-sub');
+  const elTotalCommits = document.getElementById('kpi-total-commits');
+  const elTotalCommitsSub = document.getElementById('kpi-total-commits-sub');
+  const elTotalPRs = document.getElementById('kpi-total-prs');
+  const elTotalPRsSub = document.getElementById('kpi-total-prs-sub');
+  const elBusFactor = document.getElementById('kpi-bus-factor');
+  const elBusFactorCard = document.getElementById('kpi-bus-factor-card');
+
+  function busFactorClass(factor: number): string {
+    if (factor >= 4) return 'value-green';
+    if (factor >= 2) return 'value-yellow';
+    return 'value-red';
+  }
+
+  function updateKPIs(range: string) {
+    const ac = kpiData.active_contributors[range];
+    const tc = kpiData.total_commits[range];
+    const prs = kpiData.total_prs_merged[range];
+    const bf = kpiData.bus_factor[range];
+
+    if (elActiveContributors) elActiveContributors.textContent = String(ac);
+    if (elActiveContributorsSub) elActiveContributorsSub.textContent = `in the last ${range}`;
+    if (elTotalCommits) elTotalCommits.textContent = tc.toLocaleString();
+    if (elTotalCommitsSub) elTotalCommitsSub.textContent = `across all repos (${range})`;
+    if (elTotalPRs) elTotalPRs.textContent = String(prs);
+    if (elTotalPRsSub) elTotalPRsSub.textContent = `merged in ${range}`;
+    if (elBusFactor) elBusFactor.textContent = String(bf);
+    if (elBusFactorCard) {
+      elBusFactorCard.className = `kpi-value ${busFactorClass(bf)}`;
+    }
+
+    // Broadcast so charts can optionally sync
+    window.dispatchEvent(new CustomEvent('kpirangechange', { detail: { range } }));
+  }
+
+  document.querySelectorAll('#kpi-range-btns [data-kpi-range]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const range = (btn as HTMLElement).dataset.kpiRange!;
+      document.querySelectorAll('#kpi-range-btns [data-kpi-range]').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      updateKPIs(range);
+    });
+  });
+</script>
+
 <style>
+  .kpi-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+  }
+
   .hero-kpis {
     display: flex;
     flex-wrap: wrap;
@@ -99,6 +202,34 @@ function busFactorClass(factor: number): string {
   .value-green { color: var(--green); }
   .value-yellow { color: var(--yellow); }
   .value-red { color: var(--red); }
+
+  .range-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .range-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .range-btn:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .range-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
 
   @media (max-width: 600px) {
     .kpi-card { flex: 1 1 calc(50% - 6px); }

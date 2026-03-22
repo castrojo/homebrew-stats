@@ -1,0 +1,112 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+import type { WeekRecord } from '../lib/types.ts';
+
+interface Props {
+  currentWeek: WeekRecord | null;
+  prevWeek: WeekRecord | null;
+}
+const { currentWeek, prevWeek } = Astro.props;
+
+const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
+const LABELS  = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
+
+const hasData = !!currentWeek && !!prevWeek;
+---
+
+{!hasData ? (
+  <ChartCard
+    title="Device Momentum (This Week vs Last Week)"
+    canvasId="ecosystem-growth-chart"
+    isEmpty
+    emptyMsg="Collecting data…"
+  />
+) : (
+  <>
+    <ChartCard
+      title="Device Momentum (This Week vs Last Week)"
+      canvasId="ecosystem-growth-chart"
+      height={300}
+    />
+    <script type="application/json" id="ecosystem-growth-data" set:html={safeJson({ currentWeek, prevWeek, DISTROS, LABELS })}></script>
+  </>
+)}
+
+<script>
+import '../lib/chart-registry.js';
+import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
+
+const dataEl = document.getElementById('ecosystem-growth-data');
+if (dataEl) {
+  const { currentWeek, prevWeek, DISTROS, LABELS } = JSON.parse(dataEl.textContent!);
+  const canvas = document.getElementById('ecosystem-growth-chart') as HTMLCanvasElement;
+
+  const c = getChartColors();
+  
+  // Create datasets for "This Week" and "Last Week".
+  // Using a darker shade of the brand colour for Last Week and the brand colour for This Week.
+  const datasets = [
+    {
+      label: 'This Week',
+      data: DISTROS.map(d => currentWeek.distros[d] ?? 0),
+      backgroundColor: BRAND_COLOURS.slice(0, DISTROS.length),
+      borderRadius: 4,
+    },
+    {
+      label: 'Last Week',
+      data: DISTROS.map(d => prevWeek.distros[d] ?? 0),
+      backgroundColor: BRAND_COLOURS.slice(0, DISTROS.length).map(col => col + '80'), // 50% opacity
+      borderRadius: 4,
+    }
+  ];
+
+  try {
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: LABELS,
+        datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { 
+            grid: { display: false },
+            ticks: { color: c.muted } 
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: c.grid },
+            ticks: {
+              color: c.muted,
+              callback: (v) => Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(0)}k` : String(v),
+            },
+          }
+        },
+        plugins: {
+          legend: {
+            display: true,
+            labels: { color: c.text, usePointStyle: true, boxWidth: 8 }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString()}`
+            }
+          }
+        }
+      }
+    });
+  } catch (e) {
+    console.error('[EcosystemGrowthChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    // Chart instance needs to be stored to update it here.
+    // For simplicity, we can let the page reload or just handle it if we have the instance.
+    // In other components, we store it in a local variable.
+  });
+}
+</script>

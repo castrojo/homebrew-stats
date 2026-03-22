@@ -413,4 +413,78 @@ describe("src/data/contributors.json schema", () => {
       expect(typeof entry.comments).toBe("number");
     }
   });
+
+  it("top_contributors have _60d and _365d commit fields", () => {
+    const data = raw as Record<string, unknown>;
+    const contribs = data.top_contributors as Array<Record<string, unknown>>;
+    if (contribs.length === 0) return;
+    for (const c of contribs.slice(0, 3)) {
+      expect(typeof c.commits_60d, `${c.login}: commits_60d must be a number`).toBe("number");
+      expect(typeof c.commits_365d, `${c.login}: commits_365d must be a number`).toBe("number");
+      expect(c.commits_60d as number, `commits_60d >= commits_30d`).toBeGreaterThanOrEqual(c.commits_30d as number);
+      expect(c.commits_365d as number, `commits_365d >= commits_60d`).toBeGreaterThanOrEqual(c.commits_60d as number);
+    }
+  });
+
+  it("top_contributors have _60d and _365d prs_merged fields", () => {
+    const data = raw as Record<string, unknown>;
+    const contribs = data.top_contributors as Array<Record<string, unknown>>;
+    if (contribs.length === 0) return;
+    for (const c of contribs.slice(0, 3)) {
+      expect(typeof c.prs_merged_60d, `${c.login}: prs_merged_60d must be a number`).toBe("number");
+      expect(typeof c.prs_merged_365d, `${c.login}: prs_merged_365d must be a number`).toBe("number");
+    }
+  });
+
+  it("repos have _60d and _365d commit fields", () => {
+    const data = raw as Record<string, unknown>;
+    const repos = data.repos as Array<Record<string, unknown>>;
+    if (repos.length === 0) return;
+    const r = repos[0];
+    expect(typeof r.commits_60d, `repos[0].commits_60d must be a number`).toBe("number");
+    expect(typeof r.commits_365d, `repos[0].commits_365d must be a number`).toBe("number");
+    expect(r.commits_60d as number).toBeGreaterThanOrEqual(0);
+    expect(r.commits_365d as number).toBeGreaterThanOrEqual(r.commits_60d as number);
+  });
+
+  it("repos have _60d and _365d bus_factor fields", () => {
+    const data = raw as Record<string, unknown>;
+    const repos = data.repos as Array<Record<string, unknown>>;
+    if (repos.length === 0) return;
+    for (const r of repos) {
+      expect(typeof r.bus_factor_60d, `${r.name}: bus_factor_60d must be a number`).toBe("number");
+      expect(typeof r.bus_factor_365d, `${r.name}: bus_factor_365d must be a number`).toBe("number");
+      expect(r.bus_factor_60d as number).toBeGreaterThanOrEqual(1);
+      expect(r.bus_factor_365d as number).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it("summary has _60d and _365d fields", () => {
+    const s = raw.summary as Record<string, unknown>;
+    const fields60 = ["active_contributors_60d", "total_commits_60d", "total_prs_merged_60d", "bus_factor_60d"];
+    const fields365 = ["active_contributors_365d", "total_commits_365d", "total_prs_merged_365d", "bus_factor_365d"];
+    for (const f of [...fields60, ...fields365]) {
+      expect(typeof s[f], `summary.${f} must be a number`).toBe("number");
+      expect(s[f] as number, `summary.${f} must be >= 0`).toBeGreaterThanOrEqual(0);
+    }
+    // 365d >= 60d >= 30d for additive metrics
+    expect(s.total_commits_60d as number).toBeGreaterThanOrEqual(s.total_commits as number);
+    expect(s.total_commits_365d as number).toBeGreaterThanOrEqual(s.total_commits_60d as number);
+    expect(s.total_prs_merged_60d as number).toBeGreaterThanOrEqual(s.total_prs_merged as number);
+    expect(s.total_prs_merged_365d as number).toBeGreaterThanOrEqual(s.total_prs_merged_60d as number);
+  });
+
+  it("discussions_summary has _60d and _365d fields", () => {
+    const ds = raw.discussions_summary as Record<string, unknown>;
+    expect(typeof ds.total_discussions_60d).toBe("number");
+    expect(typeof ds.total_discussions_365d).toBe("number");
+    expect(typeof ds.total_discussion_comments_60d).toBe("number");
+    expect(typeof ds.total_discussion_comments_365d).toBe("number");
+    expect(typeof ds.unique_discussion_authors_60d).toBe("number");
+    expect(typeof ds.unique_discussion_authors_365d).toBe("number");
+    // monotonic: 365d >= 60d >= 30d
+    expect(ds.total_discussions_60d as number).toBeGreaterThanOrEqual(ds.total_discussions_30d as number);
+    expect(ds.total_discussions_365d as number).toBeGreaterThanOrEqual(ds.total_discussions_60d as number);
+  });
 });
+

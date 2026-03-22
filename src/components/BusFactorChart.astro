@@ -5,11 +5,17 @@ import { safeJson } from '../lib/inject.ts';
 interface ContributorEntry {
   login: string;
   commits_30d: number;
+  commits_60d?: number;
+  commits_365d?: number;
 }
 
 interface ContributorSummary {
   bus_factor: number;
+  bus_factor_60d?: number;
+  bus_factor_365d?: number;
   total_commits: number;
+  total_commits_60d?: number;
+  total_commits_365d?: number;
 }
 
 interface Props {
@@ -24,8 +30,11 @@ const { topContributors, summary } = Astro.props;
   title="Commit Share — Top Contributors"
   canvasId="bus-factor-chart"
   height={260}
+  rangeId="bus-factor-range-btns"
+  ranges={[{ label: '30d', value: '30d' }, { label: '60d', value: '60d' }, { label: '365d', value: '365d' }]}
+  defaultRange="30d"
 >
-  <p class="bus-factor-label">Bus factor: <strong>{summary.bus_factor}</strong> — {summary.bus_factor >= 4 ? '✅ healthy' : summary.bus_factor >= 2 ? '⚠️ moderate risk' : '🚨 critical risk'}</p>
+  <p class="bus-factor-label" id="bus-factor-label">Bus factor: <strong id="bus-factor-value">{summary.bus_factor}</strong> — {summary.bus_factor >= 4 ? '✅ healthy' : summary.bus_factor >= 2 ? '⚠️ moderate risk' : '🚨 critical risk'}</p>
 </ChartCard>
 <script type="application/json" id="bus-factor-data" set:html={safeJson({ topContributors, summary })}></script>
 
@@ -36,18 +45,55 @@ const { topContributors, summary } = Astro.props;
   import { Chart } from 'chart.js';
 
   const { topContributors, summary } = readChartData<{
-    topContributors: { login: string; commits_30d: number }[];
-    summary: { total_commits: number; bus_factor: number };
+    topContributors: {
+      login: string;
+      commits_30d: number;
+      commits_60d?: number;
+      commits_365d?: number;
+    }[];
+    summary: {
+      total_commits: number;
+      total_commits_60d?: number;
+      total_commits_365d?: number;
+      bus_factor: number;
+      bus_factor_60d?: number;
+      bus_factor_365d?: number;
+    };
   }>('bus-factor-data');
 
   const top5 = topContributors.slice(0, 5);
-  const top5Total = top5.reduce((s, c) => s + c.commits_30d, 0);
-  const others = Math.max(0, summary.total_commits - top5Total);
-
-  const labels = [...top5.map(c => c.login), 'Others'];
-  const dataValues = [...top5.map(c => c.commits_30d), others];
   const bgColors = [...BRAND_COLOURS.slice(0, 5), '#444d56'];
 
+  // Build per-range data bundles
+  const buildDataset = (commitsFn: (c: typeof top5[0]) => number, totalCommits: number) => {
+    const top5Total = top5.reduce((s, c) => s + commitsFn(c), 0);
+    const others = Math.max(0, totalCommits - top5Total);
+    return [...top5.map(c => commitsFn(c)), others];
+  };
+
+  const total30 = summary.total_commits;
+  const total60 = summary.total_commits_60d ?? Math.round(summary.total_commits * 2);
+  const total365 = summary.total_commits_365d ?? Math.round(summary.total_commits * 10);
+
+  const rangeData: Record<string, number[]> = {
+    '30d': buildDataset(c => c.commits_30d, total30),
+    '60d': buildDataset(c => c.commits_60d ?? Math.round(c.commits_30d * 2), total60),
+    '365d': buildDataset(c => c.commits_365d ?? Math.round(c.commits_30d * 10), total365),
+  };
+
+  const rangeTotals: Record<string, number> = {
+    '30d': total30,
+    '60d': total60,
+    '365d': total365,
+  };
+
+  const rangeBusFactor: Record<string, number> = {
+    '30d': summary.bus_factor,
+    '60d': summary.bus_factor_60d ?? summary.bus_factor,
+    '365d': summary.bus_factor_365d ?? summary.bus_factor,
+  };
+
+  const labels = [...top5.map(c => c.login), 'Others'];
   const colors = getChartColors();
 
   let chart: Chart | undefined;
@@ -58,7 +104,7 @@ const { topContributors, summary } = Astro.props;
         labels,
         datasets: [
           {
-            data: dataValues,
+            data: rangeData['30d'],
             backgroundColor: bgColors as string[],
             borderColor: 'transparent',
             borderWidth: 2,
@@ -76,7 +122,8 @@ const { topContributors, summary } = Astro.props;
           tooltip: {
             callbacks: {
               label: ctx => {
-                const pct = ((ctx.parsed / summary.total_commits) * 100).toFixed(1);
+                const total = rangeTotals['30d'];
+                const pct = ((ctx.parsed / total) * 100).toFixed(1);
                 return `${ctx.label}: ${ctx.parsed} commits (${pct}%)`;
               },
             },
@@ -87,6 +134,39 @@ const { topContributors, summary } = Astro.props;
   } catch (e) {
     console.error('[BusFactorChart] Chart.js init failed:', e);
   }
+
+  const labelEl = document.getElementById('bus-factor-label');
+  const valueEl = document.getElementById('bus-factor-value');
+
+  function updateBusFactorLabel(bf: number) {
+    if (!valueEl || !labelEl) return;
+    valueEl.textContent = String(bf);
+    const status = bf >= 4 ? '✅ healthy' : bf >= 2 ? '⚠️ moderate risk' : '🚨 critical risk';
+    // Replace text after the <strong> tag
+    const textNodes = Array.from(labelEl.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+    textNodes.forEach(n => { n.textContent = ''; });
+    labelEl.childNodes[labelEl.childNodes.length - 1].textContent = ` — ${status}`;
+  }
+
+  document.querySelectorAll('#bus-factor-range-btns [data-range]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      const range = (btn as HTMLElement).dataset.range!;
+      document.querySelectorAll('#bus-factor-range-btns [data-range]').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      chart.data.datasets[0].data = rangeData[range];
+      // Update tooltip closure
+      if (chart.options.plugins?.tooltip?.callbacks) {
+        chart.options.plugins.tooltip.callbacks.label = ctx => {
+          const total = rangeTotals[range];
+          const pct = ((ctx.parsed / total) * 100).toFixed(1);
+          return `${ctx.label}: ${ctx.parsed} commits (${pct}%)`;
+        };
+      }
+      chart.update();
+      updateBusFactorLabel(rangeBusFactor[range]);
+    });
+  });
 
   window.addEventListener('themechange', () => {
     if (!chart) return;

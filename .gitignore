@@ -6,3 +6,4 @@ stats-go/stats
 autoresearch-results.tsv
 test-results/
 playwright-report/
+.gemini/

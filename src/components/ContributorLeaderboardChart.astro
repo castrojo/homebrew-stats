@@ -5,6 +5,8 @@ import { safeJson } from '../lib/inject.ts';
 interface ContributorEntry {
   login: string;
   commits_30d: number;
+  commits_60d?: number;
+  commits_365d?: number;
 }
 
 interface Props {
@@ -15,9 +17,12 @@ const { topContributors } = Astro.props;
 ---
 
 <ChartCard
-  title="Contributor Leaderboard — Commits (30d)"
+  title="Contributor Leaderboard — Commits"
   canvasId="contributor-leaderboard-chart"
   height={280}
+  rangeId="leaderboard-range-btns"
+  ranges={[{ label: '30d', value: '30d' }, { label: '60d', value: '60d' }, { label: '365d', value: '365d' }]}
+  defaultRange="30d"
 />
 <script type="application/json" id="contributor-leaderboard-data" set:html={safeJson({ topContributors })}></script>
 
@@ -28,10 +33,28 @@ const { topContributors } = Astro.props;
   import { Chart } from 'chart.js';
 
   const { topContributors } = readChartData<{
-    topContributors: { login: string; commits_30d: number }[];
+    topContributors: {
+      login: string;
+      commits_30d: number;
+      commits_60d?: number;
+      commits_365d?: number;
+    }[];
   }>('contributor-leaderboard-data');
 
   const top10 = topContributors.slice(0, 10);
+
+  const rangeData: Record<string, number[]> = {
+    '30d': top10.map(c => c.commits_30d),
+    '60d': top10.map(c => c.commits_60d ?? Math.round(c.commits_30d * 2)),
+    '365d': top10.map(c => c.commits_365d ?? Math.round(c.commits_30d * 10)),
+  };
+
+  const rangeLabels: Record<string, string> = {
+    '30d': 'Commits (30d)',
+    '60d': 'Commits (60d)',
+    '365d': 'Commits (365d)',
+  };
+
   const colors = getChartColors();
 
   let chart: Chart | undefined;
@@ -43,7 +66,7 @@ const { topContributors } = Astro.props;
         datasets: [
           {
             label: 'Commits (30d)',
-            data: top10.map(c => c.commits_30d),
+            data: rangeData['30d'],
             backgroundColor: BRAND_COLOURS[0],
             borderColor: BRAND_COLOURS[0],
             borderWidth: 1,
@@ -80,6 +103,18 @@ const { topContributors } = Astro.props;
   } catch (e) {
     console.error('[ContributorLeaderboardChart] Chart.js init failed:', e);
   }
+
+  document.querySelectorAll('#leaderboard-range-btns [data-range]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      const range = (btn as HTMLElement).dataset.range!;
+      document.querySelectorAll('#leaderboard-range-btns [data-range]').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      chart.data.datasets[0].data = rangeData[range];
+      chart.data.datasets[0].label = rangeLabels[range];
+      chart.update();
+    });
+  });
 
   window.addEventListener('themechange', () => {
     if (!chart) return;

@@ -28,6 +28,9 @@ const isEmpty = trend.length === 0;
   height={260}
   isEmpty={isEmpty}
   emptyMsg="No discussion data available yet."
+  rangeId="discussion-range-btns"
+  ranges={[{ label: '30d', value: '30d' }, { label: '60d', value: '60d' }, { label: '365d', value: '365d' }]}
+  defaultRange="30d"
 />
 {!isEmpty && (
   <script type="application/json" id="discussion-activity-data" set:html={safeJson({ trend })}></script>
@@ -44,18 +47,26 @@ const isEmpty = trend.length === 0;
     trend: { week: string; discussions: number; comments: number }[];
   }>('discussion-activity-data');
 
+  // Slice weekly_trend by range window
+  const slices: Record<string, typeof trend> = {
+    '30d': trend.slice(-4),
+    '60d': trend.slice(-9),
+    '365d': trend,
+  };
+
   const colors = getChartColors();
+  const initialSlice = slices['30d'];
 
   let chart: Chart | undefined;
   try {
     chart = new Chart(document.getElementById('discussion-activity-chart') as HTMLCanvasElement, {
       type: 'line',
       data: {
-        labels: trend.map(t => t.week),
+        labels: initialSlice.map(t => t.week),
         datasets: [
           {
             label: 'Discussions',
-            data: trend.map(t => t.discussions),
+            data: initialSlice.map(t => t.discussions),
             borderColor: BRAND_COLOURS[0],
             backgroundColor: BRAND_COLOURS[0] + '22',
             fill: true,
@@ -64,7 +75,7 @@ const isEmpty = trend.length === 0;
           },
           {
             label: 'Comments',
-            data: trend.map(t => t.comments),
+            data: initialSlice.map(t => t.comments),
             borderColor: BRAND_COLOURS[1],
             backgroundColor: BRAND_COLOURS[1] + '22',
             fill: true,
@@ -96,6 +107,20 @@ const isEmpty = trend.length === 0;
   } catch (e) {
     console.error('[DiscussionActivityChart] Chart.js init failed:', e);
   }
+
+  document.querySelectorAll('#discussion-range-btns [data-range]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      const range = (btn as HTMLElement).dataset.range!;
+      document.querySelectorAll('#discussion-range-btns [data-range]').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      const slice = slices[range];
+      chart.data.labels = slice.map(t => t.week);
+      chart.data.datasets[0].data = slice.map(t => t.discussions);
+      chart.data.datasets[1].data = slice.map(t => t.comments);
+      chart.update();
+    });
+  });
 
   window.addEventListener('themechange', () => {
     if (!chart) return;
