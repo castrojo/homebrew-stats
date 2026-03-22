@@ -49,6 +49,50 @@ query RepoDiscussions($owner: String!, $name: String!, $after: String) {
 }
 `
 
+// FilterCommitsAfter returns only commits whose Date is after cutoff.
+func FilterCommitsAfter(commits []CommitRecord, cutoff time.Time) []CommitRecord {
+	var out []CommitRecord
+	for _, c := range commits {
+		if c.Date.After(cutoff) {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// FilterIssuesAfter returns only issues created after cutoff.
+func FilterIssuesAfter(issues []IssueRecord, cutoff time.Time) []IssueRecord {
+	var out []IssueRecord
+	for _, iss := range issues {
+		if iss.CreatedAt.After(cutoff) {
+			out = append(out, iss)
+		}
+	}
+	return out
+}
+
+// FilterPRsAfter returns only PRs merged after cutoff.
+func FilterPRsAfter(prs []PRRecord, cutoff time.Time) []PRRecord {
+	var out []PRRecord
+	for _, pr := range prs {
+		if pr.MergedAt.After(cutoff) {
+			out = append(out, pr)
+		}
+	}
+	return out
+}
+
+// FilterDiscussionsAfter returns only discussions created after cutoff.
+func FilterDiscussionsAfter(discussions []DiscussionRecord, cutoff time.Time) []DiscussionRecord {
+	var out []DiscussionRecord
+	for _, d := range discussions {
+		if d.CreatedAt.After(cutoff) {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
 // CommitRecord is a single commit with author and date.
 type CommitRecord struct {
 	Login string

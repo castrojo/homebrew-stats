@@ -249,12 +249,24 @@ rate30d[m.App] = m.PassRate30d
 lastStatusByApp := computeLastStatus(store.Snapshots)
 buildMetrics := make([]testhub.BuildMetrics, 0, len(metrics7d))
 for _, m := range metrics7d {
-m.PassRate30d = rate30d[m.App]
-if ls, ok := lastStatusByApp[m.App]; ok {
-m.LastStatus = ls.status
-m.LastBuildAt = ls.at
+	m.PassRate30d = rate30d[m.App]
+	if ls, ok := lastStatusByApp[m.App]; ok {
+		m.LastStatus = ls.status
+		m.LastBuildAt = ls.at
+	}
+	buildMetrics = append(buildMetrics, m)
 }
-buildMetrics = append(buildMetrics, m)
+
+if len(buildMetrics) == 0 {
+	// If computed metrics are empty (e.g. cold start with empty history),
+	// fall back to the committed src/data/testhub.json so the site always
+	// has build status data instead of all-unknown ⚪ — .
+	if fallback := loadFallbackTesthubBuildMetrics(); len(fallback) > 0 {
+		buildMetrics = fallback
+		fmt.Fprintf(os.Stderr, "  using %d fallback build metrics from committed testhub.json\n", len(buildMetrics))
+	} else {
+		buildMetrics = []testhub.BuildMetrics{}
+	}
 }
 
 if pkgs == nil {
@@ -298,6 +310,22 @@ func loadFallbackTesthubPackages() []testhub.Package {
 		return nil
 	}
 	return out.Packages
+}
+
+// loadFallbackTesthubBuildMetrics reads the build metrics from the committed
+// src/data/testhub.json. Used when the history compute yields no results
+// (e.g. CI cold-start with no cached history) so the rendered site
+// always has status data instead of all-unknown ⚪ — .
+func loadFallbackTesthubBuildMetrics() []testhub.BuildMetrics {
+	data, err := os.ReadFile("src/data/testhub.json")
+	if err != nil {
+		return nil
+	}
+	var out testhubOutput
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil
+	}
+	return out.BuildMetrics
 }
 
 type lastStatus struct {
@@ -645,8 +673,10 @@ func runFetchContributors() error {
 	ghClient := client.GitHub()
 	ctx := client.Context()
 
-	since := time.Now().UTC().AddDate(0, 0, -30)
-	until := time.Now().UTC()
+	since365 := time.Now().UTC().AddDate(0, 0, -365)
+	since60  := time.Now().UTC().AddDate(0, 0, -60)
+	since30  := time.Now().UTC().AddDate(0, 0, -30)
+	until    := time.Now().UTC()
 
 	hist, err := loadContributorsHistory()
 	if err != nil {
@@ -663,20 +693,30 @@ func runFetchContributors() error {
 	// Per-repo accumulators.
 	var repoStats []contributors.RepoStats
 
-	// Cross-repo accumulators.
-	allAuthorCommits := make(map[string]int)           // login → total commits across all repos
-	allAuthorPRs := make(map[string]int)               // login → total PRs merged
-	allAuthorIssues := make(map[string]int)            // login → total issues opened
-	allAuthorDiscussions := make(map[string]int)       // login → discussion posts
-	authorRepos := make(map[string]map[string]bool)    // login → set of repos active in
-	repoAuthorSets := make(map[string]map[string]bool) // repo → set of human author logins
+	// Cross-repo accumulators — one map per time window.
+	allAuthorCommits30d  := make(map[string]int) // login → commits in 30d
+	allAuthorCommits60d  := make(map[string]int) // login → commits in 60d
+	allAuthorCommits365d := make(map[string]int) // login → commits in 365d
+	allAuthorPRs30d      := make(map[string]int)
+	allAuthorPRs60d      := make(map[string]int)
+	allAuthorPRs365d     := make(map[string]int)
+	allAuthorIssues30d   := make(map[string]int)
+	allAuthorIssues60d   := make(map[string]int)
+	allAuthorIssues365d  := make(map[string]int)
+	allAuthorDiscussions30d  := make(map[string]int)
+	allAuthorDiscussions60d  := make(map[string]int)
+	allAuthorDiscussions365d := make(map[string]int)
+	authorRepos := make(map[string]map[string]bool)    // login → set of repos active in (30d)
+	repoAuthorSets := make(map[string]map[string]bool) // repo → set of human author logins (30d)
 
 	// Discussion accumulators.
 	var allDiscussions []contributors.DiscussionRecord
-	totalIssuesOpened := 0
-	totalIssuesClosed := 0
-	totalPRsMerged := 0
-	totalPRsWithReview := 0
+	totalIssuesOpened30d  := 0
+	totalIssuesClosed30d  := 0
+	totalPRsMerged30d     := 0
+	totalPRsWithReview30d := 0
+	totalPRsMerged60d     := 0
+	totalPRsMerged365d    := 0
 	activeRepoCount := 0
 
 	for _, fullName := range contributors.TrackedRepos {
@@ -689,52 +729,101 @@ func runFetchContributors() error {
 		fmt.Fprintf(os.Stderr, "→ Processing %s/%s…\n", owner, repoName)
 
 		// ── Commits ──────────────────────────────────────────────────────
-		commits, err := contributors.FetchRepoCommits(ctx, ghClient, owner, repoName, since, until)
+		// Fetch 365 days once; slice in-memory for 30d and 60d windows.
+		commits, err := contributors.FetchRepoCommits(ctx, ghClient, owner, repoName, since365, until)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  commits: %v\n", err)
 			commits = nil
 		}
+		commits60 := contributors.FilterCommitsAfter(commits, since60)
+		commits30 := contributors.FilterCommitsAfter(commits, since30)
 
-		repoAuthorCommits := make(map[string]int)
-		humanAuthors := make(map[string]bool)
-		botCommits := 0
-		humanCommits := 0
+		// Per-window author commit maps (used for bus factor and contributor entries).
+		repoAuthorCommits30d  := make(map[string]int)
+		repoAuthorCommits60d  := make(map[string]int)
+		repoAuthorCommits365d := make(map[string]int)
+
+		humanAuthors30d := make(map[string]bool)
+		humanAuthors60d := make(map[string]bool)
+		humanAuthors365d := make(map[string]bool)
+		botCommits30d, humanCommits30d := 0, 0
+		humanCommits60d, humanCommits365d := 0, 0
+
+		// 365d pass — populates full-year maps; also sets up authorRepos (cross-repo).
 		for _, c := range commits {
 			if c.Login == "" {
 				continue
 			}
-			repoAuthorCommits[c.Login]++
-			allAuthorCommits[c.Login]++
-			if contributors.IsBot(c.Login) {
-				botCommits++
-			} else {
-				humanCommits++
-				humanAuthors[c.Login] = true
+			repoAuthorCommits365d[c.Login]++
+			allAuthorCommits365d[c.Login]++
+			if !contributors.IsBot(c.Login) {
+				humanAuthors365d[c.Login] = true
+				humanCommits365d++
 				if authorRepos[c.Login] == nil {
 					authorRepos[c.Login] = make(map[string]bool)
 				}
 				authorRepos[c.Login][fullName] = true
 			}
 		}
-		repoAuthorSets[fullName] = humanAuthors
+		// 60d pass.
+		for _, c := range commits60 {
+			if c.Login == "" {
+				continue
+			}
+			repoAuthorCommits60d[c.Login]++
+			allAuthorCommits60d[c.Login]++
+			if !contributors.IsBot(c.Login) {
+				humanAuthors60d[c.Login] = true
+				humanCommits60d++
+			}
+		}
+		// 30d pass.
+		for _, c := range commits30 {
+			if c.Login == "" {
+				continue
+			}
+			repoAuthorCommits30d[c.Login]++
+			allAuthorCommits30d[c.Login]++
+			if contributors.IsBot(c.Login) {
+				botCommits30d++
+			} else {
+				humanAuthors30d[c.Login] = true
+				humanCommits30d++
+			}
+		}
+		repoAuthorSets[fullName] = humanAuthors30d
 
 		// ── Issues ───────────────────────────────────────────────────────
-		issues, err := contributors.FetchRepoIssues(ctx, ghClient, owner, repoName, since)
+		// Fetch 365d; filter in-memory for 30d/60d windows.
+		issues, err := contributors.FetchRepoIssues(ctx, ghClient, owner, repoName, since365)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  issues: %v\n", err)
 			issues = nil
 		}
+		issues60 := contributors.FilterIssuesAfter(issues, since60)
+		issues30 := contributors.FilterIssuesAfter(issues, since30)
 
-		issuesOpened := 0
-		issuesClosed := 0
+		issuesOpened30d := 0
+		issuesClosed30d := 0
+		issuesOpened60d := 0
+		issuesOpened365d := 0
 		issueLabelDist := make(map[string]int)
+
 		for _, iss := range issues {
-			issuesOpened++
-			totalIssuesOpened++
-			allAuthorIssues[iss.Login]++
+			issuesOpened365d++
+			allAuthorIssues365d[iss.Login]++
+		}
+		for _, iss := range issues60 {
+			issuesOpened60d++
+			allAuthorIssues60d[iss.Login]++
+		}
+		for _, iss := range issues30 {
+			issuesOpened30d++
+			totalIssuesOpened30d++
+			allAuthorIssues30d[iss.Login]++
 			if iss.State == "closed" {
-				issuesClosed++
-				totalIssuesClosed++
+				issuesClosed30d++
+				totalIssuesClosed30d++
 			}
 			for _, l := range iss.Labels {
 				issueLabelDist[l.GetName()]++
@@ -742,24 +831,41 @@ func runFetchContributors() error {
 		}
 
 		// ── PRs ──────────────────────────────────────────────────────────
-		prs, err := contributors.FetchRepoPRs(ctx, ghClient, owner, repoName, since)
+		// Fetch 365d; filter in-memory for 30d/60d windows.
+		prs, err := contributors.FetchRepoPRs(ctx, ghClient, owner, repoName, since365)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  PRs: %v\n", err)
 			prs = nil
 		}
+		prs60 := contributors.FilterPRsAfter(prs, since60)
+		prs30 := contributors.FilterPRsAfter(prs, since30)
 
-		prsMerged := 0
+		prsMerged30d := 0
+		prsMerged60d := 0
+		prsMerged365d := 0
+
 		for _, pr := range prs {
-			prsMerged++
-			totalPRsMerged++
-			allAuthorPRs[pr.Login]++
+			prsMerged365d++
+			allAuthorPRs365d[pr.Login]++
+		}
+		for _, pr := range prs60 {
+			prsMerged60d++
+			totalPRsMerged60d++
+			allAuthorPRs60d[pr.Login]++
+		}
+		for _, pr := range prs30 {
+			prsMerged30d++
+			totalPRsMerged30d++
+			allAuthorPRs30d[pr.Login]++
 			if pr.HasReviewers {
-				totalPRsWithReview++
+				totalPRsWithReview30d++
 			}
 		}
+		totalPRsMerged365d += prsMerged365d
 
 		// ── Discussions ───────────────────────────────────────────────────
-		discs, err := contributors.FetchDiscussions(client, owner, repoName, since)
+		// Fetch 365d; all windows sliced in-memory from this set.
+		discs, err := contributors.FetchDiscussions(client, owner, repoName, since365)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  discussions: %v\n", err)
 			discs = nil
@@ -767,7 +873,17 @@ func runFetchContributors() error {
 		for _, d := range discs {
 			allDiscussions = append(allDiscussions, d)
 			if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
-				allAuthorDiscussions[d.AuthorLogin]++
+				allAuthorDiscussions365d[d.AuthorLogin]++
+			}
+		}
+		for _, d := range contributors.FilterDiscussionsAfter(discs, since60) {
+			if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
+				allAuthorDiscussions60d[d.AuthorLogin]++
+			}
+		}
+		for _, d := range contributors.FilterDiscussionsAfter(discs, since30) {
+			if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
+				allAuthorDiscussions30d[d.AuthorLogin]++
 			}
 		}
 
@@ -794,22 +910,34 @@ func runFetchContributors() error {
 			}
 		}
 
-		busFactor := contributors.ComputeBusFactor(repoAuthorCommits, 0.8)
+		busFactor30d  := contributors.ComputeBusFactor(repoAuthorCommits30d, 0.8)
+		busFactor60d  := contributors.ComputeBusFactor(repoAuthorCommits60d, 0.8)
+		busFactor365d := contributors.ComputeBusFactor(repoAuthorCommits365d, 0.8)
 		streak := contributors.ComputeActiveWeeksStreak(weekly)
 
-		if len(commits) > 0 || issuesOpened > 0 || prsMerged > 0 {
+		if len(commits30) > 0 || issuesOpened30d > 0 || prsMerged30d > 0 {
 			activeRepoCount++
 		}
 
 		rs := contributors.RepoStats{
 			Name:                  fullName,
-			Commits30d:            len(commits),
-			UniqueHumanAuthors30d: len(humanAuthors),
-			PRsMerged30d:          prsMerged,
-			IssuesOpened30d:       issuesOpened,
-			BusFactor:             busFactor,
-			BotCommits30d:         botCommits,
-			HumanCommits30d:       humanCommits,
+			Commits30d:            len(commits30),
+			Commits60d:            len(commits60),
+			Commits365d:           len(commits),
+			UniqueHumanAuthors30d: len(humanAuthors30d),
+			PRsMerged30d:          prsMerged30d,
+			PRsMerged60d:          prsMerged60d,
+			PRsMerged365d:         prsMerged365d,
+			IssuesOpened30d:       issuesOpened30d,
+			IssuesOpened60d:       issuesOpened60d,
+			IssuesOpened365d:      issuesOpened365d,
+			BusFactor:             busFactor30d,
+			BusFactor60d:          busFactor60d,
+			BusFactor365d:         busFactor365d,
+			BotCommits30d:         botCommits30d,
+			HumanCommits30d:       humanCommits30d,
+			HumanCommits60d:       humanCommits60d,
+			HumanCommits365d:      humanCommits365d,
 			ActiveWeeksStreak:     streak,
 			WeeklyCommits52w:      weekly,
 			CommitsByDayOfWeek:    dayOfWeek,
@@ -821,17 +949,30 @@ func runFetchContributors() error {
 
 	// ── Compute summary ───────────────────────────────────────────────────────
 
-	// Gather all unique human logins active in the period.
-	activeLogins := make([]string, 0, len(allAuthorCommits))
-	for login := range allAuthorCommits {
+	// Gather unique human logins active per window.
+	activeLogins30d := make([]string, 0)
+	for login := range allAuthorCommits30d {
 		if !contributors.IsBot(login) {
-			activeLogins = append(activeLogins, login)
+			activeLogins30d = append(activeLogins30d, login)
 		}
 	}
-	// Also include humans who only opened issues or discussions.
-	for login := range allAuthorIssues {
+	// Also include humans who only opened issues or discussions in 30d.
+	for login := range allAuthorIssues30d {
 		if !contributors.IsBot(login) {
-			allAuthorCommits[login] = allAuthorCommits[login] // ensure present
+			allAuthorCommits30d[login] = allAuthorCommits30d[login] // ensure present
+		}
+	}
+
+	activeLogins60d := make([]string, 0)
+	for login := range allAuthorCommits60d {
+		if !contributors.IsBot(login) {
+			activeLogins60d = append(activeLogins60d, login)
+		}
+	}
+	activeLogins365d := make([]string, 0)
+	for login := range allAuthorCommits365d {
+		if !contributors.IsBot(login) {
+			activeLogins365d = append(activeLogins365d, login)
 		}
 	}
 
@@ -843,39 +984,76 @@ func runFetchContributors() error {
 		}
 	}
 
-	newContribs := contributors.ComputeNewContributors(activeLogins, historicalLogins)
-	reviewRate := contributors.ComputeReviewParticipationRate(totalPRsWithReview, totalPRsMerged)
+	newContribs := contributors.ComputeNewContributors(activeLogins30d, historicalLogins)
+	reviewRate := contributors.ComputeReviewParticipationRate(totalPRsWithReview30d, totalPRsMerged30d)
 
-	// Global bus factor across all repos.
-	globalBusFactor := contributors.ComputeBusFactor(allAuthorCommits, 0.8)
+	// Global bus factor across all repos, per window.
+	globalBusFactor30d  := contributors.ComputeBusFactor(allAuthorCommits30d, 0.8)
+	globalBusFactor60d  := contributors.ComputeBusFactor(allAuthorCommits60d, 0.8)
+	globalBusFactor365d := contributors.ComputeBusFactor(allAuthorCommits365d, 0.8)
 
-	// Total commits (human + bot).
-	totalCommits := 0
-	for _, c := range allAuthorCommits {
-		totalCommits += c
+	// Total commits (human + bot) per window.
+	totalCommits30d := 0
+	for _, c := range allAuthorCommits30d {
+		totalCommits30d += c
+	}
+	totalCommits60d := 0
+	for _, c := range allAuthorCommits60d {
+		totalCommits60d += c
+	}
+	totalCommits365d := 0
+	for _, c := range allAuthorCommits365d {
+		totalCommits365d += c
 	}
 
 	// ── Discussion summary ────────────────────────────────────────────────────
-	discAuthors := make(map[string]bool)
-	totalDiscComments := 0
+	// allDiscussions holds 365d of data; filter in-memory for each window.
+	discs30d := contributors.FilterDiscussionsAfter(allDiscussions, since30)
+	discs60d := contributors.FilterDiscussionsAfter(allDiscussions, since60)
+
+	discAuthors30d := make(map[string]bool)
+	discAuthors60d := make(map[string]bool)
+	discAuthors365d := make(map[string]bool)
+	totalDiscComments30d := 0
+	totalDiscComments60d := 0
+	totalDiscComments365d := 0
+
 	for _, d := range allDiscussions {
 		if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
-			discAuthors[d.AuthorLogin] = true
+			discAuthors365d[d.AuthorLogin] = true
 		}
-		totalDiscComments += d.CommentCount
+		totalDiscComments365d += d.CommentCount
+	}
+	for _, d := range discs60d {
+		if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
+			discAuthors60d[d.AuthorLogin] = true
+		}
+		totalDiscComments60d += d.CommentCount
+	}
+	for _, d := range discs30d {
+		if d.AuthorLogin != "" && !contributors.IsBot(d.AuthorLogin) {
+			discAuthors30d[d.AuthorLogin] = true
+		}
+		totalDiscComments30d += d.CommentCount
 	}
 
 	discSummary := contributors.DiscussionSummary{
-		TotalDiscussions30d:        len(allDiscussions),
-		TotalDiscussionComments30d: totalDiscComments,
-		UniqueDiscussionAuthors30d: len(discAuthors),
-		WeeklyTrend:                []contributors.DiscussionWeek{},
+		TotalDiscussions30d:         len(discs30d),
+		TotalDiscussions60d:         len(discs60d),
+		TotalDiscussions365d:        len(allDiscussions),
+		TotalDiscussionComments30d:  totalDiscComments30d,
+		TotalDiscussionComments60d:  totalDiscComments60d,
+		TotalDiscussionComments365d: totalDiscComments365d,
+		UniqueDiscussionAuthors30d:  len(discAuthors30d),
+		UniqueDiscussionAuthors60d:  len(discAuthors60d),
+		UniqueDiscussionAuthors365d: len(discAuthors365d),
+		WeeklyTrend:                 []contributors.DiscussionWeek{},
 	}
 
 	// Build weekly trend: bucket discussions by Monday of their creation week.
 	if len(allDiscussions) > 0 {
 		weekMap := make(map[string]*contributors.DiscussionWeek)
-		for _, d := range allDiscussions {
+		for _, d := range discs30d {
 			// Truncate to Monday of that week.
 			wd := int(d.CreatedAt.Weekday())
 			if wd == 0 {
@@ -899,26 +1077,34 @@ func runFetchContributors() error {
 	}
 
 	summary := contributors.ContributorSummary{
-		ActiveContributors:      len(activeLogins),
+		ActiveContributors:      len(activeLogins30d),
+		ActiveContributors60d:   len(activeLogins60d),
+		ActiveContributors365d:  len(activeLogins365d),
 		NewContributors:         len(newContribs),
-		TotalCommits:            totalCommits,
-		TotalPRsMerged:          totalPRsMerged,
-		TotalIssuesOpened:       totalIssuesOpened,
-		TotalIssuesClosed:       totalIssuesClosed,
-		BusFactor:               globalBusFactor,
+		TotalCommits:            totalCommits30d,
+		TotalCommits60d:         totalCommits60d,
+		TotalCommits365d:        totalCommits365d,
+		TotalPRsMerged:          totalPRsMerged30d,
+		TotalPRsMerged60d:       totalPRsMerged60d,
+		TotalPRsMerged365d:      totalPRsMerged365d,
+		TotalIssuesOpened:       totalIssuesOpened30d,
+		TotalIssuesClosed:       totalIssuesClosed30d,
+		BusFactor:               globalBusFactor30d,
+		BusFactor60d:            globalBusFactor60d,
+		BusFactor365d:           globalBusFactor365d,
 		ReviewParticipationRate: reviewRate,
 		ActiveRepos:             activeRepoCount,
-		TotalDiscussions:        len(allDiscussions),
-		DiscussionAnswerRate:     discSummary.AnsweredRate,
+		TotalDiscussions:        len(discs30d),
+		DiscussionAnswerRate:    discSummary.AnsweredRate,
 	}
 
 	// ── Top contributors (fetch profiles, build entries) ──────────────────────
 
-	// Sort active logins by commit count descending.
+	// Sort active logins by commit count descending (30d window drives ranking).
 	type loginCount struct{ login string; count int }
-	ranked := make([]loginCount, 0, len(activeLogins))
-	for _, login := range activeLogins {
-		ranked = append(ranked, loginCount{login, allAuthorCommits[login]})
+	ranked := make([]loginCount, 0, len(activeLogins30d))
+	for _, login := range activeLogins30d {
+		ranked = append(ranked, loginCount{login, allAuthorCommits30d[login]})
 	}
 	sort.Slice(ranked, func(i, j int) bool { return ranked[i].count > ranked[j].count })
 
@@ -939,12 +1125,20 @@ func runFetchContributors() error {
 		}
 
 		entry := contributors.ContributorEntry{
-			Login:           rc.login,
-			Commits30d:      rc.count,
-			PRsMerged30d:    allAuthorPRs[rc.login],
-			IssuesOpened30d: allAuthorIssues[rc.login],
-			DiscussionPosts30d: allAuthorDiscussions[rc.login],
-			IsBot:           false,
+			Login:               rc.login,
+			Commits30d:          rc.count,
+			Commits60d:          allAuthorCommits60d[rc.login],
+			Commits365d:         allAuthorCommits365d[rc.login],
+			PRsMerged30d:        allAuthorPRs30d[rc.login],
+			PRsMerged60d:        allAuthorPRs60d[rc.login],
+			PRsMerged365d:       allAuthorPRs365d[rc.login],
+			IssuesOpened30d:     allAuthorIssues30d[rc.login],
+			IssuesOpened60d:     allAuthorIssues60d[rc.login],
+			IssuesOpened365d:    allAuthorIssues365d[rc.login],
+			DiscussionPosts30d:  allAuthorDiscussions30d[rc.login],
+			DiscussionPosts60d:  allAuthorDiscussions60d[rc.login],
+			DiscussionPosts365d: allAuthorDiscussions365d[rc.login],
+			IsBot:               false,
 		}
 
 		// Collect repos this login was active in.
@@ -967,8 +1161,8 @@ func runFetchContributors() error {
 	// ── Persist history snapshot ──────────────────────────────────────────────
 	snap := contributors.ContribDaySnapshot{
 		Date:            time.Now().UTC().Format("2006-01-02"),
-		ActiveContribs:  len(activeLogins),
-		TotalCommits:    totalCommits,
+		ActiveContribs:  len(activeLogins30d),
+		TotalCommits:    totalCommits30d,
 		TopContributors: topLogins,
 	}
 	hist.Snapshots = append(hist.Snapshots, snap)
@@ -999,7 +1193,7 @@ func runFetchContributors() error {
 		Repos:       repoStats,
 		DiscussionsSummary: discSummary,
 	}
-	out.Period.Start = since.Format("2006-01-02")
+	out.Period.Start = since30.Format("2006-01-02")
 	out.Period.End = until.Format("2006-01-02")
 
 	if err := writeJSON("src/data/contributors.json", out); err != nil {
@@ -1007,6 +1201,6 @@ func runFetchContributors() error {
 	}
 	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/contributors.json")
 	fmt.Fprintf(os.Stderr, "  active contributors: %d, repos: %d, commits: %d\n",
-		len(activeLogins), activeRepoCount, totalCommits)
+		len(activeLogins30d), activeRepoCount, totalCommits30d)
 	return nil
 }
