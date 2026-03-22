@@ -25,7 +25,7 @@ const FEDORA_VERSION_PALETTE = [
 
 {!hasData ? (
   <ChartCard
-    title="Popular `bootc` Operating System Images"
+    title="Fedora Base Version Adoption"
     canvasId="fedora-version-chart"
     isEmpty
     emptyMsg="Collecting data…"
@@ -33,16 +33,10 @@ const FEDORA_VERSION_PALETTE = [
 ) : (
   <>
     <ChartCard
-      title="Popular `bootc` Operating System Images"
+      title="Fedora Base Version Adoption"
       canvasId="fedora-version-chart"
       height={300}
     />
-    <div class="fedora-scale-controls">
-      <div class="btn-group" id="fedora-scale-btns" role="group" aria-label="Scale type">
-        <button class="range-btn active" data-scale="linear">Linear</button>
-        <button class="range-btn" data-scale="log">Log</button>
-      </div>
-    </div>
     <script type="application/json" id="fedora-version-data" set:html={safeJson({ osVersionDist, DISTRO_ORDER, allVersions, FEDORA_VERSION_PALETTE })}></script>
   </>
 )}
@@ -58,7 +52,13 @@ if (dataEl) {
     JSON.parse(dataEl.textContent!);
 
   const canvas = document.getElementById('fedora-version-chart') as HTMLCanvasElement;
-  let currentScale: 'linear' | 'log' = 'linear';
+
+  // Pre-compute per-distro totals for percentage calculation.
+  const distroTotals: Record<string, number> = {};
+  for (const distro of Object.keys(osVersionDist)) {
+    distroTotals[distro] = Object.values(osVersionDist[distro] as Record<string, number>)
+      .reduce((sum: number, n: number) => sum + n, 0);
+  }
 
   function buildChart() {
     const c = getChartColors();
@@ -66,42 +66,22 @@ if (dataEl) {
 
     const datasets = (allVersions as string[]).map((ver: string, i: number) => ({
       label: `F${ver}`,
-      data: labels.map((distro: string) => (osVersionDist[distro] ?? {})[ver] ?? 0),
+      data: labels.map((distro: string) => {
+        const raw = (osVersionDist[distro] ?? {})[ver] ?? 0;
+        const total = distroTotals[distro] ?? 0;
+        return total > 0 ? Math.round((raw / total) * 1000) / 10 : 0;
+      }),
       backgroundColor: FEDORA_VERSION_PALETTE[i % FEDORA_VERSION_PALETTE.length],
       borderRadius: 3,
     }));
 
-    const yAxis = currentScale === 'log'
-      ? {
-          type: 'logarithmic' as const,
-          min: 1,
-          grid: { color: c.grid },
-          ticks: {
-            color: c.muted,
-            callback: (v: number | string) => {
-              const n = Number(v);
-              return n >= 1000 ? `${(n / 1000).toFixed(0)}k` : String(n);
-            },
-          },
-        }
-      : {
-          type: 'linear' as const,
-          beginAtZero: true,
-          grid: { color: c.grid },
-          ticks: {
-            color: c.muted,
-            callback: (v: number | string) =>
-              Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(0)}k` : String(v),
-          },
-        };
-
     if (chart) {
       chart.data.labels = labels;
       chart.data.datasets = datasets;
+      chart.options.scales!.y!.ticks!.color = c.muted;
+      (chart.options.scales!.y!.grid as { color: string }).color = c.grid;
       chart.options.scales!.x!.ticks!.color = c.muted;
       (chart.options.scales!.x!.grid as { color: string }).color = c.grid;
-      // Update y-axis type and options in place
-      chart.options.scales!.y = yAxis as typeof chart.options.scales.y;
       (chart.options.plugins!.legend!.labels as { color: string }).color = c.muted;
       chart.update();
       return;
@@ -112,17 +92,39 @@ if (dataEl) {
         type: 'bar',
         data: { labels, datasets },
         options: {
+          indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
             legend: { labels: { color: c.muted, usePointStyle: true, boxWidth: 10 } },
+            tooltip: {
+              callbacks: {
+                label(ctx) {
+                  const ver = (allVersions as string[])[ctx.datasetIndex];
+                  const distro = (ctx.chart.data.labels as string[])[ctx.dataIndex];
+                  const raw = (osVersionDist[distro] ?? {})[ver] ?? 0;
+                  const pct = ctx.parsed.x;
+                  return ` F${ver}: ${pct}% (${raw.toLocaleString()} installs)`;
+                },
+              },
+            },
           },
           scales: {
             x: {
+              stacked: true,
+              min: 0,
+              max: 100,
+              grid: { color: c.grid },
+              ticks: {
+                color: c.muted,
+                callback: (v: number | string) => `${v}%`,
+              },
+            },
+            y: {
+              stacked: true,
               grid: { color: c.grid },
               ticks: { color: c.muted },
             },
-            y: yAxis,
           },
         },
       });
@@ -134,42 +136,7 @@ if (dataEl) {
   let chart: Chart | undefined;
   buildChart();
 
-  // Scale toggle
-  document.querySelectorAll('#fedora-scale-btns .range-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#fedora-scale-btns .range-btn').forEach(b => b.classList.remove('active'));
-      (btn as HTMLElement).classList.add('active');
-      currentScale = (btn as HTMLElement).dataset.scale as 'linear' | 'log';
-      buildChart();
-    });
-  });
-
   window.addEventListener('themechange', buildChart);
 }
 </script>
-
-<style>
-  .fedora-scale-controls {
-    display: flex;
-    gap: 8px;
-    padding: 6px 12px 0;
-    flex-wrap: wrap;
-  }
-  .btn-group {
-    display: flex;
-    gap: 4px;
-  }
-  .range-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 4px;
-    padding: 2px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: color 0.15s, background 0.15s;
-  }
-  .range-btn:hover { color: var(--text); background: var(--bg2); }
-  .range-btn.active { color: var(--text); background: var(--bg2); border-color: var(--blue); font-weight: 600; }
-</style>
 
