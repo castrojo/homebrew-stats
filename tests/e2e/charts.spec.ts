@@ -269,9 +269,9 @@ test.describe('FedoraVersionChart log scale toggle', () => {
     await page.goto('/homebrew-stats/overall/');
   });
 
-  test('Log scale toggle switches active button and keeps canvas rendered', async ({ page }) => {
-    const logBtn    = page.locator('#fedora-scale-btns .range-btn[data-scale="log"]');
-    const linearBtn = page.locator('#fedora-scale-btns .range-btn[data-scale="linear"]');
+  test.fixme('Log scale toggle switches active button and keeps canvas rendered', async ({ page }) => {
+    // TODO: #fedora-scale-btns was removed when FedoraVersionChart was replaced
+    // with a 100% stacked adoption view. Needs rewrite to match new component.
 
     await expect(linearBtn).toHaveClass(/active/);
     await logBtn.click();
