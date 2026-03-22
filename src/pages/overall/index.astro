@@ -5,10 +5,12 @@ import CountmeTrendChart from '../../components/CountmeTrendChart.astro';
 import DistroTrendChart from '../../components/DistroTrendChart.astro';
 import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
 import EcosystemGrowthChart from '../../components/EcosystemGrowthChart.astro';
+import FedoraVersionChart from '../../components/FedoraVersionChart.astro';
 import data from '../../data/countme.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
+const osVersionDist = (data as any).os_version_dist ?? {};
 ---
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">
@@ -52,6 +54,9 @@ const weekRecords = data.history.week_records ?? [];
 
     <h2>📊 Device Momentum (This Week vs Last Week)</h2>
     <EcosystemGrowthChart currentWeek={data.current_week as any} prevWeek={data.prev_week as any} />
+
+    <h2>🐧 Fedora Base Version Adoption</h2>
+    <FedoraVersionChart osVersionDist={osVersionDist} />
   </section>
 </Layout>
 
