@@ -22,7 +22,7 @@ const displayNames: Record<string, string> = {
   canvasId="tap-comparison-chart"
   height={260}
   rangeId="comparison-range-btns"
-  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
   defaultRange="30"
   isEmpty={relevant.length < 2}
   emptyMsg="Not enough history yet — charts will appear after a few daily syncs."
@@ -67,6 +67,7 @@ const displayNames: Record<string, string> = {
   function getWindow(range: string) {
     if (range === '30') return allRelevant.slice(-30);
     if (range === '90') return allRelevant.slice(-90);
+    if (range === '365') return allRelevant.slice(-365);
     return allRelevant;
   }
 

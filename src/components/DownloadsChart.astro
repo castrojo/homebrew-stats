@@ -25,7 +25,7 @@ const safeId = tapName.replace(/\//g, '-');
         canvasId={`total-chart-${safeId}`}
         height={240}
         rangeId={`range-btns-${safeId}`}
-        ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+        ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
         defaultRange="30"
       />
       <ChartCard
@@ -131,6 +131,7 @@ const safeId = tapName.replace(/\//g, '-');
     function getWindow(range: string) {
       if (range === '30') return allRelevant.slice(-30);
       if (range === '90') return allRelevant.slice(-90);
+      if (range === '365') return allRelevant.slice(-365);
       return allRelevant;
     }
 

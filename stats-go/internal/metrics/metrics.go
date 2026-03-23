@@ -113,6 +113,8 @@ func tapDownloadSumSeries(snapshots []history.DaySnapshot, tapName string) []int
 // Summary holds aggregate KPIs precomputed for hero / dashboard cards.
 type Summary struct {
 	TotalInstalls30d      int64    `json:"total_installs_30d"`
+	TotalInstalls90d      int64    `json:"total_installs_90d"`
+	TotalInstalls365d     int64    `json:"total_installs_365d"`
 	TotalUniqueTappers    int      `json:"total_unique_tappers"`
 	TotalPackages         int      `json:"total_packages"`
 	StaleCount            int      `json:"stale_count"`
@@ -128,6 +130,8 @@ func ComputeSummary(taps []tap.TapStats, snapshots []history.DaySnapshot) Summar
 		s.TotalPackages += len(t.Packages)
 		for _, pkg := range t.Packages {
 			s.TotalInstalls30d += pkg.Downloads
+			s.TotalInstalls90d += pkg.Installs90d
+			s.TotalInstalls365d += pkg.Installs365d
 			switch pkg.StatusString() {
 			case "stale":
 				s.StaleCount++

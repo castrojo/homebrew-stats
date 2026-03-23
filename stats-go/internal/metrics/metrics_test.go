@@ -222,16 +222,16 @@ taps := []tap.TapStats{
 Name:    testTap,
 Traffic: &tap.Traffic{Uniques: 100},
 Packages: []tap.Package{
-{Name: "pkg-a", Type: "cask", Downloads: 50, FreshnessKnown: true, IsStale: false},
-{Name: "pkg-b", Type: "cask", Downloads: 30, FreshnessKnown: true, IsStale: true},
-{Name: "pkg-c", Type: "cask", Downloads: 20, FreshnessKnown: false},
+{Name: "pkg-a", Type: "cask", Downloads: 50, Installs90d: 120, Installs365d: 400, FreshnessKnown: true, IsStale: false},
+{Name: "pkg-b", Type: "cask", Downloads: 30, Installs90d: 80,  Installs365d: 250, FreshnessKnown: true, IsStale: true},
+{Name: "pkg-c", Type: "cask", Downloads: 20, Installs90d: 60,  Installs365d: 200, FreshnessKnown: false},
 },
 },
 {
 Name:    "ublue-os/homebrew-experimental-tap",
 Traffic: &tap.Traffic{Uniques: 50},
 Packages: []tap.Package{
-{Name: "pkg-d", Type: "cask", Downloads: 10, FreshnessKnown: true, IsStale: false},
+{Name: "pkg-d", Type: "cask", Downloads: 10, Installs90d: 30, Installs365d: 100, FreshnessKnown: true, IsStale: false},
 },
 },
 }
@@ -239,6 +239,12 @@ s := metrics.ComputeSummary(taps, nil)
 
 if s.TotalInstalls30d != 110 {
 t.Errorf("TotalInstalls30d = %d, want 110", s.TotalInstalls30d)
+}
+if s.TotalInstalls90d != 290 {
+t.Errorf("TotalInstalls90d = %d, want 290", s.TotalInstalls90d)
+}
+if s.TotalInstalls365d != 950 {
+t.Errorf("TotalInstalls365d = %d, want 950", s.TotalInstalls365d)
 }
 if s.TotalUniqueTappers != 150 {
 t.Errorf("TotalUniqueTappers = %d, want 150", s.TotalUniqueTappers)

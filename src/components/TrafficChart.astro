@@ -15,7 +15,7 @@ const { history, tapNames } = Astro.props;
   canvasId="traffic-chart"
   height={260}
   rangeId="traffic-range-btns"
-  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
   defaultRange="30"
 />
 <script type="application/json" id="traffic-data" set:html={safeJson({ history, tapNames })}></script>
@@ -47,6 +47,7 @@ const { history, tapNames } = Astro.props;
   function getWindow(range: string) {
     if (range === '30') return allHistory.slice(-30);
     if (range === '90') return allHistory.slice(-90);
+    if (range === '365') return allHistory.slice(-365);
     return allHistory;
   }
 

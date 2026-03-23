@@ -5,6 +5,8 @@ interface Package {
   version?: string;
   downloads?: number;
   /** Added by newer backend builds; absent in older snapshots. */
+  installs_90d?: number;
+  installs_365d?: number;
   velocity7d?: number;
   is_stale?: boolean;
   freshness_known?: boolean;
@@ -43,6 +45,8 @@ interface Row {
   tapUrl: string;
   tapFileUrl: string;
   downloads: number;
+  installs90d: number;
+  installs365d: number;
   velocity7d: number | null;
   version: string;
   description: string;
@@ -57,6 +61,8 @@ const rows: Row[] = taps.flatMap(tap =>
     tapUrl:      tap.url,
     tapFileUrl:  tapFileUrl(tap.url, pkg),
     downloads:   pkg.downloads ?? 0,
+    installs90d:  pkg.installs_90d  ?? 0,
+    installs365d: pkg.installs_365d ?? 0,
     velocity7d:  pkg.velocity7d ?? null,
     version:     pkg.version ?? '—',
     description: pkg.description ?? '',
@@ -78,6 +84,11 @@ rows.sort((a, b) => b.downloads - a.downloads);
       placeholder="Filter packages…"
       autocomplete="off"
     />
+    <span class="period-btns" id="leaderboard-period-btns">
+      <button class="period-btn active" data-period="30">30d</button>
+      <button class="period-btn" data-period="90">90d</button>
+      <button class="period-btn" data-period="365">365d</button>
+    </span>
   </div>
 
   <div class="leaderboard-wrap">
@@ -86,7 +97,7 @@ rows.sort((a, b) => b.downloads - a.downloads);
         <tr>
           <th data-col="name"      class="sortable">Package    <span class="sort-icon"></span></th>
           <th data-col="tap"       class="sortable">Tap        <span class="sort-icon"></span></th>
-          <th data-col="downloads" class="sortable sort-active sort-desc">Downloads (30d) <span class="sort-icon">↓</span></th>
+          <th data-col="downloads" class="sortable sort-active sort-desc" id="downloads-th">Downloads (30d) <span class="sort-icon">↓</span></th>
           <th data-col="velocity7d" class="sortable hide-mobile">Velocity (7d)  <span class="sort-icon"></span></th>
           <th data-col="version"   class="sortable hide-mobile">Version        <span class="sort-icon"></span></th>
         </tr>
@@ -97,6 +108,9 @@ rows.sort((a, b) => b.downloads - a.downloads);
             data-name={row.name}
             data-tap={row.tap}
             data-downloads={row.downloads}
+            data-dl-30={row.downloads}
+            data-dl-90={row.installs90d}
+            data-dl-365={row.installs365d}
             data-velocity={row.velocity7d !== null ? String(row.velocity7d) : ''}
             data-version={row.version}
           >
@@ -119,11 +133,11 @@ rows.sort((a, b) => b.downloads - a.downloads);
               <a href={row.tapUrl} class="tap-link">{row.tap}</a>
             </td>
 
-            <!-- Downloads (30d): show number or em-dash -->
+            <!-- Downloads: number updated by period toggle -->
             <td class="num-cell">
-              {row.downloads > 0
-                ? <span class="downloads">{row.downloads.toLocaleString()}</span>
-                : <span class="muted">—</span>}
+              <span class="downloads dl-num">
+                {row.downloads > 0 ? row.downloads.toLocaleString() : '—'}
+              </span>
             </td>
 
             <!-- Velocity (7d): hidden on mobile -->
@@ -145,8 +159,40 @@ rows.sort((a, b) => b.downloads - a.downloads);
 </section>
 
 <script>
-  // ── Sortable leaderboard — vanilla JS, no framework ──────────────────────
+  // ── Period toggle — switches downloads column between 30d / 90d / 365d ────
   const table = document.getElementById('pkg-leaderboard') as HTMLTableElement | null;
+  const dlHeader = document.getElementById('downloads-th');
+  const periodBtns = document.querySelectorAll<HTMLButtonElement>('#leaderboard-period-btns .period-btn');
+
+  function applyPeriod(period: string): void {
+    if (!table) return;
+    const label = `Downloads (${period}d)`;
+    if (dlHeader) {
+      const icon = dlHeader.querySelector<HTMLElement>('.sort-icon');
+      dlHeader.childNodes[0].textContent = `${label} `;
+      if (icon) icon.textContent = '↓'; // preserve icon
+    }
+    const tbody = table.querySelector('tbody')!;
+    Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr')).forEach(row => {
+      const val = parseInt(row.dataset[`dl${period}`] ?? '0', 10);
+      // Update sort key — used by getValue('downloads')
+      row.dataset.downloads = String(val);
+      const span = row.querySelector<HTMLElement>('.dl-num');
+      if (span) span.textContent = val > 0 ? val.toLocaleString() : '—';
+    });
+  }
+
+  periodBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      periodBtns.forEach(b => b.classList.toggle('active', b === btn));
+      applyPeriod(btn.dataset.period!);
+      // Re-sort by downloads descending with updated values.
+      sortTable('downloads', 'desc');
+      refreshHeaders('downloads', 'desc');
+    });
+  });
+
+  // ── Sortable leaderboard — vanilla JS, no framework ──────────────────────
   if (table) {
     const headers = Array.from(table.querySelectorAll<HTMLElement>('th[data-col]'));
     let currentCol = 'downloads';
@@ -351,6 +397,36 @@ rows.sort((a, b) => b.downloads - a.downloads);
     align-items: center;
     gap: 12px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .period-btns {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+  }
+
+  .period-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: inherit;
+    padding: 4px 10px;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+  }
+
+  .period-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  .period-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
   }
 
   #pkg-search {
