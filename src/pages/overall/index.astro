@@ -5,12 +5,10 @@ import CountmeTrendChart from '../../components/CountmeTrendChart.astro';
 import DistroTrendChart from '../../components/DistroTrendChart.astro';
 import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
 import EcosystemGrowthChart from '../../components/EcosystemGrowthChart.astro';
-import FedoraVersionChart from '../../components/FedoraVersionChart.astro';
 import data from '../../data/countme.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
-const osVersionDist = (data as any).os_version_dist ?? {};
 ---
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">
@@ -28,7 +26,7 @@ const osVersionDist = (data as any).os_version_dist ?? {};
       These counts come from <strong>countme</strong>, a privacy-respecting feature built into
       <a href="https://fedoraproject.org/wiki/Changes/DNF_Better_Counting" target="_blank" rel="noopener">Fedora's package manager</a>.
       Once a week, each device sends a single anonymous check-in — no personal data, no IP addresses stored,
-      just a count of how many devices are actively using each operating system.
+      just a count of how many devices are actively using each image.
       Think of it like a headcount: it tells us how many devices checked in this week, not who they are or what they did.
     </p>
   </div>
@@ -39,10 +37,10 @@ const osVersionDist = (data as any).os_version_dist ?? {};
   />
 
   <section class="charts-section">
-    <h2>📈 Weekly Trends</h2>
+    <h2>📈 Monthly Trends</h2>
     <CountmeTrendChart weekRecords={weekRecords as any} />
 
-    <h2>📊 Individual Distro Trends</h2>
+    <h2>📊 Individual Image Trends</h2>
     <div class="distro-charts-grid">
       <DistroTrendChart distroKey="bazzite"    distroLabel="Bazzite"    colorIndex={0} weekRecords={weekRecords as any} />
       <DistroTrendChart distroKey="bluefin"    distroLabel="Bluefin"    colorIndex={1} weekRecords={weekRecords as any} />
@@ -54,9 +52,6 @@ const osVersionDist = (data as any).os_version_dist ?? {};
 
     <h2>📊 Device Momentum (This Week vs Last Week)</h2>
     <EcosystemGrowthChart currentWeek={data.current_week as any} prevWeek={data.prev_week as any} />
-
-    <h2>🐧 Fedora Base Version Adoption</h2>
-    <FedoraVersionChart osVersionDist={osVersionDist} />
   </section>
 </Layout>
 

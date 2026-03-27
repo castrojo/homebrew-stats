@@ -10,15 +10,19 @@ type ContributorEntry struct {
 	Company             string   `json:"company,omitempty"`
 	Location            string   `json:"location,omitempty"`
 	Commits30d          int      `json:"commits_30d"`
+	Commits90d          int      `json:"commits_90d,omitempty"`
 	Commits60d          int      `json:"commits_60d"`
 	Commits365d         int      `json:"commits_365d"`
 	PRsMerged30d        int      `json:"prs_merged_30d"`
+	PRsMerged90d        int      `json:"prs_merged_90d,omitempty"`
 	PRsMerged60d        int      `json:"prs_merged_60d"`
 	PRsMerged365d       int      `json:"prs_merged_365d"`
 	IssuesOpened30d     int      `json:"issues_opened_30d"`
+	IssuesOpened90d     int      `json:"issues_opened_90d,omitempty"`
 	IssuesOpened60d     int      `json:"issues_opened_60d"`
 	IssuesOpened365d    int      `json:"issues_opened_365d"`
 	DiscussionPosts30d  int      `json:"discussion_posts_30d"`
+	DiscussionPosts90d  int      `json:"discussion_posts_90d,omitempty"`
 	DiscussionPosts60d  int      `json:"discussion_posts_60d"`
 	DiscussionPosts365d int      `json:"discussion_posts_365d"`
 	ReposActive         []string `json:"repos_active"`
@@ -28,18 +32,22 @@ type ContributorEntry struct {
 // ContributorSummary is the KPI hero row.
 type ContributorSummary struct {
 	ActiveContributors      int     `json:"active_contributors"`
+	ActiveContributors90d   int     `json:"active_contributors_90d,omitempty"`
 	ActiveContributors60d   int     `json:"active_contributors_60d"`
 	ActiveContributors365d  int     `json:"active_contributors_365d"`
 	NewContributors         int     `json:"new_contributors"`
 	TotalCommits            int     `json:"total_commits"`
+	TotalCommits90d         int     `json:"total_commits_90d,omitempty"`
 	TotalCommits60d         int     `json:"total_commits_60d"`
 	TotalCommits365d        int     `json:"total_commits_365d"`
 	TotalPRsMerged          int     `json:"total_prs_merged"`
+	TotalPRsMerged90d       int     `json:"total_prs_merged_90d,omitempty"`
 	TotalPRsMerged60d       int     `json:"total_prs_merged_60d"`
 	TotalPRsMerged365d      int     `json:"total_prs_merged_365d"`
 	TotalIssuesOpened       int     `json:"total_issues_opened"`
 	TotalIssuesClosed       int     `json:"total_issues_closed"`
 	BusFactor               int     `json:"bus_factor"`
+	BusFactor90d            int     `json:"bus_factor_90d,omitempty"`
 	BusFactor60d            int     `json:"bus_factor_60d"`
 	BusFactor365d           int     `json:"bus_factor_365d"`
 	ReviewParticipationRate float64 `json:"review_participation_rate"`
@@ -52,20 +60,25 @@ type ContributorSummary struct {
 type RepoStats struct {
 	Name                  string         `json:"name"`
 	Commits30d            int            `json:"commits_30d"`
+	Commits90d            int            `json:"commits_90d,omitempty"`
 	Commits60d            int            `json:"commits_60d"`
 	Commits365d           int            `json:"commits_365d"`
 	UniqueHumanAuthors30d int            `json:"unique_human_authors_30d"`
 	PRsMerged30d          int            `json:"prs_merged_30d"`
+	PRsMerged90d          int            `json:"prs_merged_90d,omitempty"`
 	PRsMerged60d          int            `json:"prs_merged_60d"`
 	PRsMerged365d         int            `json:"prs_merged_365d"`
 	IssuesOpened30d       int            `json:"issues_opened_30d"`
+	IssuesOpened90d       int            `json:"issues_opened_90d,omitempty"`
 	IssuesOpened60d       int            `json:"issues_opened_60d"`
 	IssuesOpened365d      int            `json:"issues_opened_365d"`
 	BusFactor             int            `json:"bus_factor"`
+	BusFactor90d          int            `json:"bus_factor_90d,omitempty"`
 	BusFactor60d          int            `json:"bus_factor_60d"`
 	BusFactor365d         int            `json:"bus_factor_365d"`
 	BotCommits30d         int            `json:"bot_commits_30d"`
 	HumanCommits30d       int            `json:"human_commits_30d"`
+	HumanCommits90d       int            `json:"human_commits_90d,omitempty"`
 	HumanCommits60d       int            `json:"human_commits_60d"`
 	HumanCommits365d      int            `json:"human_commits_365d"`
 	ActiveWeeksStreak     int            `json:"active_weeks_streak"`
@@ -85,12 +98,15 @@ type DiscussionWeek struct {
 // DiscussionSummary is aggregate discussion stats.
 type DiscussionSummary struct {
 	TotalDiscussions30d         int              `json:"total_discussions_30d"`
+	TotalDiscussions90d         int              `json:"total_discussions_90d,omitempty"`
 	TotalDiscussions60d         int              `json:"total_discussions_60d"`
 	TotalDiscussions365d        int              `json:"total_discussions_365d"`
 	TotalDiscussionComments30d  int              `json:"total_discussion_comments_30d"`
+	TotalDiscussionComments90d  int              `json:"total_discussion_comments_90d,omitempty"`
 	TotalDiscussionComments60d  int              `json:"total_discussion_comments_60d"`
 	TotalDiscussionComments365d int              `json:"total_discussion_comments_365d"`
 	UniqueDiscussionAuthors30d  int              `json:"unique_discussion_authors_30d"`
+	UniqueDiscussionAuthors90d  int              `json:"unique_discussion_authors_90d,omitempty"`
 	UniqueDiscussionAuthors60d  int              `json:"unique_discussion_authors_60d"`
 	UniqueDiscussionAuthors365d int              `json:"unique_discussion_authors_365d"`
 	AnsweredRate                float64          `json:"answered_rate"`

@@ -24,8 +24,8 @@ const { history } = Astro.props;
       canvasId="testhub-build-chart"
       height={300}
       rangeId="build-range-btns"
-      ranges={[{ label: '7d', value: '7' }, { label: '30d', value: '30' }, { label: 'All', value: 'all' }]}
-      defaultRange="7"
+      ranges={[{ label: '30d', value: '30d' }, { label: '90d', value: '90d' }, { label: '365d', value: '365d' }, { label: 'All', value: 'all' }]}
+      defaultRange="30d"
     />
     <script type="application/json" id="testhub-build-data" set:html={safeJson({ history })}></script>
   </>
@@ -49,7 +49,7 @@ if (dataEl) {
 
   function getFiltered(range: string) {
     if (range === 'all') return history;
-    const days = Number(range);
+    const days = Number.parseInt(range, 10);
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
@@ -72,7 +72,7 @@ if (dataEl) {
     }));
   }
 
-  let currentRange = '7';
+  let currentRange = '30d';
   let filtered = getFiltered(currentRange);
   const c = getChartColors();
 

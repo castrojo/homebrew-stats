@@ -20,11 +20,11 @@ const reposEmpty = repos.length === 0;
     height={260}
     rangeId="duration-range"
     ranges={[
-      { label: '7d',  value: '7'  },
-      { label: '30d', value: '30' },
-      { label: '90d', value: '90' },
+      { label: '30d', value: '30d' },
+      { label: '90d', value: '90d' },
+      { label: '365d', value: '365d' },
     ]}
-    defaultRange="30"
+    defaultRange="30d"
     isEmpty={trendEmpty}
     emptyMsg="Collecting duration data…"
   />
@@ -61,9 +61,14 @@ let trendChart: Chart | undefined;
 
 if (trendDataEl) {
   const allTrend = readChartData<DurationBucket[]>('build-duration-trend-data');
-  let currentRange = 30;
+  let currentRange = '30d';
 
-  function filterTrend(days: number): DurationBucket[] {
+  function rangeToDays(range: string): number {
+    return Number.parseInt(range, 10);
+  }
+
+  function filterTrend(range: string): DurationBucket[] {
+    const days = rangeToDays(range);
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
@@ -146,7 +151,7 @@ if (trendDataEl) {
       btn.addEventListener('click', () => {
         document.getElementById('duration-range')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        currentRange = Number(btn.dataset.range);
+        currentRange = btn.dataset.range ?? '30d';
         const data = filterTrend(currentRange);
         if (trendChart) {
           const updated = buildTrendDatasets(data);

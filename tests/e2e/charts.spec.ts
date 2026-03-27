@@ -121,11 +121,12 @@ test.describe('Overall tab', () => {
 
   test('countme-trend-data has valid JSON and lowercase distro keys', async ({ page }) => {
     const data = await getScriptJSON(page, 'countme-trend-data') as Record<string, unknown>;
-    expect(Array.isArray(data.sorted), 'countme-trend-data.sorted must be an array').toBe(true);
+    const monthly = data.monthly as Array<Record<string, unknown>>;
+    expect(Array.isArray(monthly), 'countme-trend-data.monthly must be an array').toBe(true);
 
     // REGRESSION GUARD: distros must use lowercase keys (bazzite vs Bazzite case bug)
     // We check that the key exists even if the value is zero/undefined (structure check)
-    const week = (data.sorted as Array<Record<string, unknown>>)[0];
+    const week = monthly[0];
     if (week) {
       const distros = week.distros as Record<string, number>;
       expect(distros, 'week.distros must exist').toBeDefined();
@@ -140,13 +141,15 @@ test.describe('Overall tab', () => {
     expect(cw, 'ecosystem-pie-data.currentWeek must be defined (can be empty structure)').toBeDefined();
   });
 
-  test('fedora-version-data has valid JSON with title-case osVersionDist keys', async ({ page }) => {
-    const data = await getScriptJSON(page, 'fedora-version-data') as Record<string, unknown>;
-    const ovd = data.osVersionDist as Record<string, unknown>;
-    expect(typeof ovd, 'fedora-version-data.osVersionDist must be an object').toBe('object');
-    // REGRESSION GUARD: osVersionDist uses title-case keys (different contract from distros lowercase)
-    expect(ovd.Bazzite, '"Bazzite" key must exist in osVersionDist (title-case contract)').toBeTruthy();
-    expect(ovd.Bluefin, '"Bluefin" key must exist in osVersionDist').toBeTruthy();
+  test('countme-trend-data has monthly aggregation payload', async ({ page }) => {
+    const data = await getScriptJSON(page, 'countme-trend-data') as Record<string, unknown>;
+    const monthly = data.monthly as Array<Record<string, unknown>>;
+    expect(Array.isArray(monthly), 'countme-trend-data.monthly must be an array').toBe(true);
+
+    if (monthly.length > 0) {
+      expect(typeof monthly[0].week_end, 'monthly entry must expose week_end').toBe('string');
+      expect(typeof monthly[0].distros, 'monthly entry must expose distros object').toBe('object');
+    }
   });
 
   test('CountmeTrendChart canvas is rendered by Chart.js', async ({ page }) => {
@@ -155,10 +158,6 @@ test.describe('Overall tab', () => {
 
   test('EcosystemPieChart canvas is rendered by Chart.js', async ({ page }) => {
     await expectCanvasRendered(page, 'ecosystem-pie-chart');
-  });
-
-  test('FedoraVersionChart canvas is rendered by Chart.js', async ({ page }) => {
-    await expectCanvasRendered(page, 'fedora-version-chart');
   });
 
   test('Bazzite individual trend chart canvas is rendered by Chart.js', async ({ page }) => {
@@ -261,17 +260,6 @@ test.describe('OsSection interactive controls', () => {
     await expect(logBtn).toHaveClass(/active/);
     await expect(linearBtn).not.toHaveClass(/active/);
     await expectCanvasRendered(page, 'os-bar-chart');
-  });
-});
-
-test.describe('FedoraVersionChart log scale toggle', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/overall/');
-  });
-
-  test.fixme('Log scale toggle switches active button and keeps canvas rendered', async (_page) => {
-    // TODO: #fedora-scale-btns was removed when FedoraVersionChart was replaced
-    // with a 100% stacked adoption view. Needs rewrite to match new component.
   });
 });
 

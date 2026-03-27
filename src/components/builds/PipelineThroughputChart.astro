@@ -21,8 +21,8 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
     canvasId="throughput-builds-day"
     height={220}
     rangeId="throughput-range"
-    ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }]}
-    defaultRange="30"
+    ranges={[{ label: '30d', value: '30d' }, { label: '90d', value: '90d' }, { label: '365d', value: '365d' }]}
+    defaultRange="30d"
     isEmpty={!hasHistory}
     emptyMsg="Collecting data…"
   />
@@ -42,8 +42,8 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
     canvasId="throughput-queue"
     height={220}
     rangeId="queue-range"
-    ranges={[{ label: '7d', value: '7' }, { label: '30d', value: '30' }]}
-    defaultRange="7"
+    ranges={[{ label: '30d', value: '30d' }, { label: '90d', value: '90d' }, { label: '365d', value: '365d' }]}
+    defaultRange="30d"
     isEmpty={!hasHistory}
     emptyMsg="Collecting data…"
   />
@@ -87,6 +87,10 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
   }
 
   const colors = getChartColors();
+
+  function rangeToDays(range: string): number {
+    return Number.parseInt(range, 10);
+  }
 
   // ── Chart A: Builds Per Day ────────────────────────────────────────────────
   const buildsDayCanvas = document.getElementById('throughput-builds-day') as HTMLCanvasElement | null;
@@ -162,7 +166,7 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
     document.querySelectorAll('#throughput-range [data-range]').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!buildsChart) return;
-        const days = parseInt((btn as HTMLElement).dataset.range ?? '30', 10);
+        const days = rangeToDays((btn as HTMLElement).dataset.range ?? '30d');
         document.querySelectorAll('#throughput-range [data-range]').forEach(b => b.classList.remove('active'));
         (btn as HTMLElement).classList.add('active');
         const slice = sliceHistory(days);
@@ -235,7 +239,7 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
 
   if (queueCanvas && history.length > 0) {
     try {
-      const initial = buildQueueDataset(sliceHistory(7));
+      const initial = buildQueueDataset(sliceHistory(30));
       queueChart = new Chart(queueCanvas, {
         type: 'line',
         data: {
@@ -281,7 +285,7 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
     document.querySelectorAll('#queue-range [data-range]').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!queueChart) return;
-        const days = parseInt((btn as HTMLElement).dataset.range ?? '7', 10);
+        const days = rangeToDays((btn as HTMLElement).dataset.range ?? '30d');
         document.querySelectorAll('#queue-range [data-range]').forEach(b => b.classList.remove('active'));
         (btn as HTMLElement).classList.add('active');
         const { labels, data } = buildQueueDataset(sliceHistory(days));

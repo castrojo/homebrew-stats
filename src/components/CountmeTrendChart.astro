@@ -2,6 +2,7 @@
 import ChartCard from './ChartCard.astro';
 import { safeJson } from '../lib/inject.ts';
 import type { WeekRecord } from '../lib/types.ts';
+import { aggregateWeekRecordsToMonthEnd } from '../lib/countme.ts';
 
 interface Props {
   weekRecords: WeekRecord[];
@@ -11,22 +12,22 @@ const { weekRecords } = Astro.props;
 const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
 const LABELS  = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
 
-const sorted = [...weekRecords].sort((a, b) => a.week_start.localeCompare(b.week_start));
+const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
 ---
 
 {weekRecords.length === 0 ? (
-  <ChartCard title="Active Devices per Week" canvasId="countme-trend-chart" isEmpty emptyMsg="Collecting data…" />
+  <ChartCard title="Active Devices per Month" canvasId="countme-trend-chart" isEmpty emptyMsg="Collecting data..." />
 ) : (
   <>
     <ChartCard
-      title="Active Devices per Week"
+      title="Active Devices per Month"
       canvasId="countme-trend-chart"
       height={300}
       rangeId="countme-range-btns"
-      ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+      ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
       defaultRange="30"
     />
-    <script type="application/json" id="countme-trend-data" set:html={safeJson({ sorted, DISTROS, LABELS })}></script>
+    <script type="application/json" id="countme-trend-data" set:html={safeJson({ monthly, DISTROS, LABELS })}></script>
   </>
 )}
 
@@ -37,16 +38,16 @@ import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('countme-trend-data');
 if (dataEl) {
-  const { sorted, DISTROS, LABELS } = JSON.parse(dataEl.textContent!);
+  const { monthly, DISTROS, LABELS } = JSON.parse(dataEl.textContent!);
   const canvas = document.getElementById('countme-trend-chart') as HTMLCanvasElement;
 
   function getFiltered(range: string) {
-    if (range === 'all') return sorted;
+    if (range === 'all') return monthly;
     const days = Number(range);
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
-    return sorted.filter((r: { week_start: string }) => r.week_start >= cutoffStr);
+    return monthly.filter((r: { week_end: string }) => r.week_end >= cutoffStr);
   }
 
   function buildDatasets(data: { distros: Record<string, number> }[]) {
@@ -69,7 +70,7 @@ if (dataEl) {
     chart = new Chart(canvas, {
       type: 'line',
       data: {
-        labels: filtered.map((r: { week_start: string }) => r.week_start),
+        labels: filtered.map((r: { week_end: string }) => r.week_end),
         datasets: buildDatasets(filtered),
       },
       options: {
@@ -101,7 +102,7 @@ if (dataEl) {
       btn.classList.add('active');
       currentRange = btn.dataset.range!;
       const data = getFiltered(currentRange);
-      chart.data.labels = data.map((r: { week_start: string }) => r.week_start);
+      chart.data.labels = data.map((r: { week_end: string }) => r.week_end);
       chart.data.datasets = buildDatasets(data);
       chart.update();
     });

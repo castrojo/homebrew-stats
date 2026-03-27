@@ -25,11 +25,11 @@ const isEmpty = history.length === 0;
     height={220}
     rangeId="outcomes-range"
     ranges={[
-      { label: '7d',  value: '7'  },
-      { label: '30d', value: '30' },
-      { label: '90d', value: '90' },
+      { label: '30d', value: '30d' },
+      { label: '90d', value: '90d' },
+      { label: '365d', value: '365d' },
     ]}
-    defaultRange="30"
+    defaultRange="30d"
     isEmpty={isEmpty}
     emptyMsg="Collecting build history…"
   />
@@ -57,7 +57,12 @@ if (!dataEl) {
   const CANCELLED = BRAND_COLOURS[3]; // yellow
   const GOAL      = BRAND_COLOURS[0]; // blue (95% goal line)
 
-  function filterByRange(days: number): BuildDailySnapshot[] {
+  function rangeToDays(range: string): number {
+    return Number.parseInt(range, 10);
+  }
+
+  function filterByRange(range: string): BuildDailySnapshot[] {
+    const days = rangeToDays(range);
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
@@ -75,7 +80,7 @@ if (!dataEl) {
     });
   }
 
-  let currentRange = 30;
+  let currentRange = '30d';
   let successChart: Chart | undefined;
   let outcomesChart: Chart | undefined;
 
@@ -222,7 +227,7 @@ if (!dataEl) {
     }
   }
 
-  function updateCharts(range: number) {
+  function updateCharts(range: string) {
     const data = filterByRange(range);
     if (successChart) {
       const updated = buildSuccessDatasets(data);
@@ -245,7 +250,7 @@ if (!dataEl) {
     btn.addEventListener('click', () => {
       document.getElementById('outcomes-range')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      currentRange = Number(btn.dataset.range);
+      currentRange = btn.dataset.range ?? '30d';
       updateCharts(currentRange);
     });
   });

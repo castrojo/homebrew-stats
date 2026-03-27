@@ -2,6 +2,7 @@
 import ChartCard from './ChartCard.astro';
 import { safeJson } from '../lib/inject.ts';
 import type { WeekRecord } from '../lib/types.ts';
+import { aggregateWeekRecordsToMonthEnd } from '../lib/countme.ts';
 
 interface Props {
   /** Lowercase distro key matching the distros record (e.g. 'bazzite'). */
@@ -19,7 +20,7 @@ const canvasId = `${distroKey}-trend-chart`;
 const rangeId  = `${distroKey}-range-btns`;
 const dataId   = `${distroKey}-trend-data`;
 
-const sorted = [...weekRecords].sort((a, b) => a.week_start.localeCompare(b.week_start));
+const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
 ---
 
 {weekRecords.length === 0 ? (
@@ -31,10 +32,10 @@ const sorted = [...weekRecords].sort((a, b) => a.week_start.localeCompare(b.week
       canvasId={canvasId}
       height={200}
       rangeId={rangeId}
-      ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: 'All', value: 'all' }]}
+      ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
       defaultRange="30"
     />
-    <script type="application/json" id={dataId} data-distro-chart set:html={safeJson({ sorted, distroKey, distroLabel, colorIndex })}></script>
+    <script type="application/json" id={dataId} data-distro-chart set:html={safeJson({ monthly, distroKey, distroLabel, colorIndex })}></script>
   </>
 )}
 
@@ -45,17 +46,17 @@ import { Chart } from 'chart.js';
 
 // Astro deduplicates this script — handle all instances via querySelectorAll.
 document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEach(dataEl => {
-  const { sorted, distroKey, distroLabel, colorIndex } = JSON.parse(dataEl.textContent!);
+  const { monthly, distroKey, distroLabel, colorIndex } = JSON.parse(dataEl.textContent!);
   const canvas = document.getElementById(`${distroKey}-trend-chart`) as HTMLCanvasElement | null;
   if (!canvas) return;
 
   function getFiltered(range: string) {
-    if (range === 'all') return sorted;
+    if (range === 'all') return monthly;
     const days = Number(range);
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
-    return sorted.filter((r: { week_start: string }) => r.week_start >= cutoffStr);
+    return monthly.filter((r: { week_end: string }) => r.week_end >= cutoffStr);
   }
 
   let currentRange = '30';
@@ -67,8 +68,8 @@ document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEac
   try {
     chart = new Chart(canvas, {
       type: 'line',
-      data: {
-        labels: filtered.map((r: { week_start: string }) => r.week_start),
+        data: {
+        labels: filtered.map((r: { week_end: string }) => r.week_end),
         datasets: [{
           label: distroLabel,
           data: filtered.map((r: { distros: Record<string, number> }) => r.distros[distroKey] ?? 0),
@@ -108,7 +109,7 @@ document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEac
       btn.classList.add('active');
       currentRange = btn.dataset.range!;
       const data = getFiltered(currentRange);
-      chart.data.labels = data.map((r: { week_start: string }) => r.week_start);
+      chart.data.labels = data.map((r: { week_end: string }) => r.week_end);
       chart.data.datasets[0].data = data.map((r: { distros: Record<string, number> }) => r.distros[distroKey] ?? 0);
       chart.update();
     });

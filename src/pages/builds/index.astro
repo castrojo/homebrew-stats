@@ -11,7 +11,6 @@ import FailureAnalysisChart from '../../components/builds/FailureAnalysisChart.a
 import FlakinessLeaderboard from '../../components/builds/FlakinessLeaderboard.astro';
 import PipelineThroughputChart from '../../components/builds/PipelineThroughputChart.astro';
 import BuilderComparison from '../../components/builds/BuilderComparison.astro';
-import MatrixCoverageChart from '../../components/builds/MatrixCoverageChart.astro';
 import PublishReliabilityChart from '../../components/builds/PublishReliabilityChart.astro';
 import RecentBuildsFeed from '../../components/builds/RecentBuildsFeed.astro';
 
@@ -54,7 +53,6 @@ const isBootstrap = builds.summary.health_status === 'unknown';
 
       <!-- Section 5: Cross-builder view -->
       <BuilderComparison repos={builds.repos} />
-      <MatrixCoverageChart repos={builds.repos} history={builds.history} />
       <PublishReliabilityChart repos={builds.repos} />
 
       <!-- Section 6: Recent builds feed -->

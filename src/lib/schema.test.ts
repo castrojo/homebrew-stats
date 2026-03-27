@@ -423,6 +423,11 @@ describe("src/data/contributors.json schema", () => {
       expect(typeof c.commits_365d, `${c.login}: commits_365d must be a number`).toBe("number");
       expect(c.commits_60d as number, `commits_60d >= commits_30d`).toBeGreaterThanOrEqual(c.commits_30d as number);
       expect(c.commits_365d as number, `commits_365d >= commits_60d`).toBeGreaterThanOrEqual(c.commits_60d as number);
+      if (c.commits_90d !== undefined) {
+        expect(typeof c.commits_90d, `${c.login}: commits_90d must be a number when present`).toBe("number");
+        expect(c.commits_90d as number, `commits_90d >= commits_30d`).toBeGreaterThanOrEqual(c.commits_30d as number);
+        expect(c.commits_365d as number, `commits_365d >= commits_90d`).toBeGreaterThanOrEqual(c.commits_90d as number);
+      }
     }
   });
 
@@ -433,6 +438,9 @@ describe("src/data/contributors.json schema", () => {
     for (const c of contribs.slice(0, 3)) {
       expect(typeof c.prs_merged_60d, `${c.login}: prs_merged_60d must be a number`).toBe("number");
       expect(typeof c.prs_merged_365d, `${c.login}: prs_merged_365d must be a number`).toBe("number");
+      if (c.prs_merged_90d !== undefined) {
+        expect(typeof c.prs_merged_90d, `${c.login}: prs_merged_90d must be a number when present`).toBe("number");
+      }
     }
   });
 
@@ -445,6 +453,11 @@ describe("src/data/contributors.json schema", () => {
     expect(typeof r.commits_365d, `repos[0].commits_365d must be a number`).toBe("number");
     expect(r.commits_60d as number).toBeGreaterThanOrEqual(0);
     expect(r.commits_365d as number).toBeGreaterThanOrEqual(r.commits_60d as number);
+    if (r.commits_90d !== undefined) {
+      expect(typeof r.commits_90d, `repos[0].commits_90d must be a number when present`).toBe("number");
+      expect(r.commits_90d as number).toBeGreaterThanOrEqual(r.commits_30d as number);
+      expect(r.commits_365d as number).toBeGreaterThanOrEqual(r.commits_90d as number);
+    }
   });
 
   it("repos have _60d and _365d bus_factor fields", () => {
@@ -456,6 +469,10 @@ describe("src/data/contributors.json schema", () => {
       expect(typeof r.bus_factor_365d, `${r.name}: bus_factor_365d must be a number`).toBe("number");
       expect(r.bus_factor_60d as number).toBeGreaterThanOrEqual(1);
       expect(r.bus_factor_365d as number).toBeGreaterThanOrEqual(1);
+      if (r.bus_factor_90d !== undefined) {
+        expect(typeof r.bus_factor_90d, `${r.name}: bus_factor_90d must be a number when present`).toBe("number");
+        expect(r.bus_factor_90d as number).toBeGreaterThanOrEqual(1);
+      }
     }
   });
 
@@ -472,6 +489,25 @@ describe("src/data/contributors.json schema", () => {
     expect(s.total_commits_365d as number).toBeGreaterThanOrEqual(s.total_commits_60d as number);
     expect(s.total_prs_merged_60d as number).toBeGreaterThanOrEqual(s.total_prs_merged as number);
     expect(s.total_prs_merged_365d as number).toBeGreaterThanOrEqual(s.total_prs_merged_60d as number);
+    if (s.total_commits_90d !== undefined) {
+      expect(typeof s.total_commits_90d, `summary.total_commits_90d must be a number when present`).toBe("number");
+      expect(s.total_commits_90d as number).toBeGreaterThanOrEqual(s.total_commits as number);
+      expect(s.total_commits_365d as number).toBeGreaterThanOrEqual(s.total_commits_90d as number);
+    }
+    if (s.total_prs_merged_90d !== undefined) {
+      expect(typeof s.total_prs_merged_90d, `summary.total_prs_merged_90d must be a number when present`).toBe("number");
+      expect(s.total_prs_merged_90d as number).toBeGreaterThanOrEqual(s.total_prs_merged as number);
+      expect(s.total_prs_merged_365d as number).toBeGreaterThanOrEqual(s.total_prs_merged_90d as number);
+    }
+    if (s.active_contributors_90d !== undefined) {
+      expect(typeof s.active_contributors_90d, `summary.active_contributors_90d must be a number when present`).toBe("number");
+      expect(s.active_contributors_90d as number).toBeGreaterThanOrEqual(s.active_contributors as number);
+      expect(s.active_contributors_365d as number).toBeGreaterThanOrEqual(s.active_contributors_90d as number);
+    }
+    if (s.bus_factor_90d !== undefined) {
+      expect(typeof s.bus_factor_90d, `summary.bus_factor_90d must be a number when present`).toBe("number");
+      expect(s.bus_factor_90d as number).toBeGreaterThanOrEqual(1);
+    }
   });
 
   it("discussions_summary has _60d and _365d fields", () => {
@@ -485,6 +521,21 @@ describe("src/data/contributors.json schema", () => {
     // monotonic: 365d >= 60d >= 30d
     expect(ds.total_discussions_60d as number).toBeGreaterThanOrEqual(ds.total_discussions_30d as number);
     expect(ds.total_discussions_365d as number).toBeGreaterThanOrEqual(ds.total_discussions_60d as number);
+    if (ds.total_discussions_90d !== undefined) {
+      expect(typeof ds.total_discussions_90d).toBe("number");
+      expect(ds.total_discussions_90d as number).toBeGreaterThanOrEqual(ds.total_discussions_30d as number);
+      expect(ds.total_discussions_365d as number).toBeGreaterThanOrEqual(ds.total_discussions_90d as number);
+    }
+    if (ds.total_discussion_comments_90d !== undefined) {
+      expect(typeof ds.total_discussion_comments_90d).toBe("number");
+      expect(ds.total_discussion_comments_90d as number).toBeGreaterThanOrEqual(ds.total_discussion_comments_30d as number);
+      expect(ds.total_discussion_comments_365d as number).toBeGreaterThanOrEqual(ds.total_discussion_comments_90d as number);
+    }
+    if (ds.unique_discussion_authors_90d !== undefined) {
+      expect(typeof ds.unique_discussion_authors_90d).toBe("number");
+      expect(ds.unique_discussion_authors_90d as number).toBeGreaterThanOrEqual(ds.unique_discussion_authors_30d as number);
+      expect(ds.unique_discussion_authors_365d as number).toBeGreaterThanOrEqual(ds.unique_discussion_authors_90d as number);
+    }
   });
 });
 
@@ -550,4 +601,3 @@ describe('builds.json schema', () => {
     expect(typeof t.other).toBe('number');
   });
 });
-
