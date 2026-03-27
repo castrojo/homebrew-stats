@@ -8,6 +8,34 @@ For generic Go, Astro, or Chart.js patterns → their upstream docs. For homebre
 
 ---
 
+## Project Decisions (Build Pages)
+
+Use these decisions as defaults for future agents unless superseded by a newer issue.
+
+- Builds navigation/page model:
+  - Existing `Builds` UX maps to **Bluefin**.
+  - Add dedicated **Aurora** and **Bazzite** build pages instead of combining all images into one page.
+- Data pipeline model:
+  - Maintain separate build data outputs/history per image to avoid cross-image coupling and cache interference.
+  - Do not aggregate mirrored sources that can duplicate runs.
+- Aurora source mapping (confirmed):
+  - Include `ublue-os/aurora` (image repo), `get-aurora-dev/common`, `get-aurora-dev/iso`.
+  - Exclude `get-aurora-dev/aurora-test` to reduce duplicate mirrored-run risk.
+- Bazzite source mapping (current):
+  - Start with `ublue-os/bazzite`.
+  - Add Bazzite-org infrastructure repos only after explicit repo/workflow confirmation.
+- Terminology:
+  - In UI copy, refer to Aurora/Bazzite/Bluefin as **images**, not distros.
+- Issue closure in this repo:
+  - Follow `~/src/skills/github-issues/SKILL.md` closure protocol before closing any issue.
+  - Do not use "implemented in working tree" as closure evidence.
+
+Tracking issues for this plan:
+- Epic: `https://github.com/castrojo/homebrew-stats/issues/30`
+- Tasks: `https://github.com/castrojo/homebrew-stats/issues/31` to `https://github.com/castrojo/homebrew-stats/issues/36`
+
+---
+
 ## Repository Layout
 
 ```
