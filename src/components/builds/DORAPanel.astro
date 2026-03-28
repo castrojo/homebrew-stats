@@ -57,6 +57,9 @@ const mttrLvl     = mttrLevel(dora.mttr_minutes);
 ---
 
 <section class="dora-panel">
+  <div class="dora-heading">
+    <a href="https://dora.dev/research/" target="_blank" rel="noopener" class="dora-heading-link">DORA Metrics</a>
+  </div>
   <div class="dora-grid">
 
     <!-- Deployment Frequency -->
@@ -107,6 +110,23 @@ const mttrLvl     = mttrLevel(dora.mttr_minutes);
 </section>
 
 <style>
+  .dora-heading {
+    margin-bottom: 0.75rem;
+  }
+
+  .dora-heading-link {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--link);
+    text-decoration: underline;
+  }
+
+  .dora-heading-link:hover {
+    opacity: 0.8;
+  }
+
   .dora-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

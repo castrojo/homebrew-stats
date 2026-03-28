@@ -1,0 +1,307 @@
+---
+// No props — static reference content
+---
+
+<section class="references">
+  <h2 class="references-heading">Further Reading</h2>
+  <p class="references-intro">
+    The metrics on this page are grounded in peer-reviewed research and open standards.
+    These resources explain what each metric means, why it predicts software delivery
+    performance, and how to improve it.
+  </p>
+
+  <div class="ref-grid">
+
+    <!-- DORA -->
+    <div class="ref-card">
+      <div class="ref-category">Software Delivery Performance</div>
+      <div class="ref-title">DORA Metrics — Four Keys</div>
+      <p class="ref-desc">
+        The canonical framework for measuring software delivery: Deployment Frequency,
+        Lead Time for Changes, Change Failure Rate, and Time to Restore Service.
+        Published by Google Cloud's DevOps Research and Assessment team and validated
+        across thousands of organizations since 2014.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://dora.dev/guides/dora-metrics-four-keys/" target="_blank" rel="noopener">DORA Metrics Guide</a></li>
+        <li><a href="https://dora.dev/research/" target="_blank" rel="noopener">Annual State of DevOps Reports</a></li>
+        <li><a href="https://dora.dev/quickcheck/" target="_blank" rel="noopener">DORA Quick Check — assess your team</a></li>
+        <li><a href="https://dora.dev/capabilities/" target="_blank" rel="noopener">DORA Capabilities Catalog — what drives each metric</a></li>
+      </ul>
+    </div>
+
+    <!-- OpenSSF Scorecard -->
+    <div class="ref-card">
+      <div class="ref-category">Supply Chain Security</div>
+      <div class="ref-title">OpenSSF Scorecard</div>
+      <p class="ref-desc">
+        Automated security health checks for open source projects, scoring 0–10 across
+        checks including signed releases, SBOM presence, branch protection, pinned
+        dependencies, and CI test coverage. Produced by the Open Source Security
+        Foundation (OpenSSF), a Linux Foundation project.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://securityscorecards.dev/" target="_blank" rel="noopener">OpenSSF Scorecard — project home</a></li>
+        <li><a href="https://github.com/ossf/scorecard/blob/main/docs/checks.md" target="_blank" rel="noopener">All checks explained</a></li>
+      </ul>
+    </div>
+
+    <!-- SLSA -->
+    <div class="ref-card">
+      <div class="ref-category">Supply Chain Security</div>
+      <div class="ref-title">SLSA — Supply-chain Levels for Software Artifacts</div>
+      <p class="ref-desc">
+        A graduated framework (L0–L3) for verifiable software build integrity. Each level
+        adds stronger guarantees: L1 means provenance exists, L2 means it is signed by a
+        hosted build platform, L3 means the build environment itself is hardened and
+        isolated. Developed by Google and adopted as an OpenSSF standard.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://slsa.dev/" target="_blank" rel="noopener">slsa.dev — project home</a></li>
+        <li><a href="https://slsa.dev/spec/v1.2/build-track-basics" target="_blank" rel="noopener">Build Track levels explained (v1.2)</a></li>
+      </ul>
+    </div>
+
+    <!-- Sigstore -->
+    <div class="ref-card">
+      <div class="ref-category">Supply Chain Security</div>
+      <div class="ref-title">Sigstore / Cosign</div>
+      <p class="ref-desc">
+        Keyless, identity-based artifact signing backed by a public transparency log
+        (Rekor). Cosign signs and verifies container images and release artifacts using
+        short-lived OIDC certificates — no long-lived private keys to manage or rotate.
+        A CNCF project used by Kubernetes, Tekton, and the Bluefin image pipeline.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://www.sigstore.dev/" target="_blank" rel="noopener">sigstore.dev — project home</a></li>
+        <li><a href="https://docs.sigstore.dev/cosign/signing/overview/" target="_blank" rel="noopener">Cosign signing overview</a></li>
+        <li><a href="https://docs.sigstore.dev/cosign/verifying/verify/" target="_blank" rel="noopener">Verifying signatures</a></li>
+      </ul>
+    </div>
+
+    <!-- SBOM -->
+    <div class="ref-card">
+      <div class="ref-category">Supply Chain Security</div>
+      <div class="ref-title">SBOM — Software Bill of Materials</div>
+      <p class="ref-desc">
+        A machine-readable inventory of every component and dependency in a software
+        artifact. SBOMs make vulnerability response faster — when a new CVE is published,
+        you can immediately know which of your images are affected. The OpenSSF SBOM
+        Everywhere SIG maintains tooling guidance and naming conventions.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://github.com/ossf/sbom-everywhere" target="_blank" rel="noopener">OpenSSF SBOM Everywhere SIG</a></li>
+        <li><a href="https://sbom-catalog.openssf.org/" target="_blank" rel="noopener">SBOM tooling catalog</a></li>
+        <li><a href="https://github.com/ossf/sbom-everywhere/blob/main/reference/sbom_naming.md" target="_blank" rel="noopener">SBOM naming conventions</a></li>
+      </ul>
+    </div>
+
+    <!-- TAG Security -->
+    <div class="ref-card">
+      <div class="ref-category">Supply Chain Security</div>
+      <div class="ref-title">CNCF TAG Security — Supply Chain Best Practices</div>
+      <p class="ref-desc">
+        The CNCF Technical Advisory Group for Security publishes authoritative whitepapers
+        on cloud-native supply chain security. The Software Supply Chain Best Practices
+        paper (v2, 2025) and the Secure Software Factory reference architecture define
+        the practices that the Scorecard and SLSA checks encode.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://tag-security.cncf.io/" target="_blank" rel="noopener">TAG Security home</a></li>
+        <li><a href="https://tag-security.cncf.io/community/working-groups/supply-chain-security/supply-chain-security-paper-v2/Software_Supply_Chain_Practices_whitepaper_v2.pdf" target="_blank" rel="noopener">Software Supply Chain Best Practices (v2, 2025)</a></li>
+        <li><a href="https://tag-security.cncf.io/community/working-groups/supply-chain-security/secure-software-factory/Secure_Software_Factory_Whitepaper.pdf" target="_blank" rel="noopener">Secure Software Factory Reference Architecture</a></li>
+      </ul>
+    </div>
+
+    <!-- CNCF Platforms White Paper -->
+    <div class="ref-card">
+      <div class="ref-category">Platform Engineering</div>
+      <div class="ref-title">CNCF Platforms White Paper</div>
+      <p class="ref-desc">
+        The authoritative CNCF definition of what internal developer platforms are, what
+        they should measure (user satisfaction, self-service rate, onboarding time), and
+        how platform teams should operate. Published by the TAG App Delivery Platforms
+        Working Group. Recommends DORA metrics as the delivery measurement standard for
+        platform teams.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://tag-app-delivery.cncf.io/whitepapers/platforms/" target="_blank" rel="noopener">CNCF Platforms White Paper</a></li>
+        <li><a href="https://tag-app-delivery.cncf.io/wgs/platforms/" target="_blank" rel="noopener">Platforms Working Group</a></li>
+      </ul>
+    </div>
+
+    <!-- Platform Engineering Maturity Model -->
+    <div class="ref-card">
+      <div class="ref-category">Platform Engineering</div>
+      <div class="ref-title">Platform Engineering Maturity Model</div>
+      <p class="ref-desc">
+        A 4-level model (Provisional → Operational → Scalable → Optimizing) across five
+        aspects: Investment, Adoption, Interfaces, Operations, and Measurement. Helps
+        platform teams understand where they are and what practices characterize the next
+        level. Published by the CNCF TAG App Delivery Platforms Working Group.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/" target="_blank" rel="noopener">Platform Engineering Maturity Model</a></li>
+      </ul>
+    </div>
+
+    <!-- Cloud Native Maturity Model -->
+    <div class="ref-card">
+      <div class="ref-category">Platform Engineering</div>
+      <div class="ref-title">Cloud Native Maturity Model</div>
+      <p class="ref-desc">
+        A 5-level model (Build → Operate → Scale → Improve → Adapt) across Business
+        Outcomes, People, Process, Policy, and Technology. Maintained by the CNCF
+        Cartografos Working Group. Version 4 (2025) adds AI and FinOps dimensions.
+        Useful for understanding where cloud-native adoption fits in the broader
+        organizational journey.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://maturitymodel.cncf.io/" target="_blank" rel="noopener">Cloud Native Maturity Model</a></li>
+        <li><a href="https://github.com/cncf/cartografos" target="_blank" rel="noopener">Cartografos Working Group (GitHub)</a></li>
+      </ul>
+    </div>
+
+    <!-- Accelerate -->
+    <div class="ref-card">
+      <div class="ref-category">Research</div>
+      <div class="ref-title">Accelerate — The Science of Lean Software and DevOps</div>
+      <p class="ref-desc">
+        The peer-reviewed research behind DORA metrics. Nicole Forsgren, Jez Humble, and
+        Gene Kim identified 24 technical, process, and cultural capabilities that predict
+        software delivery performance and organizational outcomes. Required reading for
+        understanding <em>why</em> deployment frequency and lead time matter.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://dora.dev/research/" target="_blank" rel="noopener">DORA research archive (all annual reports)</a></li>
+      </ul>
+    </div>
+
+    <!-- SRE Golden Signals -->
+    <div class="ref-card">
+      <div class="ref-category">Research</div>
+      <div class="ref-title">SRE Golden Signals</div>
+      <p class="ref-desc">
+        Google's Site Reliability Engineering book defines four signals sufficient to
+        monitor any user-facing service: Latency, Traffic, Errors, and Saturation. These
+        are the production observability complement to DORA — they define what a "failure"
+        actually is (without them, Change Failure Rate cannot be accurately measured) and
+        predict when MTTR will spike before incidents occur.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://sre.google/sre-book/monitoring-distributed-systems/" target="_blank" rel="noopener">Google SRE Book — Chapter 6: Monitoring Distributed Systems</a></li>
+      </ul>
+    </div>
+
+    <!-- SPACE -->
+    <div class="ref-card">
+      <div class="ref-category">Research</div>
+      <div class="ref-title">SPACE Framework — Developer Productivity</div>
+      <p class="ref-desc">
+        DORA measures what the pipeline does; SPACE measures how developers experience it.
+        Developed by Nicole Forsgren (GitHub), Margaret-Anne Storey, and colleagues at
+        Microsoft Research. Five dimensions: Satisfaction, Performance, Activity,
+        Communication/Collaboration, and Efficiency. Never measure activity in isolation.
+      </p>
+      <ul class="ref-links">
+        <li><a href="https://queue.acm.org/detail.cfm?id=3454124" target="_blank" rel="noopener">ACM Queue — The SPACE of Developer Productivity (2021)</a></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .references {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .references-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    /* override Layout.astro h2 styles */
+    border-bottom: none !important;
+    border-left: none !important;
+    padding-left: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .references-intro {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    max-width: 72ch;
+    line-height: 1.6;
+  }
+
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .ref-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+
+  .ref-category {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--blue);
+    margin-bottom: 4px;
+  }
+
+  .ref-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .ref-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .ref-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ref-links a {
+    font-size: 12px;
+    color: var(--link);
+    text-decoration: none;
+  }
+
+  .ref-links a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 900px) {
+    .ref-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ref-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

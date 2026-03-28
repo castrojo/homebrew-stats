@@ -1,38 +1,222 @@
 {
-  "generated_at": "2026-01-01T00:00:00Z",
-  "repos": [],
+  "generated_at": "2026-03-01T00:00:00Z",
+  "repos": [
+    {
+      "repo": "ublue-os/bluefin",
+      "success_rate_7d": 92.3,
+      "success_rate_30d": 90.1,
+      "total_runs_7d": 61,
+      "total_runs_30d": 248,
+      "avg_duration_min": 33.2,
+      "streams": [
+        { "name": "stable", "success_rate_7d": 94.1, "success_rate_30d": 92.0, "total_runs_7d": 22, "avg_duration_min": 31.4, "last_run_at": "2026-02-28T18:12:00Z", "last_conclusion": "success" },
+        { "name": "latest", "success_rate_7d": 91.3, "success_rate_30d": 88.9, "total_runs_7d": 21, "avg_duration_min": 34.7, "last_run_at": "2026-02-28T17:55:00Z", "last_conclusion": "success" },
+        { "name": "gts",    "success_rate_7d": 88.9, "success_rate_30d": 87.2, "total_runs_7d": 18, "avg_duration_min": 35.1, "last_run_at": "2026-02-27T22:10:00Z", "last_conclusion": "failure" }
+      ],
+      "architectures": [
+        { "platform": "linux/amd64", "success_rate_7d": 93.1, "avg_duration_min": 31.8, "total_jobs_7d": 44 },
+        { "platform": "linux/arm64", "success_rate_7d": 88.6, "avg_duration_min": 38.2, "total_jobs_7d": 17 }
+      ]
+    },
+    {
+      "repo": "ublue-os/bluefin-lts",
+      "success_rate_7d": 89.4,
+      "success_rate_30d": 87.6,
+      "total_runs_7d": 47,
+      "total_runs_30d": 194,
+      "avg_duration_min": 36.1,
+      "streams": [
+        { "name": "stable", "success_rate_7d": 91.7, "success_rate_30d": 90.2, "total_runs_7d": 24, "avg_duration_min": 34.9, "last_run_at": "2026-02-28T16:40:00Z", "last_conclusion": "success" },
+        { "name": "gts",    "success_rate_7d": 86.4, "success_rate_30d": 84.5, "total_runs_7d": 23, "avg_duration_min": 37.4, "last_run_at": "2026-02-28T15:22:00Z", "last_conclusion": "success" }
+      ],
+      "architectures": [
+        { "platform": "linux/amd64", "success_rate_7d": 91.2, "avg_duration_min": 34.6, "total_jobs_7d": 36 },
+        { "platform": "linux/arm64", "success_rate_7d": 84.6, "avg_duration_min": 40.1, "total_jobs_7d": 11 }
+      ]
+    },
+    {
+      "repo": "ublue-os/aurora",
+      "success_rate_7d": 90.0,
+      "success_rate_30d": 88.3,
+      "total_runs_7d": 40,
+      "total_runs_30d": 170,
+      "avg_duration_min": 29.8,
+      "streams": [
+        { "name": "stable", "success_rate_7d": 92.0, "success_rate_30d": 90.5, "total_runs_7d": 20, "avg_duration_min": 28.3, "last_run_at": "2026-02-28T19:01:00Z", "last_conclusion": "success" },
+        { "name": "latest", "success_rate_7d": 87.5, "success_rate_30d": 85.8, "total_runs_7d": 20, "avg_duration_min": 31.4, "last_run_at": "2026-02-28T18:44:00Z", "last_conclusion": "success" }
+      ],
+      "architectures": [
+        { "platform": "linux/amd64", "success_rate_7d": 91.3, "avg_duration_min": 28.7, "total_jobs_7d": 32 },
+        { "platform": "linux/arm64", "success_rate_7d": 85.0, "avg_duration_min": 33.2, "total_jobs_7d": 8 }
+      ]
+    }
+  ],
   "summary": {
-    "overall_success_rate_7d": 0,
-    "overall_success_rate_30d": 0,
-    "total_builds_7d": 0,
-    "total_builds_30d": 0,
-    "avg_duration_min": 0,
-    "p50_duration_min": 0,
-    "p95_duration_min": 0,
-    "p99_duration_min": 0,
-    "avg_queue_time_sec": 0,
-    "active_streams": 0,
-    "health_status": "unknown"
+    "overall_success_rate_7d": 91.2,
+    "overall_success_rate_30d": 89.7,
+    "total_builds_7d": 148,
+    "total_builds_30d": 612,
+    "avg_duration_min": 31.4,
+    "p50_duration_min": 28.9,
+    "p95_duration_min": 52.1,
+    "p99_duration_min": 67.3,
+    "avg_queue_time_sec": 42,
+    "active_streams": 6,
+    "health_status": "healthy"
   },
   "dora_metrics": {
-    "deployment_frequency": "unknown",
-    "deploy_freq_per_week": 0,
-    "lead_time_minutes": 0,
-    "change_failure_rate_pct": 0,
-    "mttr_minutes": 0,
-    "mtbf_hours": 0,
-    "dora_level": "unknown"
+    "deployment_frequency": "daily",
+    "deploy_freq_per_week": 14.3,
+    "lead_time_minutes": 38.2,
+    "change_failure_rate_pct": 8.7,
+    "mttr_minutes": 42,
+    "mtbf_hours": 96,
+    "dora_level": "high"
   },
-  "top_flaky": [],
-  "recent_builds": [],
-  "duration_trend": [],
-  "failure_breakdown": [],
+  "top_flaky": [
+    { "repo": "ublue-os/bluefin", "job_name": "build-image / build (gts, arm64)", "total_runs": 38, "failures": 9, "failure_rate": 23.7, "flakiness_index": 0.71, "last_failure": "2026-02-27T22:10:00Z", "top_fail_step": "buildah build" },
+    { "repo": "ublue-os/bluefin-lts", "job_name": "build-image / build (gts, arm64)", "total_runs": 29, "failures": 6, "failure_rate": 20.7, "flakiness_index": 0.62, "last_failure": "2026-02-26T14:33:00Z", "top_fail_step": "cosign sign" },
+    { "repo": "ublue-os/aurora", "job_name": "build-image / build (latest, arm64)", "total_runs": 24, "failures": 4, "failure_rate": 16.7, "flakiness_index": 0.50, "last_failure": "2026-02-25T09:18:00Z", "top_fail_step": "skopeo copy" },
+    { "repo": "ublue-os/bluefin", "job_name": "build-image / build (latest, amd64)", "total_runs": 41, "failures": 5, "failure_rate": 12.2, "flakiness_index": 0.37, "last_failure": "2026-02-24T20:05:00Z", "top_fail_step": "rechunker" }
+  ],
+  "recent_builds": [
+    { "run_id": 14001, "repo": "ublue-os/bluefin",     "workflow": "build-image.yml", "branch": "main", "event": "schedule",          "conclusion": "success",   "duration_min": 34.2, "started_at": "2026-02-28T18:00:00Z", "html_url": "https://github.com/ublue-os/bluefin/actions/runs/14001",     "job_count": 6, "failed_jobs": 0 },
+    { "run_id": 14000, "repo": "ublue-os/aurora",      "workflow": "build-image.yml", "branch": "main", "event": "schedule",          "conclusion": "success",   "duration_min": 29.1, "started_at": "2026-02-28T17:45:00Z", "html_url": "https://github.com/ublue-os/aurora/actions/runs/14000",      "job_count": 4, "failed_jobs": 0 },
+    { "run_id": 13998, "repo": "ublue-os/bluefin-lts", "workflow": "build-image.yml", "branch": "main", "event": "schedule",          "conclusion": "success",   "duration_min": 37.8, "started_at": "2026-02-28T16:30:00Z", "html_url": "https://github.com/ublue-os/bluefin-lts/actions/runs/13998", "job_count": 4, "failed_jobs": 0 },
+    { "run_id": 13992, "repo": "ublue-os/bluefin",     "workflow": "build-image.yml", "branch": "main", "event": "push",              "conclusion": "failure",   "duration_min": 18.4, "started_at": "2026-02-27T22:05:00Z", "html_url": "https://github.com/ublue-os/bluefin/actions/runs/13992",     "job_count": 6, "failed_jobs": 1 },
+    { "run_id": 13990, "repo": "ublue-os/bluefin",     "workflow": "build-image.yml", "branch": "main", "event": "schedule",          "conclusion": "success",   "duration_min": 32.6, "started_at": "2026-02-27T18:00:00Z", "html_url": "https://github.com/ublue-os/bluefin/actions/runs/13990",     "job_count": 6, "failed_jobs": 0 },
+    { "run_id": 13985, "repo": "ublue-os/aurora",      "workflow": "build-image.yml", "branch": "main", "event": "workflow_dispatch",  "conclusion": "success",   "duration_min": 31.0, "started_at": "2026-02-27T14:20:00Z", "html_url": "https://github.com/ublue-os/aurora/actions/runs/13985",      "job_count": 4, "failed_jobs": 0 },
+    { "run_id": 13980, "repo": "ublue-os/bluefin-lts", "workflow": "build-image.yml", "branch": "main", "event": "schedule",          "conclusion": "cancelled", "duration_min": 8.2,  "started_at": "2026-02-26T18:00:00Z", "html_url": "https://github.com/ublue-os/bluefin-lts/actions/runs/13980", "job_count": 4, "failed_jobs": 0 },
+    { "run_id": 13975, "repo": "ublue-os/bluefin",     "workflow": "build-image.yml", "branch": "main", "event": "schedule",          "conclusion": "success",   "duration_min": 35.1, "started_at": "2026-02-26T18:00:00Z", "html_url": "https://github.com/ublue-os/bluefin/actions/runs/13975",     "job_count": 6, "failed_jobs": 0 }
+  ],
+  "duration_trend": [
+    { "date": "2026-02-22", "p50": 27.1, "p95": 49.3, "p99": 63.1, "avg": 29.4, "min": 14.2, "max": 71.8 },
+    { "date": "2026-02-23", "p50": 28.4, "p95": 51.2, "p99": 65.4, "avg": 30.7, "min": 15.1, "max": 73.2 },
+    { "date": "2026-02-24", "p50": 26.9, "p95": 48.7, "p99": 61.8, "avg": 28.9, "min": 13.8, "max": 69.5 },
+    { "date": "2026-02-25", "p50": 30.2, "p95": 54.1, "p99": 68.3, "avg": 32.6, "min": 16.4, "max": 77.1 },
+    { "date": "2026-02-26", "p50": 29.5, "p95": 52.8, "p99": 66.9, "avg": 31.4, "min": 15.7, "max": 74.6 },
+    { "date": "2026-02-27", "p50": 31.8, "p95": 55.4, "p99": 70.2, "avg": 33.8, "min": 17.1, "max": 79.3 },
+    { "date": "2026-02-28", "p50": 28.9, "p95": 52.1, "p99": 67.3, "avg": 31.4, "min": 14.9, "max": 75.0 }
+  ],
+  "failure_breakdown": [
+    { "category": "Build / OCI layer failure", "count": 18, "pct": 37.5 },
+    { "category": "cosign / signing timeout",  "count": 12, "pct": 25.0 },
+    { "category": "skopeo copy / push",        "count": 9,  "pct": 18.75 },
+    { "category": "rechunker OOM",             "count": 6,  "pct": 12.5 },
+    { "category": "Other",                     "count": 3,  "pct": 6.25 }
+  ],
   "trigger_breakdown": {
-    "scheduled": 0,
-    "push": 0,
-    "pull_request": 0,
-    "workflow_dispatch": 0,
-    "other": 0
+    "scheduled": 412,
+    "push": 98,
+    "pull_request": 61,
+    "workflow_dispatch": 34,
+    "other": 7
   },
-  "history": []
+  "history": [
+    { "date": "2026-02-22", "total_runs": 82,  "success_count": 74, "failure_count": 6,  "cancelled_count": 2, "avg_duration_min": 29.4, "p95_duration_min": 49.3, "avg_queue_time_sec": 38, "repo_breakdown": { "ublue-os/bluefin": { "runs": 36, "successes": 33, "failures": 3 }, "ublue-os/bluefin-lts": { "runs": 24, "successes": 21, "failures": 2 }, "ublue-os/aurora": { "runs": 22, "successes": 20, "failures": 1 } } },
+    { "date": "2026-02-23", "total_runs": 91,  "success_count": 81, "failure_count": 8,  "cancelled_count": 2, "avg_duration_min": 30.7, "p95_duration_min": 51.2, "avg_queue_time_sec": 41, "repo_breakdown": { "ublue-os/bluefin": { "runs": 40, "successes": 35, "failures": 4 }, "ublue-os/bluefin-lts": { "runs": 28, "successes": 25, "failures": 2 }, "ublue-os/aurora": { "runs": 23, "successes": 21, "failures": 2 } } },
+    { "date": "2026-02-24", "total_runs": 78,  "success_count": 71, "failure_count": 5,  "cancelled_count": 2, "avg_duration_min": 28.9, "p95_duration_min": 48.7, "avg_queue_time_sec": 36, "repo_breakdown": { "ublue-os/bluefin": { "runs": 34, "successes": 31, "failures": 2 }, "ublue-os/bluefin-lts": { "runs": 22, "successes": 20, "failures": 2 }, "ublue-os/aurora": { "runs": 22, "successes": 20, "failures": 1 } } },
+    { "date": "2026-02-25", "total_runs": 96,  "success_count": 84, "failure_count": 9,  "cancelled_count": 3, "avg_duration_min": 32.6, "p95_duration_min": 54.1, "avg_queue_time_sec": 47, "repo_breakdown": { "ublue-os/bluefin": { "runs": 42, "successes": 37, "failures": 4 }, "ublue-os/bluefin-lts": { "runs": 30, "successes": 26, "failures": 3 }, "ublue-os/aurora": { "runs": 24, "successes": 21, "failures": 2 } } },
+    { "date": "2026-02-26", "total_runs": 88,  "success_count": 79, "failure_count": 7,  "cancelled_count": 2, "avg_duration_min": 31.4, "p95_duration_min": 52.8, "avg_queue_time_sec": 43, "repo_breakdown": { "ublue-os/bluefin": { "runs": 38, "successes": 34, "failures": 3 }, "ublue-os/bluefin-lts": { "runs": 27, "successes": 24, "failures": 2 }, "ublue-os/aurora": { "runs": 23, "successes": 21, "failures": 2 } } },
+    { "date": "2026-02-27", "total_runs": 103, "success_count": 89, "failure_count": 11, "cancelled_count": 3, "avg_duration_min": 33.8, "p95_duration_min": 55.4, "avg_queue_time_sec": 52, "repo_breakdown": { "ublue-os/bluefin": { "runs": 45, "successes": 38, "failures": 5 }, "ublue-os/bluefin-lts": { "runs": 32, "successes": 28, "failures": 4 }, "ublue-os/aurora": { "runs": 26, "successes": 23, "failures": 2 } } },
+    { "date": "2026-02-28", "total_runs": 74,  "success_count": 68, "failure_count": 4,  "cancelled_count": 2, "avg_duration_min": 31.4, "p95_duration_min": 52.1, "avg_queue_time_sec": 42, "repo_breakdown": { "ublue-os/bluefin": { "runs": 32, "successes": 30, "failures": 1 }, "ublue-os/bluefin-lts": { "runs": 22, "successes": 20, "failures": 1 }, "ublue-os/aurora": { "runs": 20, "successes": 18, "failures": 2 } } }
+  ],
+  "monthly_history": [
+    {
+      "month": "2025-10",
+      "total_runs": 312,
+      "success_count": 278,
+      "failure_count": 29,
+      "cancelled_count": 5,
+      "success_rate": 89.1,
+      "avg_duration_min": 28.4,
+      "p95_duration_min": 47.2,
+      "repo_success_rate": {
+        "ublue-os/bluefin": 91.3,
+        "ublue-os/bluefin-lts": 86.7,
+        "ublue-os/aurora": 89.0
+      },
+      "dora_level": "medium"
+    },
+    {
+      "month": "2025-11",
+      "total_runs": 298,
+      "success_count": 271,
+      "failure_count": 22,
+      "cancelled_count": 5,
+      "success_rate": 90.9,
+      "avg_duration_min": 27.1,
+      "p95_duration_min": 44.8,
+      "repo_success_rate": {
+        "ublue-os/bluefin": 93.1,
+        "ublue-os/bluefin-lts": 88.2,
+        "ublue-os/aurora": 91.4
+      },
+      "dora_level": "medium"
+    },
+    {
+      "month": "2025-12",
+      "total_runs": 341,
+      "success_count": 295,
+      "failure_count": 38,
+      "cancelled_count": 8,
+      "success_rate": 86.5,
+      "avg_duration_min": 31.6,
+      "p95_duration_min": 52.1,
+      "repo_success_rate": {
+        "ublue-os/bluefin": 88.0,
+        "ublue-os/bluefin-lts": 83.4,
+        "ublue-os/aurora": 87.9
+      },
+      "dora_level": "medium"
+    },
+    {
+      "month": "2026-01",
+      "total_runs": 327,
+      "success_count": 308,
+      "failure_count": 15,
+      "cancelled_count": 4,
+      "success_rate": 94.2,
+      "avg_duration_min": 26.3,
+      "p95_duration_min": 41.7,
+      "repo_success_rate": {
+        "ublue-os/bluefin": 95.8,
+        "ublue-os/bluefin-lts": 92.4,
+        "ublue-os/aurora": 94.6
+      },
+      "dora_level": "high"
+    },
+    {
+      "month": "2026-02",
+      "total_runs": 304,
+      "success_count": 291,
+      "failure_count": 11,
+      "cancelled_count": 2,
+      "success_rate": 95.7,
+      "avg_duration_min": 25.8,
+      "p95_duration_min": 39.4,
+      "repo_success_rate": {
+        "ublue-os/bluefin": 97.2,
+        "ublue-os/bluefin-lts": 93.8,
+        "ublue-os/aurora": 96.1
+      },
+      "dora_level": "high"
+    },
+    {
+      "month": "2026-03",
+      "total_runs": 318,
+      "success_count": 310,
+      "failure_count": 7,
+      "cancelled_count": 1,
+      "success_rate": 97.5,
+      "avg_duration_min": 24.9,
+      "p95_duration_min": 37.8,
+      "repo_success_rate": {
+        "ublue-os/bluefin": 98.6,
+        "ublue-os/bluefin-lts": 96.2,
+        "ublue-os/aurora": 97.8
+      },
+      "dora_level": "elite"
+    }
+  ]
 }

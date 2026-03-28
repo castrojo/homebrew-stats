@@ -13,6 +13,7 @@ import PipelineThroughputChart from '../../components/builds/PipelineThroughputC
 import BuilderComparison from '../../components/builds/BuilderComparison.astro';
 import PublishReliabilityChart from '../../components/builds/PublishReliabilityChart.astro';
 import RecentBuildsFeed from '../../components/builds/RecentBuildsFeed.astro';
+import BuildsReferences from '../../components/builds/BuildsReferences.astro';
 import MonthlyKPIStrip from '../../components/builds/MonthlyKPIStrip.astro';
 import MonthlySuccessChart from '../../components/builds/MonthlySuccessChart.astro';
 import MonthlyDurationChart from '../../components/builds/MonthlyDurationChart.astro';
@@ -77,6 +78,9 @@ const isBootstrap = builds.summary.health_status === 'unknown';
 
       <!-- Section 6: Recent builds feed -->
       <RecentBuildsFeed builds={builds.recent_builds} />
+
+      <!-- Section 7: Further reading / references -->
+      <BuildsReferences />
     </>
   )}
 </Layout>

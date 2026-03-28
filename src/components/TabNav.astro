@@ -1,7 +1,7 @@
 ---
 interface Props { activeTab: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds'; }
 const { activeTab } = Astro.props;
-const base = import.meta.env.BASE_URL;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <nav class="tab-nav">
   <a href={`${base}/overall/`}       data-astro-prefetch class:list={['tab', { active: activeTab === 'overall'       }]}>🌐 Overall</a>
