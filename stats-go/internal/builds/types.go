@@ -41,6 +41,20 @@ type StepRecord struct {
 	DurationSec int    `json:"duration_sec"`
 }
 
+// MonthlySnapshot holds aggregated monthly history for trend charts.
+type MonthlySnapshot struct {
+	Month           string             `json:"month"` // "2025-01"
+	TotalRuns       int                `json:"total_runs"`
+	SuccessCount    int                `json:"success_count"`
+	FailureCount    int                `json:"failure_count"`
+	CancelledCount  int                `json:"cancelled_count"`
+	SuccessRate     float64            `json:"success_rate"` // 0.0–100.0
+	AvgDurationMin  float64            `json:"avg_duration_min"`
+	P95DurationMin  float64            `json:"p95_duration_min"`
+	RepoSuccessRate map[string]float64 `json:"repo_success_rate"`
+	DORALevel       string             `json:"dora_level"`
+}
+
 // BuildsOutput is the top-level JSON written to src/data/builds.json.
 type BuildsOutput struct {
 	GeneratedAt      string            `json:"generated_at"`
@@ -53,6 +67,7 @@ type BuildsOutput struct {
 	FailureBreakdown []FailureCategory `json:"failure_breakdown"`
 	TriggerBreakdown TriggerBreakdown  `json:"trigger_breakdown"`
 	History          []DailySnapshot   `json:"history"`
+	MonthlyHistory   []MonthlySnapshot `json:"monthly_history"`
 }
 
 // PipelineSummary holds top-level KPIs.
@@ -66,7 +81,7 @@ type PipelineSummary struct {
 	P95DurationMin        float64 `json:"p95_duration_min"`
 	P99DurationMin        float64 `json:"p99_duration_min"`
 	AvgQueueTimeSec       float64 `json:"avg_queue_time_sec"`
-	ActiveStreams          int     `json:"active_streams"`
+	ActiveStreams         int     `json:"active_streams"`
 	HealthStatus          string  `json:"health_status"`
 }
 

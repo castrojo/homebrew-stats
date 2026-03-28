@@ -1,0 +1,113 @@
+---
+import ChartCard from '../ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import type { BuildMonthlySnapshot } from '../../lib/types.ts';
+
+interface Props {
+  history: BuildMonthlySnapshot[];
+}
+
+const { history } = Astro.props;
+const isEmpty = history.length === 0;
+---
+
+<ChartCard
+  title="Monthly Build Duration"
+  canvasId="monthly-duration-chart"
+  height={260}
+  isEmpty={isEmpty}
+  emptyMsg="Collecting monthly duration data…"
+/>
+
+{!isEmpty && (
+  <script type="application/json" id="monthly-duration-data" set:html={safeJson(history)}></script>
+)}
+
+<script>
+import '../../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+import { BRAND_COLOURS, getChartColors, applyTheme } from '../../lib/chart-theme.js';
+import { readChartData } from '../../lib/inject.js';
+import type { BuildMonthlySnapshot } from '../../lib/types.js';
+
+const dataEl = document.getElementById('monthly-duration-data');
+if (!dataEl) {
+  // Empty state — no chart to initialise
+} else {
+  const history = readChartData<BuildMonthlySnapshot[]>('monthly-duration-data');
+
+  const AVG_COLOR = BRAND_COLOURS[0]; // blue — avg solid
+  const P95_COLOR = BRAND_COLOURS[1]; // purple — P95 dashed
+
+  const canvas = document.getElementById('monthly-duration-chart') as HTMLCanvasElement | null;
+  let chart: Chart | undefined;
+
+  if (canvas) {
+    const colors = getChartColors();
+
+    try {
+      chart = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: history.map(h => h.month),
+          datasets: [
+            {
+              label: 'Avg Duration',
+              data: history.map(h => h.avg_duration_min),
+              borderColor: AVG_COLOR,
+              backgroundColor: 'transparent',
+              tension: 0.3,
+              pointRadius: 3,
+              borderDash: [] as number[],
+            },
+            {
+              label: 'P95 Duration',
+              data: history.map(h => h.p95_duration_min),
+              borderColor: P95_COLOR,
+              backgroundColor: 'transparent',
+              tension: 0.3,
+              pointRadius: 3,
+              borderDash: [5, 5],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: colors.text, font: { size: 11 }, usePointStyle: true, boxWidth: 8 } },
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted, font: { size: 10 } },
+              grid: { color: colors.grid },
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Minutes',
+                color: colors.muted,
+                font: { size: 11 },
+              },
+              ticks: {
+                color: colors.muted,
+                font: { size: 10 },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                callback: (v: any) => `${v}m`,
+              },
+              grid: { color: colors.grid },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[MonthlyDurationChart] Chart init failed:', e);
+    }
+
+    window.addEventListener('themechange', () => {
+      if (chart) applyTheme(chart);
+    });
+  }
+}
+</script>

@@ -383,6 +383,73 @@ test.describe('Contributors tab', () => {
   });
 });
 
+// ─── Builds tab — Monthly Overview ───────────────────────────────────────────
+// The Monthly Overview section only renders when monthly_history.length >= 2.
+// With bootstrap data (health_status==="unknown") the entire non-bootstrap
+// content block is gated by `isBootstrap`, so the monthly section is never
+// emitted into the DOM. These tests handle both states gracefully so they
+// continue to pass once real data is collected.
+
+test.describe('Builds tab — Monthly Overview', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/homebrew-stats/builds/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('Monthly Overview section absent when bootstrap data (monthly_history < 2)', async ({ page }) => {
+    // With bootstrap data the entire non-bootstrap content is hidden.
+    // .monthly-overview will not be in the DOM at all.
+    const section = page.locator('.monthly-overview');
+    const count = await section.count();
+    if (count > 0) {
+      // If rendered, it must not be visible (hidden state)
+      await expect(section).not.toBeVisible();
+    }
+    // count === 0 means the section was never emitted — test passes implicitly.
+  });
+
+  test('Monthly charts render when monthly_history has data', async ({ page }) => {
+    const section = page.locator('.monthly-overview');
+    const isVisible = await section.isVisible().catch(() => false);
+
+    if (!isVisible) {
+      // Bootstrap state — no monthly data yet, section absent.
+      // This is the expected state for the current builds.json fixture.
+      return;
+    }
+
+    // Data present — all 3 canvas elements must be rendered and sized.
+    await expectCanvasRendered(page, 'monthly-success-chart');
+    await expectCanvasRendered(page, 'monthly-duration-chart');
+    await expectCanvasRendered(page, 'monthly-repo-chart');
+  });
+
+  test('Monthly data scripts have valid JSON when section is visible', async ({ page }) => {
+    const section = page.locator('.monthly-overview');
+    const isVisible = await section.isVisible().catch(() => false);
+
+    if (!isVisible) {
+      // Bootstrap state — scripts are not emitted. Skip assertions.
+      return;
+    }
+
+    // Validate each data script payload
+    const successData = await getScriptJSON(page, 'monthly-success-data') as unknown[];
+    expect(Array.isArray(successData), 'monthly-success-data must be an array').toBe(true);
+
+    const durationData = await getScriptJSON(page, 'monthly-duration-data') as unknown[];
+    expect(Array.isArray(durationData), 'monthly-duration-data must be an array').toBe(true);
+
+    const repoData = await getScriptJSON(page, 'monthly-repo-data') as unknown[];
+    expect(Array.isArray(repoData), 'monthly-repo-data must be an array').toBe(true);
+  });
+
+  test('Builds page has a file-an-issue link', async ({ page }) => {
+    const link = page.locator('a[href*="castrojo/homebrew-stats/issues/new"]');
+    await expect(link, 'Builds tab must have a file-an-issue link').toBeVisible();
+  });
+});
+
 // ─── Contributors range buttons ───────────────────────────────────────────────
 
 test.describe('Contributors range toggles', () => {

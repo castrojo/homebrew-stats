@@ -13,6 +13,10 @@ import PipelineThroughputChart from '../../components/builds/PipelineThroughputC
 import BuilderComparison from '../../components/builds/BuilderComparison.astro';
 import PublishReliabilityChart from '../../components/builds/PublishReliabilityChart.astro';
 import RecentBuildsFeed from '../../components/builds/RecentBuildsFeed.astro';
+import MonthlyKPIStrip from '../../components/builds/MonthlyKPIStrip.astro';
+import MonthlySuccessChart from '../../components/builds/MonthlySuccessChart.astro';
+import MonthlyDurationChart from '../../components/builds/MonthlyDurationChart.astro';
+import MonthlyRepoBreakdown from '../../components/builds/MonthlyRepoBreakdown.astro';
 
 const builds = rawData as unknown as BuildsData;
 const generatedAt = new Date(builds.generated_at).toUTCString();
@@ -39,6 +43,22 @@ const isBootstrap = builds.summary.health_status === 'unknown';
       <!-- Section 1: Summary KPIs + DORA -->
       <BuildsHealthBar summary={builds.summary} doraLevel={builds.dora_metrics.dora_level} />
       <DORAPanel dora={builds.dora_metrics} />
+
+      <!-- Section 1b: Monthly Overview (bootstrap guard — needs ≥ 2 months) -->
+      {builds.monthly_history && builds.monthly_history.length >= 2 && (
+        <section class="monthly-overview">
+          <h2 class="section-heading">Monthly Overview</h2>
+          <MonthlyKPIStrip
+            current={builds.monthly_history[builds.monthly_history.length - 1]}
+            prior={builds.monthly_history[builds.monthly_history.length - 2]}
+          />
+          <div class="monthly-charts">
+            <MonthlySuccessChart history={builds.monthly_history} />
+            <MonthlyDurationChart history={builds.monthly_history} />
+            <MonthlyRepoBreakdown history={builds.monthly_history} />
+          </div>
+        </section>
+      )}
 
       <!-- Section 2: Success rate + Duration trends -->
       <BuildSuccessChart history={builds.history} />
@@ -87,5 +107,24 @@ const isBootstrap = builds.summary.health_status === 'unknown';
     color: var(--muted);
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
+  }
+
+  .monthly-overview {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .monthly-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 </style>

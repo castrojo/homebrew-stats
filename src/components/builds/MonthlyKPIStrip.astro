@@ -1,0 +1,141 @@
+---
+import type { BuildMonthlySnapshot } from '../../lib/types.ts';
+
+interface Props {
+  current: BuildMonthlySnapshot;
+  prior: BuildMonthlySnapshot;
+}
+
+const { current, prior } = Astro.props;
+
+function deltaSign(delta: number): string {
+  return delta > 0 ? '+' : '';
+}
+
+function doraColor(level: string): string {
+  switch (level) {
+    case 'elite':  return 'var(--blue)';
+    case 'high':   return 'var(--green)';
+    case 'medium': return 'var(--yellow)';
+    case 'low':    return 'var(--red)';
+    default:       return 'var(--muted)';
+  }
+}
+
+// Success Rate — higher is better
+const successRateDelta = current.success_rate - prior.success_rate;
+const successRateImproved = successRateDelta > 0;
+
+// Total Builds — neutral delta (no color direction)
+const totalRunsDelta = current.total_runs - prior.total_runs;
+
+// Avg Duration — lower is better (invert colors)
+const durationDelta = current.avg_duration_min - prior.avg_duration_min;
+const durationImproved = durationDelta <= 0; // lower is better
+
+const doraDisplay = current.dora_level.charAt(0).toUpperCase() + current.dora_level.slice(1);
+---
+
+<div class="monthly-kpi-strip">
+  <!-- Success Rate -->
+  <div class="kpi-card">
+    <div class="kpi-label">Success Rate (MoM)</div>
+    <div class="kpi-value">{current.success_rate.toFixed(1)}%</div>
+    <div class={`kpi-delta ${successRateDelta > 0 ? 'delta-good' : successRateDelta < 0 ? 'delta-bad' : 'delta-neutral'}`}>
+      {successRateDelta > 0 ? '▲' : successRateDelta < 0 ? '▼' : '—'}
+      {successRateDelta !== 0 ? `${deltaSign(successRateDelta)}${successRateDelta.toFixed(1)}% vs prior month` : 'No change vs prior month'}
+    </div>
+  </div>
+
+  <!-- Total Builds -->
+  <div class="kpi-card">
+    <div class="kpi-label">Total Builds (MoM)</div>
+    <div class="kpi-value">{current.total_runs.toLocaleString()}</div>
+    <div class={`kpi-delta ${totalRunsDelta >= 0 ? 'delta-neutral' : 'delta-neutral'}`}>
+      {totalRunsDelta >= 0 ? '▲' : '▼'}
+      {deltaSign(totalRunsDelta)}{totalRunsDelta.toLocaleString()} vs prior month
+    </div>
+  </div>
+
+  <!-- Avg Duration -->
+  <div class="kpi-card">
+    <div class="kpi-label">Avg Duration (MoM)</div>
+    <div class="kpi-value">{current.avg_duration_min.toFixed(1)} min</div>
+    <div class={`kpi-delta ${durationImproved ? 'delta-good' : 'delta-bad'}`}>
+      {durationDelta <= 0 ? '▼' : '▲'}
+      {deltaSign(durationDelta)}{durationDelta.toFixed(1)} min vs prior month
+    </div>
+  </div>
+
+  <!-- DORA Level -->
+  <div class="kpi-card">
+    <div class="kpi-label">DORA Level</div>
+    <div class="kpi-value">
+      <span class="dora-badge" style={`background:${doraColor(current.dora_level)}`}>{doraDisplay}</span>
+    </div>
+    <div class="kpi-sub">This month</div>
+  </div>
+</div>
+
+<style>
+  .monthly-kpi-strip {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .kpi-card {
+    flex: 1;
+    min-width: 150px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .kpi-delta {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .delta-good    { color: var(--green); }
+  .delta-bad     { color: var(--red); }
+  .delta-neutral { color: var(--muted); }
+
+  .dora-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    text-transform: capitalize;
+  }
+
+  @media (max-width: 700px) {
+    .kpi-card { flex: 1 1 calc(50% - 0.5rem); }
+  }
+</style>
