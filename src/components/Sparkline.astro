@@ -58,14 +58,22 @@ document.querySelectorAll<HTMLCanvasElement>('[data-sparkline-id]').forEach(canv
 
   if (values.length < 2) return;
 
+  // Resolve CSS variable to a real color value Chart.js can use
+  const resolveColor = (c: string): string => {
+    if (!c.startsWith('var(')) return c;
+    const varName = c.slice(4, -1).trim();
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#3b82f6';
+  };
+
   try {
+    const resolvedColor = resolveColor(color);
     const chart = new Chart(canvas, {
       type: 'line',
       data: {
         labels: values.map((_, i) => i.toString()),
         datasets: [{
           data: values,
-          borderColor: color,
+          borderColor: resolvedColor,
           borderWidth: 1.5,
           tension: 0.4,
           fill: false,
@@ -90,7 +98,7 @@ document.querySelectorAll<HTMLCanvasElement>('[data-sparkline-id]').forEach(canv
 
     window.addEventListener('themechange', () => {
       if (chart.data.datasets[0]) {
-        chart.data.datasets[0].borderColor = canvas.dataset.sparklineColor ?? 'var(--blue)';
+        chart.data.datasets[0].borderColor = resolveColor(canvas.dataset.sparklineColor ?? 'var(--blue)');
       }
       chart.update();
     });

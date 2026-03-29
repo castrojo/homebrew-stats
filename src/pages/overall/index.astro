@@ -53,6 +53,12 @@ const auroraWeekly  = weekRecords.slice(-12).map((w: any) => w.distros?.aurora ?
     <Sparkline data={auroraWeekly} color="var(--green)" label="Aurora 12-week trend" />
   </div>
 
+  <DORAComparisonSection
+    bluefin={bluefinBuilds as unknown as BuildsData}
+    aurora={auroraBuilds as unknown as BuildsData}
+    bazzite={bazziteBuilds as unknown as BuildsData}
+  />
+
   <section class="charts-section">
     <h2>Monthly Trends</h2>
     <CountmeTrendChart weekRecords={weekRecords as any} />
@@ -69,12 +75,6 @@ const auroraWeekly  = weekRecords.slice(-12).map((w: any) => w.distros?.aurora ?
 
     <h2>Device Momentum (This Week vs Last Week)</h2>
     <EcosystemGrowthChart currentWeek={data.current_week as any} prevWeek={data.prev_week as any} />
-
-    <DORAComparisonSection
-      bluefin={bluefinBuilds as unknown as BuildsData}
-      aurora={auroraBuilds as unknown as BuildsData}
-      bazzite={bazziteBuilds as unknown as BuildsData}
-    />
   </section>
 </Layout>
 
