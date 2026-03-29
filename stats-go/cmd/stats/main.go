@@ -467,34 +467,26 @@ func runFetchCountme() error {
 		store = &countme.HistoryStore{}
 	}
 
-	fmt.Fprintln(os.Stderr, "→ Fetching ublue-os badge counts…")
-	badge, err := countme.FetchBadgeCounts()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "⚠️  countme badges: %v\n", err)
-		badge = nil
+	// Skip the CSV fetch if we already have data for the current week.
+	// The Fedora CSV only updates once per week (Sundays); fetching it on
+	// days 2–7 is wasted bandwidth (~10 MB Range request each time).
+	lastMonday := currentWeekStart()
+	if storeHasWeek(store, lastMonday) {
+		fmt.Fprintf(os.Stderr, "→ countme cache is current (week %s already fetched), skipping CSV fetch\n", lastMonday)
 	} else {
-		fmt.Fprintf(os.Stderr, "  badges: %v\n", badge)
+		fmt.Fprintln(os.Stderr, "→ Fetching countme CSV (last 30d)…")
+		csvRecs, osVersionDist, err := countme.FetchCSVLast30Days()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  countme CSV: %v\n", err)
+		} else {
+			fmt.Fprintf(os.Stderr, "  CSV: %d week records\n", len(csvRecs))
+			store = countme.MergeIntoHistory(store, csvRecs)
+			if osVersionDist != nil {
+				store.OsVersionDist = countme.MergeOsVersionDist(store.OsVersionDist, osVersionDist)
+			}
+		}
 	}
 
-	fmt.Fprintln(os.Stderr, "→ Fetching countme CSV (last 30d)…")
-	csvRecs, osVersionDist, err := countme.FetchCSVLast30Days()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "⚠️  countme CSV: %v\n", err)
-		csvRecs = nil
-		osVersionDist = nil
-	} else {
-		fmt.Fprintf(os.Stderr, "  CSV: %d week records\n", len(csvRecs))
-	}
-
-	if csvRecs != nil {
-		store = countme.MergeIntoHistory(store, csvRecs)
-	}
-	if osVersionDist != nil {
-		store.OsVersionDist = countme.MergeOsVersionDist(store.OsVersionDist, osVersionDist)
-	}
-	if badge != nil {
-		store = countme.AppendDayRecord(store, badge)
-	}
 	if err := saveCountmeHistory(store); err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  countme history save: %v\n", err)
 	}
@@ -514,6 +506,29 @@ func runFetchCountme() error {
 	}
 	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/countme.json")
 	return nil
+}
+
+// currentWeekStart returns the Monday of the current UTC week as "YYYY-MM-DD".
+func currentWeekStart() string {
+	now := time.Now().UTC()
+	// time.Weekday: Sunday=0, Monday=1, …, Saturday=6
+	// We want days since Monday.
+	wd := int(now.Weekday())
+	if wd == 0 {
+		wd = 7 // treat Sunday as day 7 so offset = wd-1
+	}
+	monday := now.AddDate(0, 0, -(wd - 1))
+	return monday.Format("2006-01-02")
+}
+
+// storeHasWeek returns true if any WeekRecord in the store has WeekStart equal to weekStart.
+func storeHasWeek(store *countme.HistoryStore, weekStart string) bool {
+	for _, rec := range store.WeekRecords {
+		if rec.WeekStart == weekStart {
+			return true
+		}
+	}
+	return false
 }
 
 func buildCountmeOutput(store *countme.HistoryStore) countmeOutput {

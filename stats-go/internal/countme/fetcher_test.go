@@ -5,7 +5,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 )
 
 // --- countmeCSVURL regression test ---
@@ -21,55 +20,6 @@ func TestCountmeCSVURL_PointsToFedoraServer(t *testing.T) {
 	if strings.Contains(countmeCSVURL, "githubusercontent") {
 		t.Errorf("countmeCSVURL must NOT use raw.githubusercontent.com — the file does not exist there (404). " +
 			"Correct URL: https://data-analysis.fedoraproject.org/csv-reports/countme/totals.csv")
-	}
-}
-
-// --- parseBadgeValue tests ---
-
-func TestParseBadgeValue_RawInt(t *testing.T) {
-	v, err := parseBadgeValue("64")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if v != 64 {
-		t.Errorf("expected 64, got %d", v)
-	}
-}
-
-func TestParseBadgeValue_Kilo(t *testing.T) {
-	v, err := parseBadgeValue("71k")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if v != 71000 {
-		t.Errorf("expected 71000, got %d", v)
-	}
-}
-
-func TestParseBadgeValue_KiloDecimal(t *testing.T) {
-	v, err := parseBadgeValue("3.6k")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if v != 3600 {
-		t.Errorf("expected 3600, got %d", v)
-	}
-}
-
-func TestParseBadgeValue_Mega(t *testing.T) {
-	v, err := parseBadgeValue("1.2M")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if v != 1200000 {
-		t.Errorf("expected 1200000, got %d", v)
-	}
-}
-
-func TestParseBadgeValue_Invalid(t *testing.T) {
-	_, err := parseBadgeValue("N/A")
-	if err == nil {
-		t.Fatal("expected error for 'N/A'")
 	}
 }
 
@@ -166,74 +116,7 @@ func TestMergeIntoHistory_EmptyStore(t *testing.T) {
 	}
 }
 
-// --- AppendDayRecord tests ---
-
-func TestAppendDayRecord_NewDay(t *testing.T) {
-	store := &HistoryStore{}
-	badge := map[string]int{"bazzite": 71000, "bluefin": 3600}
-	result := AppendDayRecord(store, badge)
-	if len(result.DayRecords) != 1 {
-		t.Fatalf("expected 1 day record, got %d", len(result.DayRecords))
-	}
-	if result.DayRecords[0].Distros["bazzite"] != 71000 {
-		t.Errorf("expected bazzite=71000, got %d", result.DayRecords[0].Distros["bazzite"])
-	}
-}
-
-func TestAppendDayRecord_Idempotent(t *testing.T) {
-	today := time.Now().UTC().Format("2006-01-02")
-	store := &HistoryStore{
-		DayRecords: []DayRecord{
-			{Date: today, Distros: map[string]int{"bazzite": 100}, Total: 100},
-		},
-	}
-	badge := map[string]int{"bazzite": 200}
-	result := AppendDayRecord(store, badge)
-	// Should overwrite today
-	if len(result.DayRecords) != 1 {
-		t.Fatalf("expected 1 day record after idempotent append, got %d", len(result.DayRecords))
-	}
-	if result.DayRecords[0].Distros["bazzite"] != 200 {
-		t.Errorf("expected updated bazzite=200, got %d", result.DayRecords[0].Distros["bazzite"])
-	}
-}
-
-// --- FetchBadgeCounts mock test ---
-
-func TestFetchBadgeCountsFromURLs(t *testing.T) {
-	// Mock server returns a typical badge endpoint response
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Return different values based on path to simulate different distros
-		if strings.Contains(r.URL.Path, "bazzite") {
-			w.Write([]byte(`{"schemaVersion":1,"label":"active users","message":"71k","color":"blue"}`))
-		} else if strings.Contains(r.URL.Path, "bluefin-lts") {
-			w.Write([]byte(`{"schemaVersion":1,"label":"active users","message":"64","color":"blue"}`))
-		} else {
-			w.Write([]byte(`{"schemaVersion":1,"label":"active users","message":"2.6k","color":"blue"}`))
-		}
-	}))
-	defer srv.Close()
-
-	// Call the internal function that accepts custom URLs (for testability)
-	urls := map[string]string{
-		"bazzite":     srv.URL + "/bazzite.json",
-		"bluefin":     srv.URL + "/bluefin.json",
-		"bluefin-lts": srv.URL + "/bluefin-lts.json",
-		"aurora":      srv.URL + "/aurora.json",
-	}
-	counts, err := fetchBadgeCountsFromURLs(urls)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if counts["bazzite"] != 71000 {
-		t.Errorf("expected bazzite=71000, got %d", counts["bazzite"])
-	}
-	if counts["bluefin-lts"] != 64 {
-		t.Errorf("expected bluefin-lts=64, got %d", counts["bluefin-lts"])
-	}
-}
-
-// --- CSV parsing test ---
+// --- FetchCSVLast30Days mock test ---
 
 func TestFetchCSVLast30Days_MockServer(t *testing.T) {
 	// Minimal valid CSV with one matching row and one non-matching row.

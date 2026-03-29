@@ -2,20 +2,13 @@ package countme
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 )
-
-// Badge endpoint base URL pattern.
-const badgeBaseURL = "https://raw.githubusercontent.com/ublue-os/countme/main/badge-endpoints"
 
 // countmeCSVURL is the source for weekly countme data.
 // IMPORTANT: The CSV lives on the Fedora data-analysis server, NOT in the ublue-os/countme
@@ -61,40 +54,6 @@ var anomalousWeekEnds = map[string]bool{
 // isCanonicalRepoTag returns true if the repo_tag is a canonical Fedora repo (fedora-NN).
 func isCanonicalRepoTag(repoTag string) bool {
 	return canonicalRepoTagRe.MatchString(repoTag)
-}
-
-// badgeNames lists the distros with badge endpoints (ublue-os hosted only).
-var badgeNames = []string{"bazzite", "bluefin", "bluefin-lts", "aurora"}
-
-// parseBadgeValue converts a badge message string like "71k", "3.6k", "1.2M", "64"
-// into an integer count.
-func parseBadgeValue(s string) (int, error) {
-	s = strings.TrimSpace(s)
-	if len(s) == 0 {
-		return 0, fmt.Errorf("empty badge value")
-	}
-
-	last := s[len(s)-1]
-	switch last {
-	case 'k', 'K':
-		f, err := strconv.ParseFloat(s[:len(s)-1], 64)
-		if err != nil {
-			return 0, fmt.Errorf("parse badge %q: %w", s, err)
-		}
-		return int(math.Round(f * 1000)), nil
-	case 'M':
-		f, err := strconv.ParseFloat(s[:len(s)-1], 64)
-		if err != nil {
-			return 0, fmt.Errorf("parse badge %q: %w", s, err)
-		}
-		return int(math.Round(f * 1000000)), nil
-	default:
-		v, err := strconv.Atoi(s)
-		if err != nil {
-			return 0, fmt.Errorf("parse badge %q: %w", s, err)
-		}
-		return v, nil
-	}
 }
 
 // csvRow holds a single parsed row from the countme CSV.
@@ -283,70 +242,6 @@ func parseDistroName(osName string) (string, bool) {
 	return key, ok
 }
 
-// fetchBadgeCountsFromURLs fetches badge counts from custom URLs (for testability).
-// Returns a map of distro key → active user count.
-func fetchBadgeCountsFromURLs(urls map[string]string) (map[string]int, error) {
-	type result struct {
-		key   string
-		count int
-		err   error
-	}
-
-	results := make(chan result, len(urls))
-	var wg sync.WaitGroup
-
-	for key, url := range urls {
-		wg.Add(1)
-		go func(k, u string) {
-			defer wg.Done()
-			resp, err := http.Get(u) //nolint:noctx
-			if err != nil {
-				results <- result{key: k, err: err}
-				return
-			}
-			defer resp.Body.Close()
-
-			var badge struct {
-				Message string `json:"message"`
-			}
-			if err := json.NewDecoder(resp.Body).Decode(&badge); err != nil {
-				results <- result{key: k, err: fmt.Errorf("decode badge %s: %w", k, err)}
-				return
-			}
-
-			count, err := parseBadgeValue(badge.Message)
-			results <- result{key: k, count: count, err: err}
-		}(key, url)
-	}
-
-	wg.Wait()
-	close(results)
-
-	counts := make(map[string]int, len(urls))
-	var errs []string
-	for r := range results {
-		if r.err != nil {
-			errs = append(errs, fmt.Sprintf("%s: %v", r.key, r.err))
-			continue
-		}
-		counts[r.key] = r.count
-	}
-
-	if len(errs) > 0 {
-		return counts, fmt.Errorf("badge fetch errors: %s", strings.Join(errs, "; "))
-	}
-	return counts, nil
-}
-
-// FetchBadgeCounts fetches badge counts for all 4 distros concurrently.
-func FetchBadgeCounts() (map[string]int, error) {
-	urls := make(map[string]string, len(badgeNames))
-	for _, name := range badgeNames {
-		urls[name] = fmt.Sprintf("%s/%s.json", badgeBaseURL, name)
-	}
-	return fetchBadgeCountsFromURLs(urls)
-}
-
 // fetchCSVFromURL fetches and parses the countme CSV from the given URL.
 // Returns week records aggregated by (week_start, week_end) and an os_version
 // distribution map (os_name → os_version → hits).
@@ -406,38 +301,4 @@ func MergeIntoHistory(store *HistoryStore, csvRecs []WeekRecord) *HistoryStore {
 		result.WeekRecords = append(result.WeekRecords, rec)
 	}
 	return result
-}
-
-// AppendDayRecord appends or overwrites today's badge snapshot in the store.
-// Deduplicates by date.
-func AppendDayRecord(store *HistoryStore, badge map[string]int) *HistoryStore {
-	today := time.Now().UTC().Format("2006-01-02")
-	total := 0
-	for _, v := range badge {
-		total += v
-	}
-	rec := DayRecord{
-		Date:    today,
-		Distros: badge,
-		Total:   total,
-	}
-
-	newStore := &HistoryStore{
-		WeekRecords: store.WeekRecords,
-	}
-
-	replaced := false
-	for _, d := range store.DayRecords {
-		if d.Date == today {
-			newStore.DayRecords = append(newStore.DayRecords, rec)
-			replaced = true
-		} else {
-			newStore.DayRecords = append(newStore.DayRecords, d)
-		}
-	}
-	if !replaced {
-		newStore.DayRecords = append(newStore.DayRecords, rec)
-	}
-
-	return newStore
 }
