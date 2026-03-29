@@ -841,6 +841,117 @@ func containsString(ss []string, s string) bool {
 	return false
 }
 
+// ── TestComputeStepCategoryRate ──────────────────────────────────────────────
+
+func makeRunWithSteps(id int64, conclusion, event string, daysAgo int, steps []StepRecord) WorkflowRunRecord {
+	r := makeRun(id, "r", conclusion, event, "main", daysAgo)
+	r.Jobs = []JobRecord{
+		{Name: "job", Conclusion: conclusion, Steps: steps},
+	}
+	return r
+}
+
+func TestComputeStepCategoryRate(t *testing.T) {
+	signStep := func(conclusion string) StepRecord {
+		return StepRecord{Name: "Cosign image", Conclusion: conclusion}
+	}
+	sbomStep := func(conclusion string) StepRecord {
+		return StepRecord{Name: "Generate SBOM with Syft", Conclusion: conclusion}
+	}
+
+	cases := []struct {
+		name     string
+		runs     []WorkflowRunRecord
+		category string
+		days     int
+		want     float64 // exact; -1 means no data
+	}{
+		{
+			name:     "no-runs-returns-minus1",
+			runs:     nil,
+			category: "sign",
+			days:     30,
+			want:     -1,
+		},
+		{
+			name:     "runs-with-no-matching-steps-returns-minus1",
+			runs:     []WorkflowRunRecord{makeRun(1, "r", "success", "push", "main", 1)},
+			category: "sign",
+			days:     30,
+			want:     -1,
+		},
+		{
+			name: "all-matching-steps-succeed-returns-100",
+			runs: []WorkflowRunRecord{
+				makeRunWithSteps(1, "success", "push", 1, []StepRecord{signStep("success")}),
+				makeRunWithSteps(2, "success", "push", 2, []StepRecord{signStep("success")}),
+			},
+			category: "sign",
+			days:     30,
+			want:     100,
+		},
+		{
+			name: "half-succeed-returns-50",
+			runs: []WorkflowRunRecord{
+				makeRunWithSteps(1, "success", "push", 1, []StepRecord{signStep("success")}),
+				makeRunWithSteps(2, "failure", "push", 2, []StepRecord{signStep("failure")}),
+			},
+			category: "sign",
+			days:     30,
+			want:     50,
+		},
+		{
+			name: "pr-runs-excluded",
+			runs: []WorkflowRunRecord{
+				makeRunWithSteps(1, "success", "pull_request", 1, []StepRecord{signStep("success")}),
+				makeRunWithSteps(2, "failure", "push", 2, []StepRecord{signStep("failure")}),
+			},
+			category: "sign",
+			days:     30,
+			want:     0, // 1 push run with failed sign step: 0/1 = 0%
+		},
+		{
+			name: "cancelled-runs-excluded",
+			runs: []WorkflowRunRecord{
+				makeRunWithSteps(1, "cancelled", "push", 1, []StepRecord{signStep("skipped")}),
+				makeRunWithSteps(2, "success", "push", 2, []StepRecord{signStep("success")}),
+			},
+			category: "sign",
+			days:     30,
+			want:     100, // only the non-cancelled run counts
+		},
+		{
+			name: "old-runs-outside-cutoff-not-counted",
+			runs: []WorkflowRunRecord{
+				makeRunWithSteps(1, "failure", "push", 35, []StepRecord{signStep("failure")}), // outside 30d
+				makeRunWithSteps(2, "success", "push", 1, []StepRecord{signStep("success")}),  // inside 30d
+			},
+			category: "sign",
+			days:     30,
+			want:     100, // only the recent success counts
+		},
+		{
+			name: "sbom-category-matched",
+			runs: []WorkflowRunRecord{
+				makeRunWithSteps(1, "success", "push", 1, []StepRecord{sbomStep("success")}),
+				makeRunWithSteps(2, "success", "push", 2, []StepRecord{sbomStep("success")}),
+			},
+			category: "sbom",
+			days:     30,
+			want:     100,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := computeStepCategoryRate(tc.runs, tc.category, tc.days)
+			if got != tc.want {
+				t.Errorf("computeStepCategoryRate() = %.2f, want %.2f", got, tc.want)
+			}
+		})
+	}
+}
+
 // ── Integration smoke: fmt is used ──────────────────────────────────────────
 
 func TestPackageSmoke(t *testing.T) {

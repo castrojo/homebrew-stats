@@ -1,0 +1,185 @@
+---
+import type { BuildRepoMetrics } from '../../lib/types.ts';
+
+interface Props {
+  repos: BuildRepoMetrics[];
+}
+
+const { repos } = Astro.props;
+
+// Determine if any repo has actual supply chain data (rate != -1)
+const hasAnyData = repos.some(
+  r =>
+    (r.sign_step_success_rate_30d !== undefined && r.sign_step_success_rate_30d !== -1) ||
+    (r.sbom_step_success_rate_30d !== undefined && r.sbom_step_success_rate_30d !== -1),
+);
+
+// Panel is hidden when no data at all (bootstrap or fully undetected)
+const show = repos.length > 0 && hasAnyData;
+
+function rateColor(rate: number | undefined): string {
+  if (rate === undefined || rate < 0) return 'var(--muted)';
+  if (rate >= 95) return 'var(--color-success, var(--green))';
+  if (rate >= 80) return 'var(--color-warning, var(--yellow))';
+  return 'var(--color-danger, var(--red))';
+}
+
+function rateLabel(rate: number | undefined): string {
+  if (rate === undefined || rate < 0) return '—';
+  return rate.toFixed(1) + '%';
+}
+
+function rateNote(rate: number | undefined): string {
+  if (rate === undefined || rate < 0) return 'Not detected';
+  return '';
+}
+
+function shortRepo(repo: string): string {
+  return repo.split('/').pop() ?? repo;
+}
+---
+
+{show && (
+  <section class="supply-chain-panel">
+    <h2 class="section-heading">Supply Chain Security</h2>
+    <div class="sc-grid">
+      {repos.map(repo => {
+        const signRate = repo.sign_step_success_rate_30d;
+        const sbomRate = repo.sbom_step_success_rate_30d;
+        const repoHasData =
+          (signRate !== undefined && signRate !== -1) ||
+          (sbomRate !== undefined && sbomRate !== -1);
+        if (!repoHasData) return null;
+        return (
+          <div class="sc-repo-row">
+            <div class="sc-repo-name">{shortRepo(repo.repo)}</div>
+            <div class="sc-metrics">
+              <div class="sc-metric-card">
+                <div class="sc-metric-label">Cosign Signing</div>
+                <div class="sc-metric-value" style={`color:${rateColor(signRate)}`}>
+                  {rateLabel(signRate)}
+                </div>
+                {rateNote(signRate) && (
+                  <div class="sc-metric-note">{rateNote(signRate)}</div>
+                )}
+                {(!rateNote(signRate)) && (
+                  <div class="sc-metric-sub">30d success rate</div>
+                )}
+              </div>
+              <div class="sc-metric-card">
+                <div class="sc-metric-label">SBOM Coverage</div>
+                <div class="sc-metric-value" style={`color:${rateColor(sbomRate)}`}>
+                  {rateLabel(sbomRate)}
+                </div>
+                {rateNote(sbomRate) && (
+                  <div class="sc-metric-note">{rateNote(sbomRate)}</div>
+                )}
+                {(!rateNote(sbomRate)) && (
+                  <div class="sc-metric-sub">30d success rate</div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+    <p class="sc-footnote">
+      Rates computed from workflow step names over last 30 days.
+      Steps not detected in pipeline are shown as —.
+    </p>
+  </section>
+)}
+
+<style>
+  .supply-chain-panel {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sc-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .sc-repo-row {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.875rem 1.25rem;
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .sc-repo-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: monospace;
+    word-break: break-word;
+  }
+
+  .sc-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .sc-metric-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sc-metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+
+  .sc-metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .sc-metric-sub {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .sc-metric-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .sc-footnote {
+    margin-top: 0.75rem;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 600px) {
+    .sc-repo-row {
+      grid-template-columns: 1fr;
+    }
+    .sc-metrics {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

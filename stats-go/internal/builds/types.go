@@ -172,14 +172,16 @@ type RepoDayCount struct {
 
 // RepoMetrics holds per-repository rollup.
 type RepoMetrics struct {
-	Repo           string          `json:"repo"`
-	SuccessRate7d  float64         `json:"success_rate_7d"`
-	SuccessRate30d float64         `json:"success_rate_30d"`
-	TotalRuns7d    int             `json:"total_runs_7d"`
-	TotalRuns30d   int             `json:"total_runs_30d"`
-	AvgDurationMin float64         `json:"avg_duration_min"`
-	Streams        []StreamMetrics `json:"streams"`
-	Architectures  []ArchMetrics   `json:"architectures,omitempty"`
+	Repo                   string          `json:"repo"`
+	SuccessRate7d          float64         `json:"success_rate_7d"`
+	SuccessRate30d         float64         `json:"success_rate_30d"`
+	TotalRuns7d            int             `json:"total_runs_7d"`
+	TotalRuns30d           int             `json:"total_runs_30d"`
+	AvgDurationMin         float64         `json:"avg_duration_min"`
+	Streams                []StreamMetrics `json:"streams"`
+	Architectures          []ArchMetrics   `json:"architectures,omitempty"`
+	SignStepSuccessRate30d float64         `json:"sign_step_success_rate_30d"`
+	SBOMStepSuccessRate30d float64         `json:"sbom_step_success_rate_30d"`
 }
 
 // StreamMetrics holds per-stream (stable/latest/beta/variant) metrics.

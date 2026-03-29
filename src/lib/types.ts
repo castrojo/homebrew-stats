@@ -280,6 +280,8 @@ export interface BuildRepoMetrics {
   avg_duration_min: number;
   streams: BuildStreamMetrics[];
   architectures?: BuildArchMetrics[];
+  sign_step_success_rate_30d?: number;  // -1 = no sign steps detected
+  sbom_step_success_rate_30d?: number;  // -1 = no sbom steps detected
 }
 
 export interface BuildStreamMetrics {

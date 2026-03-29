@@ -236,6 +236,72 @@ func containsAny(s string, substrs ...string) bool {
 	return false
 }
 
+// classifyStepName returns a category string for a workflow step name.
+// Mirrors the step matching in ClassifyFailure but applies to any step, not just failing ones.
+func classifyStepName(name string) string {
+	n := strings.ToLower(name)
+	switch {
+	case containsAny(n, "sign", "cosign", "sigstore"):
+		return "sign"
+	case containsAny(n, "sbom", "syft", "attestation"):
+		return "sbom"
+	case containsAny(n, "push", "upload", "publish"):
+		return "push"
+	case containsAny(n, "test", "check", "verify", "validate"):
+		return "test"
+	case containsAny(n, "build", "compile", "docker", "podman", "buildah"):
+		return "build"
+	case containsAny(n, "runner", "infra", "setup", "checkout", "init", "install dependency", "set up"):
+		return "infra"
+	}
+	return "unknown"
+}
+
+// computeStepCategoryRate returns the fraction of non-PR runs in the last `days` days
+// where at least one step matching the given category completed successfully,
+// out of all runs that contained at least one step of that category.
+// Returns -1 if no runs contained any step of that category (repo doesn't sign/sbom yet).
+func computeStepCategoryRate(runs []WorkflowRunRecord, category string, days int) float64 {
+	cutoff := time.Now().UTC().AddDate(0, 0, -days).Format(time.RFC3339)
+	var total, success int
+	for _, r := range runs {
+		if r.Event == "pull_request" {
+			continue
+		}
+		if r.CreatedAt < cutoff {
+			continue
+		}
+		if r.Conclusion == "cancelled" || r.Conclusion == "skipped" {
+			continue
+		}
+		hasCategory := false
+		succeeded := false
+		for _, j := range r.Jobs {
+			for _, s := range j.Steps {
+				cat := classifyStepName(s.Name)
+				if cat != category {
+					continue
+				}
+				hasCategory = true
+				if s.Conclusion == "success" {
+					succeeded = true
+				}
+			}
+		}
+		if !hasCategory {
+			continue
+		}
+		total++
+		if succeeded {
+			success++
+		}
+	}
+	if total == 0 {
+		return -1
+	}
+	return float64(success) / float64(total) * 100
+}
+
 // reJobMatrix matches patterns like:
 //
 //	"build_container (main, bluefin)"
@@ -513,14 +579,16 @@ func ComputeRepoMetrics(runs []WorkflowRunRecord, repo string) RepoMetrics {
 	})
 
 	return RepoMetrics{
-		Repo:           repo,
-		SuccessRate7d:  rate7d,
-		SuccessRate30d: rate30d,
-		TotalRuns7d:    total7d,
-		TotalRuns30d:   total30d,
-		AvgDurationMin: avgDur,
-		Streams:        streams,
-		Architectures:  archs,
+		Repo:                   repo,
+		SuccessRate7d:          rate7d,
+		SuccessRate30d:         rate30d,
+		TotalRuns7d:            total7d,
+		TotalRuns30d:           total30d,
+		AvgDurationMin:         avgDur,
+		Streams:                streams,
+		Architectures:          archs,
+		SignStepSuccessRate30d: computeStepCategoryRate(repoRuns, "sign", 30),
+		SBOMStepSuccessRate30d: computeStepCategoryRate(repoRuns, "sbom", 30),
 	}
 }
 

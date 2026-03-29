@@ -509,6 +509,15 @@ test.describe('Builds tab — Monthly Overview', () => {
     const link = page.locator('a[href*="castrojo/homebrew-stats/issues/new"]');
     await expect(link, 'Builds tab must have a file-an-issue link').toBeVisible();
   });
+
+  test('SupplyChainPanel renders when supply chain data is available', async ({ page }) => {
+    const isBootstrap = await page.evaluate(() => document.querySelector('.collecting') !== null);
+    if (isBootstrap) return;
+    // Panel is absent when all rates are -1 (step not detected in pipeline)
+    const panel = page.locator('.supply-chain-panel');
+    if (await panel.count() === 0) return;
+    await expect(panel.first()).toBeVisible();
+  });
 });
 
 // ─── Contributors range buttons ───────────────────────────────────────────────
