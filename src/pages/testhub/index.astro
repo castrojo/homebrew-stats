@@ -14,7 +14,7 @@ const history = (data.history as any) ?? [];
 
 <Layout title="Testhub — homebrew-stats" activeTab="testhub">
   <header>
-    <h1>🧪 projectbluefin/testhub</h1>
+    <h1>projectbluefin/testhub</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://github.com/projectbluefin/testhub">projectbluefin/testhub</a>
@@ -36,9 +36,9 @@ const history = (data.history as any) ?? [];
 
   {history.length > 0 && (
     <section class="charts-section">
-      <h2>📈 Build Trends</h2>
+      <h2>Build Trends</h2>
       <TesthubBuildChart history={history} />
-      <h2>🔖 Version Timeline</h2>
+      <h2>Version Timeline</h2>
       <TesthubVersionTimeline history={history} />
     </section>
   )}

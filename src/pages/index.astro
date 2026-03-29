@@ -15,7 +15,7 @@ const stableTap = stats.taps[0] as any;
 
 <Layout title="ublue-os Homebrew Tap Stats" activeTab="homebrew">
   <header>
-    <h1>🍺 ublue-os Homebrew Tap Health</h1>
+    <h1>ublue-os Homebrew Tap Health</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://github.com/ublue-os/homebrew-tap">homebrew-tap</a> ·
@@ -34,7 +34,7 @@ const stableTap = stats.taps[0] as any;
 
   {stats.history.length > 1 && (
     <section class="charts-section">
-      <h2>📈 Trends</h2>
+      <h2>Trends</h2>
       <div class="charts-zone-full">
         <TrafficChart history={stats.history} tapNames={tapNames} />
       </div>
@@ -49,7 +49,7 @@ const stableTap = stats.taps[0] as any;
 
   {(stats as any).os_analytics && (
     <>
-      <h2>🐧 OS Analytics (Linux)</h2>
+      <h2>OS Analytics (Linux)</h2>
       <OsSection osAnalytics={(stats as any).os_analytics} />
     </>
   )}

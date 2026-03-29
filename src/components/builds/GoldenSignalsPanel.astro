@@ -1,0 +1,151 @@
+---
+import type { DORAMetrics, PipelineSummary } from '../../lib/types.ts';
+
+interface Props {
+  dora: DORAMetrics;
+  summary: PipelineSummary;
+}
+
+const { dora, summary } = Astro.props;
+
+function formatMinutes(minutes: number): string {
+  if (minutes < 1)   return `${Math.round(minutes * 60)}s`;
+  if (minutes < 60)  return `${Math.round(minutes)}m`;
+  return `${(minutes / 60).toFixed(1)}h`;
+}
+
+function formatQueueTime(seconds: number): string {
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  return `${(seconds / 60).toFixed(1)}m`;
+}
+---
+
+<section class="golden-signals-panel">
+  <div class="gs-heading">
+    <span class="gs-heading-text">SRE Golden Signals</span>
+    <span class="gs-heading-sub">— mapped to build pipeline</span>
+  </div>
+  <div class="gs-grid">
+
+    <!-- Latency → Lead Time (avg build duration) -->
+    <div class="gs-card">
+      <div class="gs-signal-label">Latency</div>
+      <div class="gs-metric-label">Lead Time (avg)</div>
+      <div class="gs-metric-value">{formatMinutes(dora.lead_time_minutes)}</div>
+      <div class="gs-description">Time from commit trigger to completed build.</div>
+    </div>
+
+    <!-- Traffic → Deployment Frequency -->
+    <div class="gs-card">
+      <div class="gs-signal-label">Traffic</div>
+      <div class="gs-metric-label">Deploy Frequency</div>
+      <div class="gs-metric-value">{dora.deploy_freq_per_week.toFixed(1)}<span class="gs-unit"> / wk</span></div>
+      <div class="gs-description">How often images are built and published per week.</div>
+    </div>
+
+    <!-- Errors → Change Failure Rate -->
+    <div class="gs-card">
+      <div class="gs-signal-label">Errors</div>
+      <div class="gs-metric-label">Change Failure Rate</div>
+      <div class="gs-metric-value">{dora.change_failure_rate_pct.toFixed(1)}<span class="gs-unit">%</span></div>
+      <div class="gs-description">Percentage of builds ending in failure.</div>
+    </div>
+
+    <!-- Saturation → Queue time -->
+    <div class="gs-card">
+      <div class="gs-signal-label">Saturation</div>
+      <div class="gs-metric-label">Avg Queue Time</div>
+      <div class="gs-metric-value">{formatQueueTime(summary.avg_queue_time_sec)}</div>
+      <div class="gs-description">Average time jobs wait before a runner picks them up.</div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .golden-signals-panel {
+    margin-bottom: 1.5rem;
+  }
+
+  .gs-heading {
+    margin-bottom: 0.75rem;
+  }
+
+  .gs-heading-text {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .gs-heading-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+
+  .gs-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .gs-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+
+  .gs-signal-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--blue);
+    margin-bottom: 4px;
+  }
+
+  .gs-metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .gs-metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gs-unit {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .gs-description {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 768px) {
+    .gs-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gs-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

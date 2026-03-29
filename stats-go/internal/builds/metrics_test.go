@@ -731,6 +731,116 @@ func TestComputeMonthlySnapshots_EmptyInput_Issue40(t *testing.T) {
 	}
 }
 
+// MT1: non-nil empty slice returns non-nil empty slice (not nil which would JSON-marshal as null).
+func TestComputeMonthlySnapshots_NonNilEmptySlice_MT1(t *testing.T) {
+	result := computeMonthlySnapshots([]WorkflowRunRecord{})
+	if result == nil {
+		t.Fatal("expected non-nil slice for empty non-nil input, got nil")
+	}
+	if len(result) != 0 {
+		t.Fatalf("expected empty slice, got %d elements", len(result))
+	}
+}
+
+// MT2: runs in two distinct months produce two separate snapshot buckets.
+func TestComputeMonthlySnapshots_TwoMonths_MT2(t *testing.T) {
+	jan := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	feb := time.Date(2025, 2, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 5.0, jan),
+		makeRunAt("org/repo-a", "success", 5.0, feb),
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 monthly buckets, got %d", len(result))
+	}
+	months := []string{result[0].Month, result[1].Month}
+	if !containsString(months, "2025-01") || !containsString(months, "2025-02") {
+		t.Errorf("expected months [2025-01 2025-02], got %v", months)
+	}
+}
+
+// MT3: a repo appearing only in one month has its key in that month's RepoSuccessRate,
+// not in the other month's map. This mirrors the sparse-repo scenario that the
+// MonthlyRepoBreakdown Astro fix (issue #46) must handle on the frontend.
+func TestComputeMonthlySnapshots_SparseRepos_MT3(t *testing.T) {
+	jan := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	feb := time.Date(2025, 2, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 5.0, jan), // only in Jan
+		makeRunAt("org/repo-b", "success", 5.0, feb), // only in Feb
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 months, got %d", len(result))
+	}
+	// Find Jan and Feb snapshots by month string
+	var janSnap, febSnap *MonthlySnapshot
+	for i := range result {
+		switch result[i].Month {
+		case "2025-01":
+			janSnap = &result[i]
+		case "2025-02":
+			febSnap = &result[i]
+		}
+	}
+	if janSnap == nil || febSnap == nil {
+		t.Fatal("could not find both month snapshots")
+	}
+	if _, ok := janSnap.RepoSuccessRate["org/repo-a"]; !ok {
+		t.Error("Jan snapshot missing org/repo-a key")
+	}
+	if _, ok := janSnap.RepoSuccessRate["org/repo-b"]; ok {
+		t.Error("Jan snapshot must NOT contain org/repo-b (only appears in Feb)")
+	}
+	if _, ok := febSnap.RepoSuccessRate["org/repo-b"]; !ok {
+		t.Error("Feb snapshot missing org/repo-b key")
+	}
+	if _, ok := febSnap.RepoSuccessRate["org/repo-a"]; ok {
+		t.Error("Feb snapshot must NOT contain org/repo-a (only appears in Jan)")
+	}
+}
+
+// MT4: union of repo keys across all months equals all repos that ever appeared.
+// This is the Go-level proof of the contract the Astro fix relies on: the frontend
+// must union keys across all snapshots (not just history[0]) to build correct datasets.
+func TestComputeMonthlySnapshots_RepoKeyUnion_MT4(t *testing.T) {
+	jan := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	feb := time.Date(2025, 2, 15, 12, 0, 0, 0, time.UTC)
+	mar := time.Date(2025, 3, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 1.0, jan),
+		makeRunAt("org/repo-b", "failure", 1.0, feb),
+		makeRunAt("org/repo-c", "success", 1.0, mar),
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 3 {
+		t.Fatalf("expected 3 monthly buckets, got %d", len(result))
+	}
+	// Build union of all repo keys across all snapshots
+	union := map[string]bool{}
+	for _, snap := range result {
+		for k := range snap.RepoSuccessRate {
+			union[k] = true
+		}
+	}
+	for _, want := range []string{"org/repo-a", "org/repo-b", "org/repo-c"} {
+		if !union[want] {
+			t.Errorf("repo %q missing from union of all monthly RepoSuccessRate maps", want)
+		}
+	}
+}
+
+// containsString is a small helper used by MT2.
+func containsString(ss []string, s string) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
 // ── Integration smoke: fmt is used ──────────────────────────────────────────
 
 func TestPackageSmoke(t *testing.T) {

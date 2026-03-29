@@ -16,13 +16,13 @@ function conclusionIcon(conclusion: string): string {
   }
 }
 
-function eventIcon(event: string): string {
+function eventPill(event: string): string {
   switch (event) {
-    case 'schedule':          return '📅';
-    case 'push':              return '🔀';
-    case 'workflow_dispatch': return '🔧';
-    case 'pull_request':      return '👤';
-    default:                  return '❓';
+    case 'schedule':          return '<span class="event-pill event-pill--sched">sched</span>';
+    case 'push':              return '<span class="event-pill event-pill--push">push</span>';
+    case 'workflow_dispatch': return '<span class="event-pill event-pill--dispatch">dispatch</span>';
+    case 'pull_request':      return '<span class="event-pill event-pill--pr">PR</span>';
+    default:                  return '<span class="event-pill event-pill--other">other</span>';
   }
 }
 
@@ -75,7 +75,7 @@ function truncate(str: string, max: number): string {
               </td>
               <td class="col-workflow" title={build.workflow}>{truncate(build.workflow, 30)}</td>
               <td class="col-branch">{build.branch}</td>
-              <td class="col-trigger" title={build.event}>{eventIcon(build.event)}</td>
+              <td class="col-trigger" title={build.event} set:html={eventPill(build.event)}></td>
               <td class="col-duration">{formatDuration(build.duration_min)}</td>
               <td class="col-started" data-iso={build.started_at}>{build.started_at}</td>
               <td class="col-jobs">
@@ -207,6 +207,43 @@ document.querySelectorAll<HTMLTableCellElement>('.col-started[data-iso]').forEac
 
   .col-trigger {
     text-align: center;
+  }
+
+  /* Event trigger pills */
+  .event-pill {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .event-pill--sched {
+    background: color-mix(in srgb, var(--blue) 15%, transparent);
+    color: var(--blue);
+  }
+
+  .event-pill--push {
+    background: color-mix(in srgb, var(--green) 15%, transparent);
+    color: var(--green);
+  }
+
+  .event-pill--dispatch {
+    background: color-mix(in srgb, #a371f7 15%, transparent);
+    color: #a371f7;
+  }
+
+  .event-pill--pr {
+    background: color-mix(in srgb, var(--yellow) 15%, transparent);
+    color: var(--yellow);
+  }
+
+  .event-pill--other {
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
   }
 
   .col-workflow {

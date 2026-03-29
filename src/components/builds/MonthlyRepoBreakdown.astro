@@ -42,8 +42,9 @@ if (!dataEl) {
   if (canvas && history.length > 0) {
     const colors = getChartColors();
 
-    // Dynamically extract repo names from the first snapshot
-    const repos = Object.keys(history[0].repo_success_rate);
+    // Union of repo keys across ALL snapshots — not just history[0].
+    // Some repos only appear in later months; using only history[0] drops them.
+    const repos = [...new Set(history.flatMap((h: BuildMonthlySnapshot) => Object.keys(h.repo_success_rate)))].sort();
     const monthLabels = history.map(h => h.month);
 
     const datasets = repos.map((repo, i) => ({

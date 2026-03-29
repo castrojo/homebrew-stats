@@ -4,6 +4,7 @@
 
 Health dashboard for ublue-os Homebrew taps and projectbluefin testhub. Go backend + Astro + Chart.js.
 Live: `https://castrojo.github.io/homebrew-stats/` | Branch: `main`
+Tabs: Homebrew · Testhub · Overall · Contributors · Builds (5 total)
 
 ## Skills
 
@@ -15,10 +16,16 @@ cat ~/src/skills/homebrew-stats/SKILL.md      # cross-cutting dashboard patterns
 ## Quick Start
 
 ```bash
-just test-all    # 79 unit tests (Vitest) + 18 E2E tests (Playwright)
-just test        # unit tests only
-just verify-live # confirm live site is healthy after deploy
+just test-all    # unit tests (Vitest) + E2E tests (Playwright)
+just test        # unit tests only (Go + TypeScript)
+just test-e2e    # Playwright E2E only (builds site first)
+just verify-live # confirm live site is healthy after deploy (checks 4 pages)
+just sync        # fetch-homebrew + fetch-builds (requires GITHUB_TOKEN or GITHUB_PAT)
+just sync-builds # fetch Bluefin CI/CD build metrics only
+just dev         # Astro hot-reload dev server on :4324 (uses existing synced data)
 cd stats-go && go test ./...   # Go unit tests
+npm run lint     # ESLint (catches set:text violations — must pass before commit)
+npm run typecheck  # TypeScript type check
 ```
 
 ## Critical Rules
@@ -28,6 +35,16 @@ cd stats-go && go test ./...   # Go unit tests
 - **chart.update() not chart.destroy()** — use `chart.update()` in themechange handlers
 - **Pre-deploy vs. post-deploy** — rendering tests go in E2E suite; data-quality tests go in smoke-test.yml only
 - **Cache key bump isolation** — never add data-quality tests in the same commit as a cache key bump
+- **Terminology** — Aurora/Bazzite/Bluefin are **images** in UI copy, never "distros"
+- **Types in sync** — `src/lib/types.ts` mirrors Go structs; update both together
+
+## Definition of Done
+
+All three layers required — "CI green" alone is not done:
+
+1. `just test-all` + `npm run lint` + `actionlint` + `cd stats-go && go test ./...` all pass
+2. CI green: "Build and Deploy to GitHub Pages" AND "Smoke Test — Live Site" workflows
+3. `just verify-live` passes (HTTP 200 on 4 pages, canvas IDs present, no `chart-empty`, fresh `meta.json`)
 
 ## Work Queue
 

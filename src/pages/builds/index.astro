@@ -5,6 +5,7 @@ import rawData from '../../data/builds.json';
 
 import BuildsHealthBar from '../../components/builds/BuildsHealthBar.astro';
 import DORAPanel from '../../components/builds/DORAPanel.astro';
+import GoldenSignalsPanel from '../../components/builds/GoldenSignalsPanel.astro';
 import BuildSuccessChart from '../../components/builds/BuildSuccessChart.astro';
 import BuildDurationChart from '../../components/builds/BuildDurationChart.astro';
 import FailureAnalysisChart from '../../components/builds/FailureAnalysisChart.astro';
@@ -27,7 +28,7 @@ const isBootstrap = builds.summary.health_status === 'unknown';
 <Layout title="Bluefin CI/CD Build Metrics" activeTab="builds">
   <header class="page-header">
     <div>
-      <h1>🏗️ Bluefin Build Pipeline</h1>
+      <h1>Bluefin Build Pipeline</h1>
       <div class="meta">
         Updated {generatedAt} ·
         <a href="https://github.com/ublue-os/bluefin/actions" target="_blank" rel="noopener">bluefin</a> ·
@@ -38,12 +39,13 @@ const isBootstrap = builds.summary.health_status === 'unknown';
   </header>
 
   {isBootstrap ? (
-    <p class="collecting">📡 Collecting build data — check back after the next CI run.</p>
+    <p class="collecting">Collecting build data — check back after the next CI run.</p>
   ) : (
     <>
       <!-- Section 1: Summary KPIs + DORA -->
       <BuildsHealthBar summary={builds.summary} doraLevel={builds.dora_metrics.dora_level} />
       <DORAPanel dora={builds.dora_metrics} />
+      <GoldenSignalsPanel dora={builds.dora_metrics} summary={builds.summary} />
 
       <!-- Section 1b: Monthly Overview (bootstrap guard — needs ≥ 2 months) -->
       {builds.monthly_history && builds.monthly_history.length >= 2 && (
