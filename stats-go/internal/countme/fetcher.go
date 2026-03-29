@@ -25,10 +25,6 @@ var validDistros = map[string]string{
 	"Bluefin":     "bluefin",
 	"Bluefin LTS": "bluefin-lts",
 	"Aurora":      "aurora",
-	// Additional bootc ecosystem images (>=10,000 recent hits threshold)
-	"secureblue":  "secureblue",
-	"wayblue":     "wayblue",
-	"BlueBuildOS": "bluebuildos",
 }
 
 // badgeNames lists the distros with badge endpoints (ublue-os hosted only).

@@ -68,10 +68,6 @@ func TestParseDistroName_ValidExact(t *testing.T) {
 		{"Bluefin", "bluefin"},
 		{"Bluefin LTS", "bluefin-lts"},
 		{"Aurora", "aurora"},
-		// bootc ecosystem images (issue 72)
-		{"secureblue", "secureblue"},
-		{"wayblue", "wayblue"},
-		{"BlueBuildOS", "bluebuildos"},
 	}
 	for _, c := range cases {
 		got, ok := parseDistroName(c.input)
