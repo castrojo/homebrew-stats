@@ -3,13 +3,17 @@ import type { BuildsData, BuildMonthlySnapshot } from '../lib/types.ts';
 import { doraLevelColor } from '../lib/build-utils.ts';
 import { safeJson } from '../lib/inject.ts';
 
-interface Props {
-  bluefin: BuildsData;
-  aurora: BuildsData;
-  bazzite: BuildsData;
+interface ImageInput {
+  label: string;
+  color: string;   // CSS color string e.g. 'var(--blue)'
+  data: BuildsData;
 }
 
-const { bluefin, aurora, bazzite } = Astro.props;
+interface Props {
+  images: ImageInput[];
+}
+
+const { images } = Astro.props;
 
 interface ImageDORA {
   label: string;
@@ -19,82 +23,66 @@ interface ImageDORA {
   color: string;
 }
 
-const images: ImageDORA[] = [
-  {
-    label: 'Bluefin',
-    level: bluefin.dora_metrics.dora_level,
-    deployFreq: bluefin.dora_metrics.deploy_freq_per_week,
-    changeFailRate: bluefin.dora_metrics.change_failure_rate_pct,
-    color: 'var(--blue)',
-  },
-  {
-    label: 'Aurora',
-    level: aurora.dora_metrics.dora_level,
-    deployFreq: aurora.dora_metrics.deploy_freq_per_week,
-    changeFailRate: aurora.dora_metrics.change_failure_rate_pct,
-    color: 'var(--purple)',
-  },
-  {
-    label: 'Bazzite',
-    level: bazzite.dora_metrics.dora_level,
-    deployFreq: bazzite.dora_metrics.deploy_freq_per_week,
-    changeFailRate: bazzite.dora_metrics.change_failure_rate_pct,
-    color: 'var(--green)',
-  },
-];
+const imageCards: ImageDORA[] = images.map(img => ({
+  label: img.label,
+  level: img.data.dora_metrics.dora_level,
+  deployFreq: img.data.dora_metrics.deploy_freq_per_week,
+  changeFailRate: img.data.dora_metrics.change_failure_rate_pct,
+  color: img.color,
+}));
 
-// Monthly leaderboard data — union of all months across all three images
-const allMonths = Array.from(new Set([
-  ...(bluefin.monthly_history ?? []).map((s: BuildMonthlySnapshot) => s.month),
-  ...(aurora.monthly_history ?? []).map((s: BuildMonthlySnapshot) => s.month),
-  ...(bazzite.monthly_history ?? []).map((s: BuildMonthlySnapshot) => s.month),
-])).sort();
+// Monthly leaderboard — union of all months across all images
+const allMonths = Array.from(new Set(
+  images.flatMap(img => (img.data.monthly_history ?? []).map((s: BuildMonthlySnapshot) => s.month))
+)).sort();
 
-// For each image, build a map from month→dora_level
 function buildLevelMap(history: BuildMonthlySnapshot[] | null | undefined): Record<string, string> {
   const m: Record<string, string> = {};
   for (const s of history ?? []) { m[s.month] = s.dora_level; }
   return m;
 }
 
-const bluefinMap = buildLevelMap(bluefin.monthly_history);
-const auroraMap = buildLevelMap(aurora.monthly_history);
-const bazziteMap = buildLevelMap(bazzite.monthly_history);
-
-// Chart data: null for unknown months (Chart.js skips null points)
-interface ChartPayload {
-  labels: string[];
-  bluefin: (number | null)[];
-  aurora: (number | null)[];
-  bazzite: (number | null)[];
-}
-
 function levelToNum(level: string | undefined): number | null {
   switch (level) {
-    case 'elite': return 4;
-    case 'high': return 3;
+    case 'elite':  return 4;
+    case 'high':   return 3;
     case 'medium': return 2;
-    case 'low': return 1;
-    default: return null;
+    case 'low':    return 1;
+    default:       return null;
   }
 }
 
-const chartPayload: ChartPayload = {
-  labels: allMonths,
-  bluefin: allMonths.map(m => levelToNum(bluefinMap[m])),
-  aurora: allMonths.map(m => levelToNum(auroraMap[m])),
-  bazzite: allMonths.map(m => levelToNum(bazziteMap[m])),
-};
+interface ChartDataset {
+  label: string;
+  color: string;
+  values: (number | null)[];
+}
+
+const chartDatasets: ChartDataset[] = images.map(img => {
+  const levelMap = buildLevelMap(img.data.monthly_history);
+  return {
+    label: img.label,
+    color: img.color,
+    values: allMonths.map(m => levelToNum(levelMap[m])),
+  };
+});
 
 const showChart = allMonths.length >= 2;
+
+interface ChartPayload {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
+const chartPayload: ChartPayload = { labels: allMonths, datasets: chartDatasets };
 ---
 
 <section class="dora-comparison">
   <h2 class="section-heading">Project DORA Health</h2>
 
   <!-- KPI cards -->
-  <div class="dora-cards">
-    {images.map(img => (
+  <div class="dora-cards" style={`grid-template-columns: repeat(${Math.min(imageCards.length, 4)}, 1fr)`}>
+    {imageCards.map(img => (
       <div class="dora-card">
         <div class="dora-image-label">{img.label}</div>
         {img.level === 'unknown' ? (
@@ -127,16 +115,19 @@ const showChart = allMonths.length >= 2;
 <script>
 import '../lib/chart-registry.js';
 import { readChartData } from '../lib/inject.js';
-import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+import { getChartColors, applyTheme } from '../lib/chart-theme.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('dora-comparison-data');
 if (dataEl) {
+  interface ChartDataset {
+    label: string;
+    color: string;
+    values: (number | null)[];
+  }
   interface ChartPayload {
     labels: string[];
-    bluefin: (number | null)[];
-    aurora: (number | null)[];
-    bazzite: (number | null)[];
+    datasets: ChartDataset[];
   }
 
   try {
@@ -145,33 +136,28 @@ if (dataEl) {
 
     const levelLabels = ['', 'Low', 'Medium', 'High', 'Elite'];
 
+    // Resolve CSS vars to hex at runtime so Chart.js can use them
+    const style = getComputedStyle(document.documentElement);
+    function resolveCSSVar(v: string): string {
+      const match = v.match(/var\((--[\w-]+)\)/);
+      if (match) return style.getPropertyValue(match[1]).trim();
+      return v;
+    }
+
     const chart = new Chart('dora-comparison-chart', {
       type: 'bar',
       data: {
         labels: payload.labels,
-        datasets: [
-          {
-            label: 'Bluefin',
-            data: payload.bluefin,
-            backgroundColor: BRAND_COLOURS[0] + 'cc',
-            borderColor: BRAND_COLOURS[0],
+        datasets: payload.datasets.map(ds => {
+          const hex = resolveCSSVar(ds.color);
+          return {
+            label: ds.label,
+            data: ds.values,
+            backgroundColor: hex + 'cc',
+            borderColor: hex,
             borderWidth: 1,
-          },
-          {
-            label: 'Aurora',
-            data: payload.aurora,
-            backgroundColor: BRAND_COLOURS[3] + 'cc',
-            borderColor: BRAND_COLOURS[3],
-            borderWidth: 1,
-          },
-          {
-            label: 'Bazzite',
-            data: payload.bazzite,
-            backgroundColor: BRAND_COLOURS[1] + 'cc',
-            borderColor: BRAND_COLOURS[1],
-            borderWidth: 1,
-          },
-        ],
+          };
+        }),
       },
       options: {
         responsive: true,
@@ -230,7 +216,6 @@ if (dataEl) {
 
   .dora-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
     margin-bottom: 1rem;
   }
@@ -274,9 +259,15 @@ if (dataEl) {
     height: 220px;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     .dora-cards {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr !important;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .dora-cards {
+      grid-template-columns: 1fr !important;
     }
   }
 </style>

@@ -4,13 +4,24 @@ import { safeJson } from '../lib/inject.ts';
 import type { WeekRecord } from '../lib/types.ts';
 import { aggregateWeekRecordsToMonthEnd } from '../lib/countme.ts';
 
+interface DistroSpec { key: string; label: string; }
+
 interface Props {
   weekRecords: WeekRecord[];
+  distros?: DistroSpec[];
 }
 const { weekRecords } = Astro.props;
 
-const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
-const LABELS  = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
+// Default to the original 4 if not provided (backward-compat for individual image pages)
+const distroSpecs: DistroSpec[] = Astro.props.distros ?? [
+  { key: 'bazzite',     label: 'Bazzite'     },
+  { key: 'bluefin',     label: 'Bluefin'     },
+  { key: 'bluefin-lts', label: 'Bluefin LTS' },
+  { key: 'aurora',      label: 'Aurora'      },
+];
+
+const DISTROS = distroSpecs.map(d => d.key);
+const LABELS  = distroSpecs.map(d => d.label);
 
 const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
 ---

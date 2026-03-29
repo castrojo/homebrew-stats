@@ -12,14 +12,29 @@ import type { BuildsData, BuildRepoMetrics } from '../../lib/types.ts';
 import bluefinBuilds from '../../data/builds-bluefin.json';
 import auroraBuilds from '../../data/builds-aurora.json';
 import bazziteBuilds from '../../data/builds-bazzite.json';
+import universalBlueBuilds from '../../data/builds-universal-blue.json';
+import ucoreBuilds from '../../data/builds-ucore.json';
+import zirconiumBuilds from '../../data/builds-zirconium.json';
+import bootcrewBuilds from '../../data/builds-bootcrew.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
 
+// ── Countme distros shown across all countme-aware sections ──────────────────
+const countmeDistros = [
+  { key: 'bazzite',     label: 'Bazzite',     color: 'var(--blue)'   },
+  { key: 'bluefin',     label: 'Bluefin',     color: 'var(--purple)' },
+  { key: 'bluefin-lts', label: 'Bluefin LTS', color: 'var(--indigo)' },
+  { key: 'aurora',      label: 'Aurora',      color: 'var(--green)'  },
+  { key: 'secureblue',  label: 'secureblue',  color: 'var(--yellow)' },
+  { key: 'wayblue',     label: 'wayblue',     color: 'var(--orange)' },
+  { key: 'bluebuildos', label: 'BlueBuildOS', color: 'var(--red)'    },
+];
+
+// ── Supply chain helper ──────────────────────────────────────────────────────
 /**
  * Derive a boolean | null for a supply chain metric from a builds dataset.
- * Uses per-repo rate fields (sign_step_success_rate_30d / sbom_step_success_rate_30d).
- * -1 means "step not detected in pipeline" — treated the same as missing data (null).
+ * -1 means "step not detected in pipeline" — treated as null (no data).
  * If at least one repo has real data, use the mean rate; threshold >= 80 → true.
  */
 function deriveRate(
@@ -34,10 +49,26 @@ function deriveRate(
   return mean >= 80;
 }
 
-const bluefinRepos = (bluefinBuilds as unknown as BuildsData).repos ?? [];
-const auroraRepos  = (auroraBuilds  as unknown as BuildsData).repos ?? [];
-const bazziteRepos = (bazziteBuilds as unknown as BuildsData).repos ?? [];
+const bluefinRepos       = (bluefinBuilds      as unknown as BuildsData).repos ?? [];
+const auroraRepos        = (auroraBuilds       as unknown as BuildsData).repos ?? [];
+const bazziteRepos       = (bazziteBuilds      as unknown as BuildsData).repos ?? [];
+const universalBlueRepos = (universalBlueBuilds as unknown as BuildsData).repos ?? [];
+const ucoreRepos         = (ucoreBuilds        as unknown as BuildsData).repos ?? [];
+const zirconiumRepos     = (zirconiumBuilds    as unknown as BuildsData).repos ?? [];
+const bootcrewRepos      = (bootcrewBuilds     as unknown as BuildsData).repos ?? [];
 
+// ── DORA images — all 7 with build pipelines ─────────────────────────────────
+const doraImages = [
+  { label: 'Bluefin',       color: 'var(--blue)',   data: bluefinBuilds      as unknown as BuildsData },
+  { label: 'Aurora',        color: 'var(--green)',  data: auroraBuilds       as unknown as BuildsData },
+  { label: 'Bazzite',       color: 'var(--orange)', data: bazziteBuilds      as unknown as BuildsData },
+  { label: 'ublue-os',      color: 'var(--purple)', data: universalBlueBuilds as unknown as BuildsData },
+  { label: 'uCore',         color: 'var(--indigo)', data: ucoreBuilds        as unknown as BuildsData },
+  { label: 'Zirconium',     color: 'var(--yellow)', data: zirconiumBuilds    as unknown as BuildsData },
+  { label: 'bootcrew',      color: 'var(--red)',    data: bootcrewBuilds     as unknown as BuildsData },
+];
+
+// ── Future Proofed — all 7 ────────────────────────────────────────────────────
 const imageProofData = [
   {
     label: 'Bluefin',
@@ -60,12 +91,50 @@ const imageProofData = [
     zstdChunked: null as boolean | null,
     chunka:      null as boolean | null,
   },
+  {
+    label: 'ublue-os',
+    signing:     deriveRate(universalBlueRepos, 'sign_step_success_rate_30d'),
+    sbom:        deriveRate(universalBlueRepos, 'sbom_step_success_rate_30d'),
+    zstdChunked: null as boolean | null,
+    chunka:      null as boolean | null,
+  },
+  {
+    label: 'uCore',
+    signing:     deriveRate(ucoreRepos, 'sign_step_success_rate_30d'),
+    sbom:        deriveRate(ucoreRepos, 'sbom_step_success_rate_30d'),
+    zstdChunked: null as boolean | null,
+    chunka:      null as boolean | null,
+  },
+  {
+    label: 'Zirconium',
+    signing:     deriveRate(zirconiumRepos, 'sign_step_success_rate_30d'),
+    sbom:        deriveRate(zirconiumRepos, 'sbom_step_success_rate_30d'),
+    zstdChunked: null as boolean | null,
+    chunka:      null as boolean | null,
+  },
+  {
+    label: 'bootcrew',
+    signing:     deriveRate(bootcrewRepos, 'sign_step_success_rate_30d'),
+    sbom:        deriveRate(bootcrewRepos, 'sbom_step_success_rate_30d'),
+    zstdChunked: null as boolean | null,
+    chunka:      null as boolean | null,
+  },
+];
+
+// countme images that have individual trend charts (countme-visible only)
+const countmeTrendImages = [
+  { distroKey: 'bazzite',     distroLabel: 'Bazzite',     colorIndex: 0 },
+  { distroKey: 'bluefin',     distroLabel: 'Bluefin',     colorIndex: 1 },
+  { distroKey: 'aurora',      distroLabel: 'Aurora',      colorIndex: 3 },
+  { distroKey: 'secureblue',  distroLabel: 'secureblue',  colorIndex: 4 },
+  { distroKey: 'wayblue',     distroLabel: 'wayblue',     colorIndex: 5 },
+  { distroKey: 'bluebuildos', distroLabel: 'BlueBuildOS', colorIndex: 6 },
 ];
 ---
 
-<Layout title="Overall — homebrew-stats" activeTab="overall">
+<Layout title="bootc — homebrew-stats" activeTab="overall">
   <header>
-    <h1>Universal Blue Active Devices</h1>
+    <h1>bootc Active Devices</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://github.com/ublue-os/countme">ublue-os/countme</a>
@@ -87,33 +156,40 @@ const imageProofData = [
     currentWeek={data.current_week as any}
     wowGrowthPct={data.wow_growth_pct as any}
     weekRecords={weekRecords as any}
+    images={countmeDistros}
   />
 
-  <DORAComparisonSection
-    bluefin={bluefinBuilds as unknown as BuildsData}
-    aurora={auroraBuilds as unknown as BuildsData}
-    bazzite={bazziteBuilds as unknown as BuildsData}
-  />
+  <DORAComparisonSection images={doraImages} />
 
   <h2>Future Proofed</h2>
   <FutureProofedPanel images={imageProofData} />
 
   <section class="charts-section">
     <h2>Monthly Trends</h2>
-    <CountmeTrendChart weekRecords={weekRecords as any} />
+    <CountmeTrendChart weekRecords={weekRecords as any} distros={countmeDistros} />
 
     <h2>Individual Image Trends</h2>
     <div class="distro-charts-grid">
-      <DistroTrendChart distroKey="bazzite"    distroLabel="Bazzite"    colorIndex={0} weekRecords={weekRecords as any} defaultRange="365" />
-      <DistroTrendChart distroKey="bluefin"    distroLabel="Bluefin"    colorIndex={1} weekRecords={weekRecords as any} defaultRange="365" />
-      <DistroTrendChart distroKey="aurora"     distroLabel="Aurora"     colorIndex={3} weekRecords={weekRecords as any} defaultRange="365" />
+      {countmeTrendImages.map(img => (
+        <DistroTrendChart
+          distroKey={img.distroKey}
+          distroLabel={img.distroLabel}
+          colorIndex={img.colorIndex}
+          weekRecords={weekRecords as any}
+          defaultRange="365"
+        />
+      ))}
     </div>
 
     <h2>Ecosystem Share</h2>
-    <EcosystemPieChart currentWeek={data.current_week as any} />
+    <EcosystemPieChart currentWeek={data.current_week as any} distros={countmeDistros} />
 
     <h2>Device Momentum (This Week vs Last Week)</h2>
-    <EcosystemGrowthChart currentWeek={data.current_week as any} prevWeek={data.prev_week as any} />
+    <EcosystemGrowthChart
+      currentWeek={data.current_week as any}
+      prevWeek={data.prev_week as any}
+      distros={countmeDistros}
+    />
   </section>
 </Layout>
 

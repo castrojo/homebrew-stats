@@ -3,14 +3,24 @@ import ChartCard from './ChartCard.astro';
 import { safeJson } from '../lib/inject.ts';
 import type { WeekRecord } from '../lib/types.ts';
 
+interface DistroSpec { key: string; label: string; }
+
 interface Props {
   currentWeek: WeekRecord | null;
   prevWeek: WeekRecord | null;
+  distros?: DistroSpec[];
 }
 const { currentWeek, prevWeek } = Astro.props;
 
-const DISTROS = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora'];
-const LABELS  = ['Bazzite', 'Bluefin', 'Bluefin LTS', 'Aurora'];
+const distroSpecs: DistroSpec[] = Astro.props.distros ?? [
+  { key: 'bazzite',     label: 'Bazzite'     },
+  { key: 'bluefin',     label: 'Bluefin'     },
+  { key: 'bluefin-lts', label: 'Bluefin LTS' },
+  { key: 'aurora',      label: 'Aurora'      },
+];
+
+const DISTROS = distroSpecs.map(d => d.key);
+const LABELS  = distroSpecs.map(d => d.label);
 
 const hasData = !!currentWeek && !!prevWeek;
 ---

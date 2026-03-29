@@ -2,32 +2,40 @@
 import type { WeekRecord } from '../lib/types.ts';
 import Sparkline from './Sparkline.astro';
 
-interface WoWGrowth {
-  bazzite: number;
-  bluefin: number;
-  "bluefin-lts": number;
-  aurora: number;
-  total: number;
+interface ImageSpec {
+  key: string;        // distro key in WeekRecord.distros
+  label: string;      // display label
+  color: string;      // CSS color string e.g. 'var(--blue)'
 }
+
 interface Props {
   currentWeek: WeekRecord | null;
-  wowGrowthPct: WoWGrowth | null;
+  wowGrowthPct: Record<string, number> | null;
   weekRecords?: WeekRecord[];
+  images?: ImageSpec[];
 }
+
 const { currentWeek, wowGrowthPct, weekRecords = [] } = Astro.props;
 
-const bazziteSparkline = weekRecords.slice(-12).map((w: WeekRecord) => w.distros?.bazzite ?? 0);
-const bluefinSparkline  = weekRecords.slice(-12).map((w: WeekRecord) => w.distros?.bluefin ?? 0);
-const auroraSparkline   = weekRecords.slice(-12).map((w: WeekRecord) => w.distros?.aurora ?? 0);
+// Default: original 3 image cards (backward-compat for pages that don't pass images)
+const images: ImageSpec[] = Astro.props.images ?? [
+  { key: 'bazzite', label: 'Bazzite', color: 'var(--blue)'   },
+  { key: 'bluefin', label: 'Bluefin', color: 'var(--purple)' },
+  { key: 'aurora',  label: 'Aurora',  color: 'var(--green)'  },
+];
 
-function trendArrow(pct: number | null): string {
-  if (pct === null) return '—';
+function sparklineFor(key: string): number[] {
+  return weekRecords.slice(-12).map((w: WeekRecord) => w.distros?.[key] ?? 0);
+}
+
+function trendArrow(pct: number | null | undefined): string {
+  if (pct == null) return '';
   if (pct > 0) return '▲';
   if (pct < 0) return '▼';
   return '→';
 }
-function trendClass(pct: number | null): string {
-  if (pct === null) return 'trend-neutral';
+function trendClass(pct: number | null | undefined): string {
+  if (pct == null) return 'trend-neutral';
   if (pct > 0) return 'trend-up';
   if (pct < 0) return 'trend-down';
   return 'trend-neutral';
@@ -38,10 +46,11 @@ function fmt(n: number | undefined): string {
 ---
 
 <div class="hero-kpis">
-  <div class="kpi-card">
+  <!-- Total card -->
+  <div class="kpi-card kpi-total">
     <div class="kpi-value">
       {fmt(currentWeek?.total)}
-      {wowGrowthPct && (
+      {wowGrowthPct?.total != null && (
         <span class={`kpi-trend ${trendClass(wowGrowthPct.total)}`}>
           {trendArrow(wowGrowthPct.total)} {Math.abs(wowGrowthPct.total).toFixed(1)}%
         </span>
@@ -50,44 +59,29 @@ function fmt(n: number | undefined): string {
     <div class="kpi-label">Total Active Devices</div>
   </div>
 
-  <div class="kpi-card">
-    <div class="kpi-value">
-      {fmt(currentWeek?.distros?.bazzite)}
-      {wowGrowthPct && (
-        <span class={`kpi-trend ${trendClass(wowGrowthPct.bazzite)}`}>
-          {trendArrow(wowGrowthPct.bazzite)}
-        </span>
-      )}
-    </div>
-    <div class="kpi-label">Bazzite</div>
-    {bazziteSparkline.length >= 2 && <Sparkline data={bazziteSparkline} color="var(--blue)" label="Bazzite 12-week trend" />}
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-value">
-      {fmt(currentWeek?.distros?.bluefin)}
-      {wowGrowthPct && (
-        <span class={`kpi-trend ${trendClass(wowGrowthPct.bluefin)}`}>
-          {trendArrow(wowGrowthPct.bluefin)}
-        </span>
-      )}
-    </div>
-    <div class="kpi-label">Bluefin</div>
-    {bluefinSparkline.length >= 2 && <Sparkline data={bluefinSparkline} color="var(--purple)" label="Bluefin 12-week trend" />}
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-value">
-      {fmt(currentWeek?.distros?.aurora)}
-      {wowGrowthPct && (
-        <span class={`kpi-trend ${trendClass(wowGrowthPct.aurora)}`}>
-          {trendArrow(wowGrowthPct.aurora)}
-        </span>
-      )}
-    </div>
-    <div class="kpi-label">Aurora</div>
-    {auroraSparkline.length >= 2 && <Sparkline data={auroraSparkline} color="var(--green)" label="Aurora 12-week trend" />}
-  </div>
+  <!-- Per-image cards -->
+  {images.map(img => {
+    const count = currentWeek?.distros?.[img.key] ?? 0;
+    const wow   = wowGrowthPct?.[img.key] ?? null;
+    const spark  = sparklineFor(img.key);
+    const hasCount = count > 0;
+    return (
+      <div class="kpi-card">
+        <div class="kpi-value">
+          {hasCount ? fmt(count) : <span class="kpi-collecting">Collecting…</span>}
+          {wow != null && hasCount && (
+            <span class={`kpi-trend ${trendClass(wow)}`}>
+              {trendArrow(wow)}
+            </span>
+          )}
+        </div>
+        <div class="kpi-label">{img.label}</div>
+        {spark.length >= 2 && spark.some(v => v > 0) && (
+          <Sparkline data={spark} color={img.color} label={`${img.label} 12-week trend`} />
+        )}
+      </div>
+    );
+  })}
 </div>
 
 <style>
@@ -96,9 +90,15 @@ function fmt(n: number | undefined): string {
     background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
     padding: 20px 24px; flex: 1 1 130px;
   }
+  .kpi-total {
+    border-left: 3px solid var(--blue);
+  }
   .kpi-value {
     font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1.1;
     display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  }
+  .kpi-collecting {
+    font-size: 0.9rem; color: var(--muted); font-weight: 400;
   }
   .kpi-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
   .kpi-trend { font-size: 0.9rem; font-weight: 600; }
