@@ -548,7 +548,7 @@ func ComputeRepoMetrics(runs []WorkflowRunRecord, repo string) RepoMetrics {
 	for _, r := range repoRuns {
 		streamMap[r.WorkflowFile] = append(streamMap[r.WorkflowFile], r)
 	}
-	var streams []StreamMetrics
+	streams := []StreamMetrics{}
 	for wfFile, wfRuns := range streamMap {
 		sm := computeStreamMetrics(wfFile, wfRuns)
 		streams = append(streams, sm)
@@ -569,7 +569,7 @@ func ComputeRepoMetrics(runs []WorkflowRunRecord, repo string) RepoMetrics {
 			}
 		}
 	}
-	var archs []ArchMetrics
+	archs := []ArchMetrics{}
 	for platform, jobs := range archMap {
 		am := computeArchMetrics(platform, jobs)
 		archs = append(archs, am)

@@ -20,6 +20,8 @@ interface Props {
   };
 }
 
+import { safeJson } from '../lib/inject.ts';
+
 const { summary } = Astro.props;
 
 function busFactorClass(factor: number): string {
@@ -99,7 +101,7 @@ const kpiData = {
   </div>
 </div>
 
-<script type="application/json" id="contributors-kpi-data" set:html={JSON.stringify(kpiData).replace(/</g, '\u003c')}></script>
+<script type="application/json" id="contributors-kpi-data" set:html={safeJson(kpiData)}></script>
 
 <script>
   const raw = document.getElementById('contributors-kpi-data')?.textContent ?? '{}';
