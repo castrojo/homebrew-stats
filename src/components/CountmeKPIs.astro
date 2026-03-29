@@ -1,8 +1,7 @@
 ---
-interface WeekRecord {
-  distros: Record<string, number>;
-  total: number;
-}
+import type { WeekRecord } from '../lib/types.ts';
+import Sparkline from './Sparkline.astro';
+
 interface WoWGrowth {
   bazzite: number;
   bluefin: number;
@@ -13,8 +12,13 @@ interface WoWGrowth {
 interface Props {
   currentWeek: WeekRecord | null;
   wowGrowthPct: WoWGrowth | null;
+  weekRecords?: WeekRecord[];
 }
-const { currentWeek, wowGrowthPct } = Astro.props;
+const { currentWeek, wowGrowthPct, weekRecords = [] } = Astro.props;
+
+const bazziteSparkline = weekRecords.slice(-12).map((w: WeekRecord) => w.distros?.bazzite ?? 0);
+const bluefinSparkline  = weekRecords.slice(-12).map((w: WeekRecord) => w.distros?.bluefin ?? 0);
+const auroraSparkline   = weekRecords.slice(-12).map((w: WeekRecord) => w.distros?.aurora ?? 0);
 
 function trendArrow(pct: number | null): string {
   if (pct === null) return '—';
@@ -56,6 +60,7 @@ function fmt(n: number | undefined): string {
       )}
     </div>
     <div class="kpi-label">Bazzite</div>
+    {bazziteSparkline.length >= 2 && <Sparkline data={bazziteSparkline} color="var(--blue)" label="Bazzite 12-week trend" />}
   </div>
 
   <div class="kpi-card">
@@ -68,6 +73,7 @@ function fmt(n: number | undefined): string {
       )}
     </div>
     <div class="kpi-label">Bluefin</div>
+    {bluefinSparkline.length >= 2 && <Sparkline data={bluefinSparkline} color="var(--purple)" label="Bluefin 12-week trend" />}
   </div>
 
   <div class="kpi-card">
@@ -80,6 +86,7 @@ function fmt(n: number | undefined): string {
       )}
     </div>
     <div class="kpi-label">Aurora</div>
+    {auroraSparkline.length >= 2 && <Sparkline data={auroraSparkline} color="var(--green)" label="Aurora 12-week trend" />}
   </div>
 </div>
 

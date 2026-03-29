@@ -5,19 +5,62 @@ import CountmeTrendChart from '../../components/CountmeTrendChart.astro';
 import DistroTrendChart from '../../components/DistroTrendChart.astro';
 import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
 import EcosystemGrowthChart from '../../components/EcosystemGrowthChart.astro';
-import Sparkline from '../../components/Sparkline.astro';
 import data from '../../data/countme.json';
 import DORAComparisonSection from '../../components/DORAComparisonSection.astro';
-import type { BuildsData } from '../../lib/types.ts';
+import FutureProofedPanel from '../../components/FutureProofedPanel.astro';
+import type { BuildsData, BuildRepoMetrics } from '../../lib/types.ts';
 import bluefinBuilds from '../../data/builds-bluefin.json';
 import auroraBuilds from '../../data/builds-aurora.json';
 import bazziteBuilds from '../../data/builds-bazzite.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
-const bazziteWeekly = weekRecords.slice(-12).map((w: any) => w.distros?.bazzite ?? 0);
-const bluefinWeekly = weekRecords.slice(-12).map((w: any) => w.distros?.bluefin ?? 0);
-const auroraWeekly  = weekRecords.slice(-12).map((w: any) => w.distros?.aurora ?? 0);
+
+/**
+ * Derive a boolean | null for a supply chain metric from a builds dataset.
+ * Uses per-repo rate fields (sign_step_success_rate_30d / sbom_step_success_rate_30d).
+ * -1 means "step not detected in pipeline" — treated the same as missing data (null).
+ * If at least one repo has real data, use the mean rate; threshold >= 80 → true.
+ */
+function deriveRate(
+  repos: BuildRepoMetrics[],
+  field: 'sign_step_success_rate_30d' | 'sbom_step_success_rate_30d',
+): boolean | null {
+  const validRates = repos
+    .map(r => r[field])
+    .filter((v): v is number => v !== undefined && v !== -1);
+  if (validRates.length === 0) return null;
+  const mean = validRates.reduce((a, b) => a + b, 0) / validRates.length;
+  return mean >= 80;
+}
+
+const bluefinRepos = (bluefinBuilds as unknown as BuildsData).repos ?? [];
+const auroraRepos  = (auroraBuilds  as unknown as BuildsData).repos ?? [];
+const bazziteRepos = (bazziteBuilds as unknown as BuildsData).repos ?? [];
+
+const imageProofData = [
+  {
+    label: 'Bluefin',
+    signing:     deriveRate(bluefinRepos, 'sign_step_success_rate_30d'),
+    sbom:        deriveRate(bluefinRepos, 'sbom_step_success_rate_30d'),
+    zstdChunked: null as boolean | null,
+    chunka:      null as boolean | null,
+  },
+  {
+    label: 'Aurora',
+    signing:     deriveRate(auroraRepos, 'sign_step_success_rate_30d'),
+    sbom:        deriveRate(auroraRepos, 'sbom_step_success_rate_30d'),
+    zstdChunked: null as boolean | null,
+    chunka:      null as boolean | null,
+  },
+  {
+    label: 'Bazzite',
+    signing:     deriveRate(bazziteRepos, 'sign_step_success_rate_30d'),
+    sbom:        deriveRate(bazziteRepos, 'sbom_step_success_rate_30d'),
+    zstdChunked: null as boolean | null,
+    chunka:      null as boolean | null,
+  },
+];
 ---
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">
@@ -43,21 +86,17 @@ const auroraWeekly  = weekRecords.slice(-12).map((w: any) => w.distros?.aurora ?
   <CountmeKPIs
     currentWeek={data.current_week as any}
     wowGrowthPct={data.wow_growth_pct as any}
+    weekRecords={weekRecords as any}
   />
-  <div class="sparkline-row">
-    <span class="sparkline-label">Bazzite</span>
-    <Sparkline data={bazziteWeekly} color="var(--blue)" label="Bazzite 12-week trend" />
-    <span class="sparkline-label">Bluefin</span>
-    <Sparkline data={bluefinWeekly} color="var(--purple)" label="Bluefin 12-week trend" />
-    <span class="sparkline-label">Aurora</span>
-    <Sparkline data={auroraWeekly} color="var(--green)" label="Aurora 12-week trend" />
-  </div>
 
   <DORAComparisonSection
     bluefin={bluefinBuilds as unknown as BuildsData}
     aurora={auroraBuilds as unknown as BuildsData}
     bazzite={bazziteBuilds as unknown as BuildsData}
   />
+
+  <h2>Future Proofed</h2>
+  <FutureProofedPanel images={imageProofData} />
 
   <section class="charts-section">
     <h2>Monthly Trends</h2>
@@ -100,16 +139,4 @@ const auroraWeekly  = weekRecords.slice(-12).map((w: any) => w.distros?.aurora ?
   .explainer p { margin: 0; }
   .explainer strong { color: var(--text); }
   .explainer a { color: var(--blue); }
-  .sparkline-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-  }
-  .sparkline-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-  }
 </style>

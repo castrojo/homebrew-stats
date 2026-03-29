@@ -4,14 +4,18 @@
 
 Health dashboard for ublue-os Homebrew taps and projectbluefin testhub. Go backend + Astro + Chart.js.
 Live: `https://castrojo.github.io/homebrew-stats/` | Branch: `main`
-Tabs: Homebrew · Testhub · Overall · Contributors · Builds (5 total)
+Pages: Homebrew · Testhub · Overall · Contributors · Builds · Aurora Builds · Bazzite Builds · + 7 image tabs (14 total)
 
 ## Skills
 
 ```bash
-cat ~/src/skills/workflow/SKILL.md            # git push confirmation, CI watch, upstream PR rules
-cat skills/SKILL.md                           # repo operational knowledge (schema, CI, chart patterns)
-cat ~/src/skills/homebrew-stats/SKILL.md      # cross-cutting dashboard patterns
+cat ~/src/skills/workflow/SKILL.md                                    # git push confirmation, CI watch, upstream PR rules
+cat ~/.config/opencode/skills/homebrew-stats/SKILL.md                 # architecture overview + subskill index
+cat ~/.config/opencode/skills/homebrew-stats-charts/SKILL.md          # Chart.js, safeJson, CSS vars, build-utils.ts
+cat ~/.config/opencode/skills/homebrew-stats-go/SKILL.md              # Go backend, nil-slice, subcommands, Justfile sync
+cat ~/.config/opencode/skills/homebrew-stats-testing/SKILL.md         # Playwright, pre/post-deploy, bootstrap guards
+cat ~/.config/opencode/skills/homebrew-stats-tabs/SKILL.md            # adding new image tabs (countme vs stub)
+cat ~/.config/opencode/skills/homebrew-stats-ci/SKILL.md              # CI workflows, actionlint, verify-live, cache
 ```
 
 ## Quick Start
@@ -20,7 +24,7 @@ cat ~/src/skills/homebrew-stats/SKILL.md      # cross-cutting dashboard patterns
 just test-all    # unit tests (Vitest) + E2E tests (Playwright)
 just test        # unit tests only (Go + TypeScript)
 just test-e2e    # Playwright E2E only (builds site first)
-just verify-live # confirm live site is healthy after deploy (checks 4 pages)
+just verify-live # confirm live site is healthy after deploy (checks 7 pages)
 just sync        # fetch-homebrew + fetch-builds (requires GITHUB_TOKEN or GITHUB_PAT)
 just sync-builds # fetch Bluefin CI/CD build metrics only
 just dev         # Astro hot-reload dev server on :4324 (uses existing synced data)
@@ -46,7 +50,7 @@ All three layers required — "CI green" alone is not done:
 
 1. `just test-all` + `npm run lint` + `actionlint` + `cd stats-go && go test ./...` all pass
 2. CI green: "Build and Deploy to GitHub Pages" AND "Smoke Test — Live Site" workflows
-3. `just verify-live` passes (HTTP 200 on 4 pages, canvas IDs present, no `chart-empty`, fresh `meta.json`)
+3. `just verify-live` passes (HTTP 200 on 7 pages, canvas IDs present, no `chart-empty`, fresh `meta.json`)
 
 ## Work Queue
 

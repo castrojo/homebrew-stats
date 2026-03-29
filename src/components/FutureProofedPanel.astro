@@ -1,0 +1,166 @@
+---
+interface ImageProof {
+  label: string;
+  signing: boolean | null;   // null = unknown/no data
+  sbom: boolean | null;
+  zstdChunked: boolean | null;  // null = no data yet
+  chunka: boolean | null;       // null = no data yet
+}
+
+interface Props {
+  images: ImageProof[];
+}
+
+const { images } = Astro.props;
+
+function statusIcon(value: boolean | null): string {
+  if (value === true) return '✅';
+  if (value === false) return '❌';
+  return '—';
+}
+
+function statusLabel(value: boolean | null): string {
+  if (value === true) return 'Yes';
+  if (value === false) return 'No';
+  return 'Not tracked';
+}
+
+function statusColor(value: boolean | null): string {
+  if (value === true) return 'var(--green)';
+  if (value === false) return 'var(--red)';
+  return 'var(--muted)';
+}
+---
+
+<section class="future-proofed-panel">
+  <p class="fp-note">
+    These checks measure OCI image build best practices adopted across the bootc ecosystem.
+    Signing and SBOM rates are computed from CI workflow step detection over the last 30 days.
+    zstd:chunked and chunked (chunka) tracking is not yet implemented.
+  </p>
+  <div class="fp-table-wrapper">
+    <table class="fp-table">
+      <thead>
+        <tr>
+          <th class="col-image">Image</th>
+          <th class="col-check">Cosign Signing</th>
+          <th class="col-check">SBOM</th>
+          <th class="col-check">zstd:chunked</th>
+          <th class="col-check">chunked (chunka)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {images.map(img => (
+          <tr>
+            <td class="cell-image">{img.label}</td>
+            <td class="cell-check" style={`color:${statusColor(img.signing)}`}>
+              <span class="check-icon">{statusIcon(img.signing)}</span>
+              <span class="check-label">{statusLabel(img.signing)}</span>
+            </td>
+            <td class="cell-check" style={`color:${statusColor(img.sbom)}`}>
+              <span class="check-icon">{statusIcon(img.sbom)}</span>
+              <span class="check-label">{statusLabel(img.sbom)}</span>
+            </td>
+            <td class="cell-check" style={`color:${statusColor(img.zstdChunked)}`}>
+              <span class="check-icon">{statusIcon(img.zstdChunked)}</span>
+              <span class="check-label">{statusLabel(img.zstdChunked)}</span>
+            </td>
+            <td class="cell-check" style={`color:${statusColor(img.chunka)}`}>
+              <span class="check-icon">{statusIcon(img.chunka)}</span>
+              <span class="check-label">{statusLabel(img.chunka)}</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .future-proofed-panel {
+    margin-bottom: 2rem;
+  }
+
+  .fp-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .fp-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .fp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .fp-table thead {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .fp-table th {
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    text-align: left;
+  }
+
+  .fp-table th.col-check {
+    text-align: center;
+  }
+
+  .fp-table td {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .fp-table tbody tr:first-child td {
+    border-top: none;
+  }
+
+  .cell-image {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .cell-check {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .check-icon {
+    display: block;
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
+
+  .check-label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 600px) {
+    .fp-table th,
+    .fp-table td {
+      padding: 8px 10px;
+    }
+    .check-label {
+      display: none;
+    }
+  }
+</style>
