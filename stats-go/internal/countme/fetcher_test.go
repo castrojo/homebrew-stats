@@ -68,6 +68,7 @@ func TestParseDistroName_ValidExact(t *testing.T) {
 		{"Bluefin", "bluefin"},
 		{"Bluefin LTS", "bluefin-lts"},
 		{"Aurora", "aurora"},
+		{"secureblue", "secureblue"},
 	}
 	for _, c := range cases {
 		got, ok := parseDistroName(c.input)

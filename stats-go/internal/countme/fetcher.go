@@ -25,6 +25,7 @@ var validDistros = map[string]string{
 	"Bluefin":     "bluefin",
 	"Bluefin LTS": "bluefin-lts",
 	"Aurora":      "aurora",
+	"secureblue":  "secureblue",
 }
 
 // badgeNames lists the distros with badge endpoints (ublue-os hosted only).
