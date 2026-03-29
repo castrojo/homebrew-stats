@@ -9,6 +9,7 @@ Tabs: Homebrew · Testhub · Overall · Contributors · Builds (5 total)
 ## Skills
 
 ```bash
+cat ~/src/skills/workflow/SKILL.md            # git push confirmation, CI watch, upstream PR rules
 cat skills/SKILL.md                           # repo operational knowledge (schema, CI, chart patterns)
 cat ~/src/skills/homebrew-stats/SKILL.md      # cross-cutting dashboard patterns
 ```
@@ -37,6 +38,7 @@ npm run typecheck  # TypeScript type check
 - **Cache key bump isolation** — never add data-quality tests in the same commit as a cache key bump
 - **Terminology** — Aurora/Bazzite/Bluefin are **images** in UI copy, never "distros"
 - **Types in sync** — `src/lib/types.ts` mirrors Go structs; update both together
+- **Go nil-slice guard** — Go marshals nil slices as JSON `null`; always add `?? []` in Astro/TS and type fields as `T[] | null`
 
 ## Definition of Done
 
