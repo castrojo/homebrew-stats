@@ -48,7 +48,9 @@ import { Chart } from 'chart.js';
 
 // Astro deduplicates this script — handle all instances via querySelectorAll.
 document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEach(dataEl => {
-  const { monthly, distroKey, distroLabel, colorIndex } = JSON.parse(dataEl.textContent!);
+  const parsed = JSON.parse(dataEl.textContent ?? 'null');
+  if (!parsed) return;
+  const { monthly, distroKey, distroLabel, colorIndex } = parsed;
   const canvas = document.getElementById(`${distroKey}-trend-chart`) as HTMLCanvasElement | null;
   if (!canvas) return;
 

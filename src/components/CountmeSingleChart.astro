@@ -51,7 +51,9 @@ document.querySelectorAll<HTMLScriptElement>('script[id$="-data"][type="applicat
   const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
   if (!canvas) return;
 
-  const { weekRecords, distroKey, label } = JSON.parse(el.textContent!);
+  const parsed = JSON.parse(el.textContent ?? 'null');
+  if (!parsed) return;
+  const { weekRecords, distroKey, label } = parsed;
 
   function getFiltered(range: string) {
     if (range === 'all') return weekRecords;

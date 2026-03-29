@@ -71,7 +71,9 @@ const safeId = tapName.replace(/\//g, '-');
   // Each DownloadsChart instance emits a JSON data tag; scan them all so this
   // single deduplicated module script initialises every chart on the page.
   document.querySelectorAll('[id^="downloads-data-"]').forEach(el => {
-    const { tapName, relevant: allRelevant, TOP_N } = JSON.parse((el as HTMLElement).textContent!);
+    const parsed = JSON.parse((el as HTMLElement).textContent ?? 'null');
+    if (!parsed) return;
+    const { tapName, relevant: allRelevant, TOP_N } = parsed;
     const safeId = tapName.replace(/\//g, '-');
 
     // Determine top N packages by most recent snapshot's download counts.

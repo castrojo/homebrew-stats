@@ -46,11 +46,17 @@ const hasData = !!currentWeek && !!prevWeek;
 <script>
 import '../lib/chart-registry.js';
 import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('ecosystem-growth-data');
 if (dataEl) {
-  const { currentWeek, prevWeek, DISTROS, LABELS } = JSON.parse(dataEl.textContent!);
+  const { currentWeek, prevWeek, DISTROS, LABELS } = readChartData<{
+    currentWeek: { distros: Record<string, number> };
+    prevWeek: { distros: Record<string, number> };
+    DISTROS: string[];
+    LABELS: string[];
+  }>('ecosystem-growth-data');
   const canvas = document.getElementById('ecosystem-growth-chart') as HTMLCanvasElement;
 
   const c = getChartColors();
@@ -72,8 +78,9 @@ if (dataEl) {
     }
   ];
 
+  let chart: Chart | undefined;
   try {
-    new Chart(canvas, {
+    chart = new Chart(canvas, {
       type: 'bar',
       data: {
         labels: LABELS,
@@ -114,9 +121,15 @@ if (dataEl) {
   }
 
   window.addEventListener('themechange', () => {
-    // Chart instance needs to be stored to update it here.
-    // For simplicity, we can let the page reload or just handle it if we have the instance.
-    // In other components, we store it in a local variable.
+    if (!chart) return;
+    const colors = getChartColors();
+    chart.data.datasets[0].backgroundColor = BRAND_COLOURS.slice(0, DISTROS.length);
+    chart.data.datasets[1].backgroundColor = BRAND_COLOURS.slice(0, DISTROS.length).map(col => col + '80');
+    (chart.options.plugins!.legend!.labels as { color: string }).color = colors.text;
+    chart.options.scales!.x!.ticks!.color = colors.muted;
+    (chart.options.scales!.y!.grid as { color: string }).color = colors.grid;
+    chart.options.scales!.y!.ticks!.color = colors.muted;
+    chart.update();
   });
 }
 </script>

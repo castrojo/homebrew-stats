@@ -88,8 +88,9 @@ const centerLabelPlugin = {
   },
 };
 
+let chart: Chart | undefined;
 try {
-  new Chart(canvas, {
+  chart = new Chart(canvas, {
     type: 'doughnut',
     data: {
       labels: LABELS,
@@ -119,6 +120,13 @@ try {
 } catch (e) {
   console.error('[EcosystemPieChart] Chart.js init failed:', e);
 }
+
+window.addEventListener('themechange', () => {
+  if (!chart) return;
+  const colors = getChartColors();
+  (chart.data.datasets[0] as { borderColor: string }).borderColor = colors.grid || '#161b22';
+  chart.update();
+});
 </script>
 
 <style>

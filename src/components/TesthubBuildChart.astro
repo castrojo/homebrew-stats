@@ -34,11 +34,14 @@ const { history } = Astro.props;
 <script>
 import '../lib/chart-registry.js';
 import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('testhub-build-data');
 if (dataEl) {
-  const { history } = JSON.parse(dataEl.textContent!);
+  const { history } = readChartData<{
+    history: { date: string; build_counts: { app: string; passed: number; total: number }[]; last_run_id: number }[]
+  }>('testhub-build-data');
   const canvas = document.getElementById('testhub-build-chart') as HTMLCanvasElement;
 
   const appSet = new Set<string>();

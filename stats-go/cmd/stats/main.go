@@ -451,19 +451,11 @@ func saveTesthubHistory(store *testhub.HistoryStore) error {
 
 const countmeCacheFile = ".sync-cache/countme-history.json"
 
-type countmeWoW struct {
-	Bazzite    float64 `json:"bazzite"`
-	Bluefin    float64 `json:"bluefin"`
-	BluefinLTS float64 `json:"bluefin-lts"`
-	Aurora     float64 `json:"aurora"`
-	Total      float64 `json:"total"`
-}
-
 type countmeOutput struct {
 	GeneratedAt   string                    `json:"generated_at"`
 	CurrentWeek   *countme.WeekRecord       `json:"current_week,omitempty"`
 	PrevWeek      *countme.WeekRecord       `json:"prev_week,omitempty"`
-	WoWGrowthPct  *countmeWoW               `json:"wow_growth_pct,omitempty"`
+	WoWGrowthPct  map[string]float64        `json:"wow_growth_pct,omitempty"`
 	History       countme.HistoryStore      `json:"history"`
 	OsVersionDist map[string]map[string]int `json:"os_version_dist,omitempty"`
 }
@@ -557,20 +549,28 @@ func buildCountmeOutput(store *countme.HistoryStore) countmeOutput {
 	return out
 }
 
-func computeWoW(current, prev *countme.WeekRecord) *countmeWoW {
+func computeWoW(current, prev *countme.WeekRecord) map[string]float64 {
 	growth := func(cur, prv int) float64 {
 		if prv == 0 {
 			return 0
 		}
 		return float64(cur-prv) / float64(prv) * 100.0
 	}
-	return &countmeWoW{
-		Bazzite:    growth(current.Distros["bazzite"], prev.Distros["bazzite"]),
-		Bluefin:    growth(current.Distros["bluefin"], prev.Distros["bluefin"]),
-		BluefinLTS: growth(current.Distros["bluefin-lts"], prev.Distros["bluefin-lts"]),
-		Aurora:     growth(current.Distros["aurora"], prev.Distros["aurora"]),
-		Total:      growth(current.Total, prev.Total),
+	result := map[string]float64{
+		"total": growth(current.Total, prev.Total),
 	}
+	// Dynamically include all distros present in either week.
+	allKeys := make(map[string]struct{})
+	for k := range current.Distros {
+		allKeys[k] = struct{}{}
+	}
+	for k := range prev.Distros {
+		allKeys[k] = struct{}{}
+	}
+	for k := range allKeys {
+		result[k] = growth(current.Distros[k], prev.Distros[k])
+	}
+	return result
 }
 
 func loadCountmeHistory() (*countme.HistoryStore, error) {

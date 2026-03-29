@@ -539,9 +539,9 @@ describe("src/data/contributors.json schema", () => {
   });
 });
 
-import buildsData from '../data/builds.json';
+import buildsData from '../data/builds-bluefin.json';
 
-describe('builds.json schema', () => {
+describe('builds-bluefin.json schema', () => {
   const data = buildsData as Record<string, unknown>;
 
   it('has required top-level keys', () => {

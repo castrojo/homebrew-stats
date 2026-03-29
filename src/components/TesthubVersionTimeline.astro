@@ -30,11 +30,14 @@ const { history } = Astro.props;
 <script>
 import '../lib/chart-registry.js';
 import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('testhub-version-data');
 if (dataEl) {
-  const { history } = JSON.parse(dataEl.textContent!);
+  const { history } = readChartData<{
+    history: { date: string; packages: { name: string; version?: string }[]; build_counts: { app: string }[]; last_run_id: number }[]
+  }>('testhub-version-data');
   const canvas = document.getElementById('testhub-version-chart') as HTMLCanvasElement;
 
   const appSet = new Set<string>();
@@ -73,8 +76,9 @@ if (dataEl) {
     };
   }).filter((ds: { data: unknown[] }) => ds.data.length > 0);
 
+  let chart: Chart | undefined;
   try {
-    new Chart(canvas, {
+    chart = new Chart(canvas, {
       type: 'scatter',
       data: { datasets },
       options: {
@@ -109,5 +113,16 @@ if (dataEl) {
   } catch (e) {
     console.error('[TesthubVersionTimeline] Chart.js init failed:', e);
   }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    const colors = getChartColors();
+    (chart.options.plugins!.legend!.labels as { color: string }).color = colors.text;
+    chart.options.scales!.x!.ticks!.color = colors.muted;
+    (chart.options.scales!.x!.grid as { color: string }).color = colors.grid;
+    chart.options.scales!.y!.ticks!.color = colors.muted;
+    (chart.options.scales!.y!.grid as { color: string }).color = colors.grid;
+    chart.update();
+  });
 }
 </script>

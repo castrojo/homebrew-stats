@@ -45,11 +45,16 @@ const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
 <script>
 import '../lib/chart-registry.js';
 import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('countme-trend-data');
 if (dataEl) {
-  const { monthly, DISTROS, LABELS } = JSON.parse(dataEl.textContent!);
+  const { monthly, DISTROS, LABELS } = readChartData<{
+    monthly: { week_end: string; distros: Record<string, number> }[];
+    DISTROS: string[];
+    LABELS: string[];
+  }>('countme-trend-data');
   const canvas = document.getElementById('countme-trend-chart') as HTMLCanvasElement;
 
   function getFiltered(range: string) {
