@@ -269,3 +269,48 @@ func TestBuildActiveHumanLogins_EmptyInputReturnsEmptySlice(t *testing.T) {
 		t.Fatalf("want 0 logins, got %d", len(got))
 	}
 }
+
+func TestShouldAppendTesthubSnapshot(t *testing.T) {
+	tests := []struct {
+		name       string
+		lastRunID  int64
+		newRunID   int64
+		counts     []testhub.AppDayCount
+		wantAppend bool
+	}{
+		{
+			name:       "no new runs and no counts",
+			lastRunID:  100,
+			newRunID:   100,
+			counts:     nil,
+			wantAppend: false,
+		},
+		{
+			name:      "new run id advances",
+			lastRunID: 100,
+			newRunID:  101,
+			counts: []testhub.AppDayCount{
+				{App: "ghostty", Passed: 1, Failed: 0, Total: 1},
+			},
+			wantAppend: true,
+		},
+		{
+			name:      "same run id but non-empty counts",
+			lastRunID: 100,
+			newRunID:  100,
+			counts: []testhub.AppDayCount{
+				{App: "goose", Passed: 2, Failed: 0, Total: 2},
+			},
+			wantAppend: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := shouldAppendTesthubSnapshot(tc.lastRunID, tc.newRunID, tc.counts)
+			if got != tc.wantAppend {
+				t.Fatalf("want append=%v, got %v", tc.wantAppend, got)
+			}
+		})
+	}
+}

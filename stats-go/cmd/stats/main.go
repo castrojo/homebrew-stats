@@ -233,6 +233,13 @@ type testhubOutput struct {
 	History      []testhub.DaySnapshot  `json:"history"`
 }
 
+func shouldAppendTesthubSnapshot(lastRunID, newLastRunID int64, counts []testhub.AppDayCount) bool {
+	if newLastRunID > lastRunID {
+		return true
+	}
+	return len(counts) > 0
+}
+
 func runFetchTesthub() error {
 	client, err := ghclient.NewClient()
 	if err != nil {
@@ -255,6 +262,9 @@ func runFetchTesthub() error {
 	pkgs, err := testhub.ListPackages(client.Context(), client.GitHub(), "projectbluefin")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  testhub packages: %v\n", err)
+		if strings.Contains(err.Error(), "read:packages") {
+			fmt.Fprintln(os.Stderr, "  hint: configure GH_TRAFFIC_TOKEN with read:packages scope for fetch-testhub")
+		}
 		pkgs = nil
 	} else {
 		fmt.Fprintf(os.Stderr, "  packages: %d\n", len(pkgs))
@@ -273,9 +283,13 @@ func runFetchTesthub() error {
 	if fetchErr != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  skipping testhub history save — fetch failed: %v\n", fetchErr)
 	} else {
-		store = testhub.AppendSnapshot(store, pkgs, counts, newLastRunID)
-		if err := saveTesthubHistory(store); err != nil {
-			fmt.Fprintf(os.Stderr, "⚠️  failed to save testhub history: %v\n", err)
+		if shouldAppendTesthubSnapshot(lastRunID, newLastRunID, counts) {
+			store = testhub.AppendSnapshot(store, pkgs, counts, newLastRunID)
+			if err := saveTesthubHistory(store); err != nil {
+				fmt.Fprintf(os.Stderr, "⚠️  failed to save testhub history: %v\n", err)
+			}
+		} else {
+			fmt.Fprintln(os.Stderr, "  no new testhub runs; keeping existing history snapshot")
 		}
 	}
 
