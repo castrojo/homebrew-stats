@@ -3,10 +3,12 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 default:
     just --list
 
-# Fetch Bluefin CI/CD build metrics from GitHub Actions API
+# Fetch CI/CD build metrics for all images from GitHub Actions API
 sync-builds:
     cd stats-go && go build -o stats ./cmd/stats/
-    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-bluefin
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-aurora
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-bazzite
 
 # Fetch latest data from GitHub API (requires GITHUB_TOKEN)
 sync:
