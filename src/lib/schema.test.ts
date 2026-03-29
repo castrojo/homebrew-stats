@@ -7,8 +7,9 @@
  * without updating the other side.
  *
  * KEY CONTRACT (catches the Bazzite-key-case bug):
- *   distros keys in week_records/day_records MUST be lowercase:
- *     bazzite, bluefin, bluefin-lts, aurora
+ *   distros keys in week_records/day_records MUST be lowercase when present:
+ *     bazzite, bluefin, aurora, secureblue, wayblue
+ *   bluefin-lts uses CentOS/EPEL repos so it never appears in countme data.
  *   os_version_dist keys MUST be title case (raw os_name from CSV):
  *     Bazzite, Bluefin, Bluefin LTS, Aurora
  *
@@ -28,7 +29,9 @@ function loadJSON(relPath: string): unknown {
   return JSON.parse(readFileSync(abs, "utf8"));
 }
 
-const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "bluefin-lts", "aurora"] as const;
+// All valid lowercase distro keys — not all must be present in every record
+// (e.g. bluefin-lts uses CentOS repos so it never appears; secureblue/wayblue are tracked too)
+const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "bluefin-lts", "aurora", "secureblue", "wayblue"] as const;
 const DISTRO_KEYS_TITLECASE = ["Bazzite", "Bluefin", "Bluefin LTS", "Aurora"] as const;
 
 // ── countme.json ─────────────────────────────────────────────────────────────
@@ -58,10 +61,12 @@ describe("src/data/countme.json schema", () => {
 
     for (const week of weeks) {
       const keys = Object.keys(week.distros);
-      for (const key of DISTRO_KEYS_LOWERCASE) {
+      // Every key that IS present must be a known lowercase key.
+      // Not all keys need to be present (e.g. bluefin-lts uses CentOS repos, never appears).
+      for (const key of keys) {
         expect(
-          keys,
-          `week_records distros must use lowercase "${key}" not "${key[0].toUpperCase() + key.slice(1)}"`
+          DISTRO_KEYS_LOWERCASE as readonly string[],
+          `week_records distros key "${key}" must be lowercase and in the allowed set`
         ).toContain(key);
       }
       // Explicitly assert no title-case keys slipped in

@@ -134,7 +134,7 @@ func TestFetchCSVLast30Days_MockServer(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	recs, _, err := fetchCSVFromURL(srv.URL)
+	recs, _, _, err := fetchCSVFromURL(srv.URL, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -258,7 +258,7 @@ func TestParseOsVersionDist_WithCsvOsVersionColumn(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	_, dist, err := fetchCSVFromURL(srv.URL)
+	_, dist, _, err := fetchCSVFromURL(srv.URL, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

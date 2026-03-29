@@ -474,16 +474,20 @@ func runFetchCountme() error {
 	if storeHasWeek(store, lastMonday) {
 		fmt.Fprintf(os.Stderr, "→ countme cache is current (week %s already fetched), skipping CSV fetch\n", lastMonday)
 	} else {
-		fmt.Fprintln(os.Stderr, "→ Fetching countme CSV (last 30d)…")
-		csvRecs, osVersionDist, err := countme.FetchCSVLast30Days()
+		fmt.Fprintln(os.Stderr, "→ Fetching countme CSV…")
+		csvRecs, osVersionDist, newLastModified, err := countme.FetchCSVLast30Days(store.CSVLastModified)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "⚠️  countme CSV: %v\n", err)
+		} else if csvRecs == nil {
+			// 304 Not Modified — server confirms the file hasn't changed since our last fetch.
+			fmt.Fprintln(os.Stderr, "  CSV: 304 Not Modified — using cached data")
 		} else {
 			fmt.Fprintf(os.Stderr, "  CSV: %d week records\n", len(csvRecs))
 			store = countme.MergeIntoHistory(store, csvRecs)
 			if osVersionDist != nil {
 				store.OsVersionDist = countme.MergeOsVersionDist(store.OsVersionDist, osVersionDist)
 			}
+			store.CSVLastModified = newLastModified
 		}
 	}
 
@@ -491,11 +495,14 @@ func runFetchCountme() error {
 		fmt.Fprintf(os.Stderr, "⚠️  countme history save: %v\n", err)
 	}
 
-	// If we still have no week history (e.g. cold-start CI with empty cache + failed CSV),
+	// If we still have no week history (e.g. cold-start CI with empty cache + failed CSV fetch),
 	// fall back to the committed src/data/countme.json so the site renders real data.
+	// Note: this does NOT overwrite CSVLastModified — the store already has the right value.
 	if len(store.WeekRecords) == 0 {
 		if fb := loadFallbackCountmeHistory(); fb != nil {
 			fmt.Fprintf(os.Stderr, "  using %d fallback week records from committed countme.json\n", len(fb.WeekRecords))
+			// Preserve CSVLastModified from the live store so 304 caching still works.
+			fb.CSVLastModified = store.CSVLastModified
 			store = fb
 		}
 	}

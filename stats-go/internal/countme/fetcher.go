@@ -67,18 +67,38 @@ type csvRow struct {
 	hits      int
 }
 
+// versionDistDistros lists the os_name values (as they appear in the CSV, title-case)
+// that are eligible for os_version_dist tracking. Only distros whose version charts
+// are rendered in the UI are included here. Lowercase distros (secureblue, wayblue)
+// are excluded because:
+//   - The schema test enforces title-case keys only (Bazzite/Bluefin/Aurora).
+//   - These distros do not have a FedoraVersionChart in the UI.
+var versionDistDistros = map[string]bool{
+	"Bazzite": true,
+	"Bluefin": true,
+	"Aurora":  true,
+}
+
 // parseOsVersionDist extracts os_name → os_version → count from CSV rows.
-// Only includes the 4 target distros; skips rows with sys_age == "-1" or empty os_version.
+// Only includes title-case distros tracked by versionDistDistros; skips rows
+// with sys_age == "-1", empty os_version, or non-numeric os_version strings.
+// Non-numeric versions (e.g. "dev", "0.0.3") are excluded to satisfy the
+// schema contract: os_version_dist version keys must be numeric strings.
 func parseOsVersionDist(rows []csvRow) map[string]map[string]int {
 	result := make(map[string]map[string]int)
 	for _, row := range rows {
 		if row.sysAge == "-1" {
 			continue
 		}
-		if _, ok := validDistros[row.osName]; !ok {
+		if !versionDistDistros[row.osName] {
 			continue
 		}
 		if row.osVersion == "" {
+			continue
+		}
+		// Reject non-numeric version strings (e.g. "dev", "0.0.3").
+		// The schema contract requires version keys to be numeric strings (e.g. "41", "42").
+		if _, err := strconv.Atoi(row.osVersion); err != nil {
 			continue
 		}
 		if result[row.osName] == nil {
@@ -243,41 +263,68 @@ func parseDistroName(osName string) (string, bool) {
 }
 
 // fetchCSVFromURL fetches and parses the countme CSV from the given URL.
-// Returns week records aggregated by (week_start, week_end) and an os_version
-// distribution map (os_name → os_version → hits).
-func fetchCSVFromURL(url string) ([]WeekRecord, map[string]map[string]int, error) {
+//
+// lastModified should be the Last-Modified value from the previous successful
+// fetch (stored in HistoryStore.CSVLastModified). When non-empty it is sent as
+// an If-Modified-Since header; if the server returns 304 Not Modified the
+// function returns (nil, nil, "", nil) — the caller must use its cached data.
+//
+// On a successful 200 response the function returns week records, an os_version
+// distribution map, the new Last-Modified header value (to persist), and nil error.
+//
+// NOTE: The Fedora CSV is ~546 MB. We intentionally fetch the full file to
+// guarantee the header row is present (the previous Range approach broke
+// parsing because the header is on line 1, not in the last 10 MB).
+// The If-Modified-Since round-trip saves bandwidth on days where the file
+// hasn't changed (the CSV updates once per week, on Sundays).
+func fetchCSVFromURL(url, lastModified string) ([]WeekRecord, map[string]map[string]int, string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("create request: %w", err)
+		return nil, nil, "", fmt.Errorf("create request: %w", err)
 	}
-	// Request only the last ~10 MB to avoid downloading the full CSV.
-	req.Header.Set("Range", "bytes=-10000000")
+	if lastModified != "" {
+		req.Header.Set("If-Modified-Since", lastModified)
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("GET countme CSV: %w", err)
+		return nil, nil, "", fmt.Errorf("GET countme CSV: %w", err)
 	}
 	defer resp.Body.Close()
 
+	// 304 Not Modified — caller uses its cached data unchanged.
+	if resp.StatusCode == http.StatusNotModified {
+		return nil, nil, lastModified, nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, nil, "", fmt.Errorf("unexpected HTTP status %d", resp.StatusCode)
+	}
+
+	newLastModified := resp.Header.Get("Last-Modified")
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, nil, fmt.Errorf("read CSV body: %w", err)
+		return nil, nil, "", fmt.Errorf("read CSV body: %w", err)
 	}
 
 	rows, err := parseCSVRows(body)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
 
 	weekRecords := rowsToWeekRecords(rows)
 	osVersionDist := parseOsVersionDist(rows)
-	return weekRecords, osVersionDist, nil
+	return weekRecords, osVersionDist, newLastModified, nil
 }
 
 // FetchCSVLast30Days fetches and parses the countme CSV using the default URL.
-// Returns week records and the os_version distribution (os_name → os_version → hits).
-func FetchCSVLast30Days() ([]WeekRecord, map[string]map[string]int, error) {
-	return fetchCSVFromURL(countmeCSVURL)
+// lastModified is the cached Last-Modified value from a previous fetch; pass ""
+// on first run. Returns week records, os_version distribution, the new
+// Last-Modified value to persist, and any error.
+// When the server returns 304 Not Modified, week records and distribution are nil.
+func FetchCSVLast30Days(lastModified string) ([]WeekRecord, map[string]map[string]int, string, error) {
+	return fetchCSVFromURL(countmeCSVURL, lastModified)
 }
 
 // MergeIntoHistory merges new week records into the store, deduplicating by week_start.
