@@ -278,7 +278,7 @@ export interface BuildRepoMetrics {
   total_runs_7d: number;
   total_runs_30d: number;
   avg_duration_min: number;
-  streams: BuildStreamMetrics[];
+  streams: BuildStreamMetrics[] | null;
   architectures?: BuildArchMetrics[];
   sign_step_success_rate_30d?: number;  // -1 = no sign steps detected
   sbom_step_success_rate_30d?: number;  // -1 = no sbom steps detected

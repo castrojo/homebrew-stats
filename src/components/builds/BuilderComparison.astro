@@ -10,9 +10,10 @@ const { repos } = Astro.props;
 
 // Helpers
 function lastConclusionIcon(repo: BuildRepoMetrics): string {
-  if (!repo.streams.length) return '⚪';
+  const streams = repo.streams ?? [];
+  if (!streams.length) return '⚪';
   // Find the most recent stream by last_run_at
-  const sorted = [...repo.streams].sort(
+  const sorted = [...streams].sort(
     (a, b) => new Date(b.last_run_at).getTime() - new Date(a.last_run_at).getTime()
   );
   const latest = sorted[0];
@@ -22,8 +23,9 @@ function lastConclusionIcon(repo: BuildRepoMetrics): string {
 }
 
 function lastConclusionLabel(repo: BuildRepoMetrics): string {
-  if (!repo.streams.length) return 'No data';
-  const sorted = [...repo.streams].sort(
+  const streams = repo.streams ?? [];
+  if (!streams.length) return 'No data';
+  const sorted = [...streams].sort(
     (a, b) => new Date(b.last_run_at).getTime() - new Date(a.last_run_at).getTime()
   );
   return sorted[0].last_conclusion || 'unknown';

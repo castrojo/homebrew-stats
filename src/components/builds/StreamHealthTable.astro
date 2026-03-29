@@ -40,10 +40,10 @@ function relativeTime(iso: string): string {
       </thead>
       <tbody>
         {repos.map(repo =>
-          repo.streams.map((stream, i) => (
+          (repo.streams ?? []).map((stream, i) => (
             <tr class={i === 0 ? 'repo-first' : ''}>
               {i === 0 && (
-                <td class="repo-name" rowspan={repo.streams.length}>{shortRepo(repo.repo)}</td>
+                <td class="repo-name" rowspan={(repo.streams ?? []).length}>{shortRepo(repo.repo)}</td>
               )}
               <td class="stream-name">{stream.name}</td>
               <td class="rate" style={`color:${rateColor(stream.success_rate_7d)}`}>
