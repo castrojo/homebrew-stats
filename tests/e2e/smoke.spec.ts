@@ -95,9 +95,9 @@ test.describe('Smoke — data quality (live site only)', () => {
     await page.goto('/homebrew-stats/overall/');
     await page.waitForSelector('#countme-trend-data', { state: 'attached', timeout: 15_000 });
 
-    const trendData = await getScriptJSON(page, 'countme-trend-data') as { sorted?: Array<{ distros: Record<string, number> }> };
-    expect((trendData.sorted ?? []).length, 'countme-trend-data.sorted is empty').toBeGreaterThan(0);
-    const latestWeek = trendData.sorted![0];
+    const trendData = await getScriptJSON(page, 'countme-trend-data') as { monthly?: Array<{ distros: Record<string, number> }> };
+    expect((trendData.monthly ?? []).length, 'countme-trend-data.monthly is empty').toBeGreaterThan(0);
+    const latestWeek = trendData.monthly![0];
     expect(latestWeek.distros.bazzite, 'Bazzite countme value is 0').toBeGreaterThan(0);
 
     const pieData = await getScriptJSON(page, 'ecosystem-pie-data') as { currentWeek?: { total: number } };
