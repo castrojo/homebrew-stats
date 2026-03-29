@@ -42,9 +42,9 @@ const weekRecords = data.history.week_records ?? [];
 
     <h2>Individual Image Trends</h2>
     <div class="distro-charts-grid">
-      <DistroTrendChart distroKey="bazzite"    distroLabel="Bazzite"    colorIndex={0} weekRecords={weekRecords as any} defaultRange="all" />
-      <DistroTrendChart distroKey="bluefin"    distroLabel="Bluefin"    colorIndex={1} weekRecords={weekRecords as any} defaultRange="all" />
-      <DistroTrendChart distroKey="aurora"     distroLabel="Aurora"     colorIndex={3} weekRecords={weekRecords as any} defaultRange="all" />
+      <DistroTrendChart distroKey="bazzite"    distroLabel="Bazzite"    colorIndex={0} weekRecords={weekRecords as any} defaultRange="365" />
+      <DistroTrendChart distroKey="bluefin"    distroLabel="Bluefin"    colorIndex={1} weekRecords={weekRecords as any} defaultRange="365" />
+      <DistroTrendChart distroKey="aurora"     distroLabel="Aurora"     colorIndex={3} weekRecords={weekRecords as any} defaultRange="365" />
     </div>
 
     <h2>Ecosystem Share</h2>

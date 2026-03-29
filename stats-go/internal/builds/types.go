@@ -244,8 +244,8 @@ var DefaultRepos = []RepoConfig{
 	{
 		Owner: "projectbluefin", Repo: "iso", Label: "iso",
 		WorkflowFiles: []string{
+			"build-iso-all.yml",
 			"build-iso-stable.yml",
-			"build-iso-lts.yml",
 			"build-iso-lts-hwe.yml",
 		},
 	},
