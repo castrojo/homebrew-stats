@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/castrojo/homebrew-stats/internal/builds"
 	"github.com/castrojo/homebrew-stats/internal/testhub"
 )
 
@@ -114,6 +115,7 @@ func TestLoadTesthubHistoryFrom_CacheNoBuildCountsFallsToSeed(t *testing.T) {
 		t.Errorf("expected seed data, got date %s", got.Snapshots[0].Date)
 	}
 }
+
 // file exists but contains a zero-snapshot store (e.g. after a cache key bump
 // creates an empty cache entry), the seed file is used instead.
 func TestLoadTesthubHistoryFrom_EmptyCacheFallsToSeed(t *testing.T) {
@@ -150,5 +152,82 @@ func TestLoadTesthubHistoryFrom_CorruptCacheFallsToSeed(t *testing.T) {
 	}
 	if len(got.Snapshots) != 1 {
 		t.Errorf("want 1 snapshot from seed (cache was corrupt), got %d", len(got.Snapshots))
+	}
+}
+
+// ── Per-image repo set tests ─────────────────────────────────────────────────
+
+// TestBluefinReposMatchDefault ensures BluefinRepos is kept in sync with DefaultRepos.
+func TestBluefinReposMatchDefault(t *testing.T) {
+	if len(builds.BluefinRepos) != len(builds.DefaultRepos) {
+		t.Errorf("BluefinRepos has %d repos, DefaultRepos has %d — they should match",
+			len(builds.BluefinRepos), len(builds.DefaultRepos))
+	}
+	for i, r := range builds.BluefinRepos {
+		d := builds.DefaultRepos[i]
+		if r.Owner != d.Owner || r.Repo != d.Repo {
+			t.Errorf("BluefinRepos[%d] = %s/%s, want %s/%s", i, r.Owner, r.Repo, d.Owner, d.Repo)
+		}
+	}
+}
+
+// TestAuroraReposExcludeAuroraTest ensures aurora-test is not in AuroraRepos
+// (it mirrors runs and causes duplicate noise).
+func TestAuroraReposExcludeAuroraTest(t *testing.T) {
+	for _, r := range builds.AuroraRepos {
+		if r.Owner == "get-aurora-dev" && r.Repo == "aurora-test" {
+			t.Error("AuroraRepos must not include get-aurora-dev/aurora-test (mirrors duplicate runs)")
+		}
+	}
+}
+
+// TestAuroraReposHasExpectedOrgs confirms get-aurora-dev repos are present.
+func TestAuroraReposHasExpectedOrgs(t *testing.T) {
+	hasUblue := false
+	hasAuroraDev := false
+	for _, r := range builds.AuroraRepos {
+		if r.Owner == "ublue-os" {
+			hasUblue = true
+		}
+		if r.Owner == "get-aurora-dev" {
+			hasAuroraDev = true
+		}
+	}
+	if !hasUblue {
+		t.Error("AuroraRepos must include at least one ublue-os repo (aurora)")
+	}
+	if !hasAuroraDev {
+		t.Error("AuroraRepos must include at least one get-aurora-dev repo")
+	}
+}
+
+// TestBazziteReposHasBazziteRepo ensures the core bazzite repo is present.
+func TestBazziteReposHasBazziteRepo(t *testing.T) {
+	found := false
+	for _, r := range builds.BazziteRepos {
+		if r.Owner == "ublue-os" && r.Repo == "bazzite" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("BazziteRepos must include ublue-os/bazzite")
+	}
+}
+
+// TestRepoSetsAreNonEmpty ensures none of the image repo sets are empty.
+func TestRepoSetsAreNonEmpty(t *testing.T) {
+	cases := []struct {
+		name  string
+		repos []builds.RepoConfig
+	}{
+		{"BluefinRepos", builds.BluefinRepos},
+		{"AuroraRepos", builds.AuroraRepos},
+		{"BazziteRepos", builds.BazziteRepos},
+	}
+	for _, tc := range cases {
+		if len(tc.repos) == 0 {
+			t.Errorf("%s must not be empty", tc.name)
+		}
 	}
 }

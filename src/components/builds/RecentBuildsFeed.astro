@@ -30,6 +30,8 @@ function repoBadgeClass(repo: string): string {
   switch (repo) {
     case 'bluefin':     return 'repo-badge--blue';
     case 'bluefin-lts': return 'repo-badge--purple';
+    case 'aurora':      return 'repo-badge--teal';
+    case 'bazzite':     return 'repo-badge--red';
     default:            return 'repo-badge--grey';
   }
 }
@@ -295,6 +297,16 @@ document.querySelectorAll<HTMLTableCellElement>('.col-started[data-iso]').forEac
   .repo-badge--purple {
     background: color-mix(in srgb, #a371f7 20%, transparent);
     color: #a371f7;
+  }
+
+  .repo-badge--teal {
+    background: color-mix(in srgb, #2ea043 20%, transparent);
+    color: #2ea043;
+  }
+
+  .repo-badge--red {
+    background: color-mix(in srgb, var(--red) 20%, transparent);
+    color: var(--red);
   }
 
   .repo-badge--grey {

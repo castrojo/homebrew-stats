@@ -5,7 +5,7 @@ import IssueButton from '../components/IssueButton.astro';
 interface Props {
   title?: string;
   description?: string;
-  activeTab?: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds';
+  activeTab?: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds' | 'aurora-builds' | 'bazzite-builds';
 }
 const { title = 'Homebrew Tap Stats', description = 'Health dashboard for ublue-os Homebrew taps', activeTab } = Astro.props;
 const base = import.meta.env.BASE_URL;

@@ -214,7 +214,8 @@ type RepoConfig struct {
 	WorkflowFiles []string
 }
 
-// DefaultRepos is the canonical list of all 7 tracked build repositories.
+// DefaultRepos is the canonical list of all 7 tracked Bluefin build repositories.
+// Kept as-is for the legacy fetch-builds subcommand (backward compat).
 var DefaultRepos = []RepoConfig{
 	{
 		Owner: "ublue-os", Repo: "bluefin", Label: "bluefin",
@@ -248,4 +249,36 @@ var DefaultRepos = []RepoConfig{
 	},
 	{Owner: "projectbluefin", Repo: "finpilot", Label: "finpilot", WorkflowFiles: []string{"build.yml"}},
 	{Owner: "projectbluefin", Repo: "testhub", Label: "testhub", WorkflowFiles: []string{"build.yml"}},
+}
+
+// BluefinRepos is the per-image repo set for the Bluefin builds page.
+// Identical to DefaultRepos; defined separately so future changes are explicit.
+var BluefinRepos = DefaultRepos
+
+// AuroraRepos is the per-image repo set for the Aurora builds page.
+// aurora-test is excluded to avoid duplicate mirrored-run noise.
+var AuroraRepos = []RepoConfig{
+	{
+		Owner: "ublue-os", Repo: "aurora", Label: "aurora",
+		WorkflowFiles: []string{
+			"build-image-stable.yml",
+			"build-image-latest-main.yml",
+			"build-image-beta.yml",
+		},
+	},
+	{Owner: "get-aurora-dev", Repo: "common", Label: "common", WorkflowFiles: []string{"build.yml"}},
+	{Owner: "get-aurora-dev", Repo: "iso", Label: "iso", WorkflowFiles: []string{
+		"build-iso-stable.yml",
+		"build-iso-latest.yml",
+	}},
+}
+
+// BazziteRepos is the per-image repo set for the Bazzite builds page.
+var BazziteRepos = []RepoConfig{
+	{
+		Owner: "ublue-os", Repo: "bazzite", Label: "bazzite",
+		WorkflowFiles: []string{
+			"build.yml",
+		},
+	},
 }

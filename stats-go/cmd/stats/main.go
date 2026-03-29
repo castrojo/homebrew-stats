@@ -1,189 +1,204 @@
 package main
 
 import (
-"encoding/json"
-"fmt"
-"os"
-"path/filepath"
-"sort"
-"strings"
-"time"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"time"
 
-ghclient "github.com/castrojo/homebrew-stats/internal/github"
-"github.com/castrojo/homebrew-stats/internal/builds"
-"github.com/castrojo/homebrew-stats/internal/contributors"
-"github.com/castrojo/homebrew-stats/internal/countme"
-"github.com/castrojo/homebrew-stats/internal/history"
-"github.com/castrojo/homebrew-stats/internal/metrics"
-"github.com/castrojo/homebrew-stats/internal/osanalytics"
-"github.com/castrojo/homebrew-stats/internal/tap"
-"github.com/castrojo/homebrew-stats/internal/tapanalytics"
-"github.com/castrojo/homebrew-stats/internal/testhub"
+	"github.com/castrojo/homebrew-stats/internal/builds"
+	"github.com/castrojo/homebrew-stats/internal/contributors"
+	"github.com/castrojo/homebrew-stats/internal/countme"
+	ghclient "github.com/castrojo/homebrew-stats/internal/github"
+	"github.com/castrojo/homebrew-stats/internal/history"
+	"github.com/castrojo/homebrew-stats/internal/metrics"
+	"github.com/castrojo/homebrew-stats/internal/osanalytics"
+	"github.com/castrojo/homebrew-stats/internal/tap"
+	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
+	"github.com/castrojo/homebrew-stats/internal/testhub"
 )
 
 func main() {
-// Default to fetch-homebrew for backward compatibility with `just sync`.
-cmd := "fetch-homebrew"
-if len(os.Args) >= 2 {
-cmd = os.Args[1]
-}
-switch cmd {
-case "fetch-homebrew":
-if err := runFetchHomebrew(); err != nil {
-fmt.Fprintln(os.Stderr, "❌", err)
-os.Exit(1)
-}
-case "fetch-testhub":
-if err := runFetchTesthub(); err != nil {
-fmt.Fprintln(os.Stderr, "❌", err)
-os.Exit(1)
-}
-case "fetch-countme":
-if err := runFetchCountme(); err != nil {
-fmt.Fprintln(os.Stderr, "❌", err)
-os.Exit(1)
-}
-case "fetch-contributors":
-if err := runFetchContributors(); err != nil {
-fmt.Fprintln(os.Stderr, "❌", err)
-os.Exit(1)
-}
-case "fetch-builds":
-if err := runFetchBuilds(); err != nil {
-fmt.Fprintln(os.Stderr, "❌ fetch-builds:", err)
-os.Exit(1)
-}
-default:
-fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds]")
-os.Exit(1)
-}
+	// Default to fetch-homebrew for backward compatibility with `just sync`.
+	cmd := "fetch-homebrew"
+	if len(os.Args) >= 2 {
+		cmd = os.Args[1]
+	}
+	switch cmd {
+	case "fetch-homebrew":
+		if err := runFetchHomebrew(); err != nil {
+			fmt.Fprintln(os.Stderr, "❌", err)
+			os.Exit(1)
+		}
+	case "fetch-testhub":
+		if err := runFetchTesthub(); err != nil {
+			fmt.Fprintln(os.Stderr, "❌", err)
+			os.Exit(1)
+		}
+	case "fetch-countme":
+		if err := runFetchCountme(); err != nil {
+			fmt.Fprintln(os.Stderr, "❌", err)
+			os.Exit(1)
+		}
+	case "fetch-contributors":
+		if err := runFetchContributors(); err != nil {
+			fmt.Fprintln(os.Stderr, "❌", err)
+			os.Exit(1)
+		}
+	case "fetch-builds":
+		if err := runFetchBuilds(); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-builds:", err)
+			os.Exit(1)
+		}
+	case "fetch-builds-bluefin":
+		if err := runFetchBuildsFor("bluefin", builds.BluefinRepos); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-builds-bluefin:", err)
+			os.Exit(1)
+		}
+	case "fetch-builds-aurora":
+		if err := runFetchBuildsFor("aurora", builds.AuroraRepos); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-builds-aurora:", err)
+			os.Exit(1)
+		}
+	case "fetch-builds-bazzite":
+		if err := runFetchBuildsFor("bazzite", builds.BazziteRepos); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-builds-bazzite:", err)
+			os.Exit(1)
+		}
+	default:
+		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
+		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite]")
+		os.Exit(1)
+	}
 }
 
 // ── fetch-homebrew ──────────────────────────────────────────────────────────
 
 // homebrewOutput is the full JSON written to src/data/stats.json.
 type homebrewOutput struct {
-GeneratedAt string                 `json:"generated_at"`
-Summary     metrics.Summary        `json:"summary"`
-Taps        []tap.TapStats         `json:"taps"`
-TopPackages []metrics.TopPackage   `json:"top_packages"`
-History     []history.DaySnapshot  `json:"history"`
-OSAnalytics *osanalytics.Analytics `json:"os_analytics,omitempty"`
+	GeneratedAt string                 `json:"generated_at"`
+	Summary     metrics.Summary        `json:"summary"`
+	Taps        []tap.TapStats         `json:"taps"`
+	TopPackages []metrics.TopPackage   `json:"top_packages"`
+	History     []history.DaySnapshot  `json:"history"`
+	OSAnalytics *osanalytics.Analytics `json:"os_analytics,omitempty"`
 }
 
 // taps to track, in display order.
 var taps = []struct{ owner, repo string }{
-{"ublue-os", "homebrew-tap"},
-{"ublue-os", "homebrew-experimental-tap"},
+	{"ublue-os", "homebrew-tap"},
+	{"ublue-os", "homebrew-experimental-tap"},
 }
 
 func runFetchHomebrew() error {
-client, err := ghclient.NewClient()
-if err != nil {
-return err
-}
+	client, err := ghclient.NewClient()
+	if err != nil {
+		return err
+	}
 
-hist, err := history.LoadWithBootstrap("src/data/stats.json")
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  Could not load history: %v\n", err)
-hist = &history.Store{}
-}
+	hist, err := history.LoadWithBootstrap("src/data/stats.json")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Could not load history: %v\n", err)
+		hist = &history.Store{}
+	}
 
-fmt.Fprintln(os.Stderr, "→ Fetching Homebrew cask-install analytics…")
-brewInstalls, err := tapanalytics.Fetch()
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  Homebrew cask-install analytics: %v\n", err)
-brewInstalls = make(map[string]tapanalytics.PkgInstalls)
-} else {
-fmt.Fprintf(os.Stderr, "  cask-install: %d ublue-os packages found\n", len(brewInstalls))
-}
+	fmt.Fprintln(os.Stderr, "→ Fetching Homebrew cask-install analytics…")
+	brewInstalls, err := tapanalytics.Fetch()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Homebrew cask-install analytics: %v\n", err)
+		brewInstalls = make(map[string]tapanalytics.PkgInstalls)
+	} else {
+		fmt.Fprintf(os.Stderr, "  cask-install: %d ublue-os packages found\n", len(brewInstalls))
+	}
 
-tapStats := make([]tap.TapStats, 0, len(taps))
-todayTaps := make(map[string]history.TapSnapshot)
-for _, t := range taps {
-fmt.Fprintf(os.Stderr, "→ Collecting %s/%s…\n", t.owner, t.repo)
-ts, err := tap.Collect(t.owner, t.repo, client, brewInstalls)
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  %s/%s: %v\n", t.owner, t.repo, err)
-continue
-}
-tapStats = append(tapStats, *ts)
-pkgDownloads := make(map[string]int64, len(ts.Packages))
-for _, pkg := range ts.Packages {
-if pkg.Downloads > 0 {
-pkgDownloads[pkg.Name] = pkg.Downloads
-}
-}
-snap := history.TapSnapshot{Downloads: pkgDownloads}
-if ts.Traffic != nil {
-snap.Uniques = ts.Traffic.Uniques
-snap.Count = ts.Traffic.Count
-}
-if len(pkgDownloads) > 0 || ts.Traffic != nil {
-todayTaps[ts.Name] = snap
-}
-}
+	tapStats := make([]tap.TapStats, 0, len(taps))
+	todayTaps := make(map[string]history.TapSnapshot)
+	for _, t := range taps {
+		fmt.Fprintf(os.Stderr, "→ Collecting %s/%s…\n", t.owner, t.repo)
+		ts, err := tap.Collect(t.owner, t.repo, client, brewInstalls)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  %s/%s: %v\n", t.owner, t.repo, err)
+			continue
+		}
+		tapStats = append(tapStats, *ts)
+		pkgDownloads := make(map[string]int64, len(ts.Packages))
+		for _, pkg := range ts.Packages {
+			if pkg.Downloads > 0 {
+				pkgDownloads[pkg.Name] = pkg.Downloads
+			}
+		}
+		snap := history.TapSnapshot{Downloads: pkgDownloads}
+		if ts.Traffic != nil {
+			snap.Uniques = ts.Traffic.Uniques
+			snap.Count = ts.Traffic.Count
+		}
+		if len(pkgDownloads) > 0 || ts.Traffic != nil {
+			todayTaps[ts.Name] = snap
+		}
+	}
 
-if len(todayTaps) > 0 {
-hist.Append(todayTaps)
-if err := hist.Save(); err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  Could not save history: %v\n", err)
-}
-}
+	if len(todayTaps) > 0 {
+		hist.Append(todayTaps)
+		if err := hist.Save(); err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  Could not save history: %v\n", err)
+		}
+	}
 
-for i := range tapStats {
-ts := &tapStats[i]
-ts.GrowthPct = metrics.GrowthPct(hist.Snapshots, ts.Name)
-for j := range ts.Packages {
-pkg := &ts.Packages[j]
-pkg.Velocity7d = metrics.Velocity7d(hist.Snapshots, ts.Name, pkg.Name)
-}
-}
-summary := metrics.ComputeSummary(tapStats, hist.Snapshots)
-topPkgs := metrics.ComputeTopPackages(tapStats, hist.Snapshots)
+	for i := range tapStats {
+		ts := &tapStats[i]
+		ts.GrowthPct = metrics.GrowthPct(hist.Snapshots, ts.Name)
+		for j := range ts.Packages {
+			pkg := &ts.Packages[j]
+			pkg.Velocity7d = metrics.Velocity7d(hist.Snapshots, ts.Name, pkg.Name)
+		}
+	}
+	summary := metrics.ComputeSummary(tapStats, hist.Snapshots)
+	topPkgs := metrics.ComputeTopPackages(tapStats, hist.Snapshots)
 
-var osData *osanalytics.Analytics
-osPeriods := make([]osanalytics.PeriodData, 0, 3)
-for _, p := range []string{"30d", "90d", "365d"} {
-pd, err := osanalytics.Fetch(p)
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  OS analytics (%s): %v\n", p, err)
-continue
-}
-osPeriods = append(osPeriods, *pd)
-}
-if len(osPeriods) > 0 {
-osData = &osanalytics.Analytics{Periods: osPeriods}
-}
+	var osData *osanalytics.Analytics
+	osPeriods := make([]osanalytics.PeriodData, 0, 3)
+	for _, p := range []string{"30d", "90d", "365d"} {
+		pd, err := osanalytics.Fetch(p)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  OS analytics (%s): %v\n", p, err)
+			continue
+		}
+		osPeriods = append(osPeriods, *pd)
+	}
+	if len(osPeriods) > 0 {
+		osData = &osanalytics.Analytics{Periods: osPeriods}
+	}
 
-out := homebrewOutput{
-GeneratedAt: time.Now().UTC().Format(time.RFC3339),
-Summary:     summary,
-Taps:        tapStats,
-TopPackages: topPkgs,
-History:     hist.Snapshots,
-OSAnalytics: osData,
-}
-if err := writeJSON("src/data/stats.json", out); err != nil {
-return err
-}
-backupPath := filepath.Join(".sync-cache", "stats-latest.json")
-data, _ := json.MarshalIndent(out, "", "  ")
-if err := os.WriteFile(backupPath, data, 0o644); err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  Could not write stats backup: %v\n", err)
-} else {
-fmt.Fprintln(os.Stderr, "✓ Backed up stats to", backupPath)
-}
-fmt.Fprintln(os.Stderr, "✓ Wrote src/data/stats.json")
-for _, ts := range tapStats {
-if ts.Traffic != nil {
-fmt.Fprintf(os.Stderr, "  %s: %d unique tappers, %d packages\n",
-ts.Name, ts.Traffic.Uniques, len(ts.Packages))
-}
-}
-fmt.Fprintf(os.Stderr, "  History: %d snapshots\n", len(hist.Snapshots))
-return nil
+	out := homebrewOutput{
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		Summary:     summary,
+		Taps:        tapStats,
+		TopPackages: topPkgs,
+		History:     hist.Snapshots,
+		OSAnalytics: osData,
+	}
+	if err := writeJSON("src/data/stats.json", out); err != nil {
+		return err
+	}
+	backupPath := filepath.Join(".sync-cache", "stats-latest.json")
+	data, _ := json.MarshalIndent(out, "", "  ")
+	if err := os.WriteFile(backupPath, data, 0o644); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Could not write stats backup: %v\n", err)
+	} else {
+		fmt.Fprintln(os.Stderr, "✓ Backed up stats to", backupPath)
+	}
+	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/stats.json")
+	for _, ts := range tapStats {
+		if ts.Traffic != nil {
+			fmt.Fprintf(os.Stderr, "  %s: %d unique tappers, %d packages\n",
+				ts.Name, ts.Traffic.Uniques, len(ts.Packages))
+		}
+	}
+	fmt.Fprintf(os.Stderr, "  History: %d snapshots\n", len(hist.Snapshots))
+	return nil
 }
 
 // ── fetch-testhub ───────────────────────────────────────────────────────────
@@ -191,117 +206,116 @@ return nil
 const testhubCacheFile = ".sync-cache/testhub-history.json"
 
 type testhubOutput struct {
-GeneratedAt  string                `json:"generated_at"`
-Packages     []testhub.Package     `json:"packages"`
-BuildMetrics []testhub.BuildMetrics `json:"build_metrics"`
-History      []testhub.DaySnapshot  `json:"history"`
+	GeneratedAt  string                 `json:"generated_at"`
+	Packages     []testhub.Package      `json:"packages"`
+	BuildMetrics []testhub.BuildMetrics `json:"build_metrics"`
+	History      []testhub.DaySnapshot  `json:"history"`
 }
 
 func runFetchTesthub() error {
-client, err := ghclient.NewClient()
-if err != nil {
-return err
-}
-
-store, err := loadTesthubHistory()
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  testhub history: %v\n", err)
-store = &testhub.HistoryStore{}
-}
-
-// Determine last processed run ID to fetch only new runs.
-var lastRunID int64
-if len(store.Snapshots) > 0 {
-lastRunID = store.Snapshots[len(store.Snapshots)-1].LastRunID
-}
-
-fmt.Fprintln(os.Stderr, "→ Fetching projectbluefin testhub packages…")
-pkgs, err := testhub.ListPackages(client.Context(), client.GitHub(), "projectbluefin")
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  testhub packages: %v\n", err)
-pkgs = nil
-} else {
-fmt.Fprintf(os.Stderr, "  packages: %d\n", len(pkgs))
-}
-
-fmt.Fprintf(os.Stderr, "→ Fetching testhub build counts (since run %d)…\n", lastRunID)
-counts, newLastRunID, fetchErr := testhub.FetchBuildCounts(client.Context(), client.GitHub(), lastRunID)
-if fetchErr != nil {
-fmt.Fprintf(os.Stderr, "⚠️  testhub build counts: %v\n", fetchErr)
-counts = nil
-newLastRunID = lastRunID
-} else {
-fmt.Fprintf(os.Stderr, "  build counts: %d apps, new max run_id=%d\n", len(counts), newLastRunID)
-}
-
-if fetchErr != nil {
-fmt.Fprintf(os.Stderr, "⚠️  skipping testhub history save — fetch failed: %v\n", fetchErr)
-} else {
-store = testhub.AppendSnapshot(store, pkgs, counts, newLastRunID)
-if err := saveTesthubHistory(store); err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  failed to save testhub history: %v\n", err)
-}
-}
-
-// Compute build metrics for 7d and 30d windows; merge PassRate30d into results.
-metrics7d := testhub.ComputeBuildMetrics(store.Snapshots, 7)
-metrics30d := testhub.ComputeBuildMetrics(store.Snapshots, 30)
-// Build a lookup for 30d rates.
-rate30d := make(map[string]float64, len(metrics30d))
-for _, m := range metrics30d {
-rate30d[m.App] = m.PassRate30d
-}
-// Merge: fill PassRate30d and LastStatus/LastBuildAt.
-lastStatusByApp := computeLastStatus(store.Snapshots)
-buildMetrics := make([]testhub.BuildMetrics, 0, len(metrics7d))
-for _, m := range metrics7d {
-	m.PassRate30d = rate30d[m.App]
-	if ls, ok := lastStatusByApp[m.App]; ok {
-		m.LastStatus = ls.status
-		m.LastBuildAt = ls.at
+	client, err := ghclient.NewClient()
+	if err != nil {
+		return err
 	}
-	buildMetrics = append(buildMetrics, m)
-}
 
-if len(buildMetrics) == 0 {
-	// If computed metrics are empty (e.g. cold start with empty history),
-	// fall back to the committed src/data/testhub.json so the site always
-	// has build status data instead of all-unknown ⚪ — .
-	if fallback := loadFallbackTesthubBuildMetrics(); len(fallback) > 0 {
-		buildMetrics = fallback
-		fmt.Fprintf(os.Stderr, "  using %d fallback build metrics from committed testhub.json\n", len(buildMetrics))
+	store, err := loadTesthubHistory()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  testhub history: %v\n", err)
+		store = &testhub.HistoryStore{}
+	}
+
+	// Determine last processed run ID to fetch only new runs.
+	var lastRunID int64
+	if len(store.Snapshots) > 0 {
+		lastRunID = store.Snapshots[len(store.Snapshots)-1].LastRunID
+	}
+
+	fmt.Fprintln(os.Stderr, "→ Fetching projectbluefin testhub packages…")
+	pkgs, err := testhub.ListPackages(client.Context(), client.GitHub(), "projectbluefin")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  testhub packages: %v\n", err)
+		pkgs = nil
 	} else {
-		buildMetrics = []testhub.BuildMetrics{}
+		fmt.Fprintf(os.Stderr, "  packages: %d\n", len(pkgs))
 	}
-}
 
-if pkgs == nil {
-	// Package listing failed (e.g. missing read:packages scope on GITHUB_TOKEN).
-	// Fall back to the committed src/data/testhub.json so the site always has
-	// package data instead of rendering an empty table.
-	if fallback := loadFallbackTesthubPackages(); len(fallback) > 0 {
-		pkgs = fallback
-		fmt.Fprintf(os.Stderr, "  using %d fallback packages from committed testhub.json\n", len(pkgs))
+	fmt.Fprintf(os.Stderr, "→ Fetching testhub build counts (since run %d)…\n", lastRunID)
+	counts, newLastRunID, fetchErr := testhub.FetchBuildCounts(client.Context(), client.GitHub(), lastRunID)
+	if fetchErr != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  testhub build counts: %v\n", fetchErr)
+		counts = nil
+		newLastRunID = lastRunID
 	} else {
-		pkgs = []testhub.Package{}
+		fmt.Fprintf(os.Stderr, "  build counts: %d apps, new max run_id=%d\n", len(counts), newLastRunID)
 	}
-}
-if store.Snapshots == nil {
-store.Snapshots = []testhub.DaySnapshot{}
-}
-out := testhubOutput{
-GeneratedAt:  time.Now().UTC().Format(time.RFC3339),
-Packages:     pkgs,
-BuildMetrics: buildMetrics,
-History:      store.Snapshots,
-}
-if err := writeJSON("src/data/testhub.json", out); err != nil {
-return err
-}
-fmt.Fprintln(os.Stderr, "✓ Wrote src/data/testhub.json")
-return nil
-}
 
+	if fetchErr != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  skipping testhub history save — fetch failed: %v\n", fetchErr)
+	} else {
+		store = testhub.AppendSnapshot(store, pkgs, counts, newLastRunID)
+		if err := saveTesthubHistory(store); err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  failed to save testhub history: %v\n", err)
+		}
+	}
+
+	// Compute build metrics for 7d and 30d windows; merge PassRate30d into results.
+	metrics7d := testhub.ComputeBuildMetrics(store.Snapshots, 7)
+	metrics30d := testhub.ComputeBuildMetrics(store.Snapshots, 30)
+	// Build a lookup for 30d rates.
+	rate30d := make(map[string]float64, len(metrics30d))
+	for _, m := range metrics30d {
+		rate30d[m.App] = m.PassRate30d
+	}
+	// Merge: fill PassRate30d and LastStatus/LastBuildAt.
+	lastStatusByApp := computeLastStatus(store.Snapshots)
+	buildMetrics := make([]testhub.BuildMetrics, 0, len(metrics7d))
+	for _, m := range metrics7d {
+		m.PassRate30d = rate30d[m.App]
+		if ls, ok := lastStatusByApp[m.App]; ok {
+			m.LastStatus = ls.status
+			m.LastBuildAt = ls.at
+		}
+		buildMetrics = append(buildMetrics, m)
+	}
+
+	if len(buildMetrics) == 0 {
+		// If computed metrics are empty (e.g. cold start with empty history),
+		// fall back to the committed src/data/testhub.json so the site always
+		// has build status data instead of all-unknown ⚪ — .
+		if fallback := loadFallbackTesthubBuildMetrics(); len(fallback) > 0 {
+			buildMetrics = fallback
+			fmt.Fprintf(os.Stderr, "  using %d fallback build metrics from committed testhub.json\n", len(buildMetrics))
+		} else {
+			buildMetrics = []testhub.BuildMetrics{}
+		}
+	}
+
+	if pkgs == nil {
+		// Package listing failed (e.g. missing read:packages scope on GITHUB_TOKEN).
+		// Fall back to the committed src/data/testhub.json so the site always has
+		// package data instead of rendering an empty table.
+		if fallback := loadFallbackTesthubPackages(); len(fallback) > 0 {
+			pkgs = fallback
+			fmt.Fprintf(os.Stderr, "  using %d fallback packages from committed testhub.json\n", len(pkgs))
+		} else {
+			pkgs = []testhub.Package{}
+		}
+	}
+	if store.Snapshots == nil {
+		store.Snapshots = []testhub.DaySnapshot{}
+	}
+	out := testhubOutput{
+		GeneratedAt:  time.Now().UTC().Format(time.RFC3339),
+		Packages:     pkgs,
+		BuildMetrics: buildMetrics,
+		History:      store.Snapshots,
+	}
+	if err := writeJSON("src/data/testhub.json", out); err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/testhub.json")
+	return nil
+}
 
 // loadFallbackTesthubPackages reads the package list from the committed
 // src/data/testhub.json. Used when the GitHub API call fails (e.g. missing
@@ -335,66 +349,66 @@ func loadFallbackTesthubBuildMetrics() []testhub.BuildMetrics {
 }
 
 type lastStatus struct {
-status string
-at     string
+	status string
+	at     string
 }
 
 // computeLastStatus returns the last known build status per app from snapshots.
 func computeLastStatus(snapshots []testhub.DaySnapshot) map[string]lastStatus {
-// Sort descending by date to find the most recent entry per app.
-sorted := make([]testhub.DaySnapshot, len(snapshots))
-copy(sorted, snapshots)
-sort.Slice(sorted, func(i, j int) bool { return sorted[i].Date > sorted[j].Date })
+	// Sort descending by date to find the most recent entry per app.
+	sorted := make([]testhub.DaySnapshot, len(snapshots))
+	copy(sorted, snapshots)
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Date > sorted[j].Date })
 
-result := make(map[string]lastStatus)
-for _, snap := range sorted {
-for _, c := range snap.BuildCounts {
-if _, seen := result[c.App]; seen {
-continue
-}
-status := "unknown"
-if c.Passed > 0 && c.Failed == 0 {
-status = "passing"
-} else if c.Failed > 0 {
-status = "failing"
-}
-result[c.App] = lastStatus{status: status, at: snap.Date}
-}
-}
-return result
+	result := make(map[string]lastStatus)
+	for _, snap := range sorted {
+		for _, c := range snap.BuildCounts {
+			if _, seen := result[c.App]; seen {
+				continue
+			}
+			status := "unknown"
+			if c.Passed > 0 && c.Failed == 0 {
+				status = "passing"
+			} else if c.Failed > 0 {
+				status = "failing"
+			}
+			result[c.App] = lastStatus{status: status, at: snap.Date}
+		}
+	}
+	return result
 }
 
 // hasBuildCounts returns true if at least one snapshot has non-empty build data.
 // Used to detect caches that exist but were written before build counts were available.
 func hasBuildCounts(snapshots []testhub.DaySnapshot) bool {
-for _, snap := range snapshots {
-if len(snap.BuildCounts) > 0 {
-return true
-}
-}
-return false
+	for _, snap := range snapshots {
+		if len(snap.BuildCounts) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func loadTesthubHistoryFrom(cacheFile, seedFile string) (*testhub.HistoryStore, error) {
-data, err := os.ReadFile(cacheFile)
-if err == nil {
-var store testhub.HistoryStore
-if jsonErr := json.Unmarshal(data, &store); jsonErr == nil && hasBuildCounts(store.Snapshots) {
-// Cache is valid and has snapshots with build data — use it.
-return &store, nil
-}
-// Cache exists but is empty, malformed, or all snapshots lack build data — fall through to seed.
-fmt.Fprintf(os.Stderr, "  cache file empty or missing build data, trying seed file\n")
-}
-// Try seed file (covers: file-not-found, read error, empty/malformed cache).
-if seed, seedErr := os.ReadFile(seedFile); seedErr == nil {
-var store testhub.HistoryStore
-if json.Unmarshal(seed, &store) == nil && len(store.Snapshots) > 0 {
-fmt.Fprintf(os.Stderr, "  loaded %d snapshots from seed file\n", len(store.Snapshots))
-return &store, nil
-}
-}
-return &testhub.HistoryStore{}, nil
+	data, err := os.ReadFile(cacheFile)
+	if err == nil {
+		var store testhub.HistoryStore
+		if jsonErr := json.Unmarshal(data, &store); jsonErr == nil && hasBuildCounts(store.Snapshots) {
+			// Cache is valid and has snapshots with build data — use it.
+			return &store, nil
+		}
+		// Cache exists but is empty, malformed, or all snapshots lack build data — fall through to seed.
+		fmt.Fprintf(os.Stderr, "  cache file empty or missing build data, trying seed file\n")
+	}
+	// Try seed file (covers: file-not-found, read error, empty/malformed cache).
+	if seed, seedErr := os.ReadFile(seedFile); seedErr == nil {
+		var store testhub.HistoryStore
+		if json.Unmarshal(seed, &store) == nil && len(store.Snapshots) > 0 {
+			fmt.Fprintf(os.Stderr, "  loaded %d snapshots from seed file\n", len(store.Snapshots))
+			return &store, nil
+		}
+	}
+	return &testhub.HistoryStore{}, nil
 }
 
 func loadTesthubHistory() (*testhub.HistoryStore, error) {
@@ -402,14 +416,14 @@ func loadTesthubHistory() (*testhub.HistoryStore, error) {
 }
 
 func saveTesthubHistory(store *testhub.HistoryStore) error {
-data, err := json.MarshalIndent(store, "", "  ")
-if err != nil {
-return err
-}
-if err := os.MkdirAll(".sync-cache", 0o755); err != nil {
-return err
-}
-return os.WriteFile(testhubCacheFile, data, 0o644)
+	data, err := json.MarshalIndent(store, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(".sync-cache", 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(testhubCacheFile, data, 0o644)
 }
 
 // ── fetch-countme ───────────────────────────────────────────────────────────
@@ -417,194 +431,194 @@ return os.WriteFile(testhubCacheFile, data, 0o644)
 const countmeCacheFile = ".sync-cache/countme-history.json"
 
 type countmeWoW struct {
-Bazzite    float64 `json:"bazzite"`
-Bluefin    float64 `json:"bluefin"`
-BluefinLTS float64 `json:"bluefin-lts"`
-Aurora     float64 `json:"aurora"`
-Total      float64 `json:"total"`
+	Bazzite    float64 `json:"bazzite"`
+	Bluefin    float64 `json:"bluefin"`
+	BluefinLTS float64 `json:"bluefin-lts"`
+	Aurora     float64 `json:"aurora"`
+	Total      float64 `json:"total"`
 }
 
 type countmeOutput struct {
-GeneratedAt   string                    `json:"generated_at"`
-CurrentWeek   *countme.WeekRecord       `json:"current_week,omitempty"`
-PrevWeek      *countme.WeekRecord       `json:"prev_week,omitempty"`
-WoWGrowthPct  *countmeWoW               `json:"wow_growth_pct,omitempty"`
-History       countme.HistoryStore      `json:"history"`
-OsVersionDist map[string]map[string]int `json:"os_version_dist,omitempty"`
+	GeneratedAt   string                    `json:"generated_at"`
+	CurrentWeek   *countme.WeekRecord       `json:"current_week,omitempty"`
+	PrevWeek      *countme.WeekRecord       `json:"prev_week,omitempty"`
+	WoWGrowthPct  *countmeWoW               `json:"wow_growth_pct,omitempty"`
+	History       countme.HistoryStore      `json:"history"`
+	OsVersionDist map[string]map[string]int `json:"os_version_dist,omitempty"`
 }
 
 func runFetchCountme() error {
-store, err := loadCountmeHistory()
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  countme history: %v\n", err)
-store = &countme.HistoryStore{}
-}
-
-fmt.Fprintln(os.Stderr, "→ Fetching Universal Blue badge counts…")
-badge, err := countme.FetchBadgeCounts()
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  countme badges: %v\n", err)
-badge = nil
-} else {
-fmt.Fprintf(os.Stderr, "  badges: %v\n", badge)
-}
-
-fmt.Fprintln(os.Stderr, "→ Fetching countme CSV (last 30d)…")
-csvRecs, osVersionDist, err := countme.FetchCSVLast30Days()
-if err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  countme CSV: %v\n", err)
-csvRecs = nil
-osVersionDist = nil
-} else {
-fmt.Fprintf(os.Stderr, "  CSV: %d week records\n", len(csvRecs))
-}
-
-if csvRecs != nil {
-store = countme.MergeIntoHistory(store, csvRecs)
-}
-if osVersionDist != nil {
-store.OsVersionDist = countme.MergeOsVersionDist(store.OsVersionDist, osVersionDist)
-}
-if badge != nil {
-store = countme.AppendDayRecord(store, badge)
-}
-if err := saveCountmeHistory(store); err != nil {
-fmt.Fprintf(os.Stderr, "⚠️  countme history save: %v\n", err)
-}
-
-// If we still have no week history (e.g. cold-start CI with empty cache + failed CSV),
-// fall back to the committed src/data/countme.json so the site renders real data.
-if len(store.WeekRecords) == 0 {
-	if fb := loadFallbackCountmeHistory(); fb != nil {
-		fmt.Fprintf(os.Stderr, "  using %d fallback week records from committed countme.json\n", len(fb.WeekRecords))
-		store = fb
+	store, err := loadCountmeHistory()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  countme history: %v\n", err)
+		store = &countme.HistoryStore{}
 	}
-}
 
-out := buildCountmeOutput(store)
-if err := writeJSON("src/data/countme.json", out); err != nil {
-return err
-}
-fmt.Fprintln(os.Stderr, "✓ Wrote src/data/countme.json")
-return nil
+	fmt.Fprintln(os.Stderr, "→ Fetching Universal Blue badge counts…")
+	badge, err := countme.FetchBadgeCounts()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  countme badges: %v\n", err)
+		badge = nil
+	} else {
+		fmt.Fprintf(os.Stderr, "  badges: %v\n", badge)
+	}
+
+	fmt.Fprintln(os.Stderr, "→ Fetching countme CSV (last 30d)…")
+	csvRecs, osVersionDist, err := countme.FetchCSVLast30Days()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  countme CSV: %v\n", err)
+		csvRecs = nil
+		osVersionDist = nil
+	} else {
+		fmt.Fprintf(os.Stderr, "  CSV: %d week records\n", len(csvRecs))
+	}
+
+	if csvRecs != nil {
+		store = countme.MergeIntoHistory(store, csvRecs)
+	}
+	if osVersionDist != nil {
+		store.OsVersionDist = countme.MergeOsVersionDist(store.OsVersionDist, osVersionDist)
+	}
+	if badge != nil {
+		store = countme.AppendDayRecord(store, badge)
+	}
+	if err := saveCountmeHistory(store); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  countme history save: %v\n", err)
+	}
+
+	// If we still have no week history (e.g. cold-start CI with empty cache + failed CSV),
+	// fall back to the committed src/data/countme.json so the site renders real data.
+	if len(store.WeekRecords) == 0 {
+		if fb := loadFallbackCountmeHistory(); fb != nil {
+			fmt.Fprintf(os.Stderr, "  using %d fallback week records from committed countme.json\n", len(fb.WeekRecords))
+			store = fb
+		}
+	}
+
+	out := buildCountmeOutput(store)
+	if err := writeJSON("src/data/countme.json", out); err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/countme.json")
+	return nil
 }
 
 func buildCountmeOutput(store *countme.HistoryStore) countmeOutput {
-// Ensure nil slices marshal as [] not null in JSON.
-if store.WeekRecords == nil {
-store.WeekRecords = []countme.WeekRecord{}
-}
-if store.DayRecords == nil {
-store.DayRecords = []countme.DayRecord{}
-}
-out := countmeOutput{
-GeneratedAt: time.Now().UTC().Format(time.RFC3339),
-History:     *store,
-}
+	// Ensure nil slices marshal as [] not null in JSON.
+	if store.WeekRecords == nil {
+		store.WeekRecords = []countme.WeekRecord{}
+	}
+	if store.DayRecords == nil {
+		store.DayRecords = []countme.DayRecord{}
+	}
+	out := countmeOutput{
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		History:     *store,
+	}
 
-// Sort week records descending by week_start to find current and prev.
-weeks := make([]countme.WeekRecord, len(store.WeekRecords))
-copy(weeks, store.WeekRecords)
-sort.Slice(weeks, func(i, j int) bool { return weeks[i].WeekStart > weeks[j].WeekStart })
+	// Sort week records descending by week_start to find current and prev.
+	weeks := make([]countme.WeekRecord, len(store.WeekRecords))
+	copy(weeks, store.WeekRecords)
+	sort.Slice(weeks, func(i, j int) bool { return weeks[i].WeekStart > weeks[j].WeekStart })
 
-if len(weeks) >= 1 {
-w := weeks[0]
-out.CurrentWeek = &w
-}
-if len(weeks) >= 2 {
-w := weeks[1]
-out.PrevWeek = &w
-}
-if out.CurrentWeek != nil && out.PrevWeek != nil {
-out.WoWGrowthPct = computeWoW(out.CurrentWeek, out.PrevWeek)
-}
-out.OsVersionDist = store.OsVersionDist
-return out
+	if len(weeks) >= 1 {
+		w := weeks[0]
+		out.CurrentWeek = &w
+	}
+	if len(weeks) >= 2 {
+		w := weeks[1]
+		out.PrevWeek = &w
+	}
+	if out.CurrentWeek != nil && out.PrevWeek != nil {
+		out.WoWGrowthPct = computeWoW(out.CurrentWeek, out.PrevWeek)
+	}
+	out.OsVersionDist = store.OsVersionDist
+	return out
 }
 
 func computeWoW(current, prev *countme.WeekRecord) *countmeWoW {
-growth := func(cur, prv int) float64 {
-if prv == 0 {
-return 0
-}
-return float64(cur-prv) / float64(prv) * 100.0
-}
-return &countmeWoW{
-Bazzite:    growth(current.Distros["bazzite"], prev.Distros["bazzite"]),
-Bluefin:    growth(current.Distros["bluefin"], prev.Distros["bluefin"]),
-BluefinLTS: growth(current.Distros["bluefin-lts"], prev.Distros["bluefin-lts"]),
-Aurora:     growth(current.Distros["aurora"], prev.Distros["aurora"]),
-Total:      growth(current.Total, prev.Total),
-}
+	growth := func(cur, prv int) float64 {
+		if prv == 0 {
+			return 0
+		}
+		return float64(cur-prv) / float64(prv) * 100.0
+	}
+	return &countmeWoW{
+		Bazzite:    growth(current.Distros["bazzite"], prev.Distros["bazzite"]),
+		Bluefin:    growth(current.Distros["bluefin"], prev.Distros["bluefin"]),
+		BluefinLTS: growth(current.Distros["bluefin-lts"], prev.Distros["bluefin-lts"]),
+		Aurora:     growth(current.Distros["aurora"], prev.Distros["aurora"]),
+		Total:      growth(current.Total, prev.Total),
+	}
 }
 
 func loadCountmeHistory() (*countme.HistoryStore, error) {
-data, err := os.ReadFile(countmeCacheFile)
-if os.IsNotExist(err) {
-return &countme.HistoryStore{}, nil
-}
-if err != nil {
-return nil, err
-}
-var store countme.HistoryStore
-if err := json.Unmarshal(data, &store); err != nil {
-return nil, err
-}
-return &store, nil
+	data, err := os.ReadFile(countmeCacheFile)
+	if os.IsNotExist(err) {
+		return &countme.HistoryStore{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var store countme.HistoryStore
+	if err := json.Unmarshal(data, &store); err != nil {
+		return nil, err
+	}
+	return &store, nil
 }
 
 func saveCountmeHistory(store *countme.HistoryStore) error {
-data, err := json.MarshalIndent(store, "", "  ")
-if err != nil {
-return err
-}
-if err := os.MkdirAll(".sync-cache", 0o755); err != nil {
-return err
-}
-return os.WriteFile(countmeCacheFile, data, 0o644)
+	data, err := json.MarshalIndent(store, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(".sync-cache", 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(countmeCacheFile, data, 0o644)
 }
 
 // ── shared helpers ──────────────────────────────────────────────────────────
 
 // writeJSON marshals v to JSON and writes it to path (creating parent dirs as needed).
 func writeJSON(path string, v any) error {
-data, err := json.MarshalIndent(v, "", "  ")
-if err != nil {
-return fmt.Errorf("json marshal: %w", err)
-}
-if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-return fmt.Errorf("mkdir: %w", err)
-}
-if err := os.WriteFile(path, data, 0o644); err != nil {
-return fmt.Errorf("write %s: %w", path, err)
-}
-return nil
+	data, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return fmt.Errorf("json marshal: %w", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return fmt.Errorf("mkdir: %w", err)
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return fmt.Errorf("write %s: %w", path, err)
+	}
+	return nil
 }
 
 // loadFallbackCountmeHistory reads week_records from the committed src/data/countme.json
 // and reconstructs a HistoryStore from it. Used when both the cache and the live CSV fetch
 // are unavailable (e.g. CI cold-start with no read:packages scope or rate-limited endpoint).
 func loadFallbackCountmeHistory() *countme.HistoryStore {
-data, err := os.ReadFile("src/data/countme.json")
-if err != nil {
-return nil
-}
-var out countmeOutput
-if err := json.Unmarshal(data, &out); err != nil {
-return nil
-}
-if len(out.History.WeekRecords) == 0 {
-return nil
-}
-return &countme.HistoryStore{
-WeekRecords:  out.History.WeekRecords,
-OsVersionDist: out.OsVersionDist,
-}
+	data, err := os.ReadFile("src/data/countme.json")
+	if err != nil {
+		return nil
+	}
+	var out countmeOutput
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil
+	}
+	if len(out.History.WeekRecords) == 0 {
+		return nil
+	}
+	return &countme.HistoryStore{
+		WeekRecords:   out.History.WeekRecords,
+		OsVersionDist: out.OsVersionDist,
+	}
 }
 
 // ── fetch-contributors ──────────────────────────────────────────────────────
 
-const contributorsCacheFile   = ".sync-cache/contributors-history.json"
+const contributorsCacheFile = ".sync-cache/contributors-history.json"
 const contributorProfilesFile = ".sync-cache/contributor-profiles.json"
 
 type contributorsOutput struct {
@@ -680,9 +694,9 @@ func runFetchContributors() error {
 	ctx := client.Context()
 
 	since365 := time.Now().UTC().AddDate(0, 0, -365)
-	since60  := time.Now().UTC().AddDate(0, 0, -60)
-	since30  := time.Now().UTC().AddDate(0, 0, -30)
-	until    := time.Now().UTC()
+	since60 := time.Now().UTC().AddDate(0, 0, -60)
+	since30 := time.Now().UTC().AddDate(0, 0, -30)
+	until := time.Now().UTC()
 
 	hist, err := loadContributorsHistory()
 	if err != nil {
@@ -700,29 +714,29 @@ func runFetchContributors() error {
 	var repoStats []contributors.RepoStats
 
 	// Cross-repo accumulators — one map per time window.
-	allAuthorCommits30d  := make(map[string]int) // login → commits in 30d
-	allAuthorCommits60d  := make(map[string]int) // login → commits in 60d
+	allAuthorCommits30d := make(map[string]int)  // login → commits in 30d
+	allAuthorCommits60d := make(map[string]int)  // login → commits in 60d
 	allAuthorCommits365d := make(map[string]int) // login → commits in 365d
-	allAuthorPRs30d      := make(map[string]int)
-	allAuthorPRs60d      := make(map[string]int)
-	allAuthorPRs365d     := make(map[string]int)
-	allAuthorIssues30d   := make(map[string]int)
-	allAuthorIssues60d   := make(map[string]int)
-	allAuthorIssues365d  := make(map[string]int)
-	allAuthorDiscussions30d  := make(map[string]int)
-	allAuthorDiscussions60d  := make(map[string]int)
+	allAuthorPRs30d := make(map[string]int)
+	allAuthorPRs60d := make(map[string]int)
+	allAuthorPRs365d := make(map[string]int)
+	allAuthorIssues30d := make(map[string]int)
+	allAuthorIssues60d := make(map[string]int)
+	allAuthorIssues365d := make(map[string]int)
+	allAuthorDiscussions30d := make(map[string]int)
+	allAuthorDiscussions60d := make(map[string]int)
 	allAuthorDiscussions365d := make(map[string]int)
 	authorRepos := make(map[string]map[string]bool)    // login → set of repos active in (30d)
 	repoAuthorSets := make(map[string]map[string]bool) // repo → set of human author logins (30d)
 
 	// Discussion accumulators.
 	var allDiscussions []contributors.DiscussionRecord
-	totalIssuesOpened30d  := 0
-	totalIssuesClosed30d  := 0
-	totalPRsMerged30d     := 0
+	totalIssuesOpened30d := 0
+	totalIssuesClosed30d := 0
+	totalPRsMerged30d := 0
 	totalPRsWithReview30d := 0
-	totalPRsMerged60d     := 0
-	totalPRsMerged365d    := 0
+	totalPRsMerged60d := 0
+	totalPRsMerged365d := 0
 	activeRepoCount := 0
 
 	for _, fullName := range contributors.TrackedRepos {
@@ -745,8 +759,8 @@ func runFetchContributors() error {
 		commits30 := contributors.FilterCommitsAfter(commits, since30)
 
 		// Per-window author commit maps (used for bus factor and contributor entries).
-		repoAuthorCommits30d  := make(map[string]int)
-		repoAuthorCommits60d  := make(map[string]int)
+		repoAuthorCommits30d := make(map[string]int)
+		repoAuthorCommits60d := make(map[string]int)
 		repoAuthorCommits365d := make(map[string]int)
 
 		humanAuthors30d := make(map[string]bool)
@@ -916,8 +930,8 @@ func runFetchContributors() error {
 			}
 		}
 
-		busFactor30d  := contributors.ComputeBusFactor(repoAuthorCommits30d, 0.8)
-		busFactor60d  := contributors.ComputeBusFactor(repoAuthorCommits60d, 0.8)
+		busFactor30d := contributors.ComputeBusFactor(repoAuthorCommits30d, 0.8)
+		busFactor60d := contributors.ComputeBusFactor(repoAuthorCommits60d, 0.8)
 		busFactor365d := contributors.ComputeBusFactor(repoAuthorCommits365d, 0.8)
 		streak := contributors.ComputeActiveWeeksStreak(weekly)
 
@@ -994,8 +1008,8 @@ func runFetchContributors() error {
 	reviewRate := contributors.ComputeReviewParticipationRate(totalPRsWithReview30d, totalPRsMerged30d)
 
 	// Global bus factor across all repos, per window.
-	globalBusFactor30d  := contributors.ComputeBusFactor(allAuthorCommits30d, 0.8)
-	globalBusFactor60d  := contributors.ComputeBusFactor(allAuthorCommits60d, 0.8)
+	globalBusFactor30d := contributors.ComputeBusFactor(allAuthorCommits30d, 0.8)
+	globalBusFactor60d := contributors.ComputeBusFactor(allAuthorCommits60d, 0.8)
 	globalBusFactor365d := contributors.ComputeBusFactor(allAuthorCommits365d, 0.8)
 
 	// Total commits (human + bot) per window.
@@ -1107,7 +1121,10 @@ func runFetchContributors() error {
 	// ── Top contributors (fetch profiles, build entries) ──────────────────────
 
 	// Sort active logins by commit count descending (30d window drives ranking).
-	type loginCount struct{ login string; count int }
+	type loginCount struct {
+		login string
+		count int
+	}
 	ranked := make([]loginCount, 0, len(activeLogins30d))
 	for _, login := range activeLogins30d {
 		ranked = append(ranked, loginCount{login, allAuthorCommits30d[login]})
@@ -1193,10 +1210,10 @@ func runFetchContributors() error {
 	}
 
 	out := contributorsOutput{
-		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
-		Summary:     summary,
-		TopContributors: topContribs,
-		Repos:       repoStats,
+		GeneratedAt:        time.Now().UTC().Format(time.RFC3339),
+		Summary:            summary,
+		TopContributors:    topContribs,
+		Repos:              repoStats,
 		DiscussionsSummary: discSummary,
 	}
 	out.Period.Start = since30.Format("2006-01-02")
@@ -1221,10 +1238,33 @@ func runFetchBuilds() error {
 
 	cfg := builds.CollectorConfig{
 		Repos:        builds.DefaultRepos,
-		LookbackDays: 14,  // cold-start bootstrap; warm runs use latest-1d automatically
-		MaxRunsPerWf: 30,  // cap per workflow file to bound cold-start API calls
+		LookbackDays: 14, // cold-start bootstrap; warm runs use latest-1d automatically
+		MaxRunsPerWf: 30, // cap per workflow file to bound cold-start API calls
 		HistoryPath:  ".sync-cache/builds-history.json",
 		OutputPath:   "src/data/builds.json",
+	}
+
+	collector := builds.NewCollector(client.GitHub(), cfg)
+	return collector.Run(client.Context())
+}
+
+// runFetchBuildsFor is the generic per-image collector used by fetch-builds-bluefin,
+// fetch-builds-aurora, and fetch-builds-bazzite. It writes to:
+//
+//	src/data/builds-<image>.json
+//	.sync-cache/builds-<image>-history.json
+func runFetchBuildsFor(image string, repos []builds.RepoConfig) error {
+	client, err := ghclient.NewClient()
+	if err != nil {
+		return err
+	}
+
+	cfg := builds.CollectorConfig{
+		Repos:        repos,
+		LookbackDays: 14,
+		MaxRunsPerWf: 30,
+		HistoryPath:  fmt.Sprintf(".sync-cache/builds-%s-history.json", image),
+		OutputPath:   fmt.Sprintf("src/data/builds-%s.json", image),
 	}
 
 	collector := builds.NewCollector(client.GitHub(), cfg)

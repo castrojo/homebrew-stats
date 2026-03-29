@@ -25,8 +25,8 @@ test.describe('Builds page', () => {
   test('builds tab is active in navigation', async ({ page }) => {
     // Look for a nav link that is "active" and contains "Builds"
     const activeLink = page.locator('nav a.active, nav a[aria-current="page"]');
-    // At minimum the builds tab link should exist in the nav
-    const buildsLink = page.locator('nav a[href*="builds"]');
+    // At minimum the Bluefin builds tab link should exist in the nav (exact href to avoid matching aurora/bazzite tabs)
+    const buildsLink = page.locator('nav a[href="/homebrew-stats/builds/"]');
     await expect(buildsLink).toBeVisible();
   });
 

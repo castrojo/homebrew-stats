@@ -100,10 +100,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-countme
 
-      - name: Fetch build pipeline metrics
+      - name: Fetch build pipeline metrics (Bluefin)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./stats-go/stats fetch-builds
+        run: ./stats-go/stats fetch-builds-bluefin
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (Aurora)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-aurora
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (Bazzite)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-bazzite
         continue-on-error: true
         timeout-minutes: 8
 
@@ -143,6 +157,16 @@ jobs:
               exit 1
             fi
             echo "✅ $page: no empty charts"
+          done
+          # Aurora/Bazzite/Bluefin builds pages start in bootstrap state — show "Collecting
+          # build data" text instead of charts. Skip chart-empty check for these pages.
+          for page in dist/builds/index.html dist/aurora-builds/index.html dist/bazzite-builds/index.html; do
+            if [ -f "$page" ]; then
+              echo "✅ $page: exists (bootstrap state is expected on first run)"
+            else
+              echo "❌ $page: page was not built"
+              exit 1
+            fi
           done
           # Contributors page has 3 LFX-gated charts (org breakdown, PR health, new vs returning)
           # that are intentionally empty until LFX Insights sync runs. Allow up to 3 empty;
@@ -196,13 +220,16 @@ jobs:
             echo "⚠️ countme current_week is empty — data collection may still be bootstrapping"
           fi
 
-      - name: Verify builds page has data
+      - name: Verify builds pages have data
         run: |
-          if grep -q '"health_status":"unknown"' src/data/builds.json 2>/dev/null; then
-            echo "⚠️ builds.json is in bootstrap state (cold cache) — skipping strict check"
-          else
-            echo "✅ builds.json has real data"
-          fi
+          for image in bluefin aurora bazzite; do
+            f="src/data/builds-${image}.json"
+            if grep -q '"health_status":"unknown"' "$f" 2>/dev/null; then
+              echo "⚠️ ${f} is in bootstrap state (cold cache) — skipping strict check"
+            else
+              echo "✅ ${f} has real data"
+            fi
+          done
 
       - name: Verify contributors data (warn-only)
         run: |

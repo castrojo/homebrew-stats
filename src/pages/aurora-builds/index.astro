@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import type { BuildsData } from '../../lib/types.ts';
-import rawData from '../../data/builds-bluefin.json';
+import rawData from '../../data/builds-aurora.json';
 
 import BuildsHealthBar from '../../components/builds/BuildsHealthBar.astro';
 import DORAPanel from '../../components/builds/DORAPanel.astro';
@@ -29,15 +29,15 @@ const generatedAt = new Date(builds.generated_at).toUTCString();
 const isBootstrap = builds.summary.health_status === 'unknown';
 ---
 
-<Layout title="Bluefin CI/CD Build Metrics" activeTab="builds">
+<Layout title="Aurora CI/CD Build Metrics" activeTab="aurora-builds">
   <header class="page-header">
     <div>
-      <h1>Bluefin Build Pipeline</h1>
+      <h1>Aurora Build Pipeline</h1>
       <div class="meta">
         Updated {generatedAt} ·
-        <a href="https://github.com/ublue-os/bluefin/actions" target="_blank" rel="noopener">bluefin</a> ·
-        <a href="https://github.com/ublue-os/bluefin-lts/actions" target="_blank" rel="noopener">bluefin-lts</a> ·
-        <a href="https://github.com/projectbluefin" target="_blank" rel="noopener">projectbluefin</a>
+        <a href="https://github.com/ublue-os/aurora/actions" target="_blank" rel="noopener">aurora</a> ·
+        <a href="https://github.com/get-aurora-dev/common/actions" target="_blank" rel="noopener">common</a> ·
+        <a href="https://github.com/get-aurora-dev/iso/actions" target="_blank" rel="noopener">iso</a>
       </div>
     </div>
   </header>
@@ -51,7 +51,7 @@ const isBootstrap = builds.summary.health_status === 'unknown';
       <DORAPanel dora={builds.dora_metrics} />
       <GoldenSignalsPanel dora={builds.dora_metrics} summary={builds.summary} />
 
-      <!-- Section 1b: Monthly Overview (bootstrap guard — needs ≥ 2 months) -->
+      <!-- Section 1b: Monthly Overview (bootstrap guard — needs >= 2 months) -->
       {builds.monthly_history && builds.monthly_history.length >= 2 && (
         <section class="monthly-overview">
           <h2 class="section-heading">Monthly Overview</h2>
