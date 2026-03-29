@@ -1,0 +1,282 @@
+---
+import type { BuildsData, BuildMonthlySnapshot } from '../lib/types.ts';
+import { doraLevelColor } from '../lib/build-utils.ts';
+import { safeJson } from '../lib/inject.ts';
+
+interface Props {
+  bluefin: BuildsData;
+  aurora: BuildsData;
+  bazzite: BuildsData;
+}
+
+const { bluefin, aurora, bazzite } = Astro.props;
+
+interface ImageDORA {
+  label: string;
+  level: string;
+  deployFreq: number;
+  changeFailRate: number;
+  color: string;
+}
+
+const images: ImageDORA[] = [
+  {
+    label: 'Bluefin',
+    level: bluefin.dora_metrics.dora_level,
+    deployFreq: bluefin.dora_metrics.deploy_freq_per_week,
+    changeFailRate: bluefin.dora_metrics.change_failure_rate_pct,
+    color: 'var(--blue)',
+  },
+  {
+    label: 'Aurora',
+    level: aurora.dora_metrics.dora_level,
+    deployFreq: aurora.dora_metrics.deploy_freq_per_week,
+    changeFailRate: aurora.dora_metrics.change_failure_rate_pct,
+    color: 'var(--purple)',
+  },
+  {
+    label: 'Bazzite',
+    level: bazzite.dora_metrics.dora_level,
+    deployFreq: bazzite.dora_metrics.deploy_freq_per_week,
+    changeFailRate: bazzite.dora_metrics.change_failure_rate_pct,
+    color: 'var(--green)',
+  },
+];
+
+// Monthly leaderboard data — union of all months across all three images
+const allMonths = Array.from(new Set([
+  ...(bluefin.monthly_history ?? []).map((s: BuildMonthlySnapshot) => s.month),
+  ...(aurora.monthly_history ?? []).map((s: BuildMonthlySnapshot) => s.month),
+  ...(bazzite.monthly_history ?? []).map((s: BuildMonthlySnapshot) => s.month),
+])).sort();
+
+// For each image, build a map from month→dora_level
+function buildLevelMap(history: BuildMonthlySnapshot[] | null | undefined): Record<string, string> {
+  const m: Record<string, string> = {};
+  for (const s of history ?? []) { m[s.month] = s.dora_level; }
+  return m;
+}
+
+const bluefinMap = buildLevelMap(bluefin.monthly_history);
+const auroraMap = buildLevelMap(aurora.monthly_history);
+const bazziteMap = buildLevelMap(bazzite.monthly_history);
+
+// Chart data: null for unknown months (Chart.js skips null points)
+interface ChartPayload {
+  labels: string[];
+  bluefin: (number | null)[];
+  aurora: (number | null)[];
+  bazzite: (number | null)[];
+}
+
+function levelToNum(level: string | undefined): number | null {
+  switch (level) {
+    case 'elite': return 4;
+    case 'high': return 3;
+    case 'medium': return 2;
+    case 'low': return 1;
+    default: return null;
+  }
+}
+
+const chartPayload: ChartPayload = {
+  labels: allMonths,
+  bluefin: allMonths.map(m => levelToNum(bluefinMap[m])),
+  aurora: allMonths.map(m => levelToNum(auroraMap[m])),
+  bazzite: allMonths.map(m => levelToNum(bazziteMap[m])),
+};
+
+const showChart = allMonths.length >= 2;
+---
+
+<section class="dora-comparison">
+  <h2 class="section-heading">Project DORA Health</h2>
+
+  <!-- KPI cards -->
+  <div class="dora-cards">
+    {images.map(img => (
+      <div class="dora-card">
+        <div class="dora-image-label">{img.label}</div>
+        {img.level === 'unknown' ? (
+          <div class="dora-level collecting">Collecting…</div>
+        ) : (
+          <>
+            <div
+              class="dora-level"
+              style={`color: ${doraLevelColor(img.level)}`}
+            >
+              {img.level.charAt(0).toUpperCase() + img.level.slice(1)}
+            </div>
+            <div class="dora-stat">{img.deployFreq.toFixed(1)}×/wk deploys</div>
+            <div class="dora-stat">{img.changeFailRate.toFixed(1)}% fail rate</div>
+          </>
+        )}
+      </div>
+    ))}
+  </div>
+
+  <!-- Monthly leaderboard chart -->
+  {showChart && (
+    <div class="dora-chart-wrap">
+      <canvas id="dora-comparison-chart" height={220} aria-label="Monthly DORA level leaderboard" role="img"></canvas>
+      <script type="application/json" id="dora-comparison-data" set:html={safeJson(chartPayload)}></script>
+    </div>
+  )}
+</section>
+
+<script>
+import '../lib/chart-registry.js';
+import { readChartData } from '../lib/inject.js';
+import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
+
+const dataEl = document.getElementById('dora-comparison-data');
+if (dataEl) {
+  interface ChartPayload {
+    labels: string[];
+    bluefin: (number | null)[];
+    aurora: (number | null)[];
+    bazzite: (number | null)[];
+  }
+
+  try {
+    const payload = readChartData<ChartPayload>('dora-comparison-data');
+    const colors = getChartColors();
+
+    const levelLabels = ['', 'Low', 'Medium', 'High', 'Elite'];
+
+    const chart = new Chart('dora-comparison-chart', {
+      type: 'bar',
+      data: {
+        labels: payload.labels,
+        datasets: [
+          {
+            label: 'Bluefin',
+            data: payload.bluefin,
+            backgroundColor: BRAND_COLOURS[0] + 'cc',
+            borderColor: BRAND_COLOURS[0],
+            borderWidth: 1,
+          },
+          {
+            label: 'Aurora',
+            data: payload.aurora,
+            backgroundColor: BRAND_COLOURS[3] + 'cc',
+            borderColor: BRAND_COLOURS[3],
+            borderWidth: 1,
+          },
+          {
+            label: 'Bazzite',
+            data: payload.bazzite,
+            backgroundColor: BRAND_COLOURS[1] + 'cc',
+            borderColor: BRAND_COLOURS[1],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: colors.text, font: { size: 12 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const v = ctx.parsed.y;
+                return `${ctx.dataset.label}: ${levelLabels[v] ?? 'Unknown'}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+          },
+          y: {
+            min: 0,
+            max: 4,
+            ticks: {
+              color: colors.muted,
+              font: { size: 11 },
+              stepSize: 1,
+              callback: (v) => levelLabels[v as number] ?? '',
+            },
+            grid: { color: colors.grid },
+          },
+        },
+      },
+    });
+
+    window.addEventListener('themechange', () => applyTheme(chart));
+  } catch (e) {
+    console.error('[DORAComparisonSection]', e);
+  }
+}
+</script>
+
+<style>
+  .dora-comparison {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dora-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .dora-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .dora-image-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dora-level {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .dora-level.collecting {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .dora-stat {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .dora-chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+
+  @media (max-width: 600px) {
+    .dora-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,115 @@
+---
+import { safeJson } from '../lib/inject.ts';
+
+interface Props {
+  data: number[];
+  color?: string;
+  height?: number;
+  label?: string;
+}
+
+const {
+  data,
+  color = 'var(--blue)',
+  height = 28,
+  label = 'Trend sparkline',
+} = Astro.props;
+
+const id = crypto.randomUUID();
+// Only render if we have at least 2 data points
+const shouldRender = data.length >= 2;
+---
+
+{shouldRender && (
+  <span class="sparkline-wrap" style={`height:${height}px`}>
+    <canvas
+      id={id}
+      data-sparkline-id={id}
+      data-sparkline-color={color}
+      height={height}
+      aria-label={label}
+      role="img"
+    ></canvas>
+    <script
+      type="application/json"
+      id={`sparkline-data-${id}`}
+      set:html={safeJson(data)}
+    ></script>
+  </span>
+)}
+
+<script>
+import '../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+
+// Astro deduplicates this script block — it runs once, handles all instances
+document.querySelectorAll<HTMLCanvasElement>('[data-sparkline-id]').forEach(canvas => {
+  const id = canvas.dataset.sparklineId!;
+  const color = canvas.dataset.sparklineColor ?? 'var(--blue)';
+  const dataEl = document.getElementById(`sparkline-data-${id}`);
+  if (!dataEl) return;
+
+  let values: number[];
+  try {
+    values = JSON.parse(dataEl.textContent ?? '[]') as number[];
+  } catch {
+    return;
+  }
+
+  if (values.length < 2) return;
+
+  try {
+    const chart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: values.map((_, i) => i.toString()),
+        datasets: [{
+          data: values,
+          borderColor: color,
+          borderWidth: 1.5,
+          tension: 0.4,
+          fill: false,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false },
+        },
+        scales: {
+          x: { display: false },
+          y: { display: false },
+        },
+      },
+    });
+
+    window.addEventListener('themechange', () => {
+      if (chart.data.datasets[0]) {
+        chart.data.datasets[0].borderColor = canvas.dataset.sparklineColor ?? 'var(--blue)';
+      }
+      chart.update();
+    });
+  } catch (e) {
+    console.error('[Sparkline]', e);
+  }
+});
+</script>
+
+<style>
+  .sparkline-wrap {
+    display: inline-block;
+    width: 80px;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  .sparkline-wrap canvas {
+    display: block;
+    width: 100% !important;
+  }
+</style>

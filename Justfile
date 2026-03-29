@@ -10,6 +10,10 @@ sync-builds:
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-aurora
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-bazzite
 
+# Fetch OpenSSF Scorecard scores for tracked repos
+sync-scorecard:
+    cd stats-go && go run ./cmd/stats fetch-scorecard
+
 # Fetch latest data from GitHub API (requires GITHUB_TOKEN)
 sync:
     cd stats-go && go build -o stats ./cmd/stats/

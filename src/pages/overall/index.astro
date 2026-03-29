@@ -5,10 +5,19 @@ import CountmeTrendChart from '../../components/CountmeTrendChart.astro';
 import DistroTrendChart from '../../components/DistroTrendChart.astro';
 import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
 import EcosystemGrowthChart from '../../components/EcosystemGrowthChart.astro';
+import Sparkline from '../../components/Sparkline.astro';
 import data from '../../data/countme.json';
+import DORAComparisonSection from '../../components/DORAComparisonSection.astro';
+import type { BuildsData } from '../../lib/types.ts';
+import bluefinBuilds from '../../data/builds-bluefin.json';
+import auroraBuilds from '../../data/builds-aurora.json';
+import bazziteBuilds from '../../data/builds-bazzite.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
+const bazziteWeekly = weekRecords.slice(-12).map((w: any) => w.distros?.bazzite ?? 0);
+const bluefinWeekly = weekRecords.slice(-12).map((w: any) => w.distros?.bluefin ?? 0);
+const auroraWeekly  = weekRecords.slice(-12).map((w: any) => w.distros?.aurora ?? 0);
 ---
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">
@@ -35,6 +44,14 @@ const weekRecords = data.history.week_records ?? [];
     currentWeek={data.current_week as any}
     wowGrowthPct={data.wow_growth_pct as any}
   />
+  <div class="sparkline-row">
+    <span class="sparkline-label">Bazzite</span>
+    <Sparkline data={bazziteWeekly} color="var(--blue)" label="Bazzite 12-week trend" />
+    <span class="sparkline-label">Bluefin</span>
+    <Sparkline data={bluefinWeekly} color="var(--purple)" label="Bluefin 12-week trend" />
+    <span class="sparkline-label">Aurora</span>
+    <Sparkline data={auroraWeekly} color="var(--green)" label="Aurora 12-week trend" />
+  </div>
 
   <section class="charts-section">
     <h2>Monthly Trends</h2>
@@ -52,6 +69,12 @@ const weekRecords = data.history.week_records ?? [];
 
     <h2>Device Momentum (This Week vs Last Week)</h2>
     <EcosystemGrowthChart currentWeek={data.current_week as any} prevWeek={data.prev_week as any} />
+
+    <DORAComparisonSection
+      bluefin={bluefinBuilds as unknown as BuildsData}
+      aurora={auroraBuilds as unknown as BuildsData}
+      bazzite={bazziteBuilds as unknown as BuildsData}
+    />
   </section>
 </Layout>
 
@@ -77,4 +100,16 @@ const weekRecords = data.history.week_records ?? [];
   .explainer p { margin: 0; }
   .explainer strong { color: var(--text); }
   .explainer a { color: var(--blue); }
+  .sparkline-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .sparkline-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+  }
 </style>

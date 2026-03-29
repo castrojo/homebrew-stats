@@ -1,0 +1,154 @@
+---
+import type { ScorecardData, ScorecardRepoResult } from '../../lib/types.ts';
+
+interface Props {
+  data: ScorecardData | null;
+}
+
+const { data } = Astro.props;
+
+const results: ScorecardRepoResult[] = data?.results ?? [];
+
+function scoreBadgeColor(score: number | null): string {
+  if (score === null) return 'var(--muted)';
+  if (score >= 7.0) return 'var(--green)';
+  if (score >= 5.0) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function scoreLabel(result: ScorecardRepoResult): string {
+  if (!result.indexed || result.score === null) return 'Not indexed';
+  return result.score.toFixed(1) + '/10';
+}
+
+function scorecardUrl(repo: string): string {
+  return `https://securityscorecards.dev/viewer/?uri=github.com/${repo}`;
+}
+
+function shortRepo(repo: string): string {
+  return repo.split('/').pop() ?? repo;
+}
+---
+
+<section class="scorecard-panel">
+  <h2 class="section-heading">OpenSSF Scorecard</h2>
+
+  {results.length === 0 ? (
+    <p class="collecting">Collecting Scorecard data — check back after the next sync.</p>
+  ) : (
+    <div class="sc-grid">
+      {results.map(result => (
+        <a
+          href={scorecardUrl(result.repo)}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="sc-card"
+          aria-label={`OpenSSF Scorecard for ${result.repo}`}
+        >
+          <div class="sc-repo-name">{shortRepo(result.repo)}</div>
+          <div
+            class="sc-score"
+            style={`color: ${scoreBadgeColor(result.score)}`}
+          >
+            {scoreLabel(result)}
+          </div>
+          {result.date && (
+            <div class="sc-date">{result.date}</div>
+          )}
+          {!result.indexed && (
+            <div class="sc-not-indexed">Not indexed</div>
+          )}
+        </a>
+      ))}
+    </div>
+  )}
+
+  <p class="sc-footnote">
+    Scores from <a href="https://securityscorecards.dev" target="_blank" rel="noopener">OpenSSF Scorecard</a>.
+    Click a card to view the full report.
+  </p>
+</section>
+
+<style>
+  .scorecard-panel {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .collecting {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .sc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .sc-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+
+  .sc-card:hover {
+    border-color: var(--blue);
+  }
+
+  .sc-repo-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: monospace;
+  }
+
+  .sc-score {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .sc-date {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .sc-not-indexed {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .sc-footnote {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 0.25rem;
+  }
+
+  .sc-footnote a {
+    color: var(--link);
+    text-decoration: none;
+  }
+
+  .sc-footnote a:hover {
+    text-decoration: underline;
+  }
+</style>

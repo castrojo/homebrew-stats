@@ -313,3 +313,17 @@ export interface BuildMonthlySnapshot {
   repo_success_rate: Record<string, number>;
   dora_level: string;
 }
+
+// ── Scorecard ─────────────────────────────────────────────────────────────────
+
+export interface ScorecardRepoResult {
+  repo: string;
+  score: number | null;
+  date: string | null;
+  indexed: boolean;
+}
+
+export interface ScorecardData {
+  generated_at: string;
+  results: ScorecardRepoResult[] | null;
+}

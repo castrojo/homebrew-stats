@@ -16,6 +16,7 @@ import (
 	"github.com/castrojo/homebrew-stats/internal/history"
 	"github.com/castrojo/homebrew-stats/internal/metrics"
 	"github.com/castrojo/homebrew-stats/internal/osanalytics"
+	"github.com/castrojo/homebrew-stats/internal/scorecard"
 	"github.com/castrojo/homebrew-stats/internal/tap"
 	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
 	"github.com/castrojo/homebrew-stats/internal/testhub"
@@ -63,9 +64,14 @@ func main() {
 			fmt.Fprintln(os.Stderr, "❌ fetch-builds-bazzite:", err)
 			os.Exit(1)
 		}
+	case "fetch-scorecard":
+		if err := runFetchScorecard(); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-scorecard:", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite]")
+		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite|fetch-scorecard]")
 		os.Exit(1)
 	}
 }
@@ -1244,4 +1250,32 @@ func runFetchBuildsFor(image string, repos []builds.RepoConfig) error {
 
 	collector := builds.NewCollector(client.GitHub(), cfg)
 	return collector.Run(client.Context())
+}
+
+// ── fetch-scorecard ─────────────────────────────────────────────────────────
+
+func runFetchScorecard() error {
+	repos := []string{
+		"ublue-os/bluefin",
+		"ublue-os/bluefin-lts",
+		"ublue-os/aurora",
+		"ublue-os/bazzite",
+		"projectbluefin/common",
+	}
+	out, err := scorecard.FetchAll(repos)
+	if err != nil {
+		return err
+	}
+	if err := writeJSON("src/data/scorecard.json", out); err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/scorecard.json")
+	for _, r := range out.Results {
+		if r.Indexed {
+			fmt.Fprintf(os.Stderr, "  %s: score=%.1f date=%s\n", r.Repo, *r.Score, *r.Date)
+		} else {
+			fmt.Fprintf(os.Stderr, "  %s: not indexed\n", r.Repo)
+		}
+	}
+	return nil
 }
