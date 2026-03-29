@@ -13,11 +13,11 @@ import (
 
 // CollectorConfig holds configuration for the builds data collector.
 type CollectorConfig struct {
-	Repos           []RepoConfig
-	LookbackDays    int
-	MaxRunsPerWf    int // max new runs to fetch per workflow file (0 = unlimited)
-	HistoryPath     string
-	OutputPath      string
+	Repos        []RepoConfig
+	LookbackDays int
+	MaxRunsPerWf int // max new runs to fetch per workflow file (0 = unlimited)
+	HistoryPath  string
+	OutputPath   string
 }
 
 // Collector fetches GitHub Actions data and writes builds.json.
@@ -95,6 +95,7 @@ func (c *Collector) Run(ctx context.Context) error {
 		FailureBreakdown: ComputeFailureBreakdown(history.Runs),
 		TriggerBreakdown: ComputeTriggerBreakdown(history.Runs),
 		History:          computeDailySnapshots(history.Runs),
+		MonthlyHistory:   computeMonthlySnapshots(history.Runs),
 		Repos:            computeAllRepoMetrics(history.Runs, c.cfg.Repos),
 	}
 

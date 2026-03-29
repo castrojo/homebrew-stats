@@ -183,6 +183,7 @@ export interface BuildsData {
   failure_breakdown: FailureCategory[];
   trigger_breakdown: TriggerBreakdown;
   history: BuildDailySnapshot[];
+  monthly_history?: BuildMonthlySnapshot[];
 }
 
 export interface PipelineSummary {
@@ -296,4 +297,17 @@ export interface BuildArchMetrics {
   success_rate_7d: number;
   avg_duration_min: number;
   total_jobs_7d: number;
+}
+
+export interface BuildMonthlySnapshot {
+  month: string;
+  total_runs: number;
+  success_count: number;
+  failure_count: number;
+  cancelled_count: number;
+  success_rate: number;
+  avg_duration_min: number;
+  p95_duration_min: number;
+  repo_success_rate: Record<string, number>;
+  dora_level: string;
 }

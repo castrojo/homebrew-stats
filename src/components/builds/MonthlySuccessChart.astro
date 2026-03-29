@@ -1,0 +1,105 @@
+---
+import ChartCard from '../ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import type { BuildMonthlySnapshot } from '../../lib/types.ts';
+
+interface Props {
+  history: BuildMonthlySnapshot[];
+}
+
+const { history } = Astro.props;
+const isEmpty = history.length === 0;
+---
+
+<ChartCard
+  title="Monthly Build Outcomes"
+  canvasId="monthly-success-chart"
+  height={260}
+  isEmpty={isEmpty}
+  emptyMsg="Collecting monthly build history…"
+/>
+
+{!isEmpty && (
+  <script type="application/json" id="monthly-success-data" set:html={safeJson(history)}></script>
+)}
+
+<script>
+import '../../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+import { BRAND_COLOURS, getChartColors, applyTheme } from '../../lib/chart-theme.js';
+import { readChartData } from '../../lib/inject.js';
+import type { BuildMonthlySnapshot } from '../../lib/types.js';
+
+const dataEl = document.getElementById('monthly-success-data');
+if (!dataEl) {
+  // Empty state — no chart to initialise
+} else {
+  const history = readChartData<BuildMonthlySnapshot[]>('monthly-success-data');
+
+  const SUCCESS   = BRAND_COLOURS[2]; // green
+  const FAILURE   = BRAND_COLOURS[4]; // red-orange
+  const CANCELLED = BRAND_COLOURS[3]; // yellow
+
+  const canvas = document.getElementById('monthly-success-chart') as HTMLCanvasElement | null;
+  let chart: Chart | undefined;
+
+  if (canvas) {
+    const colors = getChartColors();
+
+    try {
+      chart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: history.map(h => h.month),
+          datasets: [
+            {
+              label: 'Success',
+              data: history.map(h => h.success_count),
+              backgroundColor: SUCCESS,
+              stack: 'outcomes',
+            },
+            {
+              label: 'Failure',
+              data: history.map(h => h.failure_count),
+              backgroundColor: FAILURE,
+              stack: 'outcomes',
+            },
+            {
+              label: 'Cancelled',
+              data: history.map(h => h.cancelled_count),
+              backgroundColor: CANCELLED,
+              stack: 'outcomes',
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: colors.text, font: { size: 11 }, usePointStyle: true, boxWidth: 8 } },
+          },
+          scales: {
+            x: {
+              stacked: true,
+              ticks: { color: colors.muted, font: { size: 10 } },
+              grid: { color: colors.grid },
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              ticks: { color: colors.muted, font: { size: 10 } },
+              grid: { color: colors.grid },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[MonthlySuccessChart] Chart init failed:', e);
+    }
+
+    window.addEventListener('themechange', () => {
+      if (chart) applyTheme(chart);
+    });
+  }
+}
+</script>

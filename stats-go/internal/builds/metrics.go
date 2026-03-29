@@ -282,7 +282,6 @@ func ParseJobDimensions(jobName string) (platform, variant, flavor, stream strin
 	return
 }
 
-
 // ComputeDORALevel classifies pipeline performance into elite/high/medium/low
 // based on published DORA benchmarks.
 func ComputeDORALevel(d DORAMetrics) string {
@@ -432,7 +431,7 @@ func ComputeSummary(runs []WorkflowRunRecord) PipelineSummary {
 		P95DurationMin:        p95,
 		P99DurationMin:        p99,
 		AvgQueueTimeSec:       avgQueue,
-		ActiveStreams:          len(streams),
+		ActiveStreams:         len(streams),
 		HealthStatus:          HealthStatus(rate7d, mttr),
 	}
 }
@@ -807,6 +806,116 @@ func ComputeTriggerBreakdown(runs []WorkflowRunRecord) TriggerBreakdown {
 		}
 	}
 	return td
+}
+
+// computeMonthlySnapshots aggregates runs into per-month snapshots.
+// The current (incomplete) month is excluded so only full months appear.
+func computeMonthlySnapshots(runs []WorkflowRunRecord) []MonthlySnapshot {
+	if len(runs) == 0 {
+		return []MonthlySnapshot{}
+	}
+
+	currentMonth := time.Now().UTC().Format("2006-01")
+
+	type monthData struct {
+		success, failure, cancelled int
+		durations                   []float64
+		repoSuccess                 map[string]int
+		repoTotal                   map[string]int
+	}
+	months := map[string]*monthData{}
+	monthOrder := []string{}
+
+	for _, r := range runs {
+		t, err := time.Parse(time.RFC3339, r.CreatedAt)
+		if err != nil {
+			continue
+		}
+		month := t.Format("2006-01")
+		if month == currentMonth {
+			continue
+		}
+		if _, ok := months[month]; !ok {
+			months[month] = &monthData{
+				repoSuccess: map[string]int{},
+				repoTotal:   map[string]int{},
+			}
+			monthOrder = append(monthOrder, month)
+		}
+		d := months[month]
+		switch r.Conclusion {
+		case "success":
+			d.success++
+		case "failure":
+			d.failure++
+		case "cancelled":
+			d.cancelled++
+		}
+		durationMin := float64(r.DurationSec) / 60.0
+		d.durations = append(d.durations, durationMin)
+		d.repoTotal[r.Repo]++
+		if r.Conclusion == "success" {
+			d.repoSuccess[r.Repo]++
+		}
+	}
+
+	sort.Strings(monthOrder)
+
+	result := make([]MonthlySnapshot, 0, len(monthOrder))
+	for _, month := range monthOrder {
+		d := months[month]
+		total := d.success + d.failure + d.cancelled
+		// SuccessRate excludes cancelled from denominator (matches SuccessRate() semantics)
+		denominator := d.success + d.failure
+		var successRate float64
+		if denominator > 0 {
+			successRate = 100.0 * float64(d.success) / float64(denominator)
+		}
+
+		var avgDur float64
+		if len(d.durations) > 0 {
+			sum := 0.0
+			for _, v := range d.durations {
+				sum += v
+			}
+			avgDur = sum / float64(len(d.durations))
+		}
+
+		var p95Dur float64
+		if len(d.durations) > 0 {
+			p95Dur = Percentile(d.durations, 95)
+		}
+
+		repoRate := map[string]float64{}
+		for repo, tot := range d.repoTotal {
+			if tot > 0 {
+				repoRate[repo] = 100.0 * float64(d.repoSuccess[repo]) / float64(tot)
+			}
+		}
+
+		doraLevel := "low"
+		if successRate >= 99 {
+			doraLevel = "elite"
+		} else if successRate >= 95 {
+			doraLevel = "high"
+		} else if successRate >= 85 {
+			doraLevel = "medium"
+		}
+
+		result = append(result, MonthlySnapshot{
+			Month:           month,
+			TotalRuns:       total,
+			SuccessCount:    d.success,
+			FailureCount:    d.failure,
+			CancelledCount:  d.cancelled,
+			SuccessRate:     successRate,
+			AvgDurationMin:  avgDur,
+			P95DurationMin:  p95Dur,
+			RepoSuccessRate: repoRate,
+			DORALevel:       doraLevel,
+		})
+	}
+	return result
 }
 
 // computeDORA builds DORAMetrics from all runs.

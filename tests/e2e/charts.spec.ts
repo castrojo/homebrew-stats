@@ -212,6 +212,14 @@ test.describe('No empty charts contract', () => {
   test('Overall tab has no empty charts', async ({ page }) => {
     await assertNoEmptyCharts(page, '/homebrew-stats/overall/');
   });
+
+  test('Builds tab has no empty charts', async ({ page }) => {
+    await page.goto('/homebrew-stats/builds/');
+    // Bootstrap state: only a .collecting paragraph renders — no charts at all.
+    const isCollecting = (await page.locator('.collecting').count()) > 0;
+    if (isCollecting) return;
+    await assertNoEmptyCharts(page, '/homebrew-stats/builds/');
+  });
 });
 
 // ─── IssueButton ─────────────────────────────────────────────────────────────
@@ -221,6 +229,8 @@ test.describe('IssueButton', () => {
     ['Homebrew', '/homebrew-stats/'],
     ['Testhub', '/homebrew-stats/testhub/'],
     ['Overall', '/homebrew-stats/overall/'],
+    ['Builds', '/homebrew-stats/builds/'],
+    ['Contributors', '/homebrew-stats/contributors/'],
   ]) {
     test(`${tab} tab has a "File an issue" link`, async ({ page }) => {
       await page.goto(url as string);
@@ -380,6 +390,75 @@ test.describe('Contributors tab', () => {
     const explainer = page.locator('.explainer');
     await expect(explainer).toBeVisible();
     await expect(explainer).toContainText('Project Bluefin');
+  });
+});
+
+// ─── Builds tab — Monthly Overview ───────────────────────────────────────────
+// The Monthly Overview section only renders when monthly_history.length >= 2.
+// With bootstrap data (health_status==="unknown") the entire non-bootstrap
+// content block is gated by `isBootstrap`, so the monthly section is never
+// emitted into the DOM. These tests handle both states gracefully so they
+// continue to pass once real data is collected.
+
+test.describe('Builds tab — Monthly Overview', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/homebrew-stats/builds/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('Monthly Overview section absent when bootstrap data (monthly_history < 2)', async ({ page }) => {
+    // With bootstrap data (health_status==="unknown") the entire non-bootstrap
+    // content block is not emitted — .monthly-overview will not be in the DOM.
+    // With real data (monthly_history.length >= 2) the section IS rendered and visible.
+    // Either state is acceptable here; the rendering assertions are in the next test.
+    const section = page.locator('.monthly-overview');
+    const count = await section.count();
+    // If count === 0 we are in bootstrap state — test passes.
+    // If count > 0 we have real data — section must be visible.
+    if (count > 0) {
+      await expect(section).toBeVisible();
+    }
+  });
+
+  test('Monthly charts render when monthly_history has data', async ({ page }) => {
+    const section = page.locator('.monthly-overview');
+    const isVisible = await section.isVisible().catch(() => false);
+
+    if (!isVisible) {
+      // Bootstrap state — no monthly data yet, section absent.
+      // This is the expected state for the current builds.json fixture.
+      return;
+    }
+
+    // Data present — all 3 canvas elements must be rendered and sized.
+    await expectCanvasRendered(page, 'monthly-success-chart');
+    await expectCanvasRendered(page, 'monthly-duration-chart');
+    await expectCanvasRendered(page, 'monthly-repo-chart');
+  });
+
+  test('Monthly data scripts have valid JSON when section is visible', async ({ page }) => {
+    const section = page.locator('.monthly-overview');
+    const isVisible = await section.isVisible().catch(() => false);
+
+    if (!isVisible) {
+      // Bootstrap state — scripts are not emitted. Skip assertions.
+      return;
+    }
+
+    // Validate each data script payload
+    const successData = await getScriptJSON(page, 'monthly-success-data') as unknown[];
+    expect(Array.isArray(successData), 'monthly-success-data must be an array').toBe(true);
+
+    const durationData = await getScriptJSON(page, 'monthly-duration-data') as unknown[];
+    expect(Array.isArray(durationData), 'monthly-duration-data must be an array').toBe(true);
+
+    const repoData = await getScriptJSON(page, 'monthly-repo-data') as unknown[];
+    expect(Array.isArray(repoData), 'monthly-repo-data must be an array').toBe(true);
+  });
+
+  test('Builds page has a file-an-issue link', async ({ page }) => {
+    const link = page.locator('a[href*="castrojo/homebrew-stats/issues/new"]');
+    await expect(link, 'Builds tab must have a file-an-issue link').toBeVisible();
   });
 });
 

@@ -13,7 +13,7 @@ const weekRecords = data.history.week_records ?? [];
 
 <Layout title="Overall — homebrew-stats" activeTab="overall">
   <header>
-    <h1>🌐 Universal Blue Active Devices</h1>
+    <h1>Universal Blue Active Devices</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://github.com/ublue-os/countme">ublue-os/countme</a>
@@ -37,20 +37,20 @@ const weekRecords = data.history.week_records ?? [];
   />
 
   <section class="charts-section">
-    <h2>📈 Monthly Trends</h2>
+    <h2>Monthly Trends</h2>
     <CountmeTrendChart weekRecords={weekRecords as any} />
 
-    <h2>📊 Individual Image Trends</h2>
+    <h2>Individual Image Trends</h2>
     <div class="distro-charts-grid">
-      <DistroTrendChart distroKey="bazzite"    distroLabel="Bazzite"    colorIndex={0} weekRecords={weekRecords as any} />
-      <DistroTrendChart distroKey="bluefin"    distroLabel="Bluefin"    colorIndex={1} weekRecords={weekRecords as any} />
-      <DistroTrendChart distroKey="aurora"     distroLabel="Aurora"     colorIndex={3} weekRecords={weekRecords as any} />
+      <DistroTrendChart distroKey="bazzite"    distroLabel="Bazzite"    colorIndex={0} weekRecords={weekRecords as any} defaultRange="all" />
+      <DistroTrendChart distroKey="bluefin"    distroLabel="Bluefin"    colorIndex={1} weekRecords={weekRecords as any} defaultRange="all" />
+      <DistroTrendChart distroKey="aurora"     distroLabel="Aurora"     colorIndex={3} weekRecords={weekRecords as any} defaultRange="all" />
     </div>
 
-    <h2>🌍 Ecosystem Share</h2>
+    <h2>Ecosystem Share</h2>
     <EcosystemPieChart currentWeek={data.current_week as any} />
 
-    <h2>📊 Device Momentum (This Week vs Last Week)</h2>
+    <h2>Device Momentum (This Week vs Last Week)</h2>
     <EcosystemGrowthChart currentWeek={data.current_week as any} prevWeek={data.prev_week as any} />
   </section>
 </Layout>

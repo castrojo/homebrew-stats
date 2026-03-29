@@ -12,9 +12,11 @@ interface Props {
   /** Index into BRAND_COLOURS to keep colours consistent with the combined chart. */
   colorIndex: number;
   weekRecords: WeekRecord[];
+  /** Which range button is active on initial render. Defaults to '30'. */
+  defaultRange?: string;
 }
 
-const { distroKey, distroLabel, colorIndex, weekRecords } = Astro.props;
+const { distroKey, distroLabel, colorIndex, weekRecords, defaultRange = '30' } = Astro.props;
 
 const canvasId = `${distroKey}-trend-chart`;
 const rangeId  = `${distroKey}-range-btns`;
@@ -33,7 +35,7 @@ const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
       height={200}
       rangeId={rangeId}
       ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
-      defaultRange="30"
+      defaultRange={defaultRange}
     />
     <script type="application/json" id={dataId} data-distro-chart set:html={safeJson({ monthly, distroKey, distroLabel, colorIndex })}></script>
   </>

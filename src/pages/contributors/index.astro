@@ -21,7 +21,7 @@ const lfx = (data as any).lfx ?? {};
 
 <Layout title="Contributors — homebrew-stats" activeTab="contributors">
   <header>
-    <h1>👥 Project Contributors</h1>
+    <h1>Project Contributors</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://insights.linuxfoundation.org/project/ublue-os-bluefin" target="_blank" rel="noopener">LFX Insights ↗</a>
@@ -42,38 +42,38 @@ const lfx = (data as any).lfx ?? {};
   <ContributorsKPIs summary={summary} />
 
   <section class="charts-section">
-    <h2>📊 Commit Activity by Repository</h2>
+    <h2>Commit Activity by Repository</h2>
     <CommitActivityChart repos={repos} />
 
-    <h2>🏆 Contributor Leaderboard</h2>
+      <h2>Contributor Leaderboard</h2>
     <ContributorLeaderboardChart topContributors={topContributors} />
 
     <div class="chart-row">
       <div class="chart-col">
-        <h2>🚌 Bus Factor</h2>
+        <h2>Bus Factor</h2>
         <BusFactorChart topContributors={topContributors} summary={summary} />
       </div>
       <div class="chart-col">
-        <h2>🏢 Organization Breakdown</h2>
+        <h2>Organization Breakdown</h2>
         <OrgDependencyChart lfx={lfx} />
       </div>
     </div>
 
-    <h2>📅 When Does the Community Work?</h2>
+    <h2>When Does the Community Work?</h2>
     <ContributionHeatmapChart repos={repos} />
 
     <div class="chart-row">
       <div class="chart-col">
-        <h2>💬 Discussion Activity</h2>
+        <h2>Discussion Activity</h2>
         <DiscussionActivityChart discussionsSummary={discussionsSummary} />
       </div>
       <div class="chart-col">
-        <h2>🔀 PR Health</h2>
+        <h2>PR Health</h2>
         <PRHealthChart lfx={lfx} />
       </div>
     </div>
 
-    <h2>🆕 New vs Returning Contributors</h2>
+    <h2>New vs Returning Contributors</h2>
     <NewVsReturningChart lfx={lfx} />
   </section>
 </Layout>

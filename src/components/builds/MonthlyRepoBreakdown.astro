@@ -1,0 +1,104 @@
+---
+import ChartCard from '../ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import type { BuildMonthlySnapshot } from '../../lib/types.ts';
+
+interface Props {
+  history: BuildMonthlySnapshot[];
+}
+
+const { history } = Astro.props;
+const isEmpty = history.length === 0;
+---
+
+<ChartCard
+  title="Monthly Success Rate by Repo"
+  canvasId="monthly-repo-chart"
+  height={280}
+  isEmpty={isEmpty}
+  emptyMsg="Collecting monthly repo data…"
+/>
+
+{!isEmpty && (
+  <script type="application/json" id="monthly-repo-data" set:html={safeJson(history)}></script>
+)}
+
+<script>
+import '../../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+import { BRAND_COLOURS, getChartColors, applyTheme } from '../../lib/chart-theme.js';
+import { readChartData } from '../../lib/inject.js';
+import type { BuildMonthlySnapshot } from '../../lib/types.js';
+
+const dataEl = document.getElementById('monthly-repo-data');
+if (!dataEl) {
+  // Empty state — no chart to initialise
+} else {
+  const history = readChartData<BuildMonthlySnapshot[]>('monthly-repo-data');
+
+  const canvas = document.getElementById('monthly-repo-chart') as HTMLCanvasElement | null;
+  let chart: Chart | undefined;
+
+  if (canvas && history.length > 0) {
+    const colors = getChartColors();
+
+    // Union of repo keys across ALL snapshots — not just history[0].
+    // Some repos only appear in later months; using only history[0] drops them.
+    const repos = [...new Set(history.flatMap((h: BuildMonthlySnapshot) => Object.keys(h.repo_success_rate)))].sort();
+    const monthLabels = history.map(h => h.month);
+
+    const datasets = repos.map((repo, i) => ({
+      label: repo,
+      data: history.map(h => h.repo_success_rate[repo] ?? 0),
+      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+      barPercentage: 0.8,
+    }));
+
+    try {
+      chart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: monthLabels,
+          datasets,
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: colors.text, font: { size: 11 }, usePointStyle: true, boxWidth: 8 } },
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted, font: { size: 10 } },
+              grid: { color: colors.grid },
+            },
+            y: {
+              min: 0,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Success Rate %',
+                color: colors.muted,
+                font: { size: 11 },
+              },
+              ticks: {
+                color: colors.muted,
+                font: { size: 10 },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                callback: (v: any) => `${v}%`,
+              },
+              grid: { color: colors.grid },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[MonthlyRepoBreakdown] Chart init failed:', e);
+    }
+
+    window.addEventListener('themechange', () => {
+      if (chart) applyTheme(chart);
+    });
+  }
+}
+</script>

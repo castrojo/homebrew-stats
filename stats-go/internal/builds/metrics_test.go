@@ -31,11 +31,11 @@ func makeRun(id int64, repo, conclusion, event, branch string, daysAgo int) Work
 
 func TestSuccessRate(t *testing.T) {
 	cases := []struct {
-		name     string
-		runs     []WorkflowRunRecord
-		days     int
-		wantMin  float64
-		wantMax  float64
+		name    string
+		runs    []WorkflowRunRecord
+		days    int
+		wantMin float64
+		wantMax float64
 	}{
 		{
 			name:    "empty",
@@ -251,8 +251,8 @@ func TestClassifyFailure(t *testing.T) {
 
 func TestParseJobDimensions(t *testing.T) {
 	cases := []struct {
-		name        string
-		jobName     string
+		name         string
+		jobName      string
 		wantPlatform string
 		wantVariant  string
 		wantFlavor   string
@@ -265,13 +265,13 @@ func TestParseJobDimensions(t *testing.T) {
 			wantVariant: "bluefin",
 		},
 		{
-			name:        "arm64-format",
-			jobName:     "build / Build and push image (arm64)",
+			name:         "arm64-format",
+			jobName:      "build / Build and push image (arm64)",
 			wantPlatform: "arm64",
 		},
 		{
-			name:        "iso-format",
-			jobName:     "Build Stable ISOs / Build ISOs (amd64, nvidia-open, stable)",
+			name:         "iso-format",
+			jobName:      "Build Stable ISOs / Build ISOs (amd64, nvidia-open, stable)",
 			wantPlatform: "amd64",
 			wantStream:   "stable",
 		},
@@ -329,17 +329,17 @@ func TestHealthStatus(t *testing.T) {
 
 func TestComputeDORALevel(t *testing.T) {
 	cases := []struct {
-		name  string
-		dora  DORAMetrics
-		want  string
+		name string
+		dora DORAMetrics
+		want string
 	}{
 		{
 			name: "elite",
 			dora: DORAMetrics{
-				DeployFreqPerWeek:    14,  // 2/day
-				LeadTimeMinutes:      30,  // 30 min
-				ChangeFailureRatePct: 2,   // 2%
-				MTTRMinutes:          45,  // 45 min
+				DeployFreqPerWeek:    14, // 2/day
+				LeadTimeMinutes:      30, // 30 min
+				ChangeFailureRatePct: 2,  // 2%
+				MTTRMinutes:          45, // 45 min
 			},
 			want: "elite",
 		},
@@ -600,6 +600,245 @@ func TestComputeRepoMetrics(t *testing.T) {
 	if rm.SuccessRate7d != 50 {
 		t.Errorf("SuccessRate7d = %.1f, want 50", rm.SuccessRate7d)
 	}
+}
+
+// ── makeRunAt helper ─────────────────────────────────────────────────────────
+
+// makeRunAt builds a WorkflowRunRecord with a specific timestamp.
+// durationMin is converted to DurationSec for storage.
+func makeRunAt(repo, conclusion string, durationMin float64, t time.Time) WorkflowRunRecord {
+	return WorkflowRunRecord{
+		Repo:        repo,
+		Conclusion:  conclusion,
+		DurationSec: int(durationMin * 60),
+		CreatedAt:   t.Format(time.RFC3339),
+	}
+}
+
+// ── TestComputeMonthlySnapshots ──────────────────────────────────────────────
+
+func TestComputeMonthlySnapshots_ExcludesCurrentMonth_Issue40(t *testing.T) {
+	now := time.Now()
+	// run in current month — must be excluded
+	r1 := makeRunAt("org/repo-a", "success", 5.0, now)
+	// run in prior month — must be included
+	prior := now.AddDate(0, -1, 0)
+	r2 := makeRunAt("org/repo-a", "success", 5.0, prior)
+
+	result := computeMonthlySnapshots([]WorkflowRunRecord{r1, r2})
+
+	if len(result) != 1 {
+		t.Fatalf("expected 1 month, got %d", len(result))
+	}
+	wantMonth := prior.Format("2006-01")
+	if result[0].Month != wantMonth {
+		t.Errorf("expected month %s, got %s", wantMonth, result[0].Month)
+	}
+}
+
+func TestComputeMonthlySnapshots_AggregatesSuccessCount_Issue40(t *testing.T) {
+	base := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 3.0, base),
+		makeRunAt("org/repo-a", "failure", 2.0, base),
+		makeRunAt("org/repo-a", "cancelled", 1.0, base),
+		makeRunAt("org/repo-a", "success", 4.0, base),
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 month, got %d", len(result))
+	}
+	m := result[0]
+	if m.SuccessCount != 2 {
+		t.Errorf("SuccessCount: want 2, got %d", m.SuccessCount)
+	}
+	if m.FailureCount != 1 {
+		t.Errorf("FailureCount: want 1, got %d", m.FailureCount)
+	}
+	if m.CancelledCount != 1 {
+		t.Errorf("CancelledCount: want 1, got %d", m.CancelledCount)
+	}
+	if m.TotalRuns != 4 {
+		t.Errorf("TotalRuns: want 4, got %d", m.TotalRuns)
+	}
+}
+
+func TestComputeMonthlySnapshots_ComputesAvgDuration_Issue40(t *testing.T) {
+	base := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 2.0, base),
+		makeRunAt("org/repo-a", "success", 4.0, base),
+		makeRunAt("org/repo-a", "success", 6.0, base),
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 month, got %d", len(result))
+	}
+	want := 4.0 // (2+4+6)/3
+	if result[0].AvgDurationMin != want {
+		t.Errorf("AvgDurationMin: want %.1f, got %.1f", want, result[0].AvgDurationMin)
+	}
+}
+
+func TestComputeMonthlySnapshots_ComputesP95Duration_Issue40(t *testing.T) {
+	base := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	// 20 runs with durations 1..20 min. P95 index = ceil(0.95*20)-1 = 19-1=18 → value 19.0
+	var runs []WorkflowRunRecord
+	for i := 1; i <= 20; i++ {
+		runs = append(runs, makeRunAt("org/repo-a", "success", float64(i), base))
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 month, got %d", len(result))
+	}
+	want := 19.0
+	if result[0].P95DurationMin != want {
+		t.Errorf("P95DurationMin: want %.1f, got %.1f", want, result[0].P95DurationMin)
+	}
+}
+
+func TestComputeMonthlySnapshots_PerRepoSuccessRate_Issue40(t *testing.T) {
+	base := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 1.0, base),
+		makeRunAt("org/repo-a", "success", 1.0, base),
+		makeRunAt("org/repo-a", "failure", 1.0, base),
+		makeRunAt("org/repo-b", "success", 1.0, base),
+		makeRunAt("org/repo-b", "failure", 1.0, base),
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 month, got %d", len(result))
+	}
+	rsr := result[0].RepoSuccessRate
+	wantA := 100.0 * 2.0 / 3.0
+	wantB := 50.0
+	if rsr["org/repo-a"] != wantA {
+		t.Errorf("repo-a: want %.2f, got %.2f", wantA, rsr["org/repo-a"])
+	}
+	if rsr["org/repo-b"] != wantB {
+		t.Errorf("repo-b: want %.2f, got %.2f", wantB, rsr["org/repo-b"])
+	}
+}
+
+func TestComputeMonthlySnapshots_EmptyInput_Issue40(t *testing.T) {
+	result := computeMonthlySnapshots(nil)
+	if result == nil {
+		t.Fatal("expected non-nil slice for empty input, got nil")
+	}
+	if len(result) != 0 {
+		t.Fatalf("expected empty slice, got %d elements", len(result))
+	}
+}
+
+// MT1: non-nil empty slice returns non-nil empty slice (not nil which would JSON-marshal as null).
+func TestComputeMonthlySnapshots_NonNilEmptySlice_MT1(t *testing.T) {
+	result := computeMonthlySnapshots([]WorkflowRunRecord{})
+	if result == nil {
+		t.Fatal("expected non-nil slice for empty non-nil input, got nil")
+	}
+	if len(result) != 0 {
+		t.Fatalf("expected empty slice, got %d elements", len(result))
+	}
+}
+
+// MT2: runs in two distinct months produce two separate snapshot buckets.
+func TestComputeMonthlySnapshots_TwoMonths_MT2(t *testing.T) {
+	jan := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	feb := time.Date(2025, 2, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 5.0, jan),
+		makeRunAt("org/repo-a", "success", 5.0, feb),
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 monthly buckets, got %d", len(result))
+	}
+	months := []string{result[0].Month, result[1].Month}
+	if !containsString(months, "2025-01") || !containsString(months, "2025-02") {
+		t.Errorf("expected months [2025-01 2025-02], got %v", months)
+	}
+}
+
+// MT3: a repo appearing only in one month has its key in that month's RepoSuccessRate,
+// not in the other month's map. This mirrors the sparse-repo scenario that the
+// MonthlyRepoBreakdown Astro fix (issue #46) must handle on the frontend.
+func TestComputeMonthlySnapshots_SparseRepos_MT3(t *testing.T) {
+	jan := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	feb := time.Date(2025, 2, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 5.0, jan), // only in Jan
+		makeRunAt("org/repo-b", "success", 5.0, feb), // only in Feb
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 months, got %d", len(result))
+	}
+	// Find Jan and Feb snapshots by month string
+	var janSnap, febSnap *MonthlySnapshot
+	for i := range result {
+		switch result[i].Month {
+		case "2025-01":
+			janSnap = &result[i]
+		case "2025-02":
+			febSnap = &result[i]
+		}
+	}
+	if janSnap == nil || febSnap == nil {
+		t.Fatal("could not find both month snapshots")
+	}
+	if _, ok := janSnap.RepoSuccessRate["org/repo-a"]; !ok {
+		t.Error("Jan snapshot missing org/repo-a key")
+	}
+	if _, ok := janSnap.RepoSuccessRate["org/repo-b"]; ok {
+		t.Error("Jan snapshot must NOT contain org/repo-b (only appears in Feb)")
+	}
+	if _, ok := febSnap.RepoSuccessRate["org/repo-b"]; !ok {
+		t.Error("Feb snapshot missing org/repo-b key")
+	}
+	if _, ok := febSnap.RepoSuccessRate["org/repo-a"]; ok {
+		t.Error("Feb snapshot must NOT contain org/repo-a (only appears in Jan)")
+	}
+}
+
+// MT4: union of repo keys across all months equals all repos that ever appeared.
+// This is the Go-level proof of the contract the Astro fix relies on: the frontend
+// must union keys across all snapshots (not just history[0]) to build correct datasets.
+func TestComputeMonthlySnapshots_RepoKeyUnion_MT4(t *testing.T) {
+	jan := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
+	feb := time.Date(2025, 2, 15, 12, 0, 0, 0, time.UTC)
+	mar := time.Date(2025, 3, 15, 12, 0, 0, 0, time.UTC)
+	runs := []WorkflowRunRecord{
+		makeRunAt("org/repo-a", "success", 1.0, jan),
+		makeRunAt("org/repo-b", "failure", 1.0, feb),
+		makeRunAt("org/repo-c", "success", 1.0, mar),
+	}
+	result := computeMonthlySnapshots(runs)
+	if len(result) != 3 {
+		t.Fatalf("expected 3 monthly buckets, got %d", len(result))
+	}
+	// Build union of all repo keys across all snapshots
+	union := map[string]bool{}
+	for _, snap := range result {
+		for k := range snap.RepoSuccessRate {
+			union[k] = true
+		}
+	}
+	for _, want := range []string{"org/repo-a", "org/repo-b", "org/repo-c"} {
+		if !union[want] {
+			t.Errorf("repo %q missing from union of all monthly RepoSuccessRate maps", want)
+		}
+	}
+}
+
+// containsString is a small helper used by MT2.
+func containsString(ss []string, s string) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }
 
 // ── Integration smoke: fmt is used ──────────────────────────────────────────
