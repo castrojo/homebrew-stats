@@ -63,37 +63,37 @@ const kpiData = {
 
 <div class="hero-kpis">
   <div class="kpi-card">
-    <div class="kpi-value">👥 <span id="kpi-active-contributors">{summary.active_contributors}</span></div>
+    <div class="kpi-value"><span id="kpi-active-contributors">{summary.active_contributors}</span></div>
     <div class="kpi-label">Active Contributors</div>
     <div class="kpi-sub" id="kpi-active-contributors-sub">in the last 30 days</div>
   </div>
 
   <div class="kpi-card">
-    <div class="kpi-value">🆕 {summary.new_contributors}</div>
+    <div class="kpi-value">{summary.new_contributors}</div>
     <div class="kpi-label">New Contributors</div>
     <div class="kpi-sub">first-time contributors</div>
   </div>
 
   <div class="kpi-card">
-    <div class="kpi-value">📝 <span id="kpi-total-commits">{summary.total_commits.toLocaleString()}</span></div>
+    <div class="kpi-value"><span id="kpi-total-commits">{summary.total_commits.toLocaleString()}</span></div>
     <div class="kpi-label">Commits</div>
     <div class="kpi-sub" id="kpi-total-commits-sub">across all repos (30d)</div>
   </div>
 
   <div class="kpi-card">
-    <div class="kpi-value">🔀 <span id="kpi-total-prs">{summary.total_prs_merged}</span></div>
+    <div class="kpi-value"><span id="kpi-total-prs">{summary.total_prs_merged}</span></div>
     <div class="kpi-label">PRs Merged</div>
     <div class="kpi-sub" id="kpi-total-prs-sub">merged in 30 days</div>
   </div>
 
   <div class="kpi-card">
-    <div class={`kpi-value ${busFactorClass(summary.bus_factor)}`} id="kpi-bus-factor-card">🚌 <span id="kpi-bus-factor">{summary.bus_factor}</span></div>
+    <div class={`kpi-value ${busFactorClass(summary.bus_factor)}`} id="kpi-bus-factor-card"><span id="kpi-bus-factor">{summary.bus_factor}</span></div>
     <div class="kpi-label">Bus Factor</div>
     <div class="kpi-sub">people hold 80% of commits</div>
   </div>
 
   <div class="kpi-card">
-    <div class="kpi-value">💬 {summary.total_discussions}</div>
+    <div class="kpi-value">{summary.total_discussions}</div>
     <div class="kpi-label">Discussions</div>
     <div class="kpi-sub">{Math.round(summary.discussion_answer_rate * 100)}% answered</div>
   </div>

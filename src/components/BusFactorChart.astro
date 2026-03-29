@@ -34,7 +34,7 @@ const { topContributors, summary } = Astro.props;
   ranges={[{ label: '30d', value: '30d' }, { label: '60d', value: '60d' }, { label: '365d', value: '365d' }]}
   defaultRange="30d"
 >
-  <p class="bus-factor-label" id="bus-factor-label">Bus factor: <strong id="bus-factor-value">{summary.bus_factor}</strong> — {summary.bus_factor >= 4 ? '✅ healthy' : summary.bus_factor >= 2 ? '⚠️ moderate risk' : '🚨 critical risk'}</p>
+  <p class="bus-factor-label" id="bus-factor-label">Bus factor: <strong id="bus-factor-value">{summary.bus_factor}</strong> — {summary.bus_factor >= 4 ? 'healthy' : summary.bus_factor >= 2 ? 'moderate risk' : 'critical risk'}</p>
 </ChartCard>
 <script type="application/json" id="bus-factor-data" set:html={safeJson({ topContributors, summary })}></script>
 
@@ -141,7 +141,7 @@ const { topContributors, summary } = Astro.props;
   function updateBusFactorLabel(bf: number) {
     if (!valueEl || !labelEl) return;
     valueEl.textContent = String(bf);
-    const status = bf >= 4 ? '✅ healthy' : bf >= 2 ? '⚠️ moderate risk' : '🚨 critical risk';
+    const status = bf >= 4 ? 'healthy' : bf >= 2 ? 'moderate risk' : 'critical risk';
     // Replace text after the <strong> tag
     const textNodes = Array.from(labelEl.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
     textNodes.forEach(n => { n.textContent = ''; });
