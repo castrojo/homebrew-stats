@@ -82,9 +82,9 @@ func TestParseDistroName_ValidExact(t *testing.T) {
 	}{
 		{"Bazzite", "bazzite"},
 		{"Bluefin", "bluefin"},
-		{"Bluefin LTS", "bluefin-lts"},
 		{"Aurora", "aurora"},
 		{"secureblue", "secureblue"},
+		{"wayblue", "wayblue"},
 	}
 	for _, c := range cases {
 		got, ok := parseDistroName(c.input)
@@ -236,13 +236,14 @@ func TestFetchBadgeCountsFromURLs(t *testing.T) {
 // --- CSV parsing test ---
 
 func TestFetchCSVLast30Days_MockServer(t *testing.T) {
-	// Minimal valid CSV with one matching row and one non-matching row
-	csvData := `week_start,week_end,os_name,sys_age,hits
-2024-01-01,2024-01-07,Bazzite,0,500
-2024-01-01,2024-01-07,bazzite,0,100
-2024-01-01,2024-01-07,Cloudora DX,0,200
-2024-01-01,2024-01-07,Bazzite,-1,50
-2024-01-01,2024-01-07,Bluefin,0,300
+	// Minimal valid CSV with one matching row and one non-matching row.
+	// repo_tag must be present; canonical rows use "fedora-41".
+	csvData := `week_start,week_end,os_name,sys_age,repo_tag,hits
+2024-01-01,2024-01-07,Bazzite,0,fedora-42,500
+2024-01-01,2024-01-07,bazzite,0,fedora-42,100
+2024-01-01,2024-01-07,Cloudora DX,0,fedora-42,200
+2024-01-01,2024-01-07,Bazzite,-1,fedora-42,50
+2024-01-01,2024-01-07,Bluefin,0,fedora-42,300
 `
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
@@ -359,12 +360,15 @@ func TestMergeOsVersionDist_PreservesUnaffectedDistros(t *testing.T) {
 }
 
 func TestParseOsVersionDist_WithCsvOsVersionColumn(t *testing.T) {
-	// Simulate a CSV that has an os_version column.
-	csvData := `week_start,week_end,os_name,os_version,sys_age,hits
-2024-01-01,2024-01-07,Bazzite,41,0,200
-2024-01-01,2024-01-07,Bazzite,40,0,80
-2024-01-01,2024-01-07,Bluefin LTS,42,0,15
-2024-01-01,2024-01-07,Bazzite,41,-1,999
+	// Simulate a CSV that has os_version and repo_tag columns.
+	// repo_tag must match ^fedora-\d+$ for rows to pass rowsToWeekRecords,
+	// but parseOsVersionDist operates on all rows (repo_tag agnostic).
+	// Bluefin LTS is not in validDistros, so it must not appear in dist output.
+	csvData := `week_start,week_end,os_name,os_version,sys_age,repo_tag,hits
+2024-01-01,2024-01-07,Bazzite,42,0,fedora-42,200
+2024-01-01,2024-01-07,Bazzite,41,0,fedora-42,80
+2024-01-01,2024-01-07,Bluefin LTS,42,0,fedora-42,15
+2024-01-01,2024-01-07,Bazzite,42,-1,fedora-42,999
 `
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(csvData))
@@ -375,13 +379,94 @@ func TestParseOsVersionDist_WithCsvOsVersionColumn(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if dist["Bazzite"]["41"] != 200 {
-		t.Errorf("Bazzite/41: expected 200, got %d", dist["Bazzite"]["41"])
+	if dist["Bazzite"]["42"] != 200 {
+		t.Errorf("Bazzite/42: expected 200, got %d", dist["Bazzite"]["42"])
 	}
-	if dist["Bazzite"]["40"] != 80 {
-		t.Errorf("Bazzite/40: expected 80, got %d", dist["Bazzite"]["40"])
+	if dist["Bazzite"]["41"] != 80 {
+		t.Errorf("Bazzite/41: expected 80, got %d", dist["Bazzite"]["41"])
 	}
-	if dist["Bluefin LTS"]["42"] != 15 {
-		t.Errorf("Bluefin LTS/42: expected 15, got %d", dist["Bluefin LTS"]["42"])
+	// Bluefin LTS is excluded from validDistros — must not appear in dist output.
+	if _, exists := dist["Bluefin LTS"]; exists {
+		t.Error("Bluefin LTS should not appear in dist output (excluded from validDistros)")
+	}
+}
+
+// --- isCanonicalRepoTag tests ---
+
+func TestIsCanonicalRepoTag_Valid(t *testing.T) {
+	cases := []string{"fedora-42", "fedora-41", "fedora-40", "fedora-9", "fedora-100"}
+	for _, tag := range cases {
+		if !isCanonicalRepoTag(tag) {
+			t.Errorf("isCanonicalRepoTag(%q): expected true", tag)
+		}
+	}
+}
+
+func TestIsCanonicalRepoTag_Invalid(t *testing.T) {
+	cases := []string{
+		"updates-released-f42",
+		"fedora-cisco-openh264-42",
+		"epel-10",
+		"epel-debug-10",
+		"fedora-",         // no digit
+		"fedora",          // no dash-digit
+		"fedora-42-extra", // trailing junk
+		"",
+	}
+	for _, tag := range cases {
+		if isCanonicalRepoTag(tag) {
+			t.Errorf("isCanonicalRepoTag(%q): expected false", tag)
+		}
+	}
+}
+
+// --- rowsToWeekRecords filter tests ---
+
+func TestRowsToWeekRecords_RepoTagFilter(t *testing.T) {
+	rows := []csvRow{
+		// Canonical tag — should be counted
+		{weekStart: "2024-01-01", weekEnd: "2024-01-07", osName: "Bazzite", sysAge: "0", repoTag: "fedora-42", hits: 1000},
+		// Non-canonical tags — should be excluded (would double-count otherwise)
+		{weekStart: "2024-01-01", weekEnd: "2024-01-07", osName: "Bazzite", sysAge: "0", repoTag: "updates-released-f42", hits: 900},
+		{weekStart: "2024-01-01", weekEnd: "2024-01-07", osName: "Bazzite", sysAge: "0", repoTag: "fedora-cisco-openh264-42", hits: 800},
+	}
+	recs := rowsToWeekRecords(rows)
+	if len(recs) != 1 {
+		t.Fatalf("expected 1 week record, got %d", len(recs))
+	}
+	if recs[0].Distros["bazzite"] != 1000 {
+		t.Errorf("expected bazzite=1000 (fedora-42 only), got %d", recs[0].Distros["bazzite"])
+	}
+}
+
+func TestRowsToWeekRecords_AnomalousWeekExcluded(t *testing.T) {
+	rows := []csvRow{
+		// Normal week — should be counted
+		{weekStart: "2025-06-29", weekEnd: "2025-07-05", osName: "Bazzite", sysAge: "0", repoTag: "fedora-42", hits: 500},
+		// Anomalous week — infrastructure migration, must be excluded
+		{weekStart: "2025-06-30", weekEnd: "2025-07-06", osName: "Bazzite", sysAge: "0", repoTag: "fedora-42", hits: 300},
+		// Year-end partial week — must be excluded
+		{weekStart: "2024-12-23", weekEnd: "2024-12-29", osName: "Bazzite", sysAge: "0", repoTag: "fedora-42", hits: 200},
+	}
+	recs := rowsToWeekRecords(rows)
+	if len(recs) != 1 {
+		t.Fatalf("expected 1 week record (anomalous weeks excluded), got %d", len(recs))
+	}
+	if recs[0].WeekEnd != "2025-07-05" {
+		t.Errorf("expected surviving week_end=2025-07-05, got %s", recs[0].WeekEnd)
+	}
+}
+
+func TestRowsToWeekRecords_SysAgeMinusOneExcluded(t *testing.T) {
+	rows := []csvRow{
+		{weekStart: "2024-01-01", weekEnd: "2024-01-07", osName: "Aurora", sysAge: "0", repoTag: "fedora-42", hits: 400},
+		{weekStart: "2024-01-01", weekEnd: "2024-01-07", osName: "Aurora", sysAge: "-1", repoTag: "fedora-42", hits: 999},
+	}
+	recs := rowsToWeekRecords(rows)
+	if len(recs) != 1 {
+		t.Fatalf("expected 1 week record, got %d", len(recs))
+	}
+	if recs[0].Distros["aurora"] != 400 {
+		t.Errorf("expected aurora=400 (sys_age=-1 excluded), got %d", recs[0].Distros["aurora"])
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -23,12 +24,43 @@ const badgeBaseURL = "https://raw.githubusercontent.com/ublue-os/countme/main/ba
 const countmeCSVURL = "https://data-analysis.fedoraproject.org/csv-reports/countme/totals.csv"
 
 // validDistros maps exact os_name values (from CSV) to canonical keys used in output JSON.
+// These are filtered to fedora-NN canonical repo_tags only (see isCanonicalRepoTag).
+//
+// Bluefin LTS is intentionally excluded: it uses CentOS/EPEL repos (epel-10, epel-debug-10, etc.)
+// rather than fedora-NN repos, so the fedora-NN filter produces zero hits for it.
+// The ublue-os/countme repo notes "centos countme data is broken" and has disabled LTS from
+// its badge generation. We follow the same decision — LTS countme data is publicly marked broken.
+//
+// BlueBuildOS is excluded: its countme participation collapsed 99.7% in the week of 2026-02-08
+// (from ~484 to 1–2 hits/week), consistent with a reporting infrastructure change rather than
+// user loss. Re-add when the project restores countme reporting.
 var validDistros = map[string]string{
-	"Bazzite":     "bazzite",
-	"Bluefin":     "bluefin",
-	"Bluefin LTS": "bluefin-lts",
-	"Aurora":      "aurora",
-	"secureblue":  "secureblue",
+	"Bazzite":    "bazzite",
+	"Bluefin":    "bluefin",
+	"Aurora":     "aurora",
+	"secureblue": "secureblue",
+	"wayblue":    "wayblue",
+}
+
+// canonicalRepoTagRe matches Fedora canonical repo tags of the form "fedora-NN" (e.g. fedora-41,
+// fedora-42). This is the methodology used by ublue-os/countme to count unique devices: each
+// machine checks in once per enabled repo per week, and all machines have the canonical fedora-NN
+// repo. Summing all repo_tags (updates-released-fNN, fedora-cisco-openh264-NN, etc.) inflates
+// counts ~2x. Filtering to fedora-NN only gives the closest approximation to unique device count.
+var canonicalRepoTagRe = regexp.MustCompile(`^fedora-\d+$`)
+
+// anomalousWeekEnds lists week_end dates to exclude from aggregation.
+// These are known data quality issues identified by ublue-os/countme:
+//   - 2024-12-29: partial year-end week (incomplete data)
+//   - 2025-07-06: Fedora infrastructure migration caused a ~40% artificial drop
+var anomalousWeekEnds = map[string]bool{
+	"2024-12-29": true,
+	"2025-07-06": true,
+}
+
+// isCanonicalRepoTag returns true if the repo_tag is a canonical Fedora repo (fedora-NN).
+func isCanonicalRepoTag(repoTag string) bool {
+	return canonicalRepoTagRe.MatchString(repoTag)
 }
 
 // badgeNames lists the distros with badge endpoints (ublue-os hosted only).
@@ -72,6 +104,7 @@ type csvRow struct {
 	osName    string
 	osVersion string
 	sysAge    string
+	repoTag   string
 	hits      int
 }
 
@@ -152,7 +185,7 @@ func parseCSVRows(body []byte) ([]csvRow, error) {
 		colIdx[strings.TrimSpace(h)] = i
 	}
 
-	required := []string{"week_start", "week_end", "os_name", "sys_age", "hits"}
+	required := []string{"week_start", "week_end", "os_name", "sys_age", "hits", "repo_tag"}
 	for _, col := range required {
 		if _, ok := colIdx[col]; !ok {
 			return nil, fmt.Errorf("missing CSV column: %s", col)
@@ -189,19 +222,31 @@ func parseCSVRows(body []byte) ([]csvRow, error) {
 			osName:    row[colIdx["os_name"]],
 			osVersion: osVersion,
 			sysAge:    strings.TrimSpace(row[colIdx["sys_age"]]),
+			repoTag:   strings.TrimSpace(row[colIdx["repo_tag"]]),
 			hits:      hits,
 		})
 	}
 	return rows, nil
 }
 
-// rowsToWeekRecords aggregates csvRows into WeekRecords, applying distro and sys_age filters.
+// rowsToWeekRecords aggregates csvRows into WeekRecords using the ublue-os/countme methodology:
+//   - Only counts rows where repo_tag matches ^fedora-\d+$ (canonical Fedora repo).
+//     Each device checks in once per enabled repo per week; filtering to the canonical
+//     fedora-NN repo gives one hit per device per week (vs ~2x if all repo_tags are summed).
+//   - Excludes rows where sys_age == "-1" (new/reconfigured systems, not steady-state users).
+//   - Excludes anomalous weeks listed in anomalousWeekEnds (infrastructure events).
 func rowsToWeekRecords(rows []csvRow) []WeekRecord {
 	type weekKey struct{ start, end string }
 	agg := make(map[weekKey]map[string]int)
 
 	for _, row := range rows {
 		if row.sysAge == "-1" {
+			continue
+		}
+		if anomalousWeekEnds[row.weekEnd] {
+			continue
+		}
+		if !isCanonicalRepoTag(row.repoTag) {
 			continue
 		}
 		distroKey, ok := parseDistroName(row.osName)
