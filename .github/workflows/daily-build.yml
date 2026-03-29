@@ -64,6 +64,11 @@ jobs:
             echo "✅ contributors.json found: $contrib_count top contributors"
           fi
 
+      - name: Lint GitHub Actions workflows
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@latest
+          actionlint
+
       - name: Build stats binary
         run: cd stats-go && go build -o stats ./cmd/stats/
 

@@ -48,11 +48,6 @@ func main() {
 			fmt.Fprintln(os.Stderr, "❌", err)
 			os.Exit(1)
 		}
-	case "fetch-builds":
-		if err := runFetchBuilds(); err != nil {
-			fmt.Fprintln(os.Stderr, "❌ fetch-builds:", err)
-			os.Exit(1)
-		}
 	case "fetch-builds-bluefin":
 		if err := runFetchBuildsFor("bluefin", builds.BluefinRepos); err != nil {
 			fmt.Fprintln(os.Stderr, "❌ fetch-builds-bluefin:", err)
@@ -70,7 +65,7 @@ func main() {
 		}
 	default:
 		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite]")
+		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite]")
 		os.Exit(1)
 	}
 }
@@ -1226,26 +1221,6 @@ func runFetchContributors() error {
 	fmt.Fprintf(os.Stderr, "  active contributors: %d, repos: %d, commits: %d\n",
 		len(activeLogins30d), activeRepoCount, totalCommits30d)
 	return nil
-}
-
-// ── fetch-builds ─────────────────────────────────────────────────────────────
-
-func runFetchBuilds() error {
-	client, err := ghclient.NewClient()
-	if err != nil {
-		return err
-	}
-
-	cfg := builds.CollectorConfig{
-		Repos:        builds.DefaultRepos,
-		LookbackDays: 14, // cold-start bootstrap; warm runs use latest-1d automatically
-		MaxRunsPerWf: 30, // cap per workflow file to bound cold-start API calls
-		HistoryPath:  ".sync-cache/builds-history.json",
-		OutputPath:   "src/data/builds.json",
-	}
-
-	collector := builds.NewCollector(client.GitHub(), cfg)
-	return collector.Run(client.Context())
 }
 
 // runFetchBuildsFor is the generic per-image collector used by fetch-builds-bluefin,

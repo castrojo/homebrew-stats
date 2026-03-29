@@ -73,7 +73,7 @@ verify-live:
     BASE="https://castrojo.github.io/homebrew-stats"
     echo "=== Verifying live site: $BASE ==="
 
-    for path in "/" "/testhub/" "/overall/" "/contributors/"; do
+    for path in "/" "/testhub/" "/overall/" "/contributors/" "/builds/" "/aurora-builds/" "/bazzite-builds/"; do
       code=$(curl -sf -o /dev/null -w "%{http_code}" "$BASE$path" || echo "000")
       if [ "$code" = "200" ]; then
         echo "✅ $BASE$path → HTTP $code"
