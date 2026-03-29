@@ -8,6 +8,22 @@ import (
 	"time"
 )
 
+// --- countmeCSVURL regression test ---
+// The CSV lives on the Fedora data-analysis server. The ublue-os/countme GitHub repo
+// does NOT contain totals.csv — raw.githubusercontent.com returns 404 for that path.
+// This test guards against that regression.
+func TestCountmeCSVURL_PointsToFedoraServer(t *testing.T) {
+	if !strings.HasPrefix(countmeCSVURL, "https://data-analysis.fedoraproject.org/") {
+		t.Errorf("countmeCSVURL must point to data-analysis.fedoraproject.org, got: %s\n"+
+			"IMPORTANT: raw.githubusercontent.com/ublue-os/countme/main/totals.csv returns 404 — "+
+			"that file does not exist in the GitHub repo.", countmeCSVURL)
+	}
+	if strings.Contains(countmeCSVURL, "githubusercontent") {
+		t.Errorf("countmeCSVURL must NOT use raw.githubusercontent.com — the file does not exist there (404). " +
+			"Correct URL: https://data-analysis.fedoraproject.org/csv-reports/countme/totals.csv")
+	}
+}
+
 // --- parseBadgeValue tests ---
 
 func TestParseBadgeValue_RawInt(t *testing.T) {

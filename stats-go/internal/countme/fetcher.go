@@ -17,7 +17,10 @@ import (
 const badgeBaseURL = "https://raw.githubusercontent.com/ublue-os/countme/main/badge-endpoints"
 
 // countmeCSVURL is the source for weekly countme data.
-const countmeCSVURL = "https://raw.githubusercontent.com/ublue-os/countme/main/totals.csv"
+// IMPORTANT: The CSV lives on the Fedora data-analysis server, NOT in the ublue-os/countme
+// GitHub repo (which does not contain totals.csv — that path returns 404).
+// Confirmed correct URL via: curl -sI https://data-analysis.fedoraproject.org/csv-reports/countme/totals.csv
+const countmeCSVURL = "https://data-analysis.fedoraproject.org/csv-reports/countme/totals.csv"
 
 // validDistros maps exact os_name values (from CSV) to canonical keys used in output JSON.
 var validDistros = map[string]string{

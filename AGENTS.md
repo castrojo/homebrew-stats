@@ -44,6 +44,26 @@ npm run typecheck  # TypeScript type check
 - **Types in sync** — `src/lib/types.ts` mirrors Go structs; update both together
 - **Go nil-slice guard** — Go marshals nil slices as JSON `null`; always add `?? []` in Astro/TS and type fields as `T[] | null`
 
+## Countme Data Integrity — CRITICAL
+
+**The countme CSV lives at:**
+```
+https://data-analysis.fedoraproject.org/csv-reports/countme/totals.csv
+```
+
+`raw.githubusercontent.com/ublue-os/countme/main/totals.csv` returns **HTTP 404** — the file does not exist in that repo. Any PR touching `countmeCSVURL` must verify HTTP 200 before merging.
+
+**Before adding or removing any distro from `validDistros`:**
+```bash
+# Keep a local copy — re-download when stale (it's 546MB)
+curl -s -o /tmp/countme-totals.csv https://data-analysis.fedoraproject.org/csv-reports/countme/totals.csv
+rg "secureblue" /tmp/countme-totals.csv | wc -l
+```
+
+**Never trust `.sync-cache/countme-history.json` for "zero hits" decisions.** The cache only reflects what `validDistros` was tracking at fetch time. If a distro was absent from `validDistros`, it shows zero in cache even when the full CSV has real data. Always verify against the raw CSV.
+
+**Confirmed weekly active counts (2026-03-29):** Bazzite ~140K · Bluefin ~7K · Aurora ~5K · secureblue ~1.7K · wayblue ~390 · BlueBuildOS ~2 · Bluefin LTS ~43
+
 ## Definition of Done
 
 All three layers required — "CI green" alone is not done:
