@@ -126,6 +126,34 @@ jobs:
         continue-on-error: true
         timeout-minutes: 8
 
+      - name: Fetch build pipeline metrics (Universal Blue)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-universal-blue
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (uCore)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-ucore
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (Zirconium)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-zirconium
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (bootcrew)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-bootcrew
+        continue-on-error: true
+        timeout-minutes: 8
+
       - name: Fetch Scorecard data
         run: ./stats-go/stats fetch-scorecard
         continue-on-error: true

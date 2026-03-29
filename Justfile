@@ -9,6 +9,10 @@ sync-builds:
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-bluefin
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-aurora
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-bazzite
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-universal-blue
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-ucore
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-zirconium
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-builds-bootcrew
 
 # Fetch OpenSSF Scorecard scores for tracked repos
 sync-scorecard:

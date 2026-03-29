@@ -621,8 +621,12 @@ func TestComputeMonthlySnapshots_ExcludesCurrentMonth_Issue40(t *testing.T) {
 	now := time.Now()
 	// run in current month — must be excluded
 	r1 := makeRunAt("org/repo-a", "success", 5.0, now)
-	// run in prior month — must be included
-	prior := now.AddDate(0, -1, 0)
+	// run in prior month — must be included.
+	// Use the 1st of the previous month to avoid date-clamping edge cases where
+	// AddDate(0, -1, 0) on e.g. March 29 → March 1 (same month) because Feb has <29 days.
+	y, m, _ := now.Date()
+	priorMonth := time.Date(y, m-1, 1, 12, 0, 0, 0, time.UTC)
+	prior := priorMonth
 	r2 := makeRunAt("org/repo-a", "success", 5.0, prior)
 
 	result := computeMonthlySnapshots([]WorkflowRunRecord{r1, r2})

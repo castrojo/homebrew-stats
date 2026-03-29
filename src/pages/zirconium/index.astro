@@ -1,44 +1,160 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import type { BuildsData } from '../../lib/types.ts';
+import rawData from '../../data/builds-zirconium.json';
+
+import BuildsHealthBar from '../../components/builds/BuildsHealthBar.astro';
+import DORAPanel from '../../components/builds/DORAPanel.astro';
+import GoldenSignalsPanel from '../../components/builds/GoldenSignalsPanel.astro';
+import BuildSuccessChart from '../../components/builds/BuildSuccessChart.astro';
+import BuildDurationChart from '../../components/builds/BuildDurationChart.astro';
+import FailureAnalysisChart from '../../components/builds/FailureAnalysisChart.astro';
+import FlakinessLeaderboard from '../../components/builds/FlakinessLeaderboard.astro';
+import PipelineThroughputChart from '../../components/builds/PipelineThroughputChart.astro';
+import BuilderComparison from '../../components/builds/BuilderComparison.astro';
+import PublishReliabilityChart from '../../components/builds/PublishReliabilityChart.astro';
+import RecentBuildsFeed from '../../components/builds/RecentBuildsFeed.astro';
+import BuildsReferences from '../../components/builds/BuildsReferences.astro';
+import MonthlyKPIStrip from '../../components/builds/MonthlyKPIStrip.astro';
+import MonthlySuccessChart from '../../components/builds/MonthlySuccessChart.astro';
+import MonthlyDurationChart from '../../components/builds/MonthlyDurationChart.astro';
+import MonthlyRepoBreakdown from '../../components/builds/MonthlyRepoBreakdown.astro';
+import DORALevelTrendChart from '../../components/builds/DORALevelTrendChart.astro';
+import TriggerBreakdownChart from '../../components/builds/TriggerBreakdownChart.astro';
+import StreamHealthTable from '../../components/builds/StreamHealthTable.astro';
+import ArchComparisonPanel from '../../components/builds/ArchComparisonPanel.astro';
+import SupplyChainPanel from '../../components/builds/SupplyChainPanel.astro';
+
+const builds = rawData as unknown as BuildsData;
+const isBootstrap = builds.summary.health_status === 'unknown';
+const generatedAt = builds.generated_at ? new Date(builds.generated_at).toUTCString() : '';
 ---
 
-<Layout title="Zirconium" activeTab="zirconium">
+<Layout title="Zirconium Build Metrics" activeTab="zirconium">
   <header class="page-header">
     <div>
-      <h1>Zirconium</h1>
+      <h1>Zirconium Build Pipeline</h1>
       <div class="meta">
-        Opinionated Niri bootc image ·
-        <a href="https://github.com/zirconium-dev/zirconium" target="_blank" rel="noopener">zirconium-dev/zirconium</a> ·
-        <a href="https://ghcr.io/zirconium-dev/zirconium" target="_blank" rel="noopener">ghcr.io/zirconium-dev/zirconium</a>
+        {!isBootstrap && generatedAt && <>Updated {generatedAt} · </>}
+        <a href="https://github.com/zirconium-dev/zirconium/actions" target="_blank" rel="noopener">zirconium</a>
       </div>
     </div>
   </header>
 
-  <section class="info-section">
-    <p>
-      Zirconium is a Fedora-based bootc image built with mkosi, focused on the Niri Wayland compositor.
-    </p>
-    <p class="notice">
-      <strong>Note:</strong> Zirconium does not appear in Fedora countme data. GitHub and registry
-      metrics are coming soon.
-    </p>
-  </section>
+  {isBootstrap ? (
+    <p class="collecting">Collecting build data — check back after the next CI run.</p>
+  ) : (
+    <>
+      <!-- Section 1: Summary KPIs + DORA -->
+      <BuildsHealthBar summary={builds.summary} doraLevel={builds.dora_metrics.dora_level} />
+      <DORAPanel dora={builds.dora_metrics} />
+      <GoldenSignalsPanel dora={builds.dora_metrics} summary={builds.summary} />
+
+      <!-- Section 1b: Monthly Overview (bootstrap guard — needs >= 2 months) -->
+      {builds.monthly_history && builds.monthly_history.length >= 2 && (
+        <section class="monthly-overview">
+          <h2 class="section-heading">Monthly Overview</h2>
+          <MonthlyKPIStrip
+            current={builds.monthly_history[builds.monthly_history.length - 1]}
+            prior={builds.monthly_history[builds.monthly_history.length - 2]}
+          />
+          <div class="monthly-charts">
+            <MonthlySuccessChart history={builds.monthly_history} />
+            <MonthlyDurationChart history={builds.monthly_history} />
+            <MonthlyRepoBreakdown history={builds.monthly_history} />
+            <DORALevelTrendChart history={builds.monthly_history} />
+          </div>
+        </section>
+      )}
+
+      <!-- Section 2: Success rate + Duration trends -->
+      <BuildSuccessChart history={builds.history} />
+      <BuildDurationChart trend={builds.duration_trend} repos={builds.repos} />
+
+      <!-- Section 3: Failure analysis + Flakiness -->
+      <FailureAnalysisChart breakdown={builds.failure_breakdown} mttr={builds.dora_metrics.mttr_minutes} mtbf={builds.dora_metrics.mtbf_hours} />
+      <FlakinessLeaderboard flaky={builds.top_flaky} />
+
+      <!-- Section 4: Throughput + Triggers -->
+      <div class="throughput-triggers-grid">
+        <PipelineThroughputChart history={builds.history} triggers={builds.trigger_breakdown} />
+        <TriggerBreakdownChart triggers={builds.trigger_breakdown} />
+      </div>
+
+      <!-- Section 5: Cross-builder view -->
+      <BuilderComparison repos={builds.repos} />
+      <StreamHealthTable repos={builds.repos} />
+      <ArchComparisonPanel repos={builds.repos} />
+      <PublishReliabilityChart repos={builds.repos} />
+      <SupplyChainPanel repos={builds.repos} />
+
+      <!-- Section 6: Recent builds feed -->
+      <RecentBuildsFeed builds={builds.recent_builds} />
+
+      <!-- Section 7: Further reading / references -->
+      <BuildsReferences />
+    </>
+  )}
 </Layout>
 
 <style>
-  .page-header { margin-bottom: 1.5rem; }
-  h1 { font-size: 1.75rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
-  .meta { font-size: 0.8rem; color: var(--muted); }
-  .meta a { color: var(--link); text-decoration: none; }
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .meta a {
+    color: var(--link);
+    text-decoration: none;
+  }
   .meta a:hover { text-decoration: underline; }
-  .info-section { margin-bottom: 1.5rem; color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
-  .info-section strong { color: var(--text); }
-  .notice {
-    margin-top: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--yellow);
-    border-radius: 4px;
+  .collecting {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .monthly-overview {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .monthly-charts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .throughput-triggers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .monthly-charts,
+    .throughput-triggers-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

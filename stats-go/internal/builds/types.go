@@ -289,3 +289,62 @@ var BazziteRepos = []RepoConfig{
 	},
 	{Owner: "ublue-os", Repo: "bazzite-dx", Label: "bazzite-dx", WorkflowFiles: []string{"build.yml"}},
 }
+
+// UniversalBlueRepos tracks the foundational base image layer.
+var UniversalBlueRepos = []RepoConfig{
+	{
+		Owner: "ublue-os", Repo: "main", Label: "main",
+		WorkflowFiles: []string{
+			"build-latest.yml",
+			"build-beta.yml",
+			"build-gts.yml",
+		},
+	},
+	{
+		Owner: "ublue-os", Repo: "akmods", Label: "akmods",
+		WorkflowFiles: []string{
+			"build-akmods-main.yml",
+			"build-akmods-coreos-stable.yml",
+			"build-akmods-coreos-testing.yml",
+		},
+	},
+}
+
+// UCoreRepos tracks the minimal immutable Fedora bootc server image.
+var UCoreRepos = []RepoConfig{
+	{
+		Owner: "ublue-os", Repo: "ucore", Label: "ucore",
+		WorkflowFiles: []string{
+			"build-lts.yml",
+			"build-stable.yml",
+			"build-testing.yml",
+		},
+	},
+}
+
+// ZirconiumRepos tracks the Niri-focused Fedora bootc image.
+var ZirconiumRepos = []RepoConfig{
+	{
+		Owner: "zirconium-dev", Repo: "zirconium", Label: "zirconium",
+		WorkflowFiles: []string{
+			"build-standard.yaml",
+			"build-nvidia.yaml",
+			"build-jackrabbit.yaml",
+			"build-jackrabbit-nvidia.yaml",
+			"build-rawhide.yaml",
+		},
+	},
+}
+
+// BootcrewRepos tracks the multi-distro bootc images (Arch/Debian/Ubuntu/openSUSE).
+var BootcrewRepos = []RepoConfig{
+	{
+		Owner: "bootcrew", Repo: "mono", Label: "bootcrew",
+		WorkflowFiles: []string{
+			"build-arch.yaml",
+			"build-debian.yaml",
+			"build-opensuse.yaml",
+			"build-ubuntu.yaml",
+		},
+	},
+}
