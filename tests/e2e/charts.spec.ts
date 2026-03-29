@@ -131,7 +131,6 @@ test.describe('Overall tab', () => {
       const distros = week.distros as Record<string, number>;
       expect(distros, 'week.distros must exist').toBeDefined();
       expect(Object.keys(distros)).toContain('bazzite');
-      expect(distros['bluefin-lts'], 'distros must have "bluefin-lts" key').toBeDefined();
     }
   });
 

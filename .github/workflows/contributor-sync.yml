@@ -149,7 +149,7 @@ jobs:
             echo "⚠️  Both syncs failed — committed contributors.json will be used"
           else
             echo "❌ Both syncs failed and no committed contributors.json"
-            echo '{"generated_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","period":{"start":"","end":""},"summary":{"active_contributors":0,"new_contributors":0,"total_commits":0,"total_prs_merged":0,"total_issues_opened":0,"total_issues_closed":0,"bus_factor":0,"review_participation_rate":0,"active_repos":0,"total_discussions":0,"discussion_answer_rate":0},"top_contributors":[],"repos":[],"discussions_summary":{"total_discussions_30d":0,"total_discussion_comments_30d":0,"unique_discussion_authors_30d":0,"answered_rate":0,"weekly_trend":[]}}' \
+            echo '{"generated_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","period":{"start":"","end":""},"summary":{"active_contributors":0,"active_contributors_60d":0,"active_contributors_365d":0,"new_contributors":0,"total_commits":0,"total_commits_60d":0,"total_commits_365d":0,"total_prs_merged":0,"total_prs_merged_60d":0,"total_prs_merged_365d":0,"total_issues_opened":0,"total_issues_closed":0,"bus_factor":0,"bus_factor_60d":0,"bus_factor_365d":0,"review_participation_rate":0,"active_repos":0,"total_discussions":0,"discussion_answer_rate":0},"top_contributors":[],"repos":[],"discussions_summary":{"total_discussions_30d":0,"total_discussions_60d":0,"total_discussions_365d":0,"total_discussion_comments_30d":0,"total_discussion_comments_60d":0,"total_discussion_comments_365d":0,"unique_discussion_authors_30d":0,"unique_discussion_authors_60d":0,"unique_discussion_authors_365d":0,"answered_rate":0,"weekly_trend":[]}}' \
               > src/data/contributors.json
           fi
 

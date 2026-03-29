@@ -728,6 +728,31 @@ func saveContributorProfiles(cache *contributors.ContributorProfileCache) error 
 	return os.WriteFile(contributorProfilesFile, data, 0o644)
 }
 
+// buildActiveHumanLogins returns a sorted unique list of non-bot logins
+// active in any provided contribution map for a time window.
+func buildActiveHumanLogins(commits, issues, discussions map[string]int) []string {
+	unique := make(map[string]struct{})
+	add := func(m map[string]int) {
+		for login := range m {
+			if login == "" || contributors.IsBot(login) {
+				continue
+			}
+			unique[login] = struct{}{}
+		}
+	}
+
+	add(commits)
+	add(issues)
+	add(discussions)
+
+	active := make([]string, 0, len(unique))
+	for login := range unique {
+		active = append(active, login)
+	}
+	sort.Strings(active)
+	return active
+}
+
 func runFetchContributors() error {
 	client, err := ghclient.NewClient()
 	if err != nil {
@@ -1012,32 +1037,10 @@ func runFetchContributors() error {
 
 	// ── Compute summary ───────────────────────────────────────────────────────
 
-	// Gather unique human logins active per window.
-	activeLogins30d := make([]string, 0)
-	for login := range allAuthorCommits30d {
-		if !contributors.IsBot(login) {
-			activeLogins30d = append(activeLogins30d, login)
-		}
-	}
-	// Also include humans who only opened issues or discussions in 30d.
-	for login := range allAuthorIssues30d {
-		if !contributors.IsBot(login) {
-			allAuthorCommits30d[login] = allAuthorCommits30d[login] // ensure present
-		}
-	}
-
-	activeLogins60d := make([]string, 0)
-	for login := range allAuthorCommits60d {
-		if !contributors.IsBot(login) {
-			activeLogins60d = append(activeLogins60d, login)
-		}
-	}
-	activeLogins365d := make([]string, 0)
-	for login := range allAuthorCommits365d {
-		if !contributors.IsBot(login) {
-			activeLogins365d = append(activeLogins365d, login)
-		}
-	}
+	// Gather unique human logins active per window across commits, issues, and discussions.
+	activeLogins30d := buildActiveHumanLogins(allAuthorCommits30d, allAuthorIssues30d, allAuthorDiscussions30d)
+	activeLogins60d := buildActiveHumanLogins(allAuthorCommits60d, allAuthorIssues60d, allAuthorDiscussions60d)
+	activeLogins365d := buildActiveHumanLogins(allAuthorCommits365d, allAuthorIssues365d, allAuthorDiscussions365d)
 
 	// Build historical login set from prior snapshots (for new contributor detection).
 	historicalLogins := make(map[string]bool)

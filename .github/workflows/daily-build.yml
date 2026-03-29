@@ -50,13 +50,20 @@ jobs:
           key: contributor-history-v1-${{ github.run_id }}
           restore-keys: contributor-history-v1-
 
+      - name: Restore build history cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: builds-history-v1-${{ github.run_id }}
+          restore-keys: builds-history-v1-
+
       - name: Ensure contributors.json exists
         run: |
           if [ ! -f "src/data/contributors.json" ]; then
             echo "⚠️  contributors.json not found in cache or repo — using empty seed"
             mkdir -p src/data
             # This should not happen if seed file is committed, but guard against it
-            echo '{"generated_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","period":{"start":"","end":""},"summary":{"active_contributors":0,"new_contributors":0,"total_commits":0,"total_prs_merged":0,"total_issues_opened":0,"total_issues_closed":0,"bus_factor":0,"review_participation_rate":0,"active_repos":0,"total_discussions":0,"discussion_answer_rate":0},"top_contributors":[],"repos":[],"discussions_summary":{"total_discussions_30d":0,"total_discussion_comments_30d":0,"unique_discussion_authors_30d":0,"answered_rate":0,"weekly_trend":[]}}' \
+            echo '{"generated_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","period":{"start":"","end":""},"summary":{"active_contributors":0,"active_contributors_60d":0,"active_contributors_365d":0,"new_contributors":0,"total_commits":0,"total_commits_60d":0,"total_commits_365d":0,"total_prs_merged":0,"total_prs_merged_60d":0,"total_prs_merged_365d":0,"total_issues_opened":0,"total_issues_closed":0,"bus_factor":0,"bus_factor_60d":0,"bus_factor_365d":0,"review_participation_rate":0,"active_repos":0,"total_discussions":0,"discussion_answer_rate":0},"top_contributors":[],"repos":[],"discussions_summary":{"total_discussions_30d":0,"total_discussions_60d":0,"total_discussions_365d":0,"total_discussion_comments_30d":0,"total_discussion_comments_60d":0,"total_discussion_comments_365d":0,"unique_discussion_authors_30d":0,"unique_discussion_authors_60d":0,"unique_discussion_authors_365d":0,"answered_rate":0,"weekly_trend":[]}}' \
               > src/data/contributors.json
             echo "✅ wrote empty contributors.json sentinel"
           else
@@ -165,6 +172,13 @@ jobs:
           path: .sync-cache
           key: tap-history-v4-${{ github.run_id }}
 
+      - name: Save build history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: builds-history-v1-${{ github.run_id }}
+
       - name: Install npm dependencies
         run: npm ci
 
@@ -259,9 +273,18 @@ jobs:
 
       - name: Verify builds pages have data
         run: |
-          for image in bluefin aurora bazzite; do
+          for image in bluefin aurora bazzite universal-blue ucore zirconium bootcrew; do
             f="src/data/builds-${image}.json"
-            if grep -q '"health_status":"unknown"' "$f" 2>/dev/null; then
+            if [ ! -f "$f" ]; then
+              echo "❌ ${f} is missing"
+              exit 1
+            fi
+            health_status=$(jq -r '.summary.health_status // "__missing__"' "$f" 2>/dev/null || echo "__invalid__")
+            if [ "$health_status" = "__invalid__" ] || [ "$health_status" = "__missing__" ]; then
+              echo "❌ ${f} is invalid JSON or missing summary.health_status"
+              exit 1
+            fi
+            if [ "$health_status" = "unknown" ]; then
               echo "⚠️ ${f} is in bootstrap state (cold cache) — skipping strict check"
             else
               echo "✅ ${f} has real data"

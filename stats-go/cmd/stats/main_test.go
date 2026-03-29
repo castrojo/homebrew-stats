@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 
 	"github.com/castrojo/homebrew-stats/internal/builds"
@@ -229,5 +230,42 @@ func TestRepoSetsAreNonEmpty(t *testing.T) {
 		if len(tc.repos) == 0 {
 			t.Errorf("%s must not be empty", tc.name)
 		}
+	}
+}
+
+func TestBuildActiveHumanLogins_IncludesIssueAndDiscussionOnly(t *testing.T) {
+	commits := map[string]int{
+		"alice":         3,
+		"renovate[bot]": 2,
+	}
+	issues := map[string]int{
+		"bob": 1,
+	}
+	discussions := map[string]int{
+		"carol":               4,
+		"github-actions[bot]": 1,
+	}
+
+	got := buildActiveHumanLogins(commits, issues, discussions)
+	sort.Strings(got)
+	want := []string{"alice", "bob", "carol"}
+
+	if len(got) != len(want) {
+		t.Fatalf("want %d logins, got %d (%v)", len(want), len(got), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("want %v, got %v", want, got)
+		}
+	}
+}
+
+func TestBuildActiveHumanLogins_EmptyInputReturnsEmptySlice(t *testing.T) {
+	got := buildActiveHumanLogins(nil, nil, nil)
+	if got == nil {
+		t.Fatal("want non-nil slice, got nil")
+	}
+	if len(got) != 0 {
+		t.Fatalf("want 0 logins, got %d", len(got))
 	}
 }

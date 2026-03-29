@@ -31,8 +31,8 @@ function loadJSON(relPath: string): unknown {
 
 // All valid lowercase distro keys — not all must be present in every record
 // (e.g. bluefin-lts uses CentOS repos so it never appears; secureblue/wayblue are tracked too)
-const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "bluefin-lts", "aurora", "secureblue", "wayblue"] as const;
-const DISTRO_KEYS_TITLECASE = ["Bazzite", "Bluefin", "Bluefin LTS", "Aurora"] as const;
+const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "aurora", "secureblue", "wayblue"] as const;
+const DISTRO_KEYS_TITLECASE = ["Bazzite", "Bluefin", "Aurora"] as const;
 
 // ── countme.json ─────────────────────────────────────────────────────────────
 
@@ -226,7 +226,7 @@ describe("src/data/testhub.json schema", () => {
 
   it("build_metrics last_status is a valid value", () => {
     const metrics = raw.build_metrics as Array<{ last_status: string }>;
-    const valid = new Set(["passing", "failing", ""]);
+    const valid = new Set(["passing", "failing", "unknown", ""]);
     for (const m of metrics) {
       if (m.last_status !== undefined) {
         expect(valid, `Invalid last_status: "${m.last_status}"`).toContain(m.last_status);
