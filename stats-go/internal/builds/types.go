@@ -274,11 +274,16 @@ var AuroraRepos = []RepoConfig{
 }
 
 // BazziteRepos is the per-image repo set for the Bazzite builds page.
+// Includes the main image build, ISO pipeline, and the DX variant.
+// bazzite-arch is excluded (separate Arch-based ecosystem).
+// bazzite-gdx is excluded (PR-only triggers, infrequent activity).
 var BazziteRepos = []RepoConfig{
 	{
 		Owner: "ublue-os", Repo: "bazzite", Label: "bazzite",
 		WorkflowFiles: []string{
 			"build.yml",
+			"build_iso.yml",
 		},
 	},
+	{Owner: "ublue-os", Repo: "bazzite-dx", Label: "bazzite-dx", WorkflowFiles: []string{"build.yml"}},
 }
