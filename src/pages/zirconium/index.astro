@@ -1,0 +1,44 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Zirconium" activeTab="zirconium">
+  <header class="page-header">
+    <div>
+      <h1>Zirconium</h1>
+      <div class="meta">
+        Opinionated Niri bootc image ·
+        <a href="https://github.com/zirconium-dev/zirconium" target="_blank" rel="noopener">zirconium-dev/zirconium</a> ·
+        <a href="https://ghcr.io/zirconium-dev/zirconium" target="_blank" rel="noopener">ghcr.io/zirconium-dev/zirconium</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="info-section">
+    <p>
+      Zirconium is a Fedora-based bootc image built with mkosi, focused on the Niri Wayland compositor.
+    </p>
+    <p class="notice">
+      <strong>Note:</strong> Zirconium does not appear in Fedora countme data. GitHub and registry
+      metrics are coming soon.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .page-header { margin-bottom: 1.5rem; }
+  h1 { font-size: 1.75rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+  .meta { font-size: 0.8rem; color: var(--muted); }
+  .meta a { color: var(--link); text-decoration: none; }
+  .meta a:hover { text-decoration: underline; }
+  .info-section { margin-bottom: 1.5rem; color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+  .info-section strong { color: var(--text); }
+  .notice {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--yellow);
+    border-radius: 4px;
+  }
+</style>
