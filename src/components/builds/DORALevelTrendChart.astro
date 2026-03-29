@@ -1,0 +1,144 @@
+---
+import ChartCard from '../ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import type { BuildMonthlySnapshot } from '../../lib/types.ts';
+
+interface Props {
+  history: BuildMonthlySnapshot[];
+}
+
+const { history } = Astro.props;
+const isEmpty = history.length < 2;
+---
+
+<ChartCard
+  title="DORA Level Trend"
+  canvasId="dora-level-trend-chart"
+  height={260}
+  isEmpty={isEmpty}
+  emptyMsg="Collecting monthly build history…"
+/>
+
+{!isEmpty && (
+  <script type="application/json" id="dora-level-trend-data" set:html={safeJson(history)}></script>
+)}
+
+<script>
+import '../../lib/chart-registry.js';
+import { Chart } from 'chart.js';
+import { getChartColors, applyTheme } from '../../lib/chart-theme.js';
+import { readChartData } from '../../lib/inject.js';
+import type { BuildMonthlySnapshot } from '../../lib/types.js';
+
+const dataEl = document.getElementById('dora-level-trend-data');
+if (!dataEl) {
+  // Empty state — no chart to initialise
+} else {
+  const history = readChartData<BuildMonthlySnapshot[]>('dora-level-trend-data');
+
+  const canvas = document.getElementById('dora-level-trend-chart') as HTMLCanvasElement | null;
+  let chart: Chart | undefined;
+
+  function levelOrdinal(level: string): number {
+    switch (level) {
+      case 'elite':  return 4;
+      case 'high':   return 3;
+      case 'medium': return 2;
+      case 'low':    return 1;
+      default:       return 0;
+    }
+  }
+
+  function levelColor(level: string): string {
+    switch (level) {
+      case 'elite':  return 'var(--blue)';
+      case 'high':   return 'var(--green)';
+      case 'medium': return 'var(--yellow)';
+      case 'low':    return 'var(--red)';
+      default:       return 'var(--muted)';
+    }
+  }
+
+  // Resolve CSS vars to actual colors at render time
+  function resolveCSSVar(v: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(
+      v.replace('var(', '').replace(')', '').trim()
+    ).trim() || v;
+  }
+
+  if (canvas) {
+    const colors = getChartColors();
+
+    const labels = history.map(h => h.month);
+    const values = history.map(h => levelOrdinal(h.dora_level));
+    const bgColors = history.map(h => resolveCSSVar(levelColor(h.dora_level)));
+
+    try {
+      chart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'DORA Level',
+              data: values,
+              backgroundColor: bgColors,
+              borderWidth: 0,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const snap = history[ctx.dataIndex];
+                  return ` ${snap?.dora_level ?? 'unknown'}`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted, font: { size: 10 } },
+              grid: { color: colors.grid },
+            },
+            y: {
+              beginAtZero: true,
+              max: 4,
+              ticks: {
+                color: colors.muted,
+                font: { size: 10 },
+                stepSize: 1,
+                callback: (val) => {
+                  const labels: Record<number, string> = { 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Elite' };
+                  return labels[val as number] ?? '';
+                },
+              },
+              grid: { color: colors.grid },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('[DORALevelTrendChart] Chart init failed:', e);
+    }
+
+    window.addEventListener('themechange', () => {
+      if (chart) {
+        // Re-resolve CSS vars after theme switch
+        const snap = history;
+        const newBg = snap.map(h => resolveCSSVar(levelColor(h.dora_level)));
+        if (chart.data.datasets[0]) {
+          chart.data.datasets[0].backgroundColor = newBg;
+        }
+        applyTheme(chart);
+      }
+    });
+  }
+}
+</script>

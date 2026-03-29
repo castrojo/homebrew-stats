@@ -19,6 +19,10 @@ import MonthlyKPIStrip from '../../components/builds/MonthlyKPIStrip.astro';
 import MonthlySuccessChart from '../../components/builds/MonthlySuccessChart.astro';
 import MonthlyDurationChart from '../../components/builds/MonthlyDurationChart.astro';
 import MonthlyRepoBreakdown from '../../components/builds/MonthlyRepoBreakdown.astro';
+import DORALevelTrendChart from '../../components/builds/DORALevelTrendChart.astro';
+import TriggerBreakdownChart from '../../components/builds/TriggerBreakdownChart.astro';
+import StreamHealthTable from '../../components/builds/StreamHealthTable.astro';
+import ArchComparisonPanel from '../../components/builds/ArchComparisonPanel.astro';
 
 const builds = rawData as unknown as BuildsData;
 const generatedAt = new Date(builds.generated_at).toUTCString();
@@ -59,6 +63,7 @@ const isBootstrap = builds.summary.health_status === 'unknown';
             <MonthlySuccessChart history={builds.monthly_history} />
             <MonthlyDurationChart history={builds.monthly_history} />
             <MonthlyRepoBreakdown history={builds.monthly_history} />
+            <DORALevelTrendChart history={builds.monthly_history} />
           </div>
         </section>
       )}
@@ -72,10 +77,15 @@ const isBootstrap = builds.summary.health_status === 'unknown';
       <FlakinessLeaderboard flaky={builds.top_flaky} />
 
       <!-- Section 4: Throughput + Triggers -->
-      <PipelineThroughputChart history={builds.history} triggers={builds.trigger_breakdown} />
+      <div class="throughput-triggers-grid">
+        <PipelineThroughputChart history={builds.history} triggers={builds.trigger_breakdown} />
+        <TriggerBreakdownChart triggers={builds.trigger_breakdown} />
+      </div>
 
       <!-- Section 5: Cross-builder view -->
       <BuilderComparison repos={builds.repos} />
+      <StreamHealthTable repos={builds.repos} />
+      <ArchComparisonPanel repos={builds.repos} />
       <PublishReliabilityChart repos={builds.repos} />
 
       <!-- Section 6: Recent builds feed -->
@@ -130,7 +140,21 @@ const isBootstrap = builds.summary.health_status === 'unknown';
 
   .monthly-charts {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+  }
+
+  .throughput-triggers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .monthly-charts,
+    .throughput-triggers-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

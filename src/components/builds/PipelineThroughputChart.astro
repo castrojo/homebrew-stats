@@ -11,7 +11,6 @@ interface Props {
 const { history, triggers } = Astro.props;
 
 const hasHistory = history.length > 0;
-const hasTrigggers = Object.values(triggers).some(v => v > 0);
 ---
 
 <div class="throughput-grid">
@@ -27,16 +26,7 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
     emptyMsg="Collecting data…"
   />
 
-  <!-- Chart B: Trigger Distribution -->
-  <ChartCard
-    title="Trigger Distribution"
-    canvasId="throughput-triggers"
-    height={220}
-    isEmpty={!hasTrigggers}
-    emptyMsg="Collecting data…"
-  />
-
-  <!-- Chart C: Avg Queue Wait Time -->
+  <!-- Chart B: Avg Queue Wait Time -->
   <ChartCard
     title="Avg Queue Wait Time"
     canvasId="throughput-queue"
@@ -49,7 +39,7 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
   />
 </div>
 
-<script type="application/json" id="throughput-data" set:html={safeJson({ history, triggers })}></script>
+<script type="application/json" id="throughput-data" set:html={safeJson({ history })}></script>
 
 <script>
   import '../../lib/chart-registry.js';
@@ -57,7 +47,7 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
   import { BRAND_COLOURS, getChartColors, applyTheme } from '../../lib/chart-theme.js';
   import { Chart } from 'chart.js';
 
-  const { history, triggers } = readChartData<{
+  const { history } = readChartData<{
     history: {
       date: string;
       total_runs: number;
@@ -68,13 +58,6 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
       p95_duration_min: number;
       avg_queue_time_sec: number;
     }[];
-    triggers: {
-      scheduled: number;
-      push: number;
-      pull_request: number;
-      workflow_dispatch: number;
-      other: number;
-    };
   }>('throughput-data');
 
   /** Compute 7-day rolling average over a numeric array. */
@@ -178,55 +161,7 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
     });
   }
 
-  // ── Chart B: Trigger Distribution ────────────────────────────────────────────
-  const triggersCanvas = document.getElementById('throughput-triggers') as HTMLCanvasElement | null;
-  let triggersChart: Chart | undefined;
-
-  const hasTriggers = Object.values(triggers).some(v => v > 0);
-  if (triggersCanvas && hasTriggers) {
-    try {
-      triggersChart = new Chart(triggersCanvas, {
-        type: 'doughnut',
-        data: {
-          labels: ['Scheduled', 'Push', 'Pull Request', 'Manual', 'Other'],
-          datasets: [
-            {
-              data: [
-                triggers.scheduled,
-                triggers.push,
-                triggers.pull_request,
-                triggers.workflow_dispatch,
-                triggers.other,
-              ],
-              backgroundColor: [
-                BRAND_COLOURS[0],
-                BRAND_COLOURS[1],
-                BRAND_COLOURS[2],
-                BRAND_COLOURS[3],
-                BRAND_COLOURS[4],
-              ],
-              borderColor: 'transparent',
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: { color: colors.text, font: { size: 12 } },
-            },
-          },
-        },
-      });
-    } catch (e) {
-      console.error('[PipelineThroughputChart] Triggers chart init failed:', e);
-    }
-  }
-
-  // ── Chart C: Avg Queue Wait Time ─────────────────────────────────────────────
+  // ── Chart B: Avg Queue Wait Time ─────────────────────────────────────────────
   const queueCanvas = document.getElementById('throughput-queue') as HTMLCanvasElement | null;
   let queueChart: Chart | undefined;
 
@@ -300,36 +235,20 @@ const hasTrigggers = Object.values(triggers).some(v => v > 0);
   window.addEventListener('themechange', () => {
     if (buildsChart) applyTheme(buildsChart);
     if (queueChart) applyTheme(queueChart);
-    if (triggersChart) {
-      const c = getChartColors();
-      if (triggersChart.options.plugins?.legend?.labels) {
-        triggersChart.options.plugins.legend.labels.color = c.text;
-      }
-      triggersChart.update();
-    }
   });
 </script>
 
 <style>
   .throughput-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
     margin-bottom: 20px;
-  }
-
-  /* Queue chart spans full width on its own row */
-  .throughput-grid > :last-child {
-    grid-column: 1 / -1;
   }
 
   @media (max-width: 700px) {
     .throughput-grid {
       grid-template-columns: 1fr;
-    }
-
-    .throughput-grid > :last-child {
-      grid-column: 1;
     }
   }
 </style>

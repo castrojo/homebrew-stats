@@ -430,10 +430,11 @@ test.describe('Builds tab — Monthly Overview', () => {
       return;
     }
 
-    // Data present — all 3 canvas elements must be rendered and sized.
+    // Data present — all 4 canvas elements must be rendered and sized.
     await expectCanvasRendered(page, 'monthly-success-chart');
     await expectCanvasRendered(page, 'monthly-duration-chart');
     await expectCanvasRendered(page, 'monthly-repo-chart');
+    await expectCanvasRendered(page, 'dora-level-trend-chart');
   });
 
   test('Monthly data scripts have valid JSON when section is visible', async ({ page }) => {
@@ -454,6 +455,54 @@ test.describe('Builds tab — Monthly Overview', () => {
 
     const repoData = await getScriptJSON(page, 'monthly-repo-data') as unknown[];
     expect(Array.isArray(repoData), 'monthly-repo-data must be an array').toBe(true);
+
+    const doraData = await getScriptJSON(page, 'dora-level-trend-data') as unknown[];
+    expect(Array.isArray(doraData), 'dora-level-trend-data must be an array').toBe(true);
+  });
+
+  test('trigger-breakdown-data has valid JSON and trigger-breakdown-chart renders', async ({ page }) => {
+    // Trigger breakdown data is always emitted (not gated by monthly_history).
+    // If the element is absent the component emitted an empty-state placeholder.
+    const dataEl = await page.evaluate(() => !!document.getElementById('trigger-breakdown-data'));
+    if (!dataEl) {
+      // Empty state (all trigger counts zero) — chart-empty rendered instead.
+      return;
+    }
+
+    const data = await getScriptJSON(page, 'trigger-breakdown-data') as Record<string, unknown>;
+    expect(typeof data, 'trigger-breakdown-data must be an object').toBe('object');
+
+    await expectCanvasRendered(page, 'trigger-breakdown-chart');
+  });
+
+  test('StreamHealthTable renders rows when builds data is available', async ({ page }) => {
+    // The stream health table is inside the non-bootstrap block.
+    // Guard the same way as monthly charts.
+    const isBootstrap = await page.evaluate(() => {
+      const el = document.querySelector('.collecting');
+      return el !== null;
+    });
+    if (isBootstrap) return;
+
+    const rows = page.locator('.stream-table tbody tr');
+    const count = await rows.count();
+    expect(count, 'StreamHealthTable must have at least one row').toBeGreaterThan(0);
+  });
+
+  test('ArchComparisonPanel renders arch cards when builds data is available', async ({ page }) => {
+    const isBootstrap = await page.evaluate(() => {
+      const el = document.querySelector('.collecting');
+      return el !== null;
+    });
+    if (isBootstrap) return;
+
+    // If no architectures data, the panel is fully absent (hasData guard).
+    const section = page.locator('.arch-panel');
+    const count = await section.count();
+    if (count === 0) return; // no arch data in fixture — acceptable
+
+    const cards = page.locator('.arch-card');
+    await expect(cards.first(), 'At least one .arch-card must be visible').toBeVisible();
   });
 
   test('Builds page has a file-an-issue link', async ({ page }) => {

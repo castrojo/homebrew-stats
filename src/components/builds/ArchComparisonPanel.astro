@@ -1,0 +1,177 @@
+---
+import type { BuildRepoMetrics } from '../../lib/types.ts';
+import { rateColor } from '../../lib/build-utils.ts';
+
+interface Props {
+  repos: BuildRepoMetrics[];
+}
+
+const { repos } = Astro.props;
+
+// Collect all arch data across repos
+const archMap: Record<string, { successRates: number[]; durations: number[]; jobs: number[] }> = {};
+
+for (const repo of repos) {
+  for (const arch of (repo.architectures ?? [])) {
+    if (!archMap[arch.platform]) {
+      archMap[arch.platform] = { successRates: [], durations: [], jobs: [] };
+    }
+    archMap[arch.platform].successRates.push(arch.success_rate_7d);
+    archMap[arch.platform].durations.push(arch.avg_duration_min);
+    archMap[arch.platform].jobs.push(arch.total_jobs_7d);
+  }
+}
+
+function avg(arr: number[]): number {
+  return arr.length === 0 ? 0 : arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+const platforms = Object.keys(archMap).sort();
+const hasData = platforms.length > 0;
+---
+
+{hasData && (
+  <section class="arch-panel">
+    <h2 class="section-heading">Architecture Comparison</h2>
+    <div class="arch-grid">
+      {platforms.map(platform => {
+        const data = archMap[platform];
+        const avgRate = avg(data.successRates);
+        const avgDur = avg(data.durations);
+        const totalJobs = data.jobs.reduce((a, b) => a + b, 0);
+        return (
+          <div class="arch-card">
+            <div class="arch-label">{platform}</div>
+            <div class="arch-rate" style={`color:${rateColor(avgRate)}`}>
+              {avgRate.toFixed(1)}<span class="unit">%</span>
+            </div>
+            <div class="arch-sub">7d success rate</div>
+            <div class="arch-stats">
+              <span class="stat-item"><span class="stat-val">{avgDur.toFixed(0)}m</span><span class="stat-lbl">avg duration</span></span>
+              <span class="stat-item"><span class="stat-val">{totalJobs}</span><span class="stat-lbl">jobs (7d)</span></span>
+            </div>
+            <div class="arch-breakdown">
+              {repos.map(repo => {
+                const arch = (repo.architectures ?? []).find(a => a.platform === platform);
+                if (!arch) return null;
+                const shortRepo = repo.repo.split('/')[1] ?? repo.repo;
+                return (
+                  <div class="arch-row">
+                    <span class="arch-row-repo">{shortRepo}</span>
+                    <span class="arch-row-rate" style={`color:${rateColor(arch.success_rate_7d)}`}>
+                      {arch.success_rate_7d.toFixed(1)}%
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+)}
+
+<style>
+  .arch-panel {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .arch-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+
+  .arch-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: monospace;
+  }
+
+  .arch-rate {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 2px;
+  }
+
+  .unit {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .arch-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .arch-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-val {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .stat-lbl {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .arch-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .arch-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .arch-row-repo {
+    color: var(--muted);
+  }
+
+  .arch-row-rate {
+    font-weight: 600;
+  }
+</style>
