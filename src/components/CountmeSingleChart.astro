@@ -1,0 +1,130 @@
+---
+/**
+ * CountmeSingleChart — weekly active devices for a single countme os_name key.
+ *
+ * Props:
+ *   weekRecords  — full history from countme.json history.week_records
+ *   distroKey    — canonical distro key used in WeekRecord.distros (e.g. "secureblue")
+ *   label        — display label for the chart legend (e.g. "secureblue")
+ *   canvasId     — unique canvas element id (must not collide across pages)
+ */
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+import type { WeekRecord } from '../lib/types.ts';
+
+interface Props {
+  weekRecords: WeekRecord[];
+  distroKey: string;
+  label: string;
+  canvasId: string;
+}
+const { weekRecords, distroKey, label, canvasId } = Astro.props;
+
+// Filter to records that actually have data for this distro.
+const hasData = weekRecords.some(r => (r.distros?.[distroKey] ?? 0) > 0);
+---
+
+{!hasData ? (
+  <ChartCard title="Active Devices per Week" canvasId={canvasId} isEmpty emptyMsg="Collecting data — check back after the next sync." />
+) : (
+  <>
+    <ChartCard
+      title="Active Devices per Week"
+      canvasId={canvasId}
+      height={280}
+      rangeId={`${canvasId}-range`}
+      ranges={[{ label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
+      defaultRange="365"
+    />
+    <script type="application/json" id={`${canvasId}-data`} set:html={safeJson({ weekRecords, distroKey, label })}></script>
+  </>
+)}
+
+<script>
+import '../lib/chart-registry.js';
+import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { Chart } from 'chart.js';
+
+// Find our data script by matching the canvas id pattern.
+document.querySelectorAll<HTMLScriptElement>('script[id$="-data"][type="application/json"]').forEach(el => {
+  const canvasId = el.id.replace(/-data$/, '');
+  const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
+  if (!canvas) return;
+
+  const { weekRecords, distroKey, label } = JSON.parse(el.textContent!);
+
+  function getFiltered(range: string) {
+    if (range === 'all') return weekRecords;
+    const days = Number(range);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    return weekRecords.filter((r: { week_end: string }) => r.week_end >= cutoffStr);
+  }
+
+  let currentRange = '365';
+  let filtered = getFiltered(currentRange);
+  const c = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: filtered.map((r: { week_end: string }) => r.week_end),
+        datasets: [{
+          label,
+          data: filtered.map((r: { distros: Record<string, number> }) => r.distros?.[distroKey] ?? 0),
+          borderColor: BRAND_COLOURS[0],
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: c.grid }, ticks: { color: c.muted, maxTicksLimit: 10 } },
+          y: {
+            beginAtZero: true,
+            grid: { color: c.grid },
+            ticks: {
+              color: c.muted,
+              callback: (v: number | string) =>
+                Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(0)}k` : String(v),
+            },
+          },
+        },
+        plugins: { legend: { labels: { color: c.text, usePointStyle: true, boxWidth: 8 } } },
+      },
+    });
+  } catch (e) {
+    console.error(`[CountmeSingleChart:${canvasId}] Chart.js init failed:`, e);
+  }
+
+  document.getElementById(`${canvasId}-range`)?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      document.getElementById(`${canvasId}-range`)?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = btn.dataset.range!;
+      const data = getFiltered(currentRange);
+      chart.data.labels = data.map((r: { week_end: string }) => r.week_end);
+      chart.data.datasets[0].data = data.map((r: { distros: Record<string, number> }) => r.distros?.[distroKey] ?? 0);
+      chart.update();
+    });
+  });
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    const colors = getChartColors();
+    (chart.options.plugins!.legend!.labels as { color: string }).color = colors.text;
+    chart.options.scales!.x!.ticks!.color = colors.muted;
+    (chart.options.scales!.x!.grid as { color: string }).color = colors.grid;
+    chart.options.scales!.y!.ticks!.color = colors.muted;
+    (chart.options.scales!.y!.grid as { color: string }).color = colors.grid;
+    chart.update();
+  });
+});
+</script>

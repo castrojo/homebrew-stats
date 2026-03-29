@@ -1,0 +1,40 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Universal Blue" activeTab="universal-blue">
+  <header class="page-header">
+    <div>
+      <h1>Universal Blue</h1>
+      <div class="meta">
+        The base image infrastructure layer ·
+        <a href="https://github.com/ublue-os/main" target="_blank" rel="noopener">ublue-os/main</a> ·
+        <a href="https://github.com/ublue-os/akmods" target="_blank" rel="noopener">ublue-os/akmods</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="info-section">
+    <p>
+      Universal Blue provides the foundational base images and kernel module builds that
+      Bluefin, Aurora, Bazzite, uCore, and other images are built on top of.
+      This tab covers <strong>ublue-os/main</strong> and <strong>ublue-os/akmods</strong> only —
+      the consumer images each have their own tabs.
+    </p>
+  </section>
+
+  <div class="collecting">
+    <p>Build pipeline metrics and contributor stats coming soon (issue 73).</p>
+  </div>
+</Layout>
+
+<style>
+  .page-header { margin-bottom: 1.5rem; }
+  h1 { font-size: 1.75rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+  .meta { font-size: 0.8rem; color: var(--muted); }
+  .meta a { color: var(--link); text-decoration: none; }
+  .meta a:hover { text-decoration: underline; }
+  .info-section { margin-bottom: 1.5rem; color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+  .info-section strong { color: var(--text); }
+  .collecting { color: var(--muted); font-size: 0.9rem; }
+</style>

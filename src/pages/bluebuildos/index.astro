@@ -1,0 +1,67 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CountmeSingleChart from '../../components/CountmeSingleChart.astro';
+import countme from '../../data/countme.json';
+
+const weekRecords = (countme as any).history?.week_records ?? [];
+const currentWeek = (countme as any).current_week;
+const activeDevices = currentWeek?.distros?.bluebuildos ?? 0;
+---
+
+<Layout title="BlueBuildOS" activeTab="bluebuildos">
+  <header class="page-header">
+    <div>
+      <h1>BlueBuildOS</h1>
+      <div class="meta">
+        The BlueBuild toolchain image ·
+        <a href="https://github.com/blue-build/cli" target="_blank" rel="noopener">blue-build/cli</a> ·
+        <a href="https://blue-build.org" target="_blank" rel="noopener">blue-build.org</a>
+      </div>
+    </div>
+    {activeDevices > 0 && (
+      <div class="kpi-hero">
+        <div class="kpi-value">{activeDevices.toLocaleString()}</div>
+        <div class="kpi-label">Active Devices (current week)</div>
+      </div>
+    )}
+  </header>
+
+  <section class="info-section">
+    <p>
+      BlueBuildOS is the base image published by the BlueBuild project — the toolchain used to build
+      custom bootc images. Many images on this dashboard (secureblue, wayblue, winblues) are built
+      with BlueBuild. Devices running BlueBuildOS directly report as <code>BlueBuildOS</code> in
+      Fedora countme data.
+    </p>
+  </section>
+
+  <CountmeSingleChart
+    weekRecords={weekRecords}
+    distroKey="bluebuildos"
+    label="BlueBuildOS"
+    canvasId="bluebuildos-trend"
+  />
+</Layout>
+
+<style>
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  h1 { font-size: 1.75rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+  .meta { font-size: 0.8rem; color: var(--muted); }
+  .meta a { color: var(--link); text-decoration: none; }
+  .meta a:hover { text-decoration: underline; }
+  code { font-size: 0.85em; background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 0.1em 0.35em; }
+  .kpi-hero {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 24px; text-align: right;
+  }
+  .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1.1; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .info-section { margin-bottom: 1.5rem; color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+</style>

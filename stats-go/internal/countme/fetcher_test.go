@@ -68,6 +68,10 @@ func TestParseDistroName_ValidExact(t *testing.T) {
 		{"Bluefin", "bluefin"},
 		{"Bluefin LTS", "bluefin-lts"},
 		{"Aurora", "aurora"},
+		// bootc ecosystem images (issue 72)
+		{"secureblue", "secureblue"},
+		{"wayblue", "wayblue"},
+		{"BlueBuildOS", "bluebuildos"},
 	}
 	for _, c := range cases {
 		got, ok := parseDistroName(c.input)
@@ -266,7 +270,7 @@ func TestParseOsVersionDist(t *testing.T) {
 		{osName: "Bazzite", osVersion: "41", sysAge: "0", hits: 100},
 		{osName: "Bazzite", osVersion: "40", sysAge: "0", hits: 50},
 		{osName: "Bluefin", osVersion: "41", sysAge: "0", hits: 30},
-		{osName: "Unknown", osVersion: "41", sysAge: "0", hits: 5},  // not a target distro
+		{osName: "Unknown", osVersion: "41", sysAge: "0", hits: 5},   // not a target distro
 		{osName: "Bazzite", osVersion: "41", sysAge: "-1", hits: 99}, // sys_age=-1 excluded
 		{osName: "Bazzite", osVersion: "", sysAge: "0", hits: 10},    // empty version excluded
 	}
