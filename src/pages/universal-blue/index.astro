@@ -30,10 +30,10 @@ const isBootstrap = builds.summary.health_status === 'unknown';
 const generatedAt = builds.generated_at ? new Date(builds.generated_at).toUTCString() : '';
 ---
 
-<Layout title="Universal Blue Build Metrics" activeTab="universal-blue">
+<Layout title="ublue-os Build Metrics" activeTab="universal-blue">
   <header class="page-header">
     <div>
-      <h1>Universal Blue Build Pipeline</h1>
+      <h1>ublue-os Build Pipeline</h1>
       <div class="meta">
         {!isBootstrap && generatedAt && <>Updated {generatedAt} · </>}
         <a href="https://github.com/ublue-os/main/actions" target="_blank" rel="noopener">main</a> ·

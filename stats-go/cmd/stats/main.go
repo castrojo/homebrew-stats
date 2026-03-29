@@ -475,7 +475,7 @@ func runFetchCountme() error {
 		store = &countme.HistoryStore{}
 	}
 
-	fmt.Fprintln(os.Stderr, "→ Fetching Universal Blue badge counts…")
+	fmt.Fprintln(os.Stderr, "→ Fetching ublue-os badge counts…")
 	badge, err := countme.FetchBadgeCounts()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  countme badges: %v\n", err)
