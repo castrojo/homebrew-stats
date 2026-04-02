@@ -34,7 +34,9 @@ const countmeDistros = [
 /**
  * Derive a boolean | null for a supply chain metric from a builds dataset.
  * -1 means "step not detected in pipeline" — treated as null (no data).
- * If at least one repo has real data, use the mean rate; threshold >= 80 → true.
+ * Uses the MAX rate across repos: if the best-performing repo in the ecosystem
+ * signs reliably (>= 80%), the ecosystem has signing. Mean was too punishing
+ * when helper repos (iso, common) have lower rates due to CI instability.
  */
 function deriveRate(
   repos: BuildRepoMetrics[],
@@ -44,8 +46,8 @@ function deriveRate(
     .map(r => r[field])
     .filter((v): v is number => v !== undefined && v !== -1);
   if (validRates.length === 0) return null;
-  const mean = validRates.reduce((a, b) => a + b, 0) / validRates.length;
-  return mean >= 80;
+  const max = Math.max(...validRates);
+  return max >= 80;
 }
 
 const bluefinRepos       = (bluefinBuilds      as unknown as BuildsData).repos ?? [];

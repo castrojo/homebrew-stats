@@ -115,15 +115,15 @@ return nil
 
 // ghRunRecord matches the JSON fields returned by `gh run list --json`.
 type ghRunRecord struct {
-DatabaseID   int64  `json:"databaseId"`
-Name         string `json:"name"`
-Event        string `json:"event"`
-HeadBranch   string `json:"headBranch"`
-Conclusion   string `json:"conclusion"`
-CreatedAt    string `json:"createdAt"`
-UpdatedAt    string `json:"updatedAt"`
-RunStartedAt string `json:"runStartedAt"`
-RunNumber    int    `json:"runNumber"`
+DatabaseID int64  `json:"databaseId"`
+Name       string `json:"name"`
+Event      string `json:"event"`
+HeadBranch string `json:"headBranch"`
+Conclusion string `json:"conclusion"`
+CreatedAt  string `json:"createdAt"`
+UpdatedAt  string `json:"updatedAt"`
+StartedAt  string `json:"startedAt"`  // NOTE: gh run list uses "startedAt", not "runStartedAt"
+RunNumber  int    `json:"number"`     // NOTE: gh run list uses "number", not "runNumber"
 }
 
 // fetchRuns fetches completed runs for one workflow file since `since`.
@@ -135,7 +135,7 @@ out, err := ghcli.Run("run", "list",
 "--workflow", wfFile,
 "--status", "completed",
 "--created", ">="+since.Format("2006-01-02"),
-"--json", "databaseId,name,event,headBranch,conclusion,createdAt,updatedAt,runStartedAt,runNumber",
+"--json", "databaseId,name,event,headBranch,conclusion,createdAt,updatedAt,startedAt,number",
 "--limit", "100")
 if err != nil {
 return nil, err
@@ -161,7 +161,7 @@ if c.cfg.MaxRunsPerWf > 0 && len(records) >= c.cfg.MaxRunsPerWf {
 return records, nil
 }
 
-startedAt := parseT(run.RunStartedAt)
+startedAt := parseT(run.StartedAt)
 completedAt := parseT(run.UpdatedAt)
 createdAt := parseT(run.CreatedAt)
 

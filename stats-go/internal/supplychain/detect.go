@@ -77,7 +77,7 @@ return nil
 }
 owner := parts[0]
 
-_, err = ghcli.Run("attestation", "verify", imageRef, "--owner", owner)
+_, err = ghcli.Run("attestation", "verify", "oci://"+imageRef, "--owner", owner)
 if err == nil {
 return boolPtr(true)
 }

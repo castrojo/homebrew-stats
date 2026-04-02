@@ -1,10 +1,50 @@
 {
-  "Bluefin":    {"zstd_chunked": false, "chunka_detected": false, "legacy_rechunk": true, "slsa_provenance": true},
-  "Aurora":     {"zstd_chunked": false, "chunka_detected": false, "legacy_rechunk": true, "slsa_provenance": true},
-  "Bazzite":    {"zstd_chunked": false, "chunka_detected": false, "legacy_rechunk": true, "slsa_provenance": false},
-  "ublue-os":   {"zstd_chunked": null, "chunka_detected": null, "legacy_rechunk": null, "slsa_provenance": null},
-  "uCore":      {"zstd_chunked": false, "chunka_detected": false, "legacy_rechunk": true, "slsa_provenance": false},
-  "Zirconium":  {"zstd_chunked": null, "chunka_detected": null, "legacy_rechunk": null, "slsa_provenance": null},
-  "bootcrew":   {"zstd_chunked": null, "chunka_detected": null, "legacy_rechunk": null, "slsa_provenance": null},
-  "secureblue": {"zstd_chunked": null, "chunka_detected": null, "legacy_rechunk": null, "slsa_provenance": true}
+  "Aurora": {
+    "zstd_chunked": false,
+    "chunka_detected": false,
+    "legacy_rechunk": true,
+    "slsa_provenance": true
+  },
+  "Bazzite": {
+    "zstd_chunked": false,
+    "chunka_detected": false,
+    "legacy_rechunk": true,
+    "slsa_provenance": false
+  },
+  "Bluefin": {
+    "zstd_chunked": false,
+    "chunka_detected": false,
+    "legacy_rechunk": true,
+    "slsa_provenance": true
+  },
+  "Zirconium": {
+    "zstd_chunked": false,
+    "chunka_detected": false,
+    "legacy_rechunk": false,
+    "slsa_provenance": false
+  },
+  "bootcrew": {
+    "zstd_chunked": false,
+    "chunka_detected": false,
+    "legacy_rechunk": false,
+    "slsa_provenance": false
+  },
+  "secureblue": {
+    "zstd_chunked": false,
+    "chunka_detected": false,
+    "legacy_rechunk": false,
+    "slsa_provenance": false
+  },
+  "uCore": {
+    "zstd_chunked": false,
+    "chunka_detected": false,
+    "legacy_rechunk": false,
+    "slsa_provenance": false
+  },
+  "ublue-os": {
+    "zstd_chunked": null,
+    "chunka_detected": null,
+    "legacy_rechunk": null,
+    "slsa_provenance": null
+  }
 }

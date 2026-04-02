@@ -1,39 +1,1225 @@
 {
-  "generated_at": "1970-01-01T00:00:00Z",
-  "repos": [],
+  "generated_at": "2026-04-02T18:43:23Z",
+  "repos": [
+    {
+      "repo": "bluefin",
+      "success_rate_7d": 82.35294117647058,
+      "success_rate_30d": 82.35294117647058,
+      "total_runs_7d": 68,
+      "total_runs_30d": 68,
+      "avg_duration_min": 28.476470588235294,
+      "streams": [
+        {
+          "name": "build-image-beta",
+          "success_rate_7d": 0,
+          "success_rate_30d": 0,
+          "total_runs_7d": 8,
+          "avg_duration_min": 23.235416666666666,
+          "last_run_at": "2026-04-01T23:19:19Z",
+          "last_conclusion": "failure"
+        },
+        {
+          "name": "build-image-latest-main",
+          "success_rate_7d": 100,
+          "success_rate_30d": 100,
+          "total_runs_7d": 30,
+          "avg_duration_min": 30.491111111111113,
+          "last_run_at": "2026-04-02T12:56:51Z",
+          "last_conclusion": "success"
+        },
+        {
+          "name": "build-image-stable",
+          "success_rate_7d": 86.66666666666667,
+          "success_rate_30d": 86.66666666666667,
+          "total_runs_7d": 30,
+          "avg_duration_min": 27.859444444444442,
+          "last_run_at": "2026-04-02T12:56:50Z",
+          "last_conclusion": "success"
+        }
+      ],
+      "sign_step_success_rate_30d": 93.93939393939394,
+      "sbom_step_success_rate_30d": 93.93939393939394
+    },
+    {
+      "repo": "bluefin-lts",
+      "success_rate_7d": 90.36144578313254,
+      "success_rate_30d": 90.36144578313254,
+      "total_runs_7d": 166,
+      "total_runs_30d": 166,
+      "avg_duration_min": 14.516018518518518,
+      "streams": [
+        {
+          "name": "build-dx",
+          "success_rate_7d": 96.55172413793103,
+          "success_rate_30d": 96.55172413793103,
+          "total_runs_7d": 29,
+          "avg_duration_min": 14.347777777777777,
+          "last_run_at": "2026-04-02T16:33:29Z",
+          "last_conclusion": "success"
+        },
+        {
+          "name": "build-dx-hwe",
+          "success_rate_7d": 100,
+          "success_rate_30d": 100,
+          "total_runs_7d": 28,
+          "avg_duration_min": 15.09,
+          "last_run_at": "2026-04-02T16:33:29Z",
+          "last_conclusion": "success"
+        },
+        {
+          "name": "build-gdx",
+          "success_rate_7d": 78.57142857142857,
+          "success_rate_30d": 78.57142857142857,
+          "total_runs_7d": 28,
+          "avg_duration_min": 14.966111111111111,
+          "last_run_at": "2026-04-02T16:33:29Z",
+          "last_conclusion": "success"
+        },
+        {
+          "name": "build-gnome50",
+          "success_rate_7d": 69.56521739130434,
+          "success_rate_30d": 69.56521739130434,
+          "total_runs_7d": 23,
+          "avg_duration_min": 16.96777777777778,
+          "last_run_at": "2026-04-02T16:33:29Z",
+          "last_conclusion": "success"
+        },
+        {
+          "name": "build-regular",
+          "success_rate_7d": 96.55172413793103,
+          "success_rate_30d": 96.55172413793103,
+          "total_runs_7d": 29,
+          "avg_duration_min": 12.235555555555555,
+          "last_run_at": "2026-04-02T18:28:15Z",
+          "last_conclusion": "success"
+        },
+        {
+          "name": "build-regular-hwe",
+          "success_rate_7d": 96.55172413793103,
+          "success_rate_30d": 96.55172413793103,
+          "total_runs_7d": 29,
+          "avg_duration_min": 13.488888888888889,
+          "last_run_at": "2026-04-02T18:28:15Z",
+          "last_conclusion": "success"
+        }
+      ],
+      "architectures": [
+        {
+          "platform": "amd64",
+          "success_rate_7d": 78.11320754716982,
+          "avg_duration_min": 13.466981132075471,
+          "total_jobs_7d": 265
+        },
+        {
+          "platform": "arm64",
+          "success_rate_7d": 77.73584905660378,
+          "avg_duration_min": 12.589811320754716,
+          "total_jobs_7d": 265
+        }
+      ],
+      "sign_step_success_rate_30d": 45.614035087719294,
+      "sbom_step_success_rate_30d": 0
+    },
+    {
+      "repo": "common",
+      "success_rate_7d": 86.20689655172413,
+      "success_rate_30d": 86.20689655172413,
+      "total_runs_7d": 29,
+      "total_runs_30d": 29,
+      "avg_duration_min": 1.0885057471264368,
+      "streams": [
+        {
+          "name": "build",
+          "success_rate_7d": 86.20689655172413,
+          "success_rate_30d": 86.20689655172413,
+          "total_runs_7d": 29,
+          "avg_duration_min": 1.0885057471264368,
+          "last_run_at": "2026-04-02T18:22:34Z",
+          "last_conclusion": "success"
+        }
+      ],
+      "sign_step_success_rate_30d": 78.57142857142857,
+      "sbom_step_success_rate_30d": -1
+    },
+    {
+      "repo": "dakota",
+      "success_rate_7d": 60,
+      "success_rate_30d": 69.23076923076923,
+      "total_runs_7d": 10,
+      "total_runs_30d": 13,
+      "avg_duration_min": 17.705555555555556,
+      "streams": [
+        {
+          "name": "build",
+          "success_rate_7d": 60,
+          "success_rate_30d": 69.23076923076923,
+          "total_runs_7d": 10,
+          "avg_duration_min": 17.705555555555556,
+          "last_run_at": "2026-04-01T13:54:08Z",
+          "last_conclusion": "success"
+        }
+      ],
+      "sign_step_success_rate_30d": -1,
+      "sbom_step_success_rate_30d": -1
+    },
+    {
+      "repo": "iso",
+      "success_rate_7d": 50,
+      "success_rate_30d": 50,
+      "total_runs_7d": 4,
+      "total_runs_30d": 4,
+      "avg_duration_min": 18.766666666666666,
+      "streams": [
+        {
+          "name": "build-iso-all",
+          "success_rate_7d": 0,
+          "success_rate_30d": 0,
+          "total_runs_7d": 1,
+          "avg_duration_min": 20.15,
+          "last_run_at": "2026-04-01T04:00:32Z",
+          "last_conclusion": "failure"
+        },
+        {
+          "name": "build-iso-lts-hwe",
+          "success_rate_7d": 50,
+          "success_rate_30d": 50,
+          "total_runs_7d": 2,
+          "avg_duration_min": 18.3,
+          "last_run_at": "2026-04-01T03:14:11Z",
+          "last_conclusion": "failure"
+        },
+        {
+          "name": "build-iso-stable",
+          "success_rate_7d": 100,
+          "success_rate_30d": 100,
+          "total_runs_7d": 1,
+          "avg_duration_min": 18.316666666666666,
+          "last_run_at": "2026-04-01T03:00:44Z",
+          "last_conclusion": "success"
+        }
+      ],
+      "architectures": [
+        {
+          "platform": "amd64",
+          "success_rate_7d": 100,
+          "avg_duration_min": 17.375925925925927,
+          "total_jobs_7d": 9
+        },
+        {
+          "platform": "arm64",
+          "success_rate_7d": 20,
+          "avg_duration_min": 6.33,
+          "total_jobs_7d": 5
+        }
+      ],
+      "sign_step_success_rate_30d": -1,
+      "sbom_step_success_rate_30d": -1
+    },
+    {
+      "repo": "finpilot",
+      "success_rate_7d": 100,
+      "success_rate_30d": 100,
+      "total_runs_7d": 7,
+      "total_runs_30d": 17,
+      "avg_duration_min": 4.631372549019607,
+      "streams": [
+        {
+          "name": "build",
+          "success_rate_7d": 100,
+          "success_rate_30d": 100,
+          "total_runs_7d": 7,
+          "avg_duration_min": 4.631372549019607,
+          "last_run_at": "2026-04-02T10:27:05Z",
+          "last_conclusion": "success"
+        }
+      ],
+      "sign_step_success_rate_30d": -1,
+      "sbom_step_success_rate_30d": -1
+    },
+    {
+      "repo": "testhub",
+      "success_rate_7d": 81.81818181818183,
+      "success_rate_30d": 86.20689655172413,
+      "total_runs_7d": 22,
+      "total_runs_30d": 29,
+      "avg_duration_min": 11.948333333333332,
+      "streams": [
+        {
+          "name": "build",
+          "success_rate_7d": 81.81818181818183,
+          "success_rate_30d": 86.20689655172413,
+          "total_runs_7d": 22,
+          "avg_duration_min": 11.948333333333332,
+          "last_run_at": "2026-03-29T22:45:04Z",
+          "last_conclusion": "success"
+        }
+      ],
+      "architectures": [
+        {
+          "platform": "aarch64",
+          "success_rate_7d": 100,
+          "avg_duration_min": 2.430327868852459,
+          "total_jobs_7d": 61
+        },
+        {
+          "platform": "x86_64",
+          "success_rate_7d": 93.44262295081968,
+          "avg_duration_min": 3.412841530054645,
+          "total_jobs_7d": 61
+        }
+      ],
+      "sign_step_success_rate_30d": 85.71428571428571,
+      "sbom_step_success_rate_30d": 85.71428571428571
+    }
+  ],
   "summary": {
-    "overall_success_rate_7d": 0,
-    "overall_success_rate_30d": 0,
-    "total_builds_7d": 0,
-    "total_builds_30d": 0,
-    "avg_duration_min": 0,
-    "p50_duration_min": 0,
-    "p95_duration_min": 0,
-    "p99_duration_min": 0,
-    "avg_queue_time_sec": 0,
-    "active_streams": 0,
-    "health_status": "unknown"
+    "overall_success_rate_7d": 86.27450980392157,
+    "overall_success_rate_30d": 87.11656441717791,
+    "total_builds_7d": 306,
+    "total_builds_30d": 326,
+    "avg_duration_min": 15.641040462427759,
+    "p50_duration_min": 13.216666666666667,
+    "p95_duration_min": 34.63333333333333,
+    "p99_duration_min": 55.65,
+    "avg_queue_time_sec": 31090.1,
+    "active_streams": 13,
+    "health_status": "degraded"
   },
   "dora_metrics": {
-    "deployment_frequency": "unknown",
-    "deploy_freq_per_week": 0,
-    "lead_time_minutes": 0,
-    "change_failure_rate_pct": 0,
-    "mttr_minutes": 0,
-    "mtbf_hours": 0,
-    "dora_level": "unknown"
+    "deployment_frequency": "multiple per day",
+    "deploy_freq_per_week": 20.092378752886837,
+    "lead_time_minutes": 32.13973004694833,
+    "change_failure_rate_pct": 16.260162601626014,
+    "mttr_minutes": 581.0136904761905,
+    "mtbf_hours": 3.5502439024390267,
+    "dora_level": "high"
   },
-  "top_flaky": [],
-  "recent_builds": [],
-  "duration_trend": [],
-  "failure_breakdown": [],
+  "top_flaky": [
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build / sign",
+      "total_runs": 179,
+      "failures": 127,
+      "failure_rate": 70.94972067039106,
+      "flakiness_index": 0.33780274403496324,
+      "last_failure": "2026-04-02T18:40:12Z",
+      "top_fail_step": ""
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build / Create bluefin-gdx:stream10 Manifest",
+      "total_runs": 29,
+      "failures": 8,
+      "failure_rate": 27.586206896551722,
+      "flakiness_index": 0.3203997503120126,
+      "last_failure": "2026-04-02T14:51:47Z",
+      "top_fail_step": "Exit on failure"
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build-dx / sign",
+      "total_runs": 30,
+      "failures": 13,
+      "failure_rate": 43.333333333333336,
+      "flakiness_index": 0.2718553391857276,
+      "last_failure": "2026-04-02T14:52:16Z",
+      "top_fail_step": ""
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build-dx / Create bluefin-dx:stream10 Manifest",
+      "total_runs": 30,
+      "failures": 12,
+      "failure_rate": 40,
+      "flakiness_index": 0.25008874164629014,
+      "last_failure": "2026-04-02T14:51:46Z",
+      "top_fail_step": "Exit on failure"
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build-hwe / sign",
+      "total_runs": 30,
+      "failures": 14,
+      "failure_rate": 46.666666666666664,
+      "flakiness_index": 0.2414208434842341,
+      "last_failure": "2026-04-02T14:52:18Z",
+      "top_fail_step": ""
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build-dx-hwe / sign",
+      "total_runs": 30,
+      "failures": 14,
+      "failure_rate": 46.666666666666664,
+      "flakiness_index": 0.2414208434842341,
+      "last_failure": "2026-04-02T14:52:11Z",
+      "top_fail_step": ""
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build-dx / Build and push image (arm64)",
+      "total_runs": 29,
+      "failures": 11,
+      "failure_rate": 37.93103448275862,
+      "flakiness_index": 0.24000000000000002,
+      "last_failure": "2026-04-02T14:49:18Z",
+      "top_fail_step": "Build Image"
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build / Create bluefin:stream10 Manifest",
+      "total_runs": 90,
+      "failures": 15,
+      "failure_rate": 16.666666666666664,
+      "flakiness_index": 0.23597490035285254,
+      "last_failure": "2026-04-02T14:51:49Z",
+      "top_fail_step": "Exit on failure"
+    },
+    {
+      "repo": "bluefin-lts",
+      "job_name": "build-dx / Build and push image (amd64)",
+      "total_runs": 29,
+      "failures": 10,
+      "failure_rate": 34.48275862068966,
+      "flakiness_index": 0.23323807579381206,
+      "last_failure": "2026-04-02T14:49:17Z",
+      "top_fail_step": "Build Image"
+    },
+    {
+      "repo": "testhub",
+      "job_name": "build-complete",
+      "total_runs": 30,
+      "failures": 5,
+      "failure_rate": 16.666666666666664,
+      "flakiness_index": 0.23192020664125138,
+      "last_failure": "2026-03-29T20:40:13Z",
+      "top_fail_step": "Check build results"
+    }
+  ],
+  "recent_builds": [
+    {
+      "run_id": 23915686316,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin LTS HWE",
+      "branch": "renovate/cgr.dev-chainguard-wolfi-base-latest",
+      "event": "pull_request",
+      "conclusion": "success",
+      "duration_min": 11.95,
+      "started_at": "2026-04-02T18:28:15Z",
+      "html_url": "",
+      "job_count": 5,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23915686313,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin LTS",
+      "branch": "renovate/cgr.dev-chainguard-wolfi-base-latest",
+      "event": "pull_request",
+      "conclusion": "success",
+      "duration_min": 11.366666666666667,
+      "started_at": "2026-04-02T18:28:15Z",
+      "html_url": "",
+      "job_count": 5,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23915458245,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "renovate/homebrew-actions-digest",
+      "event": "pull_request",
+      "conclusion": "success",
+      "duration_min": 0.43333333333333335,
+      "started_at": "2026-04-02T18:22:34Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23915048344,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "renovate/docker-login-action-digest",
+      "event": "pull_request",
+      "conclusion": "success",
+      "duration_min": 0.31666666666666665,
+      "started_at": "2026-04-02T18:12:31Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23915027932,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 0.7833333333333333,
+      "started_at": "2026-04-02T18:12:00Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914974886,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "renovate/docker-login-action-digest",
+      "event": "pull_request",
+      "conclusion": "success",
+      "duration_min": 0.2833333333333333,
+      "started_at": "2026-04-02T18:10:39Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914973659,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "gh-readonly-queue/main/pr-244-ffcb7fc5a1e819626dd41827b8d21ad5490bf344",
+      "event": "merge_group",
+      "conclusion": "success",
+      "duration_min": 0.7833333333333333,
+      "started_at": "2026-04-02T18:10:37Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914963056,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 1.6833333333333333,
+      "started_at": "2026-04-02T18:10:22Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914950744,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 1.7333333333333334,
+      "started_at": "2026-04-02T18:10:04Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914906334,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "gh-readonly-queue/main/pr-252-0f735d963f5ffc9a700aaf448716ca13e2d000be",
+      "event": "merge_group",
+      "conclusion": "success",
+      "duration_min": 0.5666666666666667,
+      "started_at": "2026-04-02T18:08:57Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914884736,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "gh-readonly-queue/main/pr-251-27819d7d95458580adcde2a745265ece1746d210",
+      "event": "merge_group",
+      "conclusion": "success",
+      "duration_min": 1.6333333333333333,
+      "started_at": "2026-04-02T18:08:25Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914884515,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "gh-readonly-queue/main/pr-249-07a5e570ac9329998f905c1202a6d8f1f77807bb",
+      "event": "merge_group",
+      "conclusion": "success",
+      "duration_min": 0.6833333333333333,
+      "started_at": "2026-04-02T18:08:25Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914872679,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "gh-readonly-queue/main/pr-246-62ebfa39ca9b1d4bd61687359ea61cad17c4943f",
+      "event": "merge_group",
+      "conclusion": "success",
+      "duration_min": 1.55,
+      "started_at": "2026-04-02T18:08:06Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23914636813,
+      "repo": "common",
+      "workflow": "Build",
+      "branch": "main",
+      "event": "workflow_dispatch",
+      "conclusion": "success",
+      "duration_min": 1.7333333333333334,
+      "started_at": "2026-04-02T18:02:10Z",
+      "html_url": "",
+      "job_count": 1,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23911015032,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin LTS GDX",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 24.9,
+      "started_at": "2026-04-02T16:33:29Z",
+      "html_url": "",
+      "job_count": 5,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23911014978,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin GNOME 50 (testing)",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 22.166666666666668,
+      "started_at": "2026-04-02T16:33:29Z",
+      "html_url": "",
+      "job_count": 20,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23911015004,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin LTS HWE",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 18.166666666666668,
+      "started_at": "2026-04-02T16:33:29Z",
+      "html_url": "",
+      "job_count": 5,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23911014964,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin DX LTS HWE",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 19.316666666666666,
+      "started_at": "2026-04-02T16:33:29Z",
+      "html_url": "",
+      "job_count": 5,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23911014975,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin LTS",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 18.55,
+      "started_at": "2026-04-02T16:33:29Z",
+      "html_url": "",
+      "job_count": 5,
+      "failed_jobs": 0
+    },
+    {
+      "run_id": 23911015005,
+      "repo": "bluefin-lts",
+      "workflow": "Build Bluefin LTS DX",
+      "branch": "main",
+      "event": "push",
+      "conclusion": "success",
+      "duration_min": 18.666666666666668,
+      "started_at": "2026-04-02T16:33:29Z",
+      "html_url": "",
+      "job_count": 5,
+      "failed_jobs": 0
+    }
+  ],
+  "duration_trend": [
+    {
+      "date": "2026-03-19",
+      "p50": 4.666666666666667,
+      "p95": 103.86666666666666,
+      "p99": 103.86666666666666,
+      "avg": 28.694444444444443,
+      "min": 0.5166666666666667,
+      "max": 103.86666666666666
+    },
+    {
+      "date": "2026-03-20",
+      "p50": 4.516666666666667,
+      "p95": 5.35,
+      "p99": 5.35,
+      "avg": 4.488888888888889,
+      "min": 3.6,
+      "max": 5.35
+    },
+    {
+      "date": "2026-03-21",
+      "p50": 5,
+      "p95": 5,
+      "p99": 5,
+      "avg": 5,
+      "min": 5,
+      "max": 5
+    },
+    {
+      "date": "2026-03-22",
+      "p50": 4.7,
+      "p95": 28.85,
+      "p99": 28.85,
+      "avg": 16.775000000000002,
+      "min": 4.7,
+      "max": 28.85
+    },
+    {
+      "date": "2026-03-23",
+      "p50": 5.116666666666666,
+      "p95": 5.116666666666666,
+      "p99": 5.116666666666666,
+      "avg": 5.116666666666666,
+      "min": 5.116666666666666,
+      "max": 5.116666666666666
+    },
+    {
+      "date": "2026-03-24",
+      "p50": 2.0833333333333335,
+      "p95": 8.766666666666667,
+      "p99": 8.766666666666667,
+      "avg": 4.078571428571428,
+      "min": 1.9,
+      "max": 8.766666666666667
+    },
+    {
+      "date": "2026-03-25",
+      "p50": 5.35,
+      "p95": 5.35,
+      "p99": 5.35,
+      "avg": 5.35,
+      "min": 5.35,
+      "max": 5.35
+    },
+    {
+      "date": "2026-03-26",
+      "p50": 2.05,
+      "p95": 2.05,
+      "p99": 2.05,
+      "avg": 2.05,
+      "min": 2.05,
+      "max": 2.05
+    },
+    {
+      "date": "2026-03-27",
+      "p50": 9.283333333333333,
+      "p95": 13.883333333333333,
+      "p99": 13.883333333333333,
+      "avg": 10.145454545454543,
+      "min": 4.266666666666667,
+      "max": 13.883333333333333
+    },
+    {
+      "date": "2026-03-28",
+      "p50": 6.483333333333333,
+      "p95": 20.65,
+      "p99": 20.65,
+      "avg": 10.083333333333332,
+      "min": 3.9166666666666665,
+      "max": 20.65
+    },
+    {
+      "date": "2026-03-29",
+      "p50": 8.083333333333334,
+      "p95": 64.45,
+      "p99": 69.1,
+      "avg": 13.947685185185186,
+      "min": 0.15,
+      "max": 69.1
+    },
+    {
+      "date": "2026-03-30",
+      "p50": 24.966666666666665,
+      "p95": 35.25,
+      "p99": 35.43333333333333,
+      "avg": 21.23985507246377,
+      "min": 1.3666666666666667,
+      "max": 35.43333333333333
+    },
+    {
+      "date": "2026-03-31",
+      "p50": 26.85,
+      "p95": 37.11666666666667,
+      "p99": 37.233333333333334,
+      "avg": 25.940804597701156,
+      "min": 1.7666666666666666,
+      "max": 37.233333333333334
+    },
+    {
+      "date": "2026-04-01",
+      "p50": 17.683333333333334,
+      "p95": 34.016666666666666,
+      "p99": 55.65,
+      "avg": 18.829901960784316,
+      "min": 0.26666666666666666,
+      "max": 55.65
+    },
+    {
+      "date": "2026-04-02",
+      "p50": 12.383333333333333,
+      "p95": 31.516666666666666,
+      "p99": 34.63333333333333,
+      "avg": 12.902521929824555,
+      "min": 0.26666666666666666,
+      "max": 35.15
+    }
+  ],
+  "failure_breakdown": [
+    {
+      "category": "build",
+      "count": 37,
+      "pct": 59.67741935483871
+    },
+    {
+      "category": "cancelled",
+      "count": 20,
+      "pct": 32.25806451612903
+    },
+    {
+      "category": "infra",
+      "count": 3,
+      "pct": 4.838709677419355
+    },
+    {
+      "category": "sign",
+      "count": 1,
+      "pct": 1.6129032258064515
+    },
+    {
+      "category": "unknown",
+      "count": 1,
+      "pct": 1.6129032258064515
+    }
+  ],
   "trigger_breakdown": {
-    "scheduled": 0,
-    "push": 0,
-    "pull_request": 0,
-    "workflow_dispatch": 0,
-    "other": 0
+    "scheduled": 19,
+    "push": 83,
+    "pull_request": 121,
+    "workflow_dispatch": 21,
+    "other": 103
   },
-  "history": [],
-  "monthly_history": []
+  "history": [
+    {
+      "date": "2026-03-19",
+      "total_runs": 6,
+      "success_count": 4,
+      "failure_count": 0,
+      "cancelled_count": 2,
+      "avg_duration_min": 28.694444444444443,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "dakota": {
+          "runs": 5,
+          "successes": 3,
+          "failures": 0
+        },
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-20",
+      "total_runs": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "cancelled_count": 0,
+      "avg_duration_min": 4.488888888888889,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 3,
+          "successes": 3,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-21",
+      "total_runs": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "cancelled_count": 0,
+      "avg_duration_min": 5,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-22",
+      "total_runs": 2,
+      "success_count": 2,
+      "failure_count": 0,
+      "cancelled_count": 0,
+      "avg_duration_min": 16.775000000000002,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "testhub": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-23",
+      "total_runs": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "cancelled_count": 0,
+      "avg_duration_min": 5.116666666666666,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-24",
+      "total_runs": 7,
+      "success_count": 7,
+      "failure_count": 0,
+      "cancelled_count": 0,
+      "avg_duration_min": 4.078571428571428,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "testhub": {
+          "runs": 6,
+          "successes": 6,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-25",
+      "total_runs": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "cancelled_count": 0,
+      "avg_duration_min": 5.35,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-26",
+      "total_runs": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "cancelled_count": 0,
+      "avg_duration_min": 2.05,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-27",
+      "total_runs": 11,
+      "success_count": 10,
+      "failure_count": 1,
+      "cancelled_count": 0,
+      "avg_duration_min": 10.145454545454543,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "testhub": {
+          "runs": 10,
+          "successes": 9,
+          "failures": 1
+        }
+      }
+    },
+    {
+      "date": "2026-03-28",
+      "total_runs": 5,
+      "success_count": 3,
+      "failure_count": 2,
+      "cancelled_count": 0,
+      "avg_duration_min": 10.083333333333332,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "bluefin-lts": {
+          "runs": 4,
+          "successes": 2,
+          "failures": 2
+        },
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-29",
+      "total_runs": 36,
+      "success_count": 17,
+      "failure_count": 11,
+      "cancelled_count": 8,
+      "avg_duration_min": 13.947685185185186,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "bluefin": {
+          "runs": 2,
+          "successes": 0,
+          "failures": 2
+        },
+        "bluefin-lts": {
+          "runs": 10,
+          "successes": 4,
+          "failures": 2
+        },
+        "dakota": {
+          "runs": 10,
+          "successes": 3,
+          "failures": 4
+        },
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "testhub": {
+          "runs": 13,
+          "successes": 9,
+          "failures": 3
+        }
+      }
+    },
+    {
+      "date": "2026-03-30",
+      "total_runs": 23,
+      "success_count": 16,
+      "failure_count": 6,
+      "cancelled_count": 1,
+      "avg_duration_min": 21.23985507246377,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "bluefin": {
+          "runs": 17,
+          "successes": 12,
+          "failures": 5
+        },
+        "bluefin-lts": {
+          "runs": 3,
+          "successes": 1,
+          "failures": 1
+        },
+        "dakota": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "iso": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-03-31",
+      "total_runs": 29,
+      "success_count": 23,
+      "failure_count": 3,
+      "cancelled_count": 3,
+      "avg_duration_min": 25.940804597701156,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 0,
+      "repo_breakdown": {
+        "bluefin": {
+          "runs": 21,
+          "successes": 18,
+          "failures": 3
+        },
+        "bluefin-lts": {
+          "runs": 7,
+          "successes": 4,
+          "failures": 0
+        },
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "date": "2026-04-01",
+      "total_runs": 68,
+      "success_count": 64,
+      "failure_count": 4,
+      "cancelled_count": 0,
+      "avg_duration_min": 18.829901960784316,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 805.1470588235294,
+      "repo_breakdown": {
+        "bluefin": {
+          "runs": 12,
+          "successes": 10,
+          "failures": 2
+        },
+        "bluefin-lts": {
+          "runs": 49,
+          "successes": 49,
+          "failures": 0
+        },
+        "common": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "dakota": {
+          "runs": 2,
+          "successes": 2,
+          "failures": 0
+        },
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        },
+        "iso": {
+          "runs": 3,
+          "successes": 1,
+          "failures": 2
+        }
+      }
+    },
+    {
+      "date": "2026-04-02",
+      "total_runs": 153,
+      "success_count": 131,
+      "failure_count": 15,
+      "cancelled_count": 7,
+      "avg_duration_min": 12.818191721132893,
+      "p95_duration_min": 0,
+      "avg_queue_time_sec": 1674.18954248366,
+      "repo_breakdown": {
+        "bluefin": {
+          "runs": 16,
+          "successes": 16,
+          "failures": 0
+        },
+        "bluefin-lts": {
+          "runs": 107,
+          "successes": 90,
+          "failures": 11
+        },
+        "common": {
+          "runs": 29,
+          "successes": 24,
+          "failures": 4
+        },
+        "finpilot": {
+          "runs": 1,
+          "successes": 1,
+          "failures": 0
+        }
+      }
+    }
+  ],
+  "monthly_history": [
+    {
+      "month": "2026-03",
+      "total_runs": 126,
+      "success_count": 89,
+      "failure_count": 23,
+      "cancelled_count": 14,
+      "success_rate": 79.46428571428571,
+      "avg_duration_min": 17.223677248677248,
+      "p95_duration_min": 37.11666666666667,
+      "repo_success_rate": {
+        "bluefin": 75,
+        "bluefin-lts": 45.833333333333336,
+        "dakota": 43.75,
+        "finpilot": 100,
+        "iso": 100,
+        "testhub": 83.33333333333333
+      },
+      "dora_level": "low"
+    }
+  ]
 }
