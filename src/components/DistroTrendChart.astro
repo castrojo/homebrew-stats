@@ -63,7 +63,10 @@ document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEac
     return monthly.filter((r: { week_end: string }) => r.week_end >= cutoffStr);
   }
 
-  let currentRange = '30';
+  const rangeContainerId = `${distroKey}-range-btns`;
+  const activeBtn = document.getElementById(rangeContainerId)
+    ?.querySelector<HTMLButtonElement>('.range-btn.active');
+  let currentRange = activeBtn?.dataset.range ?? '30';
   let filtered = getFiltered(currentRange);
   const c = getChartColors();
   const color = BRAND_COLOURS[colorIndex % BRAND_COLOURS.length];
