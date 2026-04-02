@@ -17,6 +17,7 @@ import (
 	"github.com/castrojo/homebrew-stats/internal/metrics"
 	"github.com/castrojo/homebrew-stats/internal/osanalytics"
 	"github.com/castrojo/homebrew-stats/internal/scorecard"
+	"github.com/castrojo/homebrew-stats/internal/supplychain"
 	"github.com/castrojo/homebrew-stats/internal/tap"
 	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
 	"github.com/castrojo/homebrew-stats/internal/testhub"
@@ -89,9 +90,14 @@ func main() {
 			fmt.Fprintln(os.Stderr, "❌ fetch-scorecard:", err)
 			os.Exit(1)
 		}
+	case "fetch-supply-chain":
+		if err := runFetchSupplyChain(); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-supply-chain:", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite|fetch-builds-universal-blue|fetch-builds-ucore|fetch-builds-zirconium|fetch-builds-bootcrew|fetch-scorecard]")
+		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite|fetch-builds-universal-blue|fetch-builds-ucore|fetch-builds-zirconium|fetch-builds-bootcrew|fetch-scorecard|fetch-supply-chain]")
 		os.Exit(1)
 	}
 }
@@ -263,7 +269,7 @@ func runFetchTesthub() error {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  testhub packages: %v\n", err)
 		if strings.Contains(err.Error(), "read:packages") {
-			fmt.Fprintln(os.Stderr, "  hint: configure GH_TRAFFIC_TOKEN with read:packages scope for fetch-testhub")
+			fmt.Fprintln(os.Stderr, "  hint: ensure packages: read is declared in the workflow permissions block")
 		}
 		pkgs = nil
 	} else {
@@ -1319,7 +1325,12 @@ func runFetchScorecard() error {
 		"ublue-os/bluefin-lts",
 		"ublue-os/aurora",
 		"ublue-os/bazzite",
+		"ublue-os/main",
+		"ublue-os/akmods",
+		"ublue-os/ucore",
 		"projectbluefin/common",
+		// Intentionally skipping zirconium-dev/zirconium and bootcrew/mono for now:
+		// both currently return 404 from the OpenSSF Scorecard API and are likely not indexed yet.
 	}
 	out, err := scorecard.FetchAll(repos)
 	if err != nil {
@@ -1336,5 +1347,21 @@ func runFetchScorecard() error {
 			fmt.Fprintf(os.Stderr, "  %s: not indexed\n", r.Repo)
 		}
 	}
+	return nil
+}
+
+// ── fetch-supply-chain ───────────────────────────────────────────────────────
+
+func runFetchSupplyChain() error {
+	out := make(map[string]builds.ImageSupplyChainInfo, len(supplychain.SupplyChainCheckRefs))
+	for name, ref := range supplychain.SupplyChainCheckRefs {
+		fmt.Fprintf(os.Stderr, "→ Inspecting %s (%s)…\n", name, ref)
+		out[name] = supplychain.DetectSupplyChain(ref)
+	}
+
+	if err := writeJSON("src/data/supply-chain.json", out); err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/supply-chain.json")
 	return nil
 }

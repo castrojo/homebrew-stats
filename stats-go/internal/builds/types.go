@@ -41,6 +41,15 @@ type StepRecord struct {
 	DurationSec int    `json:"duration_sec"`
 }
 
+// ImageSupplyChainInfo holds OCI registry-derived supply chain facts per image.
+// Uses *bool (tri-state): true=detected, false=checked & absent, nil=unknown/registry error.
+type ImageSupplyChainInfo struct {
+	ZstdChunked    *bool `json:"zstd_chunked"`
+	ChunkaDetected *bool `json:"chunka_detected"` // org.chunkah.component on any layer
+	LegacyRechunk  *bool `json:"legacy_rechunk"`  // dev.hhd.rechunk.info manifest annotation
+	SLSAProvenance *bool `json:"slsa_provenance"` // OCI referrer with SLSA artifactType
+}
+
 // MonthlySnapshot holds aggregated monthly history for trend charts.
 type MonthlySnapshot struct {
 	Month           string             `json:"month"` // "2025-01"
