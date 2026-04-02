@@ -108,7 +108,6 @@ document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEac
     console.error(`[DistroTrendChart:${distroKey}] Chart.js init failed:`, e);
   }
 
-  const rangeContainerId = `${distroKey}-range-btns`;
   document.getElementById(rangeContainerId)?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!chart) return;
