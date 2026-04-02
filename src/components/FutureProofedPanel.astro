@@ -4,7 +4,8 @@ interface ImageProof {
   signing: boolean | null;   // null = unknown/no data
   sbom: boolean | null;
   zstdChunked: boolean | null;  // null = no data yet
-  chunka: boolean | null;       // null = no data yet
+  chunka: 'chunkah' | 'legacy' | null; // null = no data yet
+  slsa: boolean | null; // null = no data yet
 }
 
 interface Props {
@@ -36,7 +37,7 @@ function statusColor(value: boolean | null): string {
   <p class="fp-note">
     These checks measure OCI image build best practices adopted across the bootc ecosystem.
     Signing and SBOM rates are computed from CI workflow step detection over the last 30 days.
-    zstd:chunked and chunked (chunka) tracking is not yet implemented.
+    zstd:chunked, chunking mode, and SLSA provenance are sourced from OCI image supply-chain snapshots.
   </p>
   <div class="fp-table-wrapper">
     <table class="fp-table">
@@ -47,6 +48,7 @@ function statusColor(value: boolean | null): string {
           <th class="col-check">SBOM</th>
           <th class="col-check">zstd:chunked</th>
           <th class="col-check">chunked (chunka)</th>
+          <th class="col-check">SLSA</th>
         </tr>
       </thead>
       <tbody>
@@ -65,9 +67,15 @@ function statusColor(value: boolean | null): string {
               <span class="check-icon">{statusIcon(img.zstdChunked)}</span>
               <span class="check-label">{statusLabel(img.zstdChunked)}</span>
             </td>
-            <td class="cell-check" style={`color:${statusColor(img.chunka)}`}>
-              <span class="check-icon">{statusIcon(img.chunka)}</span>
-              <span class="check-label">{statusLabel(img.chunka)}</span>
+            <td class="cell-check">
+              {img.chunka === 'chunkah' && <span class="status-green" title="chunkah (coreos)">✅</span>}
+              {img.chunka === 'legacy'  && <span class="status-yellow" title="legacy-rechunk (ublue-os)">⚠️</span>}
+              {img.chunka === null      && <span class="status-unknown" title="not tracked">—</span>}
+            </td>
+            <td class="cell-check">
+              {img.slsa === true  && <span class="status-green" title="SLSA Build L3 provenance">✅</span>}
+              {img.slsa === false && <span class="status-red" title="No SLSA provenance detected">❌</span>}
+              {img.slsa === null  && <span class="status-unknown" title="not tracked">—</span>}
             </td>
           </tr>
         ))}
@@ -153,6 +161,11 @@ function statusColor(value: boolean | null): string {
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
+
+  .status-green { color: var(--green); }
+  .status-yellow { color: var(--yellow); }
+  .status-red { color: var(--red); }
+  .status-unknown { color: var(--muted); }
 
   @media (max-width: 600px) {
     .fp-table th,
