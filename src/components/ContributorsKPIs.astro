@@ -104,13 +104,14 @@ const kpiData = {
 <script type="application/json" id="contributors-kpi-data" set:html={safeJson(kpiData)}></script>
 
 <script>
-  const raw = document.getElementById('contributors-kpi-data')?.textContent ?? '{}';
-  const kpiData = JSON.parse(raw) as {
+  import { readChartData } from '../lib/inject.js';
+
+  const kpiData = readChartData<{
     active_contributors: Record<string, number>;
     total_commits: Record<string, number>;
     total_prs_merged: Record<string, number>;
     bus_factor: Record<string, number>;
-  };
+  }>('contributors-kpi-data');
 
   const elActiveContributors = document.getElementById('kpi-active-contributors');
   const elActiveContributorsSub = document.getElementById('kpi-active-contributors-sub');

@@ -44,11 +44,17 @@ const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
 <script>
 import '../lib/chart-registry.js';
 import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 // Astro deduplicates this script — handle all instances via querySelectorAll.
 document.querySelectorAll<HTMLScriptElement>('script[data-distro-chart]').forEach(dataEl => {
-  const parsed = JSON.parse(dataEl.textContent ?? 'null');
+  const parsed = readChartData<{
+    monthly: Array<{ week_end: string; distros: Record<string, number> }>;
+    distroKey: string;
+    distroLabel: string;
+    colorIndex: number;
+  }>(dataEl.id);
   if (!parsed) return;
   const { monthly, distroKey, distroLabel, colorIndex } = parsed;
   const canvas = document.getElementById(`${distroKey}-trend-chart`) as HTMLCanvasElement | null;

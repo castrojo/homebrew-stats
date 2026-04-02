@@ -23,7 +23,7 @@ const LABELS  = distroSpecs.map(d => d.label);
 ---
 
 {!currentWeek ? (
-  <p class="chart-empty">Collecting data…</p>
+  <p class="chart-empty">No data available</p>
 ) : (
   <>
     <div class="chart-card">
@@ -54,79 +54,83 @@ import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('ecosystem-pie-data');
-if (!dataEl) throw new Error('ecosystem-pie-data not found');
+if (dataEl) {
+  const { currentWeek, DISTROS, LABELS } = readChartData<{
+    currentWeek: { distros: Record<string, number>; total: number } | null;
+    DISTROS: string[];
+    LABELS: string[];
+  }>('ecosystem-pie-data');
 
-const { currentWeek, DISTROS, LABELS } = readChartData<{
-  currentWeek: { distros: Record<string, number>; total: number };
-  DISTROS: string[];
-  LABELS: string[];
-}>('ecosystem-pie-data');
+  if (currentWeek) {
+    const canvas = document.getElementById('ecosystem-pie-chart') as HTMLCanvasElement;
+    const total = currentWeek.total;
+    const data = DISTROS.map((d: string) => currentWeek.distros[d] ?? 0);
+    const colours = [...BRAND_COLOURS].slice(0, DISTROS.length);
 
-const canvas = document.getElementById('ecosystem-pie-chart') as HTMLCanvasElement;
-const total = currentWeek.total;
-const data = DISTROS.map((d: string) => currentWeek.distros[d] ?? 0);
-const colours = [...BRAND_COLOURS].slice(0, DISTROS.length);
+    // Center label drawn directly on the canvas — shows total count.
+    const centerLabelPlugin = {
+      id: 'centerLabel',
+      afterDraw(chart: Chart) {
+        const { ctx, chartArea } = chart;
+        const cx = (chartArea.left + chartArea.right) / 2;
+        const cy = (chartArea.top + chartArea.bottom) / 2;
+        const c = getChartColors();
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = c.text || '#e6edf3';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(total >= 1000 ? `${(total / 1000).toFixed(0)}k` : String(total), cx, cy - 8);
+        ctx.fillStyle = c.muted || '#7d8590';
+        ctx.font = '11px sans-serif';
+        ctx.fillText('active devices', cx, cy + 12);
+        ctx.restore();
+      },
+    };
 
-// Center label drawn directly on the canvas — shows total count.
-const centerLabelPlugin = {
-  id: 'centerLabel',
-  afterDraw(chart: Chart) {
-    const { ctx, chartArea } = chart;
-    const cx = (chartArea.left + chartArea.right) / 2;
-    const cy = (chartArea.top + chartArea.bottom) / 2;
-    const c = getChartColors();
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = c.text || '#e6edf3';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText(total >= 1000 ? `${(total / 1000).toFixed(0)}k` : String(total), cx, cy - 8);
-    ctx.fillStyle = c.muted || '#7d8590';
-    ctx.font = '11px sans-serif';
-    ctx.fillText('active devices', cx, cy + 12);
-    ctx.restore();
-  },
-};
-
-let chart: Chart | undefined;
-try {
-  chart = new Chart(canvas, {
-    type: 'doughnut',
-    data: {
-      labels: LABELS,
-      datasets: [{
-        data,
-        backgroundColor: colours,
-        borderColor: getChartColors().grid || '#161b22',
-        borderWidth: 2,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '65%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx: { label: string; raw: unknown }) =>
-              ` ${ctx.label}: ${(ctx.raw as number).toLocaleString()}`,
+    let chart: Chart | undefined;
+    try {
+      chart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: LABELS,
+          datasets: [{
+            data,
+            backgroundColor: colours,
+            borderColor: getChartColors().grid || '#161b22',
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx: { label: string; raw: unknown }) =>
+                  ` ${ctx.label}: ${(ctx.raw as number).toLocaleString()}`,
+              },
+            },
           },
         },
-      },
-    },
-    plugins: [centerLabelPlugin],
-  });
-} catch (e) {
-  console.error('[EcosystemPieChart] Chart.js init failed:', e);
-}
+        plugins: [centerLabelPlugin],
+      });
+    } catch (e) {
+      console.error('[EcosystemPieChart] Chart.js init failed:', e);
+    }
 
-window.addEventListener('themechange', () => {
-  if (!chart) return;
-  const colors = getChartColors();
-  (chart.data.datasets[0] as { borderColor: string }).borderColor = colors.grid || '#161b22';
-  chart.update();
-});
+    window.addEventListener('themechange', () => {
+      if (!chart) return;
+      const colors = getChartColors();
+      (chart.data.datasets[0] as { borderColor: string }).borderColor = colors.grid || '#161b22';
+      chart.update();
+    });
+  }
+} else {
+  // Valid empty-state path when no data script is rendered.
+}
 </script>
 
 <style>

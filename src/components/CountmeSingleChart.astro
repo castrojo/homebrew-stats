@@ -43,6 +43,7 @@ const hasData = weekRecords.some(r => (r.distros?.[distroKey] ?? 0) > 0);
 <script>
 import '../lib/chart-registry.js';
 import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 // Find our data script by matching the canvas id pattern.
@@ -51,7 +52,11 @@ document.querySelectorAll<HTMLScriptElement>('script[id$="-data"][type="applicat
   const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
   if (!canvas) return;
 
-  const parsed = JSON.parse(el.textContent ?? 'null');
+  const parsed = readChartData<{
+    weekRecords: Array<{ week_end: string; distros: Record<string, number> }>;
+    distroKey: string;
+    label: string;
+  }>(el.id);
   if (!parsed) return;
   const { weekRecords, distroKey, label } = parsed;
 

@@ -38,105 +38,108 @@ const displayNames: Record<string, string> = {
   import { Chart } from 'chart.js';
 
   const dataEl = document.getElementById('comparison-data');
-  if (!dataEl) throw new Error('comparison-data not found');
+  if (!dataEl) {
+    // Valid empty-state path when downloads history has fewer than 2 points.
+  } else {
 
-  const { relevant: allRelevant, tapNames, displayNames } = readChartData<{
-    relevant: { date: string; taps: Record<string, { downloads?: Record<string, number> }> }[];
-    tapNames: string[];
-    displayNames: Record<string, string>;
-  }>('comparison-data');
+    const { relevant: allRelevant, tapNames, displayNames } = readChartData<{
+      relevant: { date: string; taps: Record<string, { downloads?: Record<string, number> }> }[];
+      tapNames: string[];
+      displayNames: Record<string, string>;
+    }>('comparison-data');
 
-  function getTapTotal(snapshot: (typeof allRelevant)[number], tapName: string) {
-    const downloads = snapshot.taps[tapName]?.downloads ?? {};
-    return Object.values(downloads).reduce((s, n) => s + n, 0);
-  }
+    function getTapTotal(snapshot: (typeof allRelevant)[number], tapName: string) {
+      const downloads = snapshot.taps[tapName]?.downloads ?? {};
+      return Object.values(downloads).reduce((s, n) => s + n, 0);
+    }
 
-  function buildDatasets(data: typeof allRelevant) {
-    return tapNames.map((name, i) => ({
-      label: displayNames[name] ?? name,
-      data: data.map(d => getTapTotal(d, name)),
-      borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
-      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length] + '22',
-      fill: false,
-      tension: 0.3,
-      pointRadius: data.length < 15 ? 4 : 2,
-      spanGaps: true,
-    }));
-  }
+    function buildDatasets(data: typeof allRelevant) {
+      return tapNames.map((name, i) => ({
+        label: displayNames[name] ?? name,
+        data: data.map(d => getTapTotal(d, name)),
+        borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+        backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length] + '22',
+        fill: false,
+        tension: 0.3,
+        pointRadius: data.length < 15 ? 4 : 2,
+        spanGaps: true,
+      }));
+    }
 
-  function getWindow(range: string) {
-    if (range === '30') return allRelevant.slice(-30);
-    if (range === '90') return allRelevant.slice(-90);
-    if (range === '365') return allRelevant.slice(-365);
-    return allRelevant;
-  }
+    function getWindow(range: string) {
+      if (range === '30') return allRelevant.slice(-30);
+      if (range === '90') return allRelevant.slice(-90);
+      if (range === '365') return allRelevant.slice(-365);
+      return allRelevant;
+    }
 
-  let current = getWindow('30');
-  const colors = getChartColors();
+    let current = getWindow('30');
+    const colors = getChartColors();
 
-  let chart: Chart | undefined;
-  try {
-    chart = new Chart(document.getElementById('tap-comparison-chart') as HTMLCanvasElement, {
-      type: 'line',
-      data: {
-        labels: current.map(d => d.date),
-        datasets: buildDatasets(current),
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            labels: { color: colors.text, font: { size: 12 } },
+    let chart: Chart | undefined;
+    try {
+      chart = new Chart(document.getElementById('tap-comparison-chart') as HTMLCanvasElement, {
+        type: 'line',
+        data: {
+          labels: current.map(d => d.date),
+          datasets: buildDatasets(current),
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              labels: { color: colors.text, font: { size: 12 } },
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} downloads (30d window)`,
+              },
+            },
           },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} downloads (30d window)`,
+          scales: {
+            x: {
+              ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
+              grid: { color: colors.grid },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: colors.muted,
+                font: { size: 11 },
+                callback: v => Number(v).toLocaleString(),
+              },
+              grid: { color: colors.grid },
+              title: {
+                display: true,
+                text: 'Downloads (30d window)',
+                color: colors.muted,
+                font: { size: 11 },
+              },
             },
           },
         },
-        scales: {
-          x: {
-            ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
-            grid: { color: colors.grid },
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              color: colors.muted,
-              font: { size: 11 },
-              callback: v => Number(v).toLocaleString(),
-            },
-            grid: { color: colors.grid },
-            title: {
-              display: true,
-              text: 'Downloads (30d window)',
-              color: colors.muted,
-              font: { size: 11 },
-            },
-          },
-        },
-      },
+      });
+    } catch (e) {
+      console.error('[TapComparisonChart] Chart.js init failed:', e);
+    }
+
+    document.querySelectorAll('#comparison-range-btns .range-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!chart) return;
+        document.querySelectorAll('#comparison-range-btns .range-btn').forEach(b => b.classList.remove('active'));
+        (btn as HTMLElement).classList.add('active');
+        const data = getWindow((btn as HTMLElement).dataset.range!);
+        chart.data.labels = data.map(d => d.date);
+        chart.data.datasets = buildDatasets(data);
+        chart.update();
+      });
     });
-  } catch (e) {
-    console.error('[TapComparisonChart] Chart.js init failed:', e);
-  }
 
-  document.querySelectorAll('#comparison-range-btns .range-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    window.addEventListener('themechange', () => {
       if (!chart) return;
-      document.querySelectorAll('#comparison-range-btns .range-btn').forEach(b => b.classList.remove('active'));
-      (btn as HTMLElement).classList.add('active');
-      const data = getWindow((btn as HTMLElement).dataset.range!);
-      chart.data.labels = data.map(d => d.date);
-      chart.data.datasets = buildDatasets(data);
-      chart.update();
+      applyTheme(chart);
     });
-  });
-
-  window.addEventListener('themechange', () => {
-    if (!chart) return;
-    applyTheme(chart);
-  });
+  }
 </script>

@@ -40,6 +40,7 @@ const shouldRender = data.length >= 2;
 
 <script>
 import '../lib/chart-registry.js';
+import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 // Astro deduplicates this script block — it runs once, handles all instances
@@ -49,12 +50,7 @@ document.querySelectorAll<HTMLCanvasElement>('[data-sparkline-id]').forEach(canv
   const dataEl = document.getElementById(`sparkline-data-${id}`);
   if (!dataEl) return;
 
-  let values: number[];
-  try {
-    values = JSON.parse(dataEl.textContent ?? '[]') as number[];
-  } catch {
-    return;
-  }
+  const values = readChartData<number[]>(dataEl.id);
 
   if (values.length < 2) return;
 
