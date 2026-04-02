@@ -121,22 +121,21 @@ that outlasts the GitHub API's 14-day rolling window.
 
 ## Token requirement
 
-The GitHub clone-traffic API requires push access. Two tokens are used:
+Only `GITHUB_TOKEN` is required, and it is automatically provided by GitHub Actions.
 
 | Token | Scope | Purpose |
 |---|---|---|
-| `GH_TRAFFIC_TOKEN` (repo secret) | `repo` (push access to `ublue-os/*`) | Clone traffic data |
-| `GITHUB_TOKEN` (automatic) | public repos | Package file contents, releases, downloads |
+| `GITHUB_TOKEN` (automatic) | repository-scoped | GitHub API access for traffic, package contents, releases, and downloads |
 
-If `GH_TRAFFIC_TOKEN` is absent, the workflow falls back to `GITHUB_TOKEN`. Traffic
-data will be unavailable (dashboard degrades gracefully — package data still shown).
-
-For local development, export either token:
+For local development, use your authenticated GitHub CLI token:
 
 ```bash
-export GITHUB_TOKEN=ghp_...
+export GITHUB_TOKEN=$(gh auth token)
 just sync
 ```
+
+> **Note:** Clone traffic for `ublue-os/*` taps may be unavailable in some contexts.
+> The sync handles this gracefully and continues with remaining data.
 
 ## Adding a new tap
 

@@ -72,9 +72,7 @@ jobs:
           fi
 
       - name: Lint GitHub Actions workflows
-        run: |
-          go install github.com/rhysd/actionlint/cmd/actionlint@latest
-          actionlint
+        uses: raven-actions/actionlint@v2
 
       - name: Build stats binary
         run: cd stats-go && go build -o stats ./cmd/stats/
@@ -83,7 +81,7 @@ jobs:
         id: sync-homebrew
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-homebrew
 
       - name: Restore stats fallback if homebrew sync failed
@@ -102,14 +100,14 @@ jobs:
         id: sync-testhub
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-testhub
 
       - name: Fetch countme active-user stats
         id: sync-countme
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-countme
 
       - name: Fetch build pipeline metrics (Bluefin)
@@ -162,6 +160,8 @@ jobs:
         timeout-minutes: 8
 
       - name: Fetch Scorecard data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-scorecard
         continue-on-error: true
 
@@ -318,7 +318,16 @@ jobs:
             echo "⚠️  contributors.json missing — contributor-sync.yml has not run yet"
           fi
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: playwright-chromium-${{ runner.os }}-
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright E2E chart tests

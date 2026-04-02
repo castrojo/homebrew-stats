@@ -139,7 +139,7 @@ jobs:
         id: sync-github
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TRAFFIC_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-contributors
 
       - name: Fallback on sync failure
