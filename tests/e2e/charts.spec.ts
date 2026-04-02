@@ -124,13 +124,18 @@ test.describe('Overall tab', () => {
     const monthly = data.monthly as Array<Record<string, unknown>>;
     expect(Array.isArray(monthly), 'countme-trend-data.monthly must be an array').toBe(true);
 
-    // REGRESSION GUARD: distros must use lowercase keys (bazzite vs Bazzite case bug)
-    // We check that the key exists even if the value is zero/undefined (structure check)
+    // REGRESSION GUARD: all present distro keys must be lowercase and in the allowed set.
     const week = monthly[0];
     if (week) {
       const distros = week.distros as Record<string, number>;
       expect(distros, 'week.distros must exist').toBeDefined();
-      expect(Object.keys(distros)).toContain('bazzite');
+      const allowedDistroKeys = ['bazzite', 'bluefin', 'bluefin-lts', 'aurora', 'secureblue'];
+      for (const key of Object.keys(distros)) {
+        expect(allowedDistroKeys, `distro key "${key}" must be lowercase and in allowed set`).toContain(key);
+      }
+      expect(Object.keys(distros)).not.toContain('Bazzite');
+      expect(Object.keys(distros)).not.toContain('Bluefin');
+      expect(Object.keys(distros)).not.toContain('Aurora');
     }
   });
 
@@ -219,6 +224,58 @@ test.describe('No empty charts contract', () => {
     if (isCollecting) return;
     await assertNoEmptyCharts(page, '/homebrew-stats/builds/');
   });
+});
+
+// ─── New image tabs smoke coverage ────────────────────────────────────────────
+
+test.describe('New image tab smoke coverage', () => {
+  for (const pageConfig of [
+    {
+      name: 'universal-blue',
+      url: '/homebrew-stats/universal-blue/',
+      heading: 'ublue-os Build Pipeline',
+      isBuildPage: true,
+    },
+    {
+      name: 'ucore',
+      url: '/homebrew-stats/ucore/',
+      heading: 'uCore Build Pipeline',
+      isBuildPage: true,
+    },
+    {
+      name: 'zirconium',
+      url: '/homebrew-stats/zirconium/',
+      heading: 'Zirconium Build Pipeline',
+      isBuildPage: true,
+    },
+    {
+      name: 'bootcrew',
+      url: '/homebrew-stats/bootcrew/',
+      heading: 'bootcrew Build Pipeline',
+      isBuildPage: true,
+    },
+    {
+      name: 'secureblue',
+      url: '/homebrew-stats/secureblue/',
+      heading: 'secureblue',
+      isBuildPage: false,
+    },
+  ]) {
+    test(`${pageConfig.name} page returns 200 and key content is visible`, async ({ page }) => {
+      const response = await page.goto(pageConfig.url);
+      expect(response?.status(), `${pageConfig.url} must return HTTP 200`).toBe(200);
+      await expect(page.locator('h1')).toContainText(pageConfig.heading);
+
+      if (pageConfig.isBuildPage) {
+        const html = await page.content();
+        const hasCollecting = html.includes('class="collecting"') || html.includes("class='collecting'") || html.includes('Collecting build data');
+        const hasDashboard = html.includes('kpi-strip') || html.includes('kpi-card') || html.includes('dora-panel') || html.includes('Pipeline Status');
+        expect(hasCollecting || hasDashboard, `${pageConfig.name} page must show collecting state or dashboard`).toBe(true);
+      } else {
+        await expect(page.locator('canvas#secureblue-trend')).toBeAttached();
+      }
+    });
+  }
 });
 
 // ─── IssueButton ─────────────────────────────────────────────────────────────
