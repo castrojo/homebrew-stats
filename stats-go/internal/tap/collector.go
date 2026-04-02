@@ -69,7 +69,7 @@ var (
 
 // Collect fetches traffic and package data for the given owner/repo tap.
 // brewInstalls maps full cask tokens (e.g. "ublue-os/tap/pkg-name") to install counts.
-func Collect(owner, repo string, client *ghclient.Client, brewInstalls map[string]tapanalytics.PkgInstalls) (*TapStats, error) {
+func Collect(owner, repo string, brewInstalls map[string]tapanalytics.PkgInstalls) (*TapStats, error) {
 	name := owner + "/" + repo
 	ts := &TapStats{
 		Name:      name,
@@ -78,7 +78,7 @@ func Collect(owner, repo string, client *ghclient.Client, brewInstalls map[strin
 	}
 
 	// Traffic.
-	count, uniques, err := client.GetTrafficClones(owner, repo)
+	count, uniques, err := ghclient.GetTrafficClones(owner, repo)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  Traffic for %s: %v\n", name, err)
 	} else {
@@ -95,14 +95,14 @@ func Collect(owner, repo string, client *ghclient.Client, brewInstalls map[strin
 	}
 
 	for _, d := range dirs {
-		files, err := client.ListDirectory(owner, repo, d.path)
+		files, err := ghclient.ListDirectory(owner, repo, d.path)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "⚠️  Listing %s/%s: %v\n", name, d.path, err)
 			continue
 		}
 		for _, filename := range files {
 			pkgName := strings.TrimSuffix(filename, ".rb")
-			content, err := client.GetFileContent(owner, repo, d.path+"/"+filename)
+			content, err := ghclient.GetFileContent(owner, repo, d.path+"/"+filename)
 			if err != nil {
 				ts.Packages = append(ts.Packages, Package{Name: pkgName, Type: d.pkgType})
 				continue
@@ -124,7 +124,7 @@ func Collect(owner, repo string, client *ghclient.Client, brewInstalls map[strin
 
 		// Freshness: requires an upstream source and a pinned version.
 		if p.SourceOwner != "" && p.SourceRepo != "" && p.Version != "" {
-			latest, err := client.GetLatestReleaseTag(p.SourceOwner, p.SourceRepo)
+			latest, err := ghclient.GetLatestReleaseTag(p.SourceOwner, p.SourceRepo)
 			if err == nil && latest != "" {
 				p.LatestVersion = normaliseVersion(latest)
 				p.FreshnessKnown = true

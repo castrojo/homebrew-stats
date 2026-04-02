@@ -12,7 +12,6 @@ import (
 	"github.com/castrojo/homebrew-stats/internal/builds"
 	"github.com/castrojo/homebrew-stats/internal/contributors"
 	"github.com/castrojo/homebrew-stats/internal/countme"
-	ghclient "github.com/castrojo/homebrew-stats/internal/github"
 	"github.com/castrojo/homebrew-stats/internal/history"
 	"github.com/castrojo/homebrew-stats/internal/metrics"
 	"github.com/castrojo/homebrew-stats/internal/osanalytics"
@@ -121,11 +120,6 @@ var taps = []struct{ owner, repo string }{
 }
 
 func runFetchHomebrew() error {
-	client, err := ghclient.NewClient()
-	if err != nil {
-		return err
-	}
-
 	hist, err := history.LoadWithBootstrap("src/data/stats.json")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  Could not load history: %v\n", err)
@@ -145,7 +139,7 @@ func runFetchHomebrew() error {
 	todayTaps := make(map[string]history.TapSnapshot)
 	for _, t := range taps {
 		fmt.Fprintf(os.Stderr, "→ Collecting %s/%s…\n", t.owner, t.repo)
-		ts, err := tap.Collect(t.owner, t.repo, client, brewInstalls)
+		ts, err := tap.Collect(t.owner, t.repo, brewInstalls)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "⚠️  %s/%s: %v\n", t.owner, t.repo, err)
 			continue
@@ -247,11 +241,6 @@ func shouldAppendTesthubSnapshot(lastRunID, newLastRunID int64, counts []testhub
 }
 
 func runFetchTesthub() error {
-	client, err := ghclient.NewClient()
-	if err != nil {
-		return err
-	}
-
 	store, err := loadTesthubHistory()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  testhub history: %v\n", err)
@@ -265,7 +254,7 @@ func runFetchTesthub() error {
 	}
 
 	fmt.Fprintln(os.Stderr, "→ Fetching projectbluefin testhub packages…")
-	pkgs, err := testhub.ListPackages(client.Context(), client.GitHub(), "projectbluefin")
+	pkgs, err := testhub.ListPackages("projectbluefin")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  testhub packages: %v\n", err)
 		if strings.Contains(err.Error(), "read:packages") {
@@ -277,7 +266,7 @@ func runFetchTesthub() error {
 	}
 
 	fmt.Fprintf(os.Stderr, "→ Fetching testhub build counts (since run %d)…\n", lastRunID)
-	counts, newLastRunID, fetchErr := testhub.FetchBuildCounts(client.Context(), client.GitHub(), lastRunID)
+	counts, newLastRunID, fetchErr := testhub.FetchBuildCounts(lastRunID)
 	if fetchErr != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  testhub build counts: %v\n", fetchErr)
 		counts = nil
@@ -774,13 +763,6 @@ func buildActiveHumanLogins(commits, issues, discussions map[string]int) []strin
 }
 
 func runFetchContributors() error {
-	client, err := ghclient.NewClient()
-	if err != nil {
-		return err
-	}
-	ghClient := client.GitHub()
-	ctx := client.Context()
-
 	since365 := time.Now().UTC().AddDate(0, 0, -365)
 	since60 := time.Now().UTC().AddDate(0, 0, -60)
 	since30 := time.Now().UTC().AddDate(0, 0, -30)
@@ -838,7 +820,7 @@ func runFetchContributors() error {
 
 		// ── Commits ──────────────────────────────────────────────────────
 		// Fetch 365 days once; slice in-memory for 30d and 60d windows.
-		commits, err := contributors.FetchRepoCommits(ctx, ghClient, owner, repoName, since365, until)
+		commits, err := contributors.FetchRepoCommits(owner, repoName, since365, until)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  commits: %v\n", err)
 			commits = nil
@@ -903,7 +885,7 @@ func runFetchContributors() error {
 
 		// ── Issues ───────────────────────────────────────────────────────
 		// Fetch 365d; filter in-memory for 30d/60d windows.
-		issues, err := contributors.FetchRepoIssues(ctx, ghClient, owner, repoName, since365)
+		issues, err := contributors.FetchRepoIssues(owner, repoName, since365)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  issues: %v\n", err)
 			issues = nil
@@ -934,13 +916,13 @@ func runFetchContributors() error {
 				totalIssuesClosed30d++
 			}
 			for _, l := range iss.Labels {
-				issueLabelDist[l.GetName()]++
+				issueLabelDist[l.Name]++
 			}
 		}
 
 		// ── PRs ──────────────────────────────────────────────────────────
 		// Fetch 365d; filter in-memory for 30d/60d windows.
-		prs, err := contributors.FetchRepoPRs(ctx, ghClient, owner, repoName, since365)
+		prs, err := contributors.FetchRepoPRs(owner, repoName, since365)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  PRs: %v\n", err)
 			prs = nil
@@ -973,7 +955,7 @@ func runFetchContributors() error {
 
 		// ── Discussions ───────────────────────────────────────────────────
 		// Fetch 365d; all windows sliced in-memory from this set.
-		discs, err := contributors.FetchDiscussions(client, owner, repoName, since365)
+		discs, err := contributors.FetchDiscussions(owner, repoName, since365)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  discussions: %v\n", err)
 			discs = nil
@@ -996,14 +978,14 @@ func runFetchContributors() error {
 		}
 
 		// ── Participation (52w weekly) ────────────────────────────────────
-		weekly, err := contributors.FetchParticipation(ctx, ghClient, owner, repoName)
+		weekly, err := contributors.FetchParticipation(owner, repoName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  participation: %v\n", err)
 			weekly = []int{}
 		}
 
 		// ── Punch card (heatmap) ─────────────────────────────────────────
-		heatmap, err := contributors.FetchPunchCard(ctx, ghClient, owner, repoName)
+		heatmap, err := contributors.FetchPunchCard(owner, repoName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  punch card: %v\n", err)
 			heatmap = [][]int{}
@@ -1208,7 +1190,7 @@ func runFetchContributors() error {
 		topLogins = append(topLogins, rc.login)
 
 		// Fetch profile (uses cache).
-		profile, err := contributors.FetchUserProfile(ctx, ghClient, rc.login, profileCache)
+		profile, err := contributors.FetchUserProfile(rc.login, profileCache)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ⚠️  profile %s: %v\n", rc.login, err)
 		}
@@ -1300,11 +1282,6 @@ func runFetchContributors() error {
 //	src/data/builds-<image>.json
 //	.sync-cache/builds-<image>-history.json
 func runFetchBuildsFor(image string, repos []builds.RepoConfig) error {
-	client, err := ghclient.NewClient()
-	if err != nil {
-		return err
-	}
-
 	cfg := builds.CollectorConfig{
 		Repos:        repos,
 		LookbackDays: 14,
@@ -1313,8 +1290,8 @@ func runFetchBuildsFor(image string, repos []builds.RepoConfig) error {
 		OutputPath:   fmt.Sprintf("src/data/builds-%s.json", image),
 	}
 
-	collector := builds.NewCollector(client.GitHub(), cfg)
-	return collector.Run(client.Context())
+	collector := builds.NewCollector(cfg)
+	return collector.Run()
 }
 
 // ── fetch-scorecard ─────────────────────────────────────────────────────────
