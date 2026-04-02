@@ -878,11 +878,11 @@ func TestComputeStepCategoryRate(t *testing.T) {
 			want:     -1,
 		},
 		{
-			name:     "runs-with-no-matching-steps-returns-minus1",
+			name:     "runs-with-no-matching-steps-returns-0",
 			runs:     []WorkflowRunRecord{makeRun(1, "r", "success", "push", "main", 1)},
 			category: "sign",
 			days:     30,
-			want:     -1,
+			want:     0, // runs exist but no sign steps → ecosystem doesn't sign → 0%
 		},
 		{
 			name: "all-matching-steps-succeed-returns-100",

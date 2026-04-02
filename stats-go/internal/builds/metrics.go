@@ -260,10 +260,17 @@ func classifyStepName(name string) string {
 // computeStepCategoryRate returns the fraction of non-PR runs in the last `days` days
 // where at least one step matching the given category completed successfully,
 // out of all runs that contained at least one step of that category.
-// Returns -1 if no runs contained any step of that category (repo doesn't sign/sbom yet).
+//
+// Return values:
+//   - -1: no eligible runs in the period at all (truly no data — repo may be inactive)
+//   - 0-100: percentage of runs where the category step succeeded
+//     (0 means runs exist but the step was never found or always failed)
+//
+// Distinction: if a repo has runs but none contain the category step, we return 0
+// (not -1) — the absence of signing/SBOM steps IS measurable data.
 func computeStepCategoryRate(runs []WorkflowRunRecord, category string, days int) float64 {
 	cutoff := time.Now().UTC().AddDate(0, 0, -days).Format(time.RFC3339)
-	var total, success int
+	var eligible, total, success int
 	for _, r := range runs {
 		if r.Event == "pull_request" {
 			continue
@@ -274,6 +281,7 @@ func computeStepCategoryRate(runs []WorkflowRunRecord, category string, days int
 		if r.Conclusion == "cancelled" || r.Conclusion == "skipped" {
 			continue
 		}
+		eligible++
 		hasCategory := false
 		succeeded := false
 		for _, j := range r.Jobs {
@@ -296,8 +304,13 @@ func computeStepCategoryRate(runs []WorkflowRunRecord, category string, days int
 			success++
 		}
 	}
-	if total == 0 {
+	if eligible == 0 {
+		// No runs in the period at all — genuinely no data.
 		return -1
+	}
+	if total == 0 {
+		// Runs exist but the step was never found — the repo doesn't do this.
+		return 0
 	}
 	return float64(success) / float64(total) * 100
 }
