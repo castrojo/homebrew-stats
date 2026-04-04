@@ -35,6 +35,7 @@ func TestParseDistroName_ValidExact(t *testing.T) {
 		{"Aurora", "aurora"},
 		{"secureblue", "secureblue"},
 		{"wayblue", "wayblue"},
+		{"Origami Linux", "origami"},
 	}
 	for _, c := range cases {
 		got, ok := parseDistroName(c.input)

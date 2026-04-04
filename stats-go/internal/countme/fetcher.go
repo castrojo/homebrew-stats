@@ -27,12 +27,17 @@ const countmeCSVURL = "https://data-analysis.fedoraproject.org/csv-reports/count
 // BlueBuildOS is excluded: its countme participation collapsed 99.7% in the week of 2026-02-08
 // (from ~484 to 1–2 hits/week), consistent with a reporting infrastructure change rather than
 // user loss. Re-add when the project restores countme reporting.
+//
+// Origami Linux: Fedora Atomic / Cosmic desktop distro. os_name = "Origami Linux" (with space).
+// Weekly counts: ~50/week (Nov 2025) → ~1200/week (Mar 2026). Growing fast; not yet at 10K threshold
+// for a dedicated tab but tracked for trend visibility. Registry: registry.gitlab.com/origami-linux/.
 var validDistros = map[string]string{
-	"Bazzite":    "bazzite",
-	"Bluefin":    "bluefin",
-	"Aurora":     "aurora",
-	"secureblue": "secureblue",
-	"wayblue":    "wayblue",
+	"Bazzite":       "bazzite",
+	"Bluefin":       "bluefin",
+	"Aurora":        "aurora",
+	"secureblue":    "secureblue",
+	"wayblue":       "wayblue",
+	"Origami Linux": "origami",
 }
 
 // canonicalRepoTagRe matches Fedora canonical repo tags of the form "fedora-NN" (e.g. fedora-41,

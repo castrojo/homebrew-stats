@@ -8,7 +8,7 @@
  *
  * KEY CONTRACT (catches the Bazzite-key-case bug):
  *   distros keys in week_records/day_records MUST be lowercase when present:
- *     bazzite, bluefin, aurora, secureblue, wayblue
+ *     bazzite, bluefin, aurora, secureblue, wayblue, origami
  *   bluefin-lts uses CentOS/EPEL repos so it never appears in countme data.
  *   os_version_dist keys MUST be title case (raw os_name from CSV):
  *     Bazzite, Bluefin, Bluefin LTS, Aurora
@@ -30,8 +30,8 @@ function loadJSON(relPath: string): unknown {
 }
 
 // All valid lowercase distro keys — not all must be present in every record
-// (e.g. bluefin-lts uses CentOS repos so it never appears; secureblue/wayblue are tracked too)
-const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "aurora", "secureblue", "wayblue"] as const;
+// (e.g. bluefin-lts uses CentOS repos so it never appears; secureblue/wayblue/origami are tracked too)
+const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "aurora", "secureblue", "wayblue", "origami"] as const;
 const DISTRO_KEYS_TITLECASE = ["Bazzite", "Bluefin", "Aurora"] as const;
 
 // ── countme.json ─────────────────────────────────────────────────────────────
