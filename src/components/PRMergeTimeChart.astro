@@ -1,0 +1,144 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface MonthlyMergeTime {
+  month: string;
+  p50_hours: number;
+  p95_hours: number;
+  pr_count: number;
+}
+
+interface Props {
+  p50Hours: number;
+  p95Hours: number;
+  monthly: MonthlyMergeTime[];
+}
+
+const { p50Hours, p95Hours, monthly } = Astro.props;
+
+function severityClass(hours: number): string {
+  if (hours < 24) return 'value-green';
+  if (hours < 72) return 'value-yellow';
+  return 'value-red';
+}
+---
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class={`kpi-value ${severityClass(p50Hours)}`}>{p50Hours.toFixed(1)}h</div>
+    <div class="kpi-label">P50 Merge Time</div>
+  </div>
+  <div class="kpi-card">
+    <div class={`kpi-value ${severityClass(p95Hours)}`}>{p95Hours.toFixed(1)}h</div>
+    <div class="kpi-label">P95 Merge Time</div>
+  </div>
+</div>
+
+<ChartCard title="PR Merge Time" canvasId="pr-merge-time" height={240} />
+<script type="application/json" id="pr-merge-time-data" set:html={safeJson({ monthly })}></script>
+
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { monthly } = readChartData<{
+    monthly: { month: string; p50_hours: number; p95_hours: number }[];
+  }>('pr-merge-time-data');
+
+  const rows = monthly.slice(-6);
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(document.getElementById('pr-merge-time') as HTMLCanvasElement, {
+      type: 'line',
+      data: {
+        labels: rows.map(r => r.month),
+        datasets: [
+          {
+            label: 'P50 (hours)',
+            data: rows.map(r => r.p50_hours),
+            borderColor: BRAND_COLOURS[2],
+            backgroundColor: BRAND_COLOURS[2],
+            tension: 0.35,
+            borderWidth: 2.5,
+            pointRadius: 3,
+            spanGaps: true,
+          },
+          {
+            label: 'P95 (hours)',
+            data: rows.map(r => r.p95_hours),
+            borderColor: BRAND_COLOURS[4],
+            backgroundColor: BRAND_COLOURS[4],
+            tension: 0.35,
+            borderDash: [6, 4],
+            borderWidth: 2.5,
+            pointRadius: 3,
+            spanGaps: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: colors.text, font: { size: 12 } } },
+        },
+        scales: {
+          x: {
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+            title: { display: true, text: 'Hours', color: colors.muted, font: { size: 11 } },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[PRMergeTimeChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    applyTheme(chart);
+    chart.update('none');
+  });
+</script>
+
+<style>
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .kpi-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+  .value-green { color: var(--green); }
+  .value-yellow { color: var(--yellow); }
+  .value-red { color: var(--red); }
+</style>

@@ -1,0 +1,163 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface RepoReleases {
+  repo: string;
+  label: string;
+  releases_30d: number;
+  avg_days_between_releases: number;
+}
+
+interface Props {
+  repos: RepoReleases[];
+  monthlyBreakdown: Record<string, Record<string, number>>;
+}
+
+const { repos, monthlyBreakdown } = Astro.props;
+---
+
+<div class="kpi-grid">
+  {repos.map((repo) => (
+    <div class="kpi-card">
+      <div class="kpi-value">{repo.releases_30d}/30d</div>
+      <div class="kpi-label">{repo.label}</div>
+      <div class="kpi-sub">
+        {repo.avg_days_between_releases > 0
+          ? `every ${repo.avg_days_between_releases.toFixed(1)} days`
+          : 'insufficient history'}
+      </div>
+    </div>
+  ))}
+</div>
+
+<ChartCard
+  title="Release Cadence"
+  canvasId="release-freq"
+  height={260}
+  rangeId="release-freq-range-btns"
+  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '12mo', value: '365' }]}
+  defaultRange="365"
+/>
+<script type="application/json" id="release-freq-data" set:html={safeJson({ repos, monthlyBreakdown })}></script>
+
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const { repos, monthlyBreakdown } = readChartData<{
+    repos: { label: string }[];
+    monthlyBreakdown: Record<string, Record<string, number>>;
+  }>('release-freq-data');
+
+  const allMonths = Object.keys(monthlyBreakdown).sort();
+
+  function getMonths(range: string): string[] {
+    if (range === '30') return allMonths.slice(-1);
+    if (range === '90') return allMonths.slice(-3);
+    return allMonths.slice(-12);
+  }
+
+  function buildDatasets(months: string[]) {
+    return repos.map((repo, i) => ({
+      label: repo.label,
+      data: months.map(month => monthlyBreakdown[month]?.[repo.label] ?? 0),
+      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+      borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
+      borderWidth: 1,
+      stack: 'releases',
+    }));
+  }
+
+  let currentRange = '365';
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    const months = getMonths(currentRange);
+    chart = new Chart(document.getElementById('release-freq') as HTMLCanvasElement, {
+      type: 'bar',
+      data: {
+        labels: months,
+        datasets: buildDatasets(months),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: colors.text, font: { size: 12 } } },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            ticks: { color: colors.muted, font: { size: 11 } },
+            grid: { color: colors.grid },
+            title: { display: true, text: 'Releases', color: colors.muted, font: { size: 11 } },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[ReleaseFrequencyChart] Chart.js init failed:', e);
+  }
+
+  document.querySelectorAll('#release-freq-range-btns .range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      currentRange = (btn as HTMLElement).dataset.range!;
+      document.querySelectorAll('#release-freq-range-btns .range-btn').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      const months = getMonths(currentRange);
+      chart.data.labels = months;
+      chart.data.datasets = buildDatasets(months);
+      chart.update();
+    });
+  });
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    applyTheme(chart);
+    chart.update('none');
+  });
+</script>
+
+<style>
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .kpi-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+</style>

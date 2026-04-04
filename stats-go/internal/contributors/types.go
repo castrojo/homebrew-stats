@@ -113,6 +113,21 @@ type DiscussionSummary struct {
 	WeeklyTrend                 []DiscussionWeek `json:"weekly_trend"`
 }
 
+// PRMergeTimeMonth is one month of PR merge-time percentiles.
+type PRMergeTimeMonth struct {
+	Month    string  `json:"month"`
+	P50Hours float64 `json:"p50_hours"`
+	P95Hours float64 `json:"p95_hours"`
+	PRCount  int     `json:"pr_count"`
+}
+
+// PRMergeTimeData is aggregate PR merge-time data for the last 90 days.
+type PRMergeTimeData struct {
+	P50Hours float64            `json:"p50_hours"`
+	P95Hours float64            `json:"p95_hours"`
+	Monthly  []PRMergeTimeMonth `json:"monthly"`
+}
+
 // ContribDaySnapshot is one day's snapshot stored in the history cache.
 type ContribDaySnapshot struct {
 	Date            string   `json:"date"`

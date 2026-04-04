@@ -9,7 +9,10 @@ import ContributionHeatmapChart from '../../components/ContributionHeatmapChart.
 import DiscussionActivityChart from '../../components/DiscussionActivityChart.astro';
 import NewVsReturningChart from '../../components/NewVsReturningChart.astro';
 import PRHealthChart from '../../components/PRHealthChart.astro';
+import PRMergeTimeChart from '../../components/PRMergeTimeChart.astro';
+import ReleaseFrequencyChart from '../../components/ReleaseFrequencyChart.astro';
 import data from '../../data/contributors.json';
+import releases from '../../data/releases.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const summary = data.summary as any;
@@ -17,6 +20,7 @@ const topContributors = (data.top_contributors ?? []) as any[];
 const repos = (data.repos ?? []) as any[];
 const discussionsSummary = data.discussions_summary as any;
 const lfx = (data as any).lfx ?? {};
+const prMergeTime = (data as any).pr_merge_time;
 ---
 
 <Layout title="Contributors — bootc-ecosystem" activeTab="contributors">
@@ -80,8 +84,29 @@ const lfx = (data as any).lfx ?? {};
       </div>
     </div>
 
+    {prMergeTime && (
+      <>
+        <h2 class="section-heading">PR Merge Time</h2>
+        <PRMergeTimeChart
+          p50Hours={prMergeTime.p50_hours}
+          p95Hours={prMergeTime.p95_hours}
+          monthly={prMergeTime.monthly ?? []}
+        />
+      </>
+    )}
+
     <h2>New vs Returning Contributors</h2>
     <NewVsReturningChart lfx={lfx} />
+
+    {releases.repos.length > 0 && (
+      <>
+        <h2 class="section-heading">Release Cadence</h2>
+        <ReleaseFrequencyChart
+          repos={releases.repos}
+          monthlyBreakdown={releases.monthly_breakdown}
+        />
+      </>
+    )}
   </section>
 </Layout>
 
