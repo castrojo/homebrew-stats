@@ -83,7 +83,7 @@ const doraImages = [
   { label: 'bootcrew',      color: 'var(--red)',    data: bootcrewBuilds     as unknown as BuildsData },
 ];
 
-// ── Future Proofed — all 7 ────────────────────────────────────────────────────
+// ── Future Proofed — all 8 ────────────────────────────────────────────────────
 const imageProofData = [
   {
     label: 'Bluefin',
@@ -140,6 +140,14 @@ const imageProofData = [
     zstdChunked: supplyChain['bootcrew']?.zstd_chunked ?? null,
     chunka:      chunkaState('bootcrew'),
     slsa:        supplyChain['bootcrew']?.slsa_provenance ?? null,
+  },
+  {
+    label: 'secureblue',
+    signing:     null, // no CI build pipeline tracked
+    sbom:        null, // no CI build pipeline tracked
+    zstdChunked: supplyChain['secureblue']?.zstd_chunked ?? null,
+    chunka:      chunkaState('secureblue'),
+    slsa:        supplyChain['secureblue']?.slsa_provenance ?? null,
   },
 ];
 
