@@ -4,9 +4,9 @@ import (
 "fmt"
 "testing"
 
-"github.com/castrojo/homebrew-stats/internal/history"
-"github.com/castrojo/homebrew-stats/internal/metrics"
-"github.com/castrojo/homebrew-stats/internal/tap"
+"github.com/castrojo/bootc-ecosystem/internal/history"
+"github.com/castrojo/bootc-ecosystem/internal/metrics"
+"github.com/castrojo/bootc-ecosystem/internal/tap"
 )
 
 // ---------------------------------------------------------------------------

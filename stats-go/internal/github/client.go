@@ -6,7 +6,7 @@ import (
 "fmt"
 "strings"
 
-ghcli "github.com/castrojo/homebrew-stats/internal/ghcli"
+ghcli "github.com/castrojo/bootc-ecosystem/internal/ghcli"
 )
 
 // TesthubPackage represents a Flatpak package from projectbluefin testhub.

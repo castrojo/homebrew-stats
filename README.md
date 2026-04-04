@@ -1,8 +1,8 @@
-# homebrew-stats
+# bootc-ecosystem
 
 Health dashboard for [ublue-os/homebrew-tap](https://github.com/ublue-os/homebrew-tap) and [ublue-os/homebrew-experimental-tap](https://github.com/ublue-os/homebrew-experimental-tap).
 
-Live site: https://castrojo.github.io/homebrew-stats/
+Live site: https://castrojo.github.io/bootc-ecosystem/
 
 ## What it tracks
 
@@ -20,7 +20,7 @@ just install
 # Fetch latest data from GitHub (requires GITHUB_TOKEN or GITHUB_PAT)
 just sync
 
-# Start hot-reload dev server at http://localhost:4324/homebrew-stats/
+# Start hot-reload dev server at http://localhost:4324/bootc-ecosystem/
 just dev
 
 # Fetch data then start dev server
@@ -35,7 +35,7 @@ just sync-build
 # Build container image locally
 just container-build
 
-# Build container + run it at http://localhost:8080/homebrew-stats/
+# Build container + run it at http://localhost:8080/bootc-ecosystem/
 just serve
 
 # Stop the running container
@@ -64,13 +64,13 @@ Astro static site (src/)
     │  builds to
     ▼
 dist/                         → GitHub Pages
-    └─────────────────────────→ ghcr.io/castrojo/homebrew-stats (Chainguard nginx)
+    └─────────────────────────→ ghcr.io/castrojo/bootc-ecosystem (Chainguard nginx)
 ```
 
 ## Architecture
 
 ```
-homebrew-stats/
+bootc-ecosystem/
 ├── stats-go/                   Go CLI — fetches GitHub API data
 │   ├── cmd/stats/main.go       Entry point: collect → history → write stats.json
 │   ├── internal/github/        GitHub API client (traffic, files, releases, downloads)
@@ -110,7 +110,7 @@ Runs daily at **8 AM UTC** (two hours after Pages, so the cache is warm):
 
 1. Restore `.sync-cache` from `actions/cache`
 2. Sync tap data (same as above)
-3. Build and push `Containerfile` to `ghcr.io/castrojo/homebrew-stats:latest` and `:sha`
+3. Build and push `Containerfile` to `ghcr.io/castrojo/bootc-ecosystem:latest` and `:sha`
 
 ### History cache
 

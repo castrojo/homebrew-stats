@@ -19,7 +19,7 @@ export default defineConfig({
   ...(process.env.BASE_URL ? {} : {
     webServer: {
       command: 'npm run preview',
-      url: 'http://localhost:4324/homebrew-stats/',
+      url: 'http://localhost:4324/bootc-ecosystem/',
       reuseExistingServer: !process.env.CI,
       stdout: 'ignore',
       stderr: 'pipe',

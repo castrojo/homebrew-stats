@@ -7,8 +7,8 @@ import (
 "strings"
 "time"
 
-ghcli "github.com/castrojo/homebrew-stats/internal/ghcli"
-ghpkg "github.com/castrojo/homebrew-stats/internal/github"
+ghcli "github.com/castrojo/bootc-ecosystem/internal/ghcli"
+ghpkg "github.com/castrojo/bootc-ecosystem/internal/github"
 )
 
 // Repos to always include (hardcoded for predictability).

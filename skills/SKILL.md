@@ -1,7 +1,7 @@
-# homebrew-stats — Operational Knowledge
+# bootc-ecosystem — Operational Knowledge
 
 ## When to Use
-Load this skill for any work in `castrojo/homebrew-stats` — Go backend, Astro frontend, Chart.js components, CI pipeline, data schemas.
+Load this skill for any work in `castrojo/bootc-ecosystem` — Go backend, Astro frontend, Chart.js components, CI pipeline, data schemas.
 
 ## When NOT to Use
 For generic Go, Astro, or Chart.js patterns → their upstream docs. For homebrew tap content → load `~/src/skills/homebrew-taps/SKILL.md`.
@@ -31,15 +31,15 @@ Use these decisions as defaults for future agents unless superseded by a newer i
   - Do not use "implemented in working tree" as closure evidence.
 
 Tracking issues for this plan:
-- Epic: `https://github.com/castrojo/homebrew-stats/issues/30`
-- Tasks: `https://github.com/castrojo/homebrew-stats/issues/31` to `https://github.com/castrojo/homebrew-stats/issues/36`
+- Epic: `https://github.com/castrojo/bootc-ecosystem/issues/30`
+- Tasks: `https://github.com/castrojo/bootc-ecosystem/issues/31` to `https://github.com/castrojo/bootc-ecosystem/issues/36`
 
 ---
 
 ## Repository Layout
 
 ```
-homebrew-stats/
+bootc-ecosystem/
 ├── stats-go/              # Go data-collection backend
 │   ├── cmd/stats/         # CLI entry point (main.go) — subcommand dispatch
 │   └── internal/
@@ -334,6 +334,6 @@ A task is complete only when ALL three layers pass:
 
 ### Layer 3 — Live site verified
 - Run `just verify-live` after CI is green
-- Checks `https://castrojo.github.io/homebrew-stats/`: HTTP 200 on all 3 pages, canvas elements present, no `class="chart-empty"`, `public/meta.json` reflects today's date
+- Checks `https://castrojo.github.io/bootc-ecosystem/`: HTTP 200 on all 3 pages, canvas elements present, no `class="chart-empty"`, `public/meta.json` reflects today's date
 
 **"CI green" is not done. `just verify-live` passing is done.**

@@ -3,7 +3,7 @@ package tap
 import (
 	"testing"
 
-	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
+	"github.com/castrojo/bootc-ecosystem/internal/tapanalytics"
 )
 
 func TestNormaliseVersion(t *testing.T) {

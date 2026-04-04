@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Aurora Builds page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/aurora-builds/');
+    await page.goto('/bootc-ecosystem/aurora-builds/');
   });
 
   test('page loads with correct title', async ({ page }) => {

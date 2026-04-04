@@ -1,5 +1,5 @@
 /**
- * Shared data types for the homebrew-stats data pipeline.
+ * Shared data types for the bootc-ecosystem data pipeline.
  *
  * These types mirror the JSON structures written by stats-go.
  * DO NOT edit these without also updating the corresponding Go types.

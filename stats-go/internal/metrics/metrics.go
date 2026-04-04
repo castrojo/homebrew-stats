@@ -7,8 +7,8 @@ import (
 	"math"
 	"sort"
 
-	"github.com/castrojo/homebrew-stats/internal/history"
-	"github.com/castrojo/homebrew-stats/internal/tap"
+	"github.com/castrojo/bootc-ecosystem/internal/history"
+	"github.com/castrojo/bootc-ecosystem/internal/tap"
 )
 
 // ---------------------------------------------------------------------------

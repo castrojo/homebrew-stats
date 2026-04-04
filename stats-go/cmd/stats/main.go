@@ -9,17 +9,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/castrojo/homebrew-stats/internal/builds"
-	"github.com/castrojo/homebrew-stats/internal/contributors"
-	"github.com/castrojo/homebrew-stats/internal/countme"
-	"github.com/castrojo/homebrew-stats/internal/history"
-	"github.com/castrojo/homebrew-stats/internal/metrics"
-	"github.com/castrojo/homebrew-stats/internal/osanalytics"
-	"github.com/castrojo/homebrew-stats/internal/scorecard"
-	"github.com/castrojo/homebrew-stats/internal/supplychain"
-	"github.com/castrojo/homebrew-stats/internal/tap"
-	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
-	"github.com/castrojo/homebrew-stats/internal/testhub"
+	"github.com/castrojo/bootc-ecosystem/internal/builds"
+	"github.com/castrojo/bootc-ecosystem/internal/contributors"
+	"github.com/castrojo/bootc-ecosystem/internal/countme"
+	"github.com/castrojo/bootc-ecosystem/internal/history"
+	"github.com/castrojo/bootc-ecosystem/internal/metrics"
+	"github.com/castrojo/bootc-ecosystem/internal/osanalytics"
+	"github.com/castrojo/bootc-ecosystem/internal/scorecard"
+	"github.com/castrojo/bootc-ecosystem/internal/supplychain"
+	"github.com/castrojo/bootc-ecosystem/internal/tap"
+	"github.com/castrojo/bootc-ecosystem/internal/tapanalytics"
+	"github.com/castrojo/bootc-ecosystem/internal/testhub"
 )
 
 func main() {

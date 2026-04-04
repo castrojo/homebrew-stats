@@ -1,4 +1,4 @@
-module github.com/castrojo/homebrew-stats
+module github.com/castrojo/bootc-ecosystem
 
 go 1.25.6
 

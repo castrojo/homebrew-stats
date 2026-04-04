@@ -8,7 +8,7 @@ import (
 "strings"
 "time"
 
-ghcli "github.com/castrojo/homebrew-stats/internal/ghcli"
+ghcli "github.com/castrojo/bootc-ecosystem/internal/ghcli"
 )
 
 // parseJobApp extracts the app name from a job name like "compile-oci (ghostty, x86_64)".

@@ -4,7 +4,7 @@ import (
 "encoding/json"
 "fmt"
 
-ghcli "github.com/castrojo/homebrew-stats/internal/ghcli"
+ghcli "github.com/castrojo/bootc-ecosystem/internal/ghcli"
 )
 
 // GraphQL executes a GitHub GraphQL query via gh CLI.

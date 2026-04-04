@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Builds page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/builds/');
+    await page.goto('/bootc-ecosystem/builds/');
   });
 
   test('page loads with correct title', async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe('Builds page', () => {
     // Look for a nav link that is "active" and contains "Builds"
     const activeLink = page.locator('nav a.active, nav a[aria-current="page"]');
     // At minimum the Bluefin builds tab link should exist in the nav (exact href to avoid matching aurora/bazzite tabs)
-    const buildsLink = page.locator('nav a[href="/homebrew-stats/builds/"]');
+    const buildsLink = page.locator('nav a[href="/bootc-ecosystem/builds/"]');
     await expect(buildsLink).toBeVisible();
   });
 

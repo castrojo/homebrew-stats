@@ -8,7 +8,7 @@ import (
 "sort"
 "time"
 
-ghcli "github.com/castrojo/homebrew-stats/internal/ghcli"
+ghcli "github.com/castrojo/bootc-ecosystem/internal/ghcli"
 )
 
 // CollectorConfig holds configuration for the builds data collector.

@@ -35,7 +35,7 @@ jobs:
           echo "Waiting for generated_at=$today at live site…"
           for i in $(seq 1 18); do
             gen=$(curl -sf --max-time 10 \
-              "https://castrojo.github.io/homebrew-stats/meta.json?cb=$RANDOM" \
+              "https://castrojo.github.io/bootc-ecosystem/meta.json?cb=$RANDOM" \
               | jq -r '.generated_at // empty' 2>/dev/null || echo "")
             if [ "$gen" = "$today" ]; then
               echo "✅ CDN propagated — generated_at=$gen"

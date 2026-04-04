@@ -45,18 +45,18 @@ sync-build:
 # Build container and serve locally
 serve:
     just container-build
-    podman rm -f homebrew-stats 2>/dev/null || true
-    podman run -d --name homebrew-stats -p 8080:8080 ghcr.io/castrojo/homebrew-stats:local
-    xdg-open http://localhost:8080/homebrew-stats/ || true
-    echo "Running at http://localhost:8080/homebrew-stats/ — use 'just stop' to kill"
+    podman rm -f bootc-ecosystem 2>/dev/null || true
+    podman run -d --name bootc-ecosystem -p 8080:8080 ghcr.io/castrojo/bootc-ecosystem:local
+    xdg-open http://localhost:8080/bootc-ecosystem/ || true
+    echo "Running at http://localhost:8080/bootc-ecosystem/ — use 'just stop' to kill"
 
 # Build the container image locally
 container-build:
-    podman build -t ghcr.io/castrojo/homebrew-stats:local -f Containerfile --build-arg SKIP_GO_SYNC=true .
+    podman build -t ghcr.io/castrojo/bootc-ecosystem:local -f Containerfile --build-arg SKIP_GO_SYNC=true .
 
 # Stop the running container
 stop:
-    podman rm -f homebrew-stats 2>/dev/null || true
+    podman rm -f bootc-ecosystem 2>/dev/null || true
 
 # Run unit tests (Go backend + TypeScript frontend)
 test:
@@ -78,7 +78,7 @@ test-all: test test-e2e
 verify-live:
     #!/usr/bin/env bash
     set -euo pipefail
-    BASE="https://castrojo.github.io/homebrew-stats"
+    BASE="https://castrojo.github.io/bootc-ecosystem"
     echo "=== Verifying live site: $BASE ==="
 
     for path in "/" "/testhub/" "/overall/" "/contributors/" "/builds/" "/aurora-builds/" "/bazzite-builds/" "/universal-blue/" "/ucore/" "/zirconium/" "/bootcrew/" "/secureblue/"; do

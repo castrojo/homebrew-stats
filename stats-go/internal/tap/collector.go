@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	ghclient "github.com/castrojo/homebrew-stats/internal/github"
-	"github.com/castrojo/homebrew-stats/internal/tapanalytics"
+	ghclient "github.com/castrojo/bootc-ecosystem/internal/github"
+	"github.com/castrojo/bootc-ecosystem/internal/tapanalytics"
 )
 
 // Traffic holds 14-day clone traffic for a tap.

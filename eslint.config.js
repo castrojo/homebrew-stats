@@ -34,7 +34,7 @@ export default [
     rules: {
       // CRITICAL: set:text HTML-encodes quotes. Browsers do NOT decode HTML entities
       // inside <script> raw text elements. Use set:html for <script type="application/json">.
-      // See: skills/homebrew-stats/SKILL.md#chart-data-injection
+      // See: skills/bootc-ecosystem/SKILL.md#chart-data-injection
       "no-restricted-syntax": [
         "error",
         {

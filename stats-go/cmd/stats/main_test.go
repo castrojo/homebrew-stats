@@ -7,8 +7,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/castrojo/homebrew-stats/internal/builds"
-	"github.com/castrojo/homebrew-stats/internal/testhub"
+	"github.com/castrojo/bootc-ecosystem/internal/builds"
+	"github.com/castrojo/bootc-ecosystem/internal/testhub"
 )
 
 func writeTempFile(t *testing.T, dir, name string, v any) string {

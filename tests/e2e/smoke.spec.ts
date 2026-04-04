@@ -35,7 +35,7 @@ test.describe('Smoke — data quality (live site only)', () => {
   test.skip(!isLiveSite, 'Smoke tests only run against the live deployed site (BASE_URL must be set)');
 
   test('testhub: at least one package has a known build status', async ({ page }) => {
-    await page.goto('/homebrew-stats/testhub/');
+    await page.goto('/bootc-ecosystem/testhub/');
     // tbody is SSR'd — wait for it to be attached (script/hidden elements need state: 'attached')
     await page.waitForSelector('#testhub-tbody', { state: 'attached', timeout: 15_000 });
 
@@ -51,7 +51,7 @@ test.describe('Smoke — data quality (live site only)', () => {
 
   test('meta.json: generated_at reflects today', async ({ page }) => {
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const response = await page.goto(`/homebrew-stats/meta.json?cb=${Date.now()}`);
+    const response = await page.goto(`/bootc-ecosystem/meta.json?cb=${Date.now()}`);
     expect(response?.status()).toBe(200);
 
     const body = await response?.text();
@@ -63,7 +63,7 @@ test.describe('Smoke — data quality (live site only)', () => {
   });
 
   test('homebrew: traffic history has data', async ({ page }) => {
-    await page.goto('/homebrew-stats/');
+    await page.goto('/bootc-ecosystem/');
     // traffic-data is a SSR'd <script type="application/json"> element — use 'attached' not 'visible'
     await page.waitForSelector('#traffic-data', { state: 'attached', timeout: 15_000 });
 
@@ -75,7 +75,7 @@ test.describe('Smoke — data quality (live site only)', () => {
   });
 
   test('testhub: build and version history have data', async ({ page }) => {
-    await page.goto('/homebrew-stats/testhub/');
+    await page.goto('/bootc-ecosystem/testhub/');
     await page.waitForSelector('#testhub-build-data', { state: 'attached', timeout: 15_000 });
 
     const buildData = await getScriptJSON(page, 'testhub-build-data') as { history?: unknown[] };
@@ -86,13 +86,13 @@ test.describe('Smoke — data quality (live site only)', () => {
   });
 
   test('testhub: package table has data rows', async ({ page }) => {
-    await page.goto('/homebrew-stats/testhub/');
+    await page.goto('/bootc-ecosystem/testhub/');
     const rows = page.locator('#testhub-tbody tr');
     expect(await rows.count(), 'Testhub package table is empty').toBeGreaterThan(0);
   });
 
   test('overall: countme trend and ecosystem data have non-zero values', async ({ page }) => {
-    await page.goto('/homebrew-stats/overall/');
+    await page.goto('/bootc-ecosystem/overall/');
     await page.waitForSelector('#countme-trend-data', { state: 'attached', timeout: 15_000 });
 
     const trendData = await getScriptJSON(page, 'countme-trend-data') as { monthly?: Array<{ distros: Record<string, number> }> };
@@ -105,7 +105,7 @@ test.describe('Smoke — data quality (live site only)', () => {
   });
 
   test('contributors: all data sources have non-empty data', async ({ page }) => {
-    await page.goto('/homebrew-stats/contributors/');
+    await page.goto('/bootc-ecosystem/contributors/');
     await page.waitForSelector('#commit-activity-data', { state: 'attached', timeout: 15_000 });
 
     const commitData = await getScriptJSON(page, 'commit-activity-data') as { repos?: unknown[] };

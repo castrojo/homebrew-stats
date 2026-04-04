@@ -53,5 +53,5 @@ jobs:
           push: true
           build-args: SKIP_GO_SYNC=true
           tags: |
-            ghcr.io/castrojo/homebrew-stats:latest
-            ghcr.io/castrojo/homebrew-stats:${{ github.sha }}
+            ghcr.io/castrojo/bootc-ecosystem:latest
+            ghcr.io/castrojo/bootc-ecosystem:${{ github.sha }}

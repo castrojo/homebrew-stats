@@ -46,7 +46,7 @@ async function expectCanvasRendered(page: Page, canvasId: string) {
 
 test.describe('Homebrew tab', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/');
+    await page.goto('/bootc-ecosystem/');
     await page.waitForLoadState('networkidle');
   });
 
@@ -82,7 +82,7 @@ test.describe('Homebrew tab', () => {
 
 test.describe('Testhub tab', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/testhub/');
+    await page.goto('/bootc-ecosystem/testhub/');
     await page.waitForLoadState('networkidle');
   });
 
@@ -115,7 +115,7 @@ test.describe('Testhub tab', () => {
 
 test.describe('Overall tab', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/overall/');
+    await page.goto('/bootc-ecosystem/overall/');
     await page.waitForLoadState('networkidle');
   });
 
@@ -206,23 +206,23 @@ test.describe('No empty charts contract', () => {
   }
 
   test('Homebrew tab has no empty charts', async ({ page }) => {
-    await assertNoEmptyCharts(page, '/homebrew-stats/');
+    await assertNoEmptyCharts(page, '/bootc-ecosystem/');
   });
 
   test('Testhub tab has no empty charts', async ({ page }) => {
-    await assertNoEmptyCharts(page, '/homebrew-stats/testhub/');
+    await assertNoEmptyCharts(page, '/bootc-ecosystem/testhub/');
   });
 
   test('Overall tab has no empty charts', async ({ page }) => {
-    await assertNoEmptyCharts(page, '/homebrew-stats/overall/');
+    await assertNoEmptyCharts(page, '/bootc-ecosystem/overall/');
   });
 
   test('Builds tab has no empty charts', async ({ page }) => {
-    await page.goto('/homebrew-stats/builds/');
+    await page.goto('/bootc-ecosystem/builds/');
     // Bootstrap state: only a .collecting paragraph renders — no charts at all.
     const isCollecting = (await page.locator('.collecting').count()) > 0;
     if (isCollecting) return;
-    await assertNoEmptyCharts(page, '/homebrew-stats/builds/');
+    await assertNoEmptyCharts(page, '/bootc-ecosystem/builds/');
   });
 });
 
@@ -232,31 +232,31 @@ test.describe('New image tab smoke coverage', () => {
   for (const pageConfig of [
     {
       name: 'universal-blue',
-      url: '/homebrew-stats/universal-blue/',
+      url: '/bootc-ecosystem/universal-blue/',
       heading: 'ublue-os Build Pipeline',
       isBuildPage: true,
     },
     {
       name: 'ucore',
-      url: '/homebrew-stats/ucore/',
+      url: '/bootc-ecosystem/ucore/',
       heading: 'uCore Build Pipeline',
       isBuildPage: true,
     },
     {
       name: 'zirconium',
-      url: '/homebrew-stats/zirconium/',
+      url: '/bootc-ecosystem/zirconium/',
       heading: 'Zirconium Build Pipeline',
       isBuildPage: true,
     },
     {
       name: 'bootcrew',
-      url: '/homebrew-stats/bootcrew/',
+      url: '/bootc-ecosystem/bootcrew/',
       heading: 'bootcrew Build Pipeline',
       isBuildPage: true,
     },
     {
       name: 'secureblue',
-      url: '/homebrew-stats/secureblue/',
+      url: '/bootc-ecosystem/secureblue/',
       heading: 'secureblue',
       isBuildPage: false,
     },
@@ -282,15 +282,15 @@ test.describe('New image tab smoke coverage', () => {
 
 test.describe('IssueButton', () => {
   for (const [tab, url] of [
-    ['Homebrew', '/homebrew-stats/'],
-    ['Testhub', '/homebrew-stats/testhub/'],
-    ['Overall', '/homebrew-stats/overall/'],
-    ['Builds', '/homebrew-stats/builds/'],
-    ['Contributors', '/homebrew-stats/contributors/'],
+    ['Homebrew', '/bootc-ecosystem/'],
+    ['Testhub', '/bootc-ecosystem/testhub/'],
+    ['Overall', '/bootc-ecosystem/overall/'],
+    ['Builds', '/bootc-ecosystem/builds/'],
+    ['Contributors', '/bootc-ecosystem/contributors/'],
   ]) {
     test(`${tab} tab has a "File an issue" link`, async ({ page }) => {
       await page.goto(url as string);
-      const link = page.locator('a[href*="castrojo/homebrew-stats/issues/new"]');
+      const link = page.locator('a[href*="castrojo/bootc-ecosystem/issues/new"]');
       await expect(link, `${tab} tab must have a file-an-issue link`).toBeVisible();
     });
   }
@@ -303,7 +303,7 @@ test.describe('IssueButton', () => {
 
 test.describe('OsSection interactive controls', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/');
+    await page.goto('/bootc-ecosystem/');
   });
 
   test('Atomic Focus toggle switches active button and keeps canvas rendered', async ({ page }) => {
@@ -333,7 +333,7 @@ test.describe('OsSection interactive controls', () => {
 
 test.describe('Testhub data quality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/testhub/');
+    await page.goto('/bootc-ecosystem/testhub/');
   });
 
   test('KPI cards have all expected labels', async ({ page }) => {
@@ -360,7 +360,7 @@ test.describe('Testhub data quality', () => {
 
 test.describe('Contributors tab', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/contributors/');
+    await page.goto('/bootc-ecosystem/contributors/');
     await page.waitForLoadState('networkidle');
   });
 
@@ -458,7 +458,7 @@ test.describe('Contributors tab', () => {
 
 test.describe('Builds tab — Monthly Overview', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/builds/');
+    await page.goto('/bootc-ecosystem/builds/');
     await page.waitForLoadState('networkidle');
   });
 
@@ -562,7 +562,7 @@ test.describe('Builds tab — Monthly Overview', () => {
   });
 
   test('Builds page has a file-an-issue link', async ({ page }) => {
-    const link = page.locator('a[href*="castrojo/homebrew-stats/issues/new"]');
+    const link = page.locator('a[href*="castrojo/bootc-ecosystem/issues/new"]');
     await expect(link, 'Builds tab must have a file-an-issue link').toBeVisible();
   });
 
@@ -580,7 +580,7 @@ test.describe('Builds tab — Monthly Overview', () => {
 
 test.describe('Contributors range toggles', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/contributors/');
+    await page.goto('/bootc-ecosystem/contributors/');
     await page.waitForLoadState('networkidle');
   });
 

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Bazzite Builds page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/homebrew-stats/bazzite-builds/');
+    await page.goto('/bootc-ecosystem/bazzite-builds/');
   });
 
   test('page loads with correct title', async ({ page }) => {

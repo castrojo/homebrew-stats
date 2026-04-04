@@ -43,7 +43,7 @@ RUN npm run build
 # ── Stage 3: Runtime ─────────────────────────────────────────────────────────
 FROM cgr.dev/chainguard/nginx:latest
 
-COPY --from=site-builder /build/dist/ /usr/share/nginx/html/homebrew-stats/
+COPY --from=site-builder /build/dist/ /usr/share/nginx/html/bootc-ecosystem/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080
