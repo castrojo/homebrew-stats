@@ -350,9 +350,11 @@ test.describe('Testhub data quality', () => {
     const headers = await page.locator('#testhub-table thead th').allTextContents();
     const text = headers.join(' ');
     expect(text).toContain('Package');
+    expect(text).toContain('Version');
     expect(text).toContain('Build Status');
-    expect(text).toContain('Version Count');
-    expect(text).toContain('Pulls');
+    expect(text).toContain('Last Build');
+    expect(text).not.toContain('Version Count');
+    expect(text).not.toContain('Pulls');
   });
 });
 
