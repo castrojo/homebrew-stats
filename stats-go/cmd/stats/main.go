@@ -15,6 +15,7 @@ import (
 	"github.com/castrojo/bootc-ecosystem/internal/history"
 	"github.com/castrojo/bootc-ecosystem/internal/metrics"
 	"github.com/castrojo/bootc-ecosystem/internal/osanalytics"
+	"github.com/castrojo/bootc-ecosystem/internal/quay"
 	"github.com/castrojo/bootc-ecosystem/internal/scorecard"
 	"github.com/castrojo/bootc-ecosystem/internal/supplychain"
 	"github.com/castrojo/bootc-ecosystem/internal/tap"
@@ -89,6 +90,21 @@ func main() {
 			fmt.Fprintln(os.Stderr, "❌ fetch-builds-blue-build:", err)
 			os.Exit(1)
 		}
+	case "fetch-quay-fedora":
+		if err := runFetchQuay("fedora", quay.FedoraRepos); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-quay-fedora:", err)
+			os.Exit(1)
+		}
+	case "fetch-quay-centos":
+		if err := runFetchQuay("centos", quay.CentOSRepos); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-quay-centos:", err)
+			os.Exit(1)
+		}
+	case "fetch-quay-almalinux":
+		if err := runFetchQuay("almalinux", quay.AlmaLinuxRepos); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-quay-almalinux:", err)
+			os.Exit(1)
+		}
 	case "fetch-scorecard":
 		if err := runFetchScorecard(); err != nil {
 			fmt.Fprintln(os.Stderr, "❌ fetch-scorecard:", err)
@@ -101,7 +117,7 @@ func main() {
 		}
 	default:
 		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite|fetch-builds-universal-blue|fetch-builds-ucore|fetch-builds-zirconium|fetch-builds-bootcrew|fetch-builds-blue-build|fetch-scorecard|fetch-supply-chain]")
+		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite|fetch-builds-universal-blue|fetch-builds-ucore|fetch-builds-zirconium|fetch-builds-bootcrew|fetch-builds-blue-build|fetch-quay-fedora|fetch-quay-centos|fetch-quay-almalinux|fetch-scorecard|fetch-supply-chain]")
 		os.Exit(1)
 	}
 }
@@ -1304,6 +1320,23 @@ func runFetchBuildsFor(image string, repos []builds.RepoConfig) error {
 
 	collector := builds.NewCollector(cfg)
 	return collector.Run()
+}
+
+func runFetchQuay(name string, repos []quay.RepoConfig) error {
+	fmt.Fprintf(os.Stderr, "→ Fetching Quay.io pull stats (%s)…\n", name)
+	out, err := quay.FetchAll(repos)
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("src/data/quay-%s.json", name)
+	if err := writeJSON(path, out); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(os.Stderr, "✓ Wrote %s\n", path)
+	fmt.Fprintf(os.Stderr, "  repos: %d, pulls(7d): %d\n", len(out.Repos), out.TotalPulls7d)
+	return nil
 }
 
 // ── fetch-scorecard ─────────────────────────────────────────────────────────
