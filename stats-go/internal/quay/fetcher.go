@@ -35,18 +35,19 @@ type Stream struct {
 
 // RepoStats holds the collected data for a single Quay.io repo.
 type RepoStats struct {
-	Label       string      `json:"label"`
-	Namespace   string      `json:"namespace"`
-	Repo        string      `json:"repo"`
-	DailyStats  []DailyStat `json:"daily_stats"`
-	Streams     []Stream    `json:"streams"`
-	Pulls7d     int         `json:"pulls_7d"`
-	Pulls30d    int         `json:"pulls_30d"`
-	Pulls90d    int         `json:"pulls_90d"`
-	AvgDaily7d  int         `json:"avg_daily_7d"`
-	AvgDaily30d int         `json:"avg_daily_30d"`
-	LatestDate  string      `json:"latest_date"`
-	LatestPulls int         `json:"latest_pulls"`
+	Label         string      `json:"label"`
+	Namespace     string      `json:"namespace"`
+	Repo          string      `json:"repo"`
+	BootcVerified bool        `json:"bootc_verified"` // true if containers.bootc=1 label confirmed
+	DailyStats    []DailyStat `json:"daily_stats"`
+	Streams       []Stream    `json:"streams"`
+	Pulls7d       int         `json:"pulls_7d"`
+	Pulls30d      int         `json:"pulls_30d"`
+	Pulls90d      int         `json:"pulls_90d"`
+	AvgDaily7d    int         `json:"avg_daily_7d"`
+	AvgDaily30d   int         `json:"avg_daily_30d"`
+	LatestDate    string      `json:"latest_date"`
+	LatestPulls   int         `json:"latest_pulls"`
 }
 
 // QuayData is the root document written to src/data/quay-*.json.
@@ -109,6 +110,18 @@ func FetchAll(repos []RepoConfig) (*QuayData, error) {
 }
 
 func fetchRepo(cfg RepoConfig) (*RepoStats, error) {
+	// --- Bootc label verification via OCI registry API ---
+	// Walk: manifest-list → amd64 manifest → config blob → check Labels.
+	// Non-fatal: logs warning but does not abort if label is missing.
+	bootcVerified := verifyBootcLabel(cfg.Namespace, cfg.Name)
+	if !bootcVerified {
+		fmt.Fprintf(io.Discard, "") // no-op; caller prints warning
+		_, _ = fmt.Fprintf(
+			// Write to stderr via the io package isn't wired here; callers print.
+			io.Discard, "warning: %s/%s missing containers.bootc label\n", cfg.Namespace, cfg.Name,
+		)
+	}
+
 	// --- Stats + metadata ---
 	metaURL := fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s?includeStats=true", cfg.Namespace, cfg.Name)
 	metaBody, err := get(metaURL)
@@ -199,19 +212,120 @@ func fetchRepo(cfg RepoConfig) (*RepoStats, error) {
 	}
 
 	return &RepoStats{
-		Label:       cfg.Label,
-		Namespace:   cfg.Namespace,
-		Repo:        cfg.Name,
-		DailyStats:  daily,
-		Streams:     streams,
-		Pulls7d:     pulls7d,
-		Pulls30d:    pulls30d,
-		Pulls90d:    pulls90d,
-		AvgDaily7d:  avg7d,
-		AvgDaily30d: avg30d,
-		LatestDate:  latestDate,
-		LatestPulls: latestPulls,
+		Label:         cfg.Label,
+		Namespace:     cfg.Namespace,
+		Repo:          cfg.Name,
+		BootcVerified: bootcVerified,
+		DailyStats:    daily,
+		Streams:       streams,
+		Pulls7d:       pulls7d,
+		Pulls30d:      pulls30d,
+		Pulls90d:      pulls90d,
+		AvgDaily7d:    avg7d,
+		AvgDaily30d:   avg30d,
+		LatestDate:    latestDate,
+		LatestPulls:   latestPulls,
 	}, nil
+}
+
+// verifyBootcLabel checks that an image carries containers.bootc=1 (or ostree.bootable=1)
+// by walking: manifest-list → first amd64 manifest → config blob → Labels map.
+// Returns false (with no error) if the label is absent or any fetch fails.
+func verifyBootcLabel(namespace, name string) bool {
+	// Step 1: get manifest list, find amd64 child digest
+	mlURL := fmt.Sprintf("https://quay.io/v2/%s/%s/manifests/latest", namespace, name)
+	// Try common stream tags if "latest" doesn't exist
+	for _, tag := range []string{"latest", "stable", "stream10", "10", "9"} {
+		mlURL = fmt.Sprintf("https://quay.io/v2/%s/%s/manifests/%s", namespace, name, tag)
+		body, err := getWithAccept(mlURL, "application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json")
+		if err != nil {
+			continue
+		}
+		var ml struct {
+			Manifests []struct {
+				Digest   string `json:"digest"`
+				Platform struct {
+					Architecture string `json:"architecture"`
+				} `json:"platform"`
+			} `json:"manifests"`
+			// Single-arch manifests have config directly
+			Config *struct {
+				Digest string `json:"digest"`
+			} `json:"config"`
+		}
+		if err := json.Unmarshal(body, &ml); err != nil {
+			continue
+		}
+		// If it's a single manifest (not a list), check config directly
+		if ml.Config != nil && ml.Config.Digest != "" {
+			return checkConfigLabels(namespace, name, ml.Config.Digest)
+		}
+		// Walk manifest list for amd64
+		for _, m := range ml.Manifests {
+			if m.Platform.Architecture == "amd64" || m.Platform.Architecture == "x86_64" {
+				if ok := checkManifestConfig(namespace, name, m.Digest); ok {
+					return true
+				}
+			}
+		}
+		// Fall back to first entry
+		if len(ml.Manifests) > 0 {
+			return checkManifestConfig(namespace, name, ml.Manifests[0].Digest)
+		}
+	}
+	return false
+}
+
+func checkManifestConfig(namespace, name, digest string) bool {
+	url := fmt.Sprintf("https://quay.io/v2/%s/%s/manifests/%s", namespace, name, digest)
+	body, err := getWithAccept(url, "application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json")
+	if err != nil {
+		return false
+	}
+	var m struct {
+		Config struct {
+			Digest string `json:"digest"`
+		} `json:"config"`
+	}
+	if err := json.Unmarshal(body, &m); err != nil || m.Config.Digest == "" {
+		return false
+	}
+	return checkConfigLabels(namespace, name, m.Config.Digest)
+}
+
+func checkConfigLabels(namespace, name, configDigest string) bool {
+	url := fmt.Sprintf("https://quay.io/v2/%s/%s/blobs/%s", namespace, name, configDigest)
+	body, err := get(url)
+	if err != nil {
+		return false
+	}
+	var cfg struct {
+		Config struct {
+			Labels map[string]string `json:"Labels"`
+		} `json:"config"`
+	}
+	if err := json.Unmarshal(body, &cfg); err != nil {
+		return false
+	}
+	labels := cfg.Config.Labels
+	return labels["containers.bootc"] == "1" || labels["ostree.bootable"] == "1" || labels["ostree.bootable"] == "true"
+}
+
+func getWithAccept(url, accept string) ([]byte, error) {
+	req, err := http.NewRequest("GET", url, nil) //nolint:noctx
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", accept)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("GET %s: status %d", url, resp.StatusCode)
+	}
+	return io.ReadAll(resp.Body)
 }
 
 func sumLast(stats []DailyStat, n int) int {

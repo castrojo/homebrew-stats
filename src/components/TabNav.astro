@@ -1,22 +1,28 @@
 ---
-interface Props { activeTab: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds' | 'aurora-builds' | 'bazzite-builds' | 'universal-blue' | 'ucore' | 'zirconium' | 'bootcrew' | 'secureblue' | 'blue-build'; }
+interface Props { activeTab: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds' | 'aurora-builds' | 'bazzite-builds' | 'universal-blue' | 'ucore' | 'zirconium' | 'bootcrew' | 'secureblue' | 'blue-build' | 'fedora' | 'centos' | 'almalinux'; }
 const { activeTab } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <nav class="tab-nav">
-  <a href={`${base}/overall/`} class="site-brand" aria-label="bootc ecosystem home">
-    <img src={`${base}/bootc-logo.svg`} alt="bootc" class="site-logo" />
-    <span class="site-name">bootc ecosystem</span>
-  </a>
+  <div class="tab-nav-top">
+    <a href={`${base}/overall/`} class="site-brand" aria-label="bootc ecosystem home">
+      <img src={`${base}/bootc-logo.svg`} alt="bootc" class="site-logo" />
+      <span class="site-name">bootc ecosystem</span>
+    </a>
+    <button id="theme-toggle" title="Toggle theme">🖥</button>
+  </div>
   <div class="tab-links">
     <a href={`${base}/overall/`}           data-astro-prefetch class:list={['tab', { active: activeTab === 'overall'          }]}>bootc</a>
     <a href={`${base}/contributors/`}      data-astro-prefetch class:list={['tab', { active: activeTab === 'contributors'     }]}>Contributors</a>
     <span class="tab-sep" aria-hidden="true"></span>
     <a href={`${base}/aurora-builds/`}     data-astro-prefetch class:list={['tab', { active: activeTab === 'aurora-builds'    }]}>Aurora</a>
+    <a href={`${base}/almalinux/`}         data-astro-prefetch class:list={['tab', { active: activeTab === 'almalinux'        }]}>AlmaLinux</a>
     <a href={`${base}/bazzite-builds/`}    data-astro-prefetch class:list={['tab', { active: activeTab === 'bazzite-builds'   }]}>Bazzite</a>
     <a href={`${base}/blue-build/`}        data-astro-prefetch class:list={['tab', { active: activeTab === 'blue-build'       }]}>BlueBuild</a>
     <a href={`${base}/builds/`}            data-astro-prefetch class:list={['tab', { active: activeTab === 'builds'           }]}>Bluefin</a>
     <a href={`${base}/bootcrew/`}          data-astro-prefetch class:list={['tab', { active: activeTab === 'bootcrew'         }]}>bootcrew</a>
+    <a href={`${base}/centos/`}            data-astro-prefetch class:list={['tab', { active: activeTab === 'centos'           }]}>CentOS</a>
+    <a href={`${base}/fedora/`}            data-astro-prefetch class:list={['tab', { active: activeTab === 'fedora'           }]}>Fedora</a>
     <a href={`${base}/secureblue/`}        data-astro-prefetch class:list={['tab', { active: activeTab === 'secureblue'       }]}>secureblue</a>
     <a href={`${base}/universal-blue/`}    data-astro-prefetch class:list={['tab', { active: activeTab === 'universal-blue'   }]}>ublue-os</a>
     <a href={`${base}/ucore/`}             data-astro-prefetch class:list={['tab', { active: activeTab === 'ucore'            }]}>uCore</a>
@@ -25,31 +31,35 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <a href={`${base}/`}                   data-astro-prefetch class:list={['tab', { active: activeTab === 'homebrew'         }]}>Homebrew</a>
     <a href={`${base}/testhub/`}           data-astro-prefetch class:list={['tab', { active: activeTab === 'testhub'          }]}>Testhub</a>
   </div>
-  <button id="theme-toggle" title="Toggle theme">🖥</button>
 </nav>
 <style>
 .tab-nav {
   display: flex;
-  align-items: center;
-  gap: 0;
+  flex-direction: column;
   border-bottom: 1px solid var(--border);
   margin-bottom: 2rem;
-  padding: 0 0 0 0;
+}
+
+/* Row 1: logo left, toggle right */
+.tab-nav-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .site-brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px 8px 0;
+  padding: 4px 0;
   text-decoration: none;
   flex-shrink: 0;
-  border-right: 1px solid var(--border);
-  margin-right: 4px;
 }
 .site-brand:hover { text-decoration: none; }
 .site-logo {
-  height: 28px;
+  height: 26px;
   width: auto;
 }
 .site-name {
@@ -59,20 +69,21 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   white-space: nowrap;
 }
 
+/* Row 2: tabs wrap naturally, no scrollbar */
 .tab-links {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  flex: 1;
-  overflow-x: auto;
   gap: 0;
+  padding-top: 2px;
 }
 
 .tab {
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.85rem;
   text-decoration: none;
   color: var(--muted);
   border-bottom: 2px solid transparent;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   white-space: nowrap;
   transition: color 0.15s, border-color 0.15s;
 }
@@ -85,9 +96,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 .tab-sep {
   display: inline-block;
   width: 1px;
-  height: 20px;
+  height: 18px;
   background: var(--border);
   margin: 0 4px;
+  align-self: center;
   flex-shrink: 0;
 }
 
@@ -98,10 +110,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   border-radius: 6px;
   padding: 4px 10px;
   cursor: pointer;
-  font-size: 14px;
-  margin-left: auto;
+  font-size: 13px;
   flex-shrink: 0;
-  margin-right: 0;
 }
 #theme-toggle:hover { background: var(--bg2); }
 </style>

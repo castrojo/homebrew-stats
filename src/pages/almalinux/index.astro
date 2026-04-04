@@ -1,0 +1,290 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ChartCard from '../../components/ChartCard.astro';
+import { safeJson } from '../../lib/inject.ts';
+import rawData from '../../data/quay-almalinux.json';
+
+interface DailyStat {
+  date: string;
+  count: number;
+}
+
+interface Stream {
+  name: string;
+  last_modified: string;
+  arch_count: number;
+}
+
+interface QuayRepo {
+  label: string;
+  namespace: string;
+  repo: string;
+  daily_stats: DailyStat[];
+  streams: Stream[];
+  avg_daily_7d: number;
+}
+
+interface QuayData {
+  generated_at: string;
+  repos: QuayRepo[];
+  total_pulls_7d: number;
+  total_pulls_30d: number;
+  total_pulls_90d: number;
+  combined_daily: DailyStat[];
+}
+
+interface StreamRow {
+  name: string;
+  lastModified: string;
+  archCount: number;
+  ageText: string;
+  status: 'fresh' | 'warm' | 'stale';
+}
+
+const data = rawData as unknown as QuayData;
+const repo = data.repos[0];
+const isBootstrap = !data.generated_at;
+const generatedAt = data.generated_at ? new Date(data.generated_at).toUTCString() : '';
+const numberFmt = new Intl.NumberFormat('en-US');
+const nowMs = data.generated_at ? new Date(data.generated_at).getTime() : Date.now();
+
+function ageInfo(lastModified: string): { ageText: string; status: StreamRow['status'] } {
+  const ts = new Date(lastModified).getTime();
+  if (Number.isNaN(ts)) return { ageText: 'Unknown', status: 'stale' };
+  const ageHours = Math.max(0, Math.floor((nowMs - ts) / 3_600_000));
+  const ageText = ageHours < 1 ? '<1h ago' : ageHours < 24 ? `${ageHours}h ago` : `${Math.floor(ageHours / 24)}d ago`;
+  const status = ageHours < 24 ? 'fresh' : ageHours <= 72 ? 'warm' : 'stale';
+  return { ageText, status };
+}
+
+const streamRows: StreamRow[] = (repo?.streams ?? [])
+  .filter((stream) => !stream.name.startsWith('sha256-'))
+  .filter((stream) => !/(amd64|arm64|aarch64|ppc64le|s390x|x86_64)/i.test(stream.name))
+  .map((stream) => {
+    const age = ageInfo(stream.last_modified);
+    return {
+      name: stream.name,
+      lastModified: stream.last_modified,
+      archCount: stream.arch_count,
+      ageText: age.ageText,
+      status: age.status,
+    };
+  });
+
+const chartData = { daily: data.combined_daily ?? [] };
+---
+
+<Layout title="AlmaLinux bootc" activeTab={'almalinux' as any}>
+  <header class="page-header">
+    <h1>AlmaLinux bootc</h1>
+    <p class="meta">
+      {generatedAt && <>Updated {generatedAt} · </>}
+      <a href="https://quay.io/repository/almalinuxorg/almalinux-bootc" target="_blank" rel="noopener">quay.io/almalinuxorg/almalinux-bootc</a>
+      {' · '}
+      <a href="https://almalinux.org/" target="_blank" rel="noopener">almalinux.org</a>
+    </p>
+  </header>
+
+  {isBootstrap ? (
+    <p class="collecting">Collecting data — check back after next CI run</p>
+  ) : (
+    <>
+      <section class="kpi-grid">
+        <article class="kpi-card"><div class="kpi-label">7d pulls</div><div class="kpi-value">{numberFmt.format(data.total_pulls_7d ?? 0)}</div></article>
+        <article class="kpi-card"><div class="kpi-label">30d pulls</div><div class="kpi-value">{numberFmt.format(data.total_pulls_30d ?? 0)}</div></article>
+        <article class="kpi-card"><div class="kpi-label">90d pulls</div><div class="kpi-value">{numberFmt.format(data.total_pulls_90d ?? 0)}</div></article>
+        <article class="kpi-card"><div class="kpi-label">Avg daily 7d</div><div class="kpi-value">{numberFmt.format(repo?.avg_daily_7d ?? 0)}</div></article>
+      </section>
+
+      <ChartCard title="Daily Pull Trend" canvasId="almalinux-trend-chart" height={280} />
+
+      <section class="table-section">
+        <h2>Stream Freshness</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Stream</th>
+                <th>Last Modified</th>
+                <th>Age</th>
+                <th>Architectures</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {streamRows.map((row) => (
+                <tr>
+                  <td class="mono">{row.name}</td>
+                  <td>{row.lastModified}</td>
+                  <td>{row.ageText}</td>
+                  <td>{row.archCount}</td>
+                  <td>
+                    <span class={`status-badge ${row.status}`}>
+                      <span class="dot"></span>
+                      {row.status === 'fresh' ? 'Fresh' : row.status === 'warm' ? 'Aging' : 'Stale'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <script type="application/json" id="almalinux-quay-data" set:html={safeJson(chartData)} />
+      <script>
+        import '../../lib/chart-registry.js';
+        import { Chart } from 'chart.js';
+        import { getChartColors } from '../../lib/chart-theme.js';
+        import { readChartData } from '../../lib/inject.js';
+
+        function makeGradient(chart, topColor, bottomColor) {
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return topColor;
+          const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          g.addColorStop(0, topColor);
+          g.addColorStop(1, bottomColor);
+          return g;
+        }
+
+        function movingAvg(data, window = 7) {
+          return data.map((_, i) => {
+            const slice = data.slice(Math.max(0, i - window + 1), i + 1);
+            return { x: data[i].x, y: Math.round(slice.reduce((s, p) => s + p.y, 0) / slice.length) };
+          });
+        }
+
+        const fmt = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+        const fmtFull = new Intl.NumberFormat('en-US');
+        const payload = readChartData('almalinux-quay-data');
+        const points = (payload.daily ?? []).map((d) => ({ x: d.date, y: d.count }));
+        const avgPoints = movingAvg(points);
+        const colors = getChartColors();
+
+        const canvas = document.getElementById('almalinux-trend-chart');
+        let chart;
+        if (canvas) {
+          chart = new Chart(canvas, {
+            type: 'line',
+            data: { datasets: [{
+              label: 'Daily pulls',
+              data: points,
+              borderColor: '#af68d9',
+              backgroundColor: (ctx) => makeGradient(ctx.chart, 'rgba(175,104,217,0.45)', 'rgba(175,104,217,0.02)'),
+              fill: 'origin',
+              tension: 0.35,
+              cubicInterpolationMode: 'monotone',
+              borderWidth: 2.5,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              pointHitRadius: 20,
+              pointHoverBackgroundColor: '#af68d9',
+            }, {
+              label: '7-day avg',
+              data: avgPoints,
+              borderColor: 'rgba(175,104,217,0.5)',
+              borderDash: [5, 3],
+              fill: false,
+              tension: 0.35,
+              borderWidth: 1.5,
+              pointRadius: 0,
+            }]},
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: { labels: { color: 'var(--text)', usePointStyle: true, pointStyleWidth: 10 } },
+                filler: { propagate: true },
+                tooltip: {
+                  mode: 'index', intersect: false,
+                  backgroundColor: 'rgba(38,38,38,0.97)',
+                  titleColor: '#f4f4f4',
+                  bodyColor: '#c6c6c6',
+                  borderColor: 'rgba(175,104,217,0.4)',
+                  borderWidth: 1,
+                  padding: 12,
+                  callbacks: {
+                    title: (items) => {
+                      const date = items[0]?.raw?.x ?? items[0]?.label ?? '';
+                      return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    },
+                    label: (ctx) => ` ${ctx.dataset.label}: ${fmtFull.format(ctx.parsed.y)} pulls`,
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  type: 'category',
+                  ticks: { color: colors.muted, maxTicksLimit: 8, autoSkip: true },
+                  grid: { color: colors.grid },
+                  border: { color: colors.grid },
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: { color: colors.muted, callback: (v) => fmt.format(v) },
+                  grid: { color: colors.grid },
+                  border: { color: colors.grid },
+                },
+              },
+            },
+          });
+        }
+
+        window.addEventListener('themechange', () => {
+          if (!chart) return;
+          const isDark = document.documentElement.dataset.theme === 'dark';
+          const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+          const textColor = isDark ? '#8d8d8d' : '#525252';
+          chart.options.scales.x.ticks.color = textColor;
+          chart.options.scales.x.grid.color = gridColor;
+          chart.options.scales.y.ticks.color = textColor;
+          chart.options.scales.y.grid.color = gridColor;
+          chart.options.plugins.legend.labels.color = isDark ? '#f4f4f4' : '#161616';
+          chart.update('none');
+        });
+      </script>
+    </>
+  )}
+</Layout>
+
+<style>
+  .page-header { margin-bottom: 1.5rem; }
+  h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+  .meta { color: var(--muted); font-size: 0.85rem; }
+  .collecting { color: var(--muted); margin-bottom: 1.5rem; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem;
+  }
+  .kpi-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .kpi-value { color: var(--accent); font-size: 1.5rem; font-weight: 700; margin-top: 0.3rem; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border); text-align: left; }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  tbody tr:nth-child(odd) { background: var(--bg); }
+  tbody tr:nth-child(even) { background: var(--bg2); }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  .status-badge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; padding: 0.2rem 0.45rem; border-radius: 999px; border: 1px solid var(--border); }
+  .status-badge .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .status-badge.fresh .dot { background: var(--green); }
+  .status-badge.warm .dot { background: var(--yellow); }
+  .status-badge.stale .dot { background: var(--red); }
+  :global(.chart-card) { box-shadow: var(--card-shadow); }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>

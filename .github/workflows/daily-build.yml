@@ -166,6 +166,21 @@ jobs:
         continue-on-error: true
         timeout-minutes: 8
 
+      - name: Fetch Quay.io pull stats (Fedora)
+        run: ./stats-go/stats fetch-quay-fedora
+        continue-on-error: true
+        timeout-minutes: 5
+
+      - name: Fetch Quay.io pull stats (CentOS)
+        run: ./stats-go/stats fetch-quay-centos
+        continue-on-error: true
+        timeout-minutes: 5
+
+      - name: Fetch Quay.io pull stats (AlmaLinux)
+        run: ./stats-go/stats fetch-quay-almalinux
+        continue-on-error: true
+        timeout-minutes: 5
+
       - name: Fetch Scorecard data
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
