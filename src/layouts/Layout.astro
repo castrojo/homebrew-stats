@@ -7,7 +7,7 @@ interface Props {
   description?: string;
   activeTab?: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds' | 'aurora-builds' | 'bazzite-builds' | 'universal-blue' | 'ucore' | 'zirconium' | 'bootcrew' | 'secureblue';
 }
-const { title = 'Homebrew Tap Stats', description = 'Health dashboard for ublue-os Homebrew taps', activeTab } = Astro.props;
+const { title = 'bootc ecosystem', description = 'Health dashboard for the bootc image ecosystem', activeTab } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 <!doctype html>
@@ -17,12 +17,17 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
-    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/bootc-logo.svg`} />
     <script is:inline>
       (function() {
         const stored = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = stored || (prefersDark ? 'dark' : 'light');
+        let theme;
+        if (stored === 'light' || stored === 'dark') {
+          theme = stored;
+        } else {
+          // system default — respect OS preference
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
         document.documentElement.dataset.theme = theme;
       })();
     </script>
@@ -30,31 +35,40 @@ const base = import.meta.env.BASE_URL;
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
       :root {
-        --bg:       #0d1117;
-        --bg2:      #161b22;
-        --border:   #30363d;
-        --text:     #e6edf3;
-        --muted:    #7d8590;
-        --link:     #58a6ff;
-        --green:    #3fb950;
-        --yellow:   #d29922;
-        --red:      #f85149;
-        --purple:   #a371f7;
-        --blue:     #388bfd;
+        /* Carbon dark + bootc purple accents */
+        --bg:       #161616;
+        --bg2:      #262626;
+        --bg3:      #1e1e1e;
+        --border:   #393939;
+        --text:     #f4f4f4;
+        --muted:    #8d8d8d;
+        --link:     #af68d9;
+        --green:    #24a148;
+        --yellow:   #f1c21b;
+        --red:      #fa4d56;
+        --purple:   #af68d9;
+        --blue:     #9232a9;
+        --indigo:   #6929c4;
+        --accent:   #78298b;
+        --card-shadow: 0 1px 4px rgba(0,0,0,0.45);
       }
 
       [data-theme="light"] {
         --bg:       #ffffff;
-        --bg2:      #f6f8fa;
-        --border:   #d0d7de;
-        --text:     #1f2328;
-        --muted:    #656d76;
-        --link:     #0969da;
-        --green:    #1a7f37;
-        --yellow:   #9a6700;
-        --red:      #d1242f;
-        --purple:   #8250df;
-        --blue:     #0969da;
+        --bg2:      #f4f4f4;
+        --bg3:      #f8f8f8;
+        --border:   #e0e0e0;
+        --text:     #161616;
+        --muted:    #525252;
+        --link:     #6929c4;
+        --green:    #198038;
+        --yellow:   #b28600;
+        --red:      #da1e28;
+        --purple:   #8a3ffc;
+        --blue:     #6929c4;
+        --indigo:   #4f2196;
+        --accent:   #6929c4;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.10);
       }
 
       body {
@@ -101,7 +115,7 @@ const base = import.meta.env.BASE_URL;
         padding-bottom: 8px;
         border-bottom: 1px solid var(--border);
         padding-left: 10px;
-        border-left: 3px solid var(--blue);
+        border-left: 3px solid var(--accent);
       }
 
       a { color: var(--link); text-decoration: none; }
@@ -116,14 +130,11 @@ const base = import.meta.env.BASE_URL;
         text-align: center;
       }
 
-      header { position: relative; }
-
-      #theme-toggle {
-        background: none; border: 1px solid var(--border); color: var(--text);
-        border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 14px;
-        position: absolute; top: 24px; right: 16px;
+      /* Card depth — picked up by ChartCard and KPI components */
+      :global(.chart-card),
+      :global(.kpi-card) {
+        box-shadow: var(--card-shadow);
       }
-      #theme-toggle:hover { background: var(--bg2); }
     </style>
   </head>
   <body>
@@ -138,18 +149,49 @@ const base = import.meta.env.BASE_URL;
       </footer>
     </div>
     <script>
-      const btn = document.getElementById('theme-toggle') as HTMLButtonElement;
-      function applyTheme(theme: string) {
-        document.documentElement.dataset.theme = theme;
-        localStorage.setItem('theme', theme);
-        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      const btn = document.getElementById('theme-toggle') as HTMLButtonElement | null;
+      if (btn) {
+        const modes = ['system', 'light', 'dark'] as const;
+        type Mode = typeof modes[number];
+        const icons: Record<Mode, string> = { system: '🖥', light: '☀️', dark: '🌙' };
+
+        function getSystemTheme() {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function applyMode(mode: Mode) {
+          const resolved = mode === 'system' ? getSystemTheme() : mode;
+          document.documentElement.dataset.theme = resolved;
+          if (mode === 'system') {
+            localStorage.removeItem('theme');
+          } else {
+            localStorage.setItem('theme', mode);
+          }
+          btn.textContent = icons[mode];
+          btn.title = `Theme: ${mode}`;
+          window.dispatchEvent(new CustomEvent('themechange'));
+        }
+
+        function getCurrentMode(): Mode {
+          const stored = localStorage.getItem('theme');
+          if (stored === 'light' || stored === 'dark') return stored;
+          return 'system';
+        }
+
+        // Initialize
+        applyMode(getCurrentMode());
+
+        btn.addEventListener('click', () => {
+          const current = getCurrentMode();
+          const next = modes[(modes.indexOf(current) + 1) % modes.length];
+          applyMode(next);
+        });
+
+        // Keep system mode in sync with OS preference changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          if (getCurrentMode() === 'system') applyMode('system');
+        });
       }
-      applyTheme(document.documentElement.dataset.theme || 'dark');
-      btn.addEventListener('click', () => {
-        const current = document.documentElement.dataset.theme;
-        applyTheme(current === 'dark' ? 'light' : 'dark');
-        window.dispatchEvent(new CustomEvent('themechange'));
-      });
     </script>
   </body>
 </html>
