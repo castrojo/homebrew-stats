@@ -1,133 +1,130 @@
 ---
 import ChartCard from './ChartCard.astro';
 import { safeJson } from '../lib/inject.ts';
-import type { AppDayCount } from '../lib/types.ts';
 
 interface DaySnapshot {
   date: string;
-  build_counts: AppDayCount[];
-  last_run_id: number;
+  build_counts: { app: string; passed: number; failed: number; total: number }[] | null;
 }
 
 interface Props {
   history: DaySnapshot[];
 }
 const { history } = Astro.props;
+
+const series = [...history]
+  .sort((a, b) => a.date.localeCompare(b.date))
+  .slice(-30)
+  .map((snapshot) => {
+    const counts = snapshot.build_counts ?? [];
+    const passed = counts.reduce((sum, item) => sum + (item.passed ?? 0), 0);
+    const failed = counts.reduce((sum, item) => sum + (item.failed ?? 0), 0);
+    return {
+      date: snapshot.date,
+      passed,
+      failed,
+    };
+  });
 ---
 
-{history.length === 0 ? (
-  <ChartCard title="Build Pass Rate by App" canvasId="testhub-build-chart" isEmpty emptyMsg="Collecting data…" />
+{series.length === 0 ? (
+  <ChartCard title="Build Outcomes (Last 30 Snapshots)" canvasId="testhub-build-chart" isEmpty emptyMsg="Collecting data…" />
 ) : (
   <>
     <ChartCard
-      title="Build Pass Rate by App"
+      title="Build Outcomes (Last 30 Snapshots)"
       canvasId="testhub-build-chart"
       height={300}
-      rangeId="build-range-btns"
-      ranges={[{ label: '30d', value: '30d' }, { label: '90d', value: '90d' }, { label: '365d', value: '365d' }, { label: 'All', value: 'all' }]}
-      defaultRange="30d"
     />
-    <script type="application/json" id="testhub-build-data" set:html={safeJson({ history })}></script>
+    <script type="application/json" id="testhub-build-data" set:html={safeJson({ series })}></script>
   </>
 )}
 
 <script>
 import '../lib/chart-registry.js';
-import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { getChartColors } from '../lib/chart-theme.js';
 import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('testhub-build-data');
 if (dataEl) {
-  const { history } = readChartData<{
-    history: { date: string; build_counts: { app: string; passed: number; total: number }[]; last_run_id: number }[]
+  const { series } = readChartData<{
+    series: { date: string; passed: number; failed: number }[]
   }>('testhub-build-data');
   const canvas = document.getElementById('testhub-build-chart') as HTMLCanvasElement;
-
-  const appSet = new Set<string>();
-  for (const snap of history) {
-    for (const c of snap.build_counts) appSet.add(c.app);
-  }
-  const apps = Array.from(appSet).sort();
-
-  function getFiltered(range: string) {
-    if (range === 'all') return history;
-    const days = Number.parseInt(range, 10);
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    const cutoffStr = cutoff.toISOString().slice(0, 10);
-    return history.filter((s: { date: string }) => s.date >= cutoffStr);
-  }
-
-  function buildDatasets(data: { build_counts: { app: string; passed: number; total: number }[] }[]) {
-    return apps.map((app: string, i: number) => ({
-      label: app,
-      data: data.map(snap => {
-        const c = snap.build_counts.find((bc: { app: string }) => bc.app === app);
-        if (!c || c.total === 0) return null;
-        return Math.round((c.passed / c.total) * 100);
-      }),
-      borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
-      backgroundColor: 'transparent',
-      spanGaps: true,
-      tension: 0.3,
-      pointRadius: 3,
-    }));
-  }
-
-  let currentRange = '30d';
-  let filtered = getFiltered(currentRange);
   const c = getChartColors();
 
   let chart: Chart | undefined;
   try {
     chart = new Chart(canvas, {
-      type: 'line',
+      type: 'bar',
       data: {
-        labels: filtered.map((s: { date: string }) => s.date),
-        datasets: buildDatasets(filtered),
+        labels: series.map((s) => s.date),
+        datasets: [
+          {
+            label: 'Passed',
+            data: series.map((s) => s.passed),
+            backgroundColor: '#24a148',
+            borderColor: '#24a148',
+            borderWidth: 1,
+            borderRadius: 4,
+            borderSkipped: false,
+            stack: 'builds',
+          },
+          {
+            label: 'Failed',
+            data: series.map((s) => s.failed),
+            backgroundColor: '#fa4d56',
+            borderColor: '#fa4d56',
+            borderWidth: 1,
+            borderRadius: 4,
+            borderSkipped: false,
+            stack: 'builds',
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { grid: { color: c.grid }, ticks: { color: c.muted, maxTicksLimit: 10 } },
-          y: {
-            min: 0,
-            max: 100,
+          x: {
+            type: 'category',
+            stacked: true,
             grid: { color: c.grid },
-            ticks: { color: c.muted, callback: (v: number | string) => `${v}%` },
+            ticks: { color: c.muted, maxTicksLimit: 8 },
+          },
+          y: {
+            beginAtZero: true,
+            stacked: true,
+            grid: { color: c.grid },
+            ticks: { color: c.muted },
           },
         },
-        plugins: { legend: { labels: { color: c.text, usePointStyle: true, boxWidth: 8 } } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              footer: (items: { parsed: { y: number } }[]) => {
+                const total = items.reduce((sum, item) => sum + item.parsed.y, 0);
+                return `Total: ${total}`;
+              },
+            },
+          },
+        },
       },
     });
   } catch (e) {
     console.error('[TesthubBuildChart] Chart.js init failed:', e);
   }
 
-  document.getElementById('build-range-btns')?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (!chart) return;
-      document.getElementById('build-range-btns')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentRange = btn.dataset.range!;
-      const data = getFiltered(currentRange);
-      chart.data.labels = data.map((s: { date: string }) => s.date);
-      chart.data.datasets = buildDatasets(data);
-      chart.update();
-    });
-  });
-
   window.addEventListener('themechange', () => {
     if (!chart) return;
     const colors = getChartColors();
-    (chart.options.plugins!.legend!.labels as { color: string }).color = colors.text;
     chart.options.scales!.x!.ticks!.color = colors.muted;
     (chart.options.scales!.x!.grid as { color: string }).color = colors.grid;
     chart.options.scales!.y!.ticks!.color = colors.muted;
     (chart.options.scales!.y!.grid as { color: string }).color = colors.grid;
-    chart.update();
+    chart.update('none');
   });
 }
 </script>

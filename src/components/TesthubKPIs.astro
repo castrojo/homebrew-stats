@@ -54,6 +54,14 @@ const totalRuns30d = history
   .reduce((sum, s) => sum + s.build_counts.reduce((a, c) => a + c.total, 0), 0);
 // Total OCI pulls across all packages
 const totalPulls = packages.reduce((sum, p) => sum + (p.pull_count ?? 0), 0);
+
+// Average pass rate over the last 7 days across all tracked apps
+const passRateSamples = buildMetrics
+  .map(m => m.pass_rate_7d)
+  .filter((v): v is number => Number.isFinite(v));
+const avgPassRate7d = passRateSamples.length > 0
+  ? passRateSamples.reduce((sum, v) => sum + v, 0) / passRateSamples.length
+  : null;
 ---
 
 <div class="hero-kpis">
@@ -64,6 +72,10 @@ const totalPulls = packages.reduce((sum, p) => sum + (p.pull_count ?? 0), 0);
   <div class="kpi-card">
     <div class="kpi-value">{latestBuildStatus}</div>
     <div class="kpi-label">Latest Build Status</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{avgPassRate7d == null ? "—" : `${avgPassRate7d.toFixed(1)}%`}</div>
+    <div class="kpi-label">Pass Rate (7d)</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-value">{updatedThisWeek}</div>

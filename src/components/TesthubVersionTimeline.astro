@@ -1,112 +1,103 @@
 ---
 import ChartCard from './ChartCard.astro';
 import { safeJson } from '../lib/inject.ts';
-import type { Package } from '../lib/types.ts';
 
 interface DaySnapshot {
   date: string;
-  packages: Package[];
-  build_counts: { app: string }[];
-  last_run_id: number;
+  packages: { version_count: number }[] | null;
 }
 
 interface Props { history: DaySnapshot[]; }
 const { history } = Astro.props;
+
+let previousTotal = 0;
+const timeline = [...history]
+  .sort((a, b) => a.date.localeCompare(b.date))
+  .map((snapshot) => {
+    if (snapshot.packages && snapshot.packages.length > 0) {
+      previousTotal = snapshot.packages.reduce((sum, pkg) => sum + (pkg.version_count ?? 0), 0);
+    }
+    return {
+      date: snapshot.date,
+      totalVersions: previousTotal,
+    };
+  });
 ---
 
-{history.length === 0 ? (
-  <ChartCard title="Version Change Timeline" canvasId="testhub-version-chart" isEmpty emptyMsg="Collecting data…" />
+{timeline.length === 0 ? (
+  <ChartCard title="Published Versions Over Time" canvasId="testhub-version-chart" isEmpty emptyMsg="Collecting data…" />
 ) : (
   <>
     <ChartCard
-      title="Version Change Timeline"
+      title="Published Versions Over Time"
       canvasId="testhub-version-chart"
       height={300}
     />
-    <script type="application/json" id="testhub-version-data" set:html={safeJson({ history })}></script>
+    <script type="application/json" id="testhub-version-data" set:html={safeJson({ timeline })}></script>
   </>
 )}
 
 <script>
 import '../lib/chart-registry.js';
-import { BRAND_COLOURS, getChartColors } from '../lib/chart-theme.js';
+import { getChartColors } from '../lib/chart-theme.js';
 import { readChartData } from '../lib/inject.js';
 import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('testhub-version-data');
 if (dataEl) {
-  const { history } = readChartData<{
-    history: { date: string; packages: { name: string; version?: string }[]; build_counts: { app: string }[]; last_run_id: number }[]
+  const { timeline } = readChartData<{
+    timeline: { date: string; totalVersions: number }[]
   }>('testhub-version-data');
   const canvas = document.getElementById('testhub-version-chart') as HTMLCanvasElement;
 
-  const appSet = new Set<string>();
-  for (const snap of history) {
-    for (const pkg of snap.packages) appSet.add(pkg.name);
-  }
-  const apps = Array.from(appSet).sort();
-
-  interface VersionChange { date: string; version: string; app: string }
-  const changes: VersionChange[] = [];
-  for (const app of apps) {
-    let prevVer: string | undefined;
-    for (const snap of history) {
-      const pkg = snap.packages.find((p: { name: string }) => p.name === app);
-      if (!pkg) continue;
-      const ver = pkg.version ?? '';
-      if (prevVer !== undefined && ver !== prevVer) {
-        changes.push({ date: snap.date, version: ver, app });
-      }
-      prevVer = ver;
-    }
+  function makeGradient(chart: Chart, topColor: string, bottomColor: string): CanvasGradient | string {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return topColor;
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, topColor);
+    gradient.addColorStop(1, bottomColor);
+    return gradient;
   }
 
   const c = getChartColors();
 
-  const datasets = apps.map((app: string, i: number) => {
-    const pts = changes
-      .filter((ch: VersionChange) => ch.app === app)
-      .map((ch: VersionChange) => ({ x: ch.date, y: i, label: ch.version }));
-    return {
-      label: app,
-      data: pts,
-      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
-      pointRadius: 8,
-      pointHoverRadius: 10,
-    };
-  }).filter((ds: { data: unknown[] }) => ds.data.length > 0);
-
   let chart: Chart | undefined;
   try {
     chart = new Chart(canvas, {
-      type: 'scatter',
-      data: { datasets },
+      type: 'line',
+      data: {
+        labels: timeline.map((point) => point.date),
+        datasets: [
+          {
+            label: 'Total versions',
+            data: timeline.map((point) => point.totalVersions),
+            borderColor: '#af68d9',
+            backgroundColor: (ctx) => makeGradient(ctx.chart, 'rgba(175,104,217,0.45)', 'rgba(175,104,217,0.03)'),
+            fill: true,
+            tension: 0.35,
+            pointRadius: 2,
+            pointHoverRadius: 4,
+            pointBackgroundColor: '#af68d9',
+          },
+        ],
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
           x: {
             type: 'category',
-            labels: history.map((s: { date: string }) => s.date),
             grid: { color: c.grid },
             ticks: { color: c.muted, maxTicksLimit: 10 },
           },
           y: {
-            type: 'category',
-            labels: apps,
+            beginAtZero: true,
             grid: { color: c.grid },
             ticks: { color: c.muted },
-            offset: true,
           },
         },
         plugins: {
-          legend: { labels: { color: c.text, usePointStyle: true, boxWidth: 8 } },
-          tooltip: {
-            callbacks: {
-              label: (ctx: { raw: { label?: string; x: string } }) =>
-                `${ctx.raw.label ?? ''} (${ctx.raw.x})`,
-            },
-          },
+          legend: { display: false },
         },
       },
     });
@@ -117,12 +108,11 @@ if (dataEl) {
   window.addEventListener('themechange', () => {
     if (!chart) return;
     const colors = getChartColors();
-    (chart.options.plugins!.legend!.labels as { color: string }).color = colors.text;
     chart.options.scales!.x!.ticks!.color = colors.muted;
     (chart.options.scales!.x!.grid as { color: string }).color = colors.grid;
     chart.options.scales!.y!.ticks!.color = colors.muted;
     (chart.options.scales!.y!.grid as { color: string }).color = colors.grid;
-    chart.update();
+    chart.update('none');
   });
 }
 </script>

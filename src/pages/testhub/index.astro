@@ -13,13 +13,16 @@ const history = (data.history as any) ?? [];
 ---
 
 <Layout title="Testhub — bootc-ecosystem" activeTab="testhub">
-  <header>
+  <header class="page-header">
     <h1>projectbluefin/testhub</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://github.com/projectbluefin/testhub">projectbluefin/testhub</a>
     </div>
-
+    <p class="intro">
+      Testhub tracks package publishing and CI build outcomes for projectbluefin apps. Use this page to quickly
+      spot reliability trends, failed builds, and how published version volume changes over time.
+    </p>
   </header>
 
   <TesthubKPIs
@@ -29,21 +32,37 @@ const history = (data.history as any) ?? [];
     generatedAt={data.generated_at}
   />
 
-  <TesthubPackageTable
-    packages={packages}
-    buildMetrics={buildMetrics}
-  />
+  <section class="section">
+    <h2>Package Health</h2>
+    <TesthubPackageTable
+      packages={packages}
+      buildMetrics={buildMetrics}
+    />
+  </section>
 
   {history.length > 0 && (
     <section class="charts-section">
-      <h2>Build Trends</h2>
+      <h2>Build Outcomes</h2>
       <TesthubBuildChart history={history} />
-      <h2>Version Timeline</h2>
+      <h2>Version Growth Timeline</h2>
       <TesthubVersionTimeline history={history} />
     </section>
   )}
 </Layout>
 
 <style>
+  .page-header { margin-bottom: 24px; }
+  .intro {
+    margin-top: 10px;
+    color: var(--muted);
+    max-width: 72ch;
+    line-height: 1.5;
+  }
+  .section { margin-bottom: 20px; }
+  .section > h2,
+  .charts-section > h2 {
+    margin: 22px 0 12px;
+    color: var(--text);
+  }
   .charts-section { margin-bottom: 48px; }
 </style>

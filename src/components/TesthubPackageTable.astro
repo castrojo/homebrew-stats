@@ -25,14 +25,33 @@ const { packages, buildMetrics } = Astro.props;
 const metricsByApp = Object.fromEntries(buildMetrics.map(m => [m.app, m]));
 
 function statusBadge(status: string): string {
-  if (status === "passing") return "🟢 Pass";
-  if (status === "failing") return "🔴 Fail";
-  return "⚪ —";
+  if (status === "passing") return "Passing";
+  if (status === "failing") return "Failing";
+  return "Unknown";
+}
+
+function parseDate(value?: string): Date | null {
+  if (!value) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function relativeTime(value?: string): string {
+  const date = parseDate(value);
+  if (!date) return "—";
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  if (diffMs < 0) return "in the future";
+  const day = 24 * 60 * 60 * 1000;
+  const days = Math.floor(diffMs / day);
+  if (days === 0) return "today";
+  if (days === 1) return "1 day ago";
+  return `${days} days ago`;
 }
 ---
 
 <section class="testhub-table-section">
-  <h2>Packages</h2>
   {packages.length === 0 ? (
     <p class="chart-empty">Collecting data…</p>
   ) : (
@@ -42,8 +61,8 @@ function statusBadge(status: string): string {
           <tr>
             <th data-sort-key="name" class="sortable">Package ↕</th>
             <th data-sort-key="version" class="sortable">Version ↕</th>
-            <th data-sort-key="updated_at" class="sortable">Last Updated ↕</th>
             <th data-sort-key="last_status" class="sortable">Build Status ↕</th>
+            <th data-sort-key="last_build_ts" class="sortable">Last Build ↕</th>
             <th data-sort-key="pull_count" class="sortable">Pulls ↕</th>
             <th data-sort-key="version_count" class="sortable">Version Count ↕</th>
           </tr>
@@ -52,12 +71,14 @@ function statusBadge(status: string): string {
           {packages.map(pkg => {
             const m = metricsByApp[pkg.name];
             const status = m?.last_status ?? "unknown";
+            const lastBuild = m?.last_build_at;
+            const lastBuildDate = parseDate(lastBuild);
             return (
               <tr
                 data-name={pkg.name}
                 data-version={pkg.version ?? ""}
-                data-updated_at={pkg.updated_at ?? ""}
                 data-last_status={status}
+                data-last_build_ts={lastBuildDate ? lastBuildDate.getTime() : 0}
                 data-pull_count={pkg.pull_count ?? 0}
                 data-version_count={pkg.version_count}
               >
@@ -67,8 +88,10 @@ function statusBadge(status: string): string {
                     : pkg.name}
                 </td>
                 <td>{pkg.version ?? "—"}</td>
-                <td>{pkg.updated_at ? pkg.updated_at.slice(0, 10) : "—"}</td>
-                <td>{statusBadge(status)}</td>
+                <td>
+                  <span class={`status-badge ${status}`}>{statusBadge(status)}</span>
+                </td>
+                <td title={lastBuild ?? "No data"}>{relativeTime(lastBuild)}</td>
                 <td>{(pkg.pull_count != null && pkg.pull_count > 0) ? pkg.pull_count.toLocaleString() : "—"}</td>
                 <td>{pkg.version_count.toLocaleString()}</td>
               </tr>
@@ -102,7 +125,7 @@ function statusBadge(status: string): string {
         const aVal = a.dataset[sortKey] ?? '';
         const bVal = b.dataset[sortKey] ?? '';
         // Numeric sort for version_count and pull_count
-        if (sortKey === 'version_count' || sortKey === 'pull_count') {
+        if (sortKey === 'version_count' || sortKey === 'pull_count' || sortKey === 'last_build_ts') {
           return (Number(aVal) - Number(bVal)) * sortDir;
         }
         return aVal.localeCompare(bVal) * sortDir;
@@ -124,4 +147,27 @@ function statusBadge(status: string): string {
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .status-badge.passing {
+    border-color: #24a148;
+    color: #42be65;
+    background: rgba(36, 161, 72, 0.12);
+  }
+  .status-badge.failing {
+    border-color: #da1e28;
+    color: #fa4d56;
+    background: rgba(250, 77, 86, 0.12);
+  }
+  .status-badge.unknown {
+    color: var(--muted);
+    background: var(--bg3);
+  }
 </style>
