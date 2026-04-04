@@ -1,11 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import type { BuildsData } from '../../lib/types.ts';
+import type { BuildsData, ScorecardData } from '../../lib/types.ts';
 import rawData from '../../data/builds-bazzite.json';
 
 import BuildsHealthBar from '../../components/builds/BuildsHealthBar.astro';
 import DORAPanel from '../../components/builds/DORAPanel.astro';
-import GoldenSignalsPanel from '../../components/builds/GoldenSignalsPanel.astro';
 import BuildSuccessChart from '../../components/builds/BuildSuccessChart.astro';
 import BuildDurationChart from '../../components/builds/BuildDurationChart.astro';
 import FailureAnalysisChart from '../../components/builds/FailureAnalysisChart.astro';
@@ -24,8 +23,17 @@ import TriggerBreakdownChart from '../../components/builds/TriggerBreakdownChart
 import StreamHealthTable from '../../components/builds/StreamHealthTable.astro';
 import ArchComparisonPanel from '../../components/builds/ArchComparisonPanel.astro';
 import SupplyChainPanel from '../../components/builds/SupplyChainPanel.astro';
+import ScorecardPanel from '../../components/builds/ScorecardPanel.astro';
+import scorecardRaw from '../../data/scorecard.json';
 
 const builds = rawData as unknown as BuildsData;
+const scorecardData = scorecardRaw as unknown as ScorecardData;
+const bazziteScorecardData: ScorecardData = {
+  ...scorecardData,
+  results: (scorecardData.results ?? []).filter((result) =>
+    result.repo.toLowerCase().includes('bazzite'),
+  ),
+};
 const generatedAt = new Date(builds.generated_at).toUTCString();
 const isBootstrap = builds.summary.health_status === 'unknown';
 ---
@@ -48,19 +56,21 @@ const isBootstrap = builds.summary.health_status === 'unknown';
       <!-- Section 1: Summary KPIs + DORA -->
       <BuildsHealthBar summary={builds.summary} doraLevel={builds.dora_metrics.dora_level} />
       <DORAPanel dora={builds.dora_metrics} />
-      <GoldenSignalsPanel dora={builds.dora_metrics} summary={builds.summary} />
 
       <!-- Section 1b: Monthly Overview (bootstrap guard — needs >= 2 months) -->
       {builds.monthly_history && builds.monthly_history.length >= 2 && (
-        <section class="monthly-overview">
+        <section class="monthly-section">
           <h2 class="section-heading">Monthly Overview</h2>
           <MonthlyKPIStrip
             current={builds.monthly_history[builds.monthly_history.length - 1]}
             prior={builds.monthly_history[builds.monthly_history.length - 2]}
           />
-          <div class="monthly-charts">
+          <section class="monthly-overview">
+            <h3>Monthly Overview</h3>
             <MonthlySuccessChart history={builds.monthly_history} />
             <MonthlyDurationChart history={builds.monthly_history} />
+          </section>
+          <div class="monthly-charts">
             <MonthlyRepoBreakdown history={builds.monthly_history} />
             <DORALevelTrendChart history={builds.monthly_history} />
           </div>
@@ -74,6 +84,7 @@ const isBootstrap = builds.summary.health_status === 'unknown';
       <!-- Section 3: Failure analysis + Flakiness -->
       <FailureAnalysisChart breakdown={builds.failure_breakdown} mttr={builds.dora_metrics.mttr_minutes} mtbf={builds.dora_metrics.mtbf_hours} />
       <FlakinessLeaderboard flaky={builds.top_flaky} />
+      <ScorecardPanel data={bazziteScorecardData} />
 
       <!-- Section 4: Throughput + Triggers -->
       <div class="throughput-triggers-grid">
@@ -125,9 +136,12 @@ const isBootstrap = builds.summary.health_status === 'unknown';
     margin-bottom: 1.5rem;
   }
 
-  .monthly-overview {
+  .monthly-section {
     margin-bottom: 2rem;
   }
+
+  .monthly-overview { margin: 2rem 0; }
+  .monthly-overview h3 { font-size: 1rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
 
   .section-heading {
     font-size: 1.1rem;

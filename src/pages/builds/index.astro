@@ -5,7 +5,6 @@ import rawData from '../../data/builds-bluefin.json';
 
 import BuildsHealthBar from '../../components/builds/BuildsHealthBar.astro';
 import DORAPanel from '../../components/builds/DORAPanel.astro';
-import GoldenSignalsPanel from '../../components/builds/GoldenSignalsPanel.astro';
 import BuildSuccessChart from '../../components/builds/BuildSuccessChart.astro';
 import BuildDurationChart from '../../components/builds/BuildDurationChart.astro';
 import FailureAnalysisChart from '../../components/builds/FailureAnalysisChart.astro';
@@ -50,19 +49,21 @@ const isBootstrap = builds.summary.health_status === 'unknown';
       <!-- Section 1: Summary KPIs + DORA -->
       <BuildsHealthBar summary={builds.summary} doraLevel={builds.dora_metrics.dora_level} />
       <DORAPanel dora={builds.dora_metrics} />
-      <GoldenSignalsPanel dora={builds.dora_metrics} summary={builds.summary} />
 
       <!-- Section 1b: Monthly Overview (bootstrap guard — needs ≥ 2 months) -->
       {builds.monthly_history && builds.monthly_history.length >= 2 && (
-        <section class="monthly-overview">
+        <section class="monthly-section">
           <h2 class="section-heading">Monthly Overview</h2>
           <MonthlyKPIStrip
             current={builds.monthly_history[builds.monthly_history.length - 1]}
             prior={builds.monthly_history[builds.monthly_history.length - 2]}
           />
-          <div class="monthly-charts">
+          <section class="monthly-overview">
+            <h3>Monthly Overview</h3>
             <MonthlySuccessChart history={builds.monthly_history} />
             <MonthlyDurationChart history={builds.monthly_history} />
+          </section>
+          <div class="monthly-charts">
             <MonthlyRepoBreakdown history={builds.monthly_history} />
             <DORALevelTrendChart history={builds.monthly_history} />
           </div>
@@ -127,9 +128,12 @@ const isBootstrap = builds.summary.health_status === 'unknown';
     margin-bottom: 1.5rem;
   }
 
-  .monthly-overview {
+  .monthly-section {
     margin-bottom: 2rem;
   }
+
+  .monthly-overview { margin: 2rem 0; }
+  .monthly-overview h3 { font-size: 1rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
 
   .section-heading {
     font-size: 1.1rem;
