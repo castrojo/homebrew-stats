@@ -56,6 +56,7 @@ function fmt(n: number | undefined): string {
         </span>
       )}
     </div>
+    <div class="kpi-sub">/ this week</div>
     <div class="kpi-label">Total Active Devices</div>
   </div>
 
@@ -75,9 +76,12 @@ function fmt(n: number | undefined): string {
             </span>
           )}
         </div>
+        {hasCount && <div class="kpi-sub">/ this week</div>}
         <div class="kpi-label">{img.label}</div>
         {spark.length >= 2 && spark.some(v => v > 0) && (
-          <Sparkline data={spark} color={img.color} label={`${img.label} 12-week trend`} />
+          <div class="kpi-sparkline">
+            <Sparkline data={spark} color={img.color} label={`${img.label} 12-week trend`} />
+          </div>
         )}
       </div>
     );
@@ -88,7 +92,13 @@ function fmt(n: number | undefined): string {
   .hero-kpis { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
   .kpi-card {
     background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 20px 24px; flex: 1 1 130px;
+    padding: 20px 24px; flex: 1 1 160px;
+    display: flex; flex-direction: column;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .kpi-card:hover {
+    border-color: var(--accent);
+    background: var(--bg3);
   }
   .kpi-total {
     border-left: 3px solid var(--blue);
@@ -100,7 +110,19 @@ function fmt(n: number | undefined): string {
   .kpi-collecting {
     font-size: 0.9rem; color: var(--muted); font-weight: 400;
   }
+  .kpi-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
   .kpi-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-sparkline { margin-top: auto; padding-top: 10px; }
+  .kpi-sparkline :global(.sparkline-wrap) {
+    display: block;
+    width: 100%;
+    margin-left: 0;
+  }
+  .kpi-sparkline :global(.sparkline-wrap canvas) { height: 28px !important; }
   .kpi-trend { font-size: 0.9rem; font-weight: 600; }
   .trend-up { color: var(--green); }
   .trend-down { color: var(--red); }

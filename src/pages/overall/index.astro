@@ -9,6 +9,7 @@ import data from '../../data/countme.json';
 import DORAComparisonSection from '../../components/DORAComparisonSection.astro';
 import FutureProofedPanel from '../../components/FutureProofedPanel.astro';
 import ScorecardPanel from '../../components/builds/ScorecardPanel.astro';
+import Sparkline from '../../components/Sparkline.astro';
 import scorecardRaw from '../../data/scorecard.json';
 import type { BuildsData, BuildRepoMetrics, ScorecardData } from '../../lib/types.ts';
 const scorecardData = scorecardRaw as unknown as ScorecardData;
@@ -30,13 +31,44 @@ const weekRecords = data.history.week_records ?? [];
 
 // ── Image Pulls (Quay.io) ─────────────────────────────────────────────────────
 const imagePullTiles = [
-  ...quayFedora.repos.map(r => ({ label: r.label, pulls7d: r.pulls_7d, pulls30d: r.pulls_30d, href: '/bootc-ecosystem/fedora/', verified: r.bootc_verified })),
-  ...quayCentos.repos.map(r => ({ label: r.label, pulls7d: r.pulls_7d, pulls30d: r.pulls_30d, href: '/bootc-ecosystem/centos/', verified: r.bootc_verified })),
-  ...quayAlmaLinux.repos.map(r => ({ label: r.label, pulls7d: r.pulls_7d, pulls30d: r.pulls_30d, href: '/bootc-ecosystem/almalinux/', verified: r.bootc_verified })),
+  ...quayFedora.repos.map(r => ({
+    label: r.label,
+    pulls7d: r.pulls_7d,
+    pulls30d: r.pulls_30d,
+    spark30d: r.daily_stats.slice(-30).map(d => d.count),
+    href: '/bootc-ecosystem/fedora/',
+    verified: r.bootc_verified ?? false,
+  })),
+  ...quayCentos.repos.map(r => ({
+    label: r.label,
+    pulls7d: r.pulls_7d,
+    pulls30d: r.pulls_30d,
+    spark30d: r.daily_stats.slice(-30).map(d => d.count),
+    href: '/bootc-ecosystem/centos/',
+    verified: r.bootc_verified ?? false,
+  })),
+  ...quayAlmaLinux.repos.map(r => ({
+    label: r.label,
+    pulls7d: r.pulls_7d,
+    pulls30d: r.pulls_30d,
+    spark30d: r.daily_stats.slice(-30).map(d => d.count),
+    href: '/bootc-ecosystem/almalinux/',
+    verified: r.bootc_verified ?? false,
+  })),
 ];
 const totalPulls7d = quayFedora.total_pulls_7d + quayCentos.total_pulls_7d + quayAlmaLinux.total_pulls_7d;
 const totalPulls30d = quayFedora.total_pulls_30d + quayCentos.total_pulls_30d + quayAlmaLinux.total_pulls_30d;
 function fmtNum(n: number) { return n >= 1_000_000 ? (n/1_000_000).toFixed(1)+'M' : n >= 1_000 ? (n/1_000).toFixed(1)+'K' : String(n); }
+const combinedDailyMap: Record<string, number> = {};
+for (const source of [quayFedora, quayCentos, quayAlmaLinux]) {
+  for (const entry of source.combined_daily ?? []) {
+    combinedDailyMap[entry.date] = (combinedDailyMap[entry.date] ?? 0) + entry.count;
+  }
+}
+const totalPullsSpark30d = Object.keys(combinedDailyMap)
+  .sort()
+  .slice(-30)
+  .map(date => combinedDailyMap[date]);
 
 // ── Countme distros shown across all countme-aware sections ──────────────────
 const countmeDistros = [
@@ -216,24 +248,28 @@ const countmeTrendImages = [
 
   <h1>Image Pulls</h1>
   <div class="pulls-meta">Quay.io container image pulls · source: public registry API</div>
-  <div class="pulls-grid">
-    <!-- Total tile -->
-    <a href="/bootc-ecosystem/fedora/" class="pull-tile pull-tile--total">
-      <div class="pull-tile-label">All Tracked Images</div>
-      <div class="pull-tile-value">{fmtNum(totalPulls7d)}</div>
-      <div class="pull-tile-sub">7-day pulls</div>
-      <div class="pull-tile-30d">{fmtNum(totalPulls30d)} / 30 days</div>
+  <div class="hero-kpis pulls-kpis">
+    <a href="/bootc-ecosystem/fedora/" class="kpi-card kpi-total kpi-card-link">
+      <div class="kpi-label">All Tracked Images</div>
+      <div class="kpi-value">{fmtNum(totalPulls30d)}</div>
+      <div class="kpi-sub">/ 30 days</div>
+      <div class="kpi-secondary">{fmtNum(totalPulls7d)} / 7 days</div>
+      <div class="kpi-sparkline">
+        <Sparkline data={totalPullsSpark30d} color="var(--accent)" label="All tracked images 30-day pull trend" />
+      </div>
     </a>
-    <!-- Individual image tiles -->
     {imagePullTiles.map(tile => (
-      <a href={tile.href} class="pull-tile">
-        <div class="pull-tile-label">
+      <a href={tile.href} class="kpi-card kpi-card-link">
+        <div class="kpi-label">
           {tile.label}
           {tile.verified && <span class="verified-badge" title="bootc verified">✓</span>}
         </div>
-        <div class="pull-tile-value">{fmtNum(tile.pulls7d)}</div>
-        <div class="pull-tile-sub">7-day pulls</div>
-        <div class="pull-tile-30d">{fmtNum(tile.pulls30d)} / 30 days</div>
+        <div class="kpi-value">{fmtNum(tile.pulls30d)}</div>
+        <div class="kpi-sub">/ 30 days</div>
+        <div class="kpi-secondary">{fmtNum(tile.pulls7d)} / 7 days</div>
+        <div class="kpi-sparkline">
+          <Sparkline data={tile.spark30d} color="var(--purple)" label={`${tile.label} 30-day pull trend`} />
+        </div>
       </a>
     ))}
   </div>
@@ -304,64 +340,81 @@ const countmeTrendImages = [
     margin-bottom: 16px;
     margin-top: -8px;
   }
-  .pulls-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 14px;
+  .hero-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-bottom: 40px;
   }
-  .pull-tile {
+  .kpi-card {
     background: var(--bg2);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    text-decoration: none;
-    color: inherit;
+    border-radius: 8px;
+    padding: 20px 24px;
+    flex: 1 1 160px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
     transition: border-color 0.15s, background 0.15s;
   }
-  .pull-tile:hover {
+  .kpi-card:hover {
     border-color: var(--accent);
     background: var(--bg3);
+  }
+  .kpi-card-link {
     text-decoration: none;
+    color: inherit;
   }
-  .pull-tile--total {
+  .kpi-total {
     border-left: 3px solid var(--accent);
-    background: var(--bg3);
   }
-  .pull-tile-label {
-    font-size: 0.75rem;
+  .kpi-label {
+    font-size: 11px;
     color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     display: flex;
     align-items: center;
     gap: 5px;
   }
-  .pull-tile-value {
-    font-size: 1.6rem;
+  .pulls-kpis .kpi-label { margin-top: 0; }
+  .kpi-value {
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text);
     line-height: 1.1;
-    letter-spacing: -0.02em;
   }
-  .pull-tile--total .pull-tile-value {
+  .kpi-total .kpi-value {
     color: var(--accent);
   }
-  .pull-tile-sub {
-    font-size: 0.7rem;
+  .kpi-sub {
+    font-size: 0.75rem;
     color: var(--muted);
+    margin-top: 2px;
   }
-  .pull-tile-30d {
-    font-size: 0.7rem;
+  .kpi-secondary {
+    font-size: 0.75rem;
     color: var(--muted);
-    margin-top: 4px;
-    padding-top: 6px;
-    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .kpi-sparkline {
+    margin-top: auto;
+    padding-top: 10px;
+  }
+  .kpi-sparkline :global(.sparkline-wrap) {
+    display: block;
+    width: 100%;
+    margin-left: 0;
+  }
+  .kpi-sparkline :global(.sparkline-wrap canvas) {
+    height: 28px !important;
   }
   .verified-badge {
     color: var(--accent);
     font-size: 0.7rem;
     font-weight: 700;
+  }
+  @media (max-width: 600px) {
+    .kpi-card { flex: 1 1 calc(50% - 6px); }
   }
 </style>
