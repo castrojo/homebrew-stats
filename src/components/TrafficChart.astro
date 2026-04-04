@@ -11,7 +11,7 @@ const { history, tapNames } = Astro.props;
 ---
 
 <ChartCard
-  title="Unique Tappers Over Time"
+  title="Install Trend by Tap"
   canvasId="traffic-chart"
   height={260}
   rangeId="traffic-range-btns"
@@ -27,19 +27,45 @@ const { history, tapNames } = Astro.props;
   import { Chart } from 'chart.js';
 
   const { history: allHistory, tapNames } = readChartData<{
-    history: { date: string; taps: Record<string, { uniques: number }> }[];
+    history: { date: string; taps: Record<string, { count: number; downloads?: Record<string, number> }> }[];
     tapNames: string[];
   }>('traffic-data');
+
+  function makeGradient(chart: Chart, topColor: string, bottomColor: string): string | CanvasGradient {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return topColor;
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, topColor);
+    gradient.addColorStop(1, bottomColor);
+    return gradient;
+  }
+
+  function getTapInstalls(snapshot: (typeof allHistory)[number], tapName: string): number | null {
+    const downloads = snapshot.taps[tapName]?.downloads;
+    if (downloads) {
+      return Object.values(downloads).reduce((sum, value) => sum + value, 0);
+    }
+    const fallback = snapshot.taps[tapName]?.count;
+    return typeof fallback === 'number' ? fallback : null;
+  }
 
   function buildDatasets(data: typeof allHistory) {
     return tapNames.map((name, i) => ({
       label: name,
-      data: data.map(s => s.taps[name]?.uniques ?? null),
+      data: data.map(s => getTapInstalls(s, name)),
       borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
-      backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length] + '22',
-      fill: true,
-      tension: 0.3,
-      pointRadius: data.length < 15 ? 4 : 2,
+      backgroundColor: (ctx: { chart: Chart }) =>
+        makeGradient(
+          ctx.chart,
+          `${BRAND_COLOURS[i % BRAND_COLOURS.length]}66`,
+          `${BRAND_COLOURS[i % BRAND_COLOURS.length]}05`
+        ),
+      fill: 'origin',
+      tension: 0.35,
+      cubicInterpolationMode: 'monotone' as const,
+      borderWidth: 2.5,
+      pointRadius: data.length < 15 ? 3 : 0,
+      pointHoverRadius: 4,
       spanGaps: true,
     }));
   }
@@ -67,33 +93,34 @@ const { history, tapNames } = Astro.props;
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: {
-            labels: { color: colors.text, font: { size: 12 } },
+            legend: {
+              labels: { color: colors.text, font: { size: 12 } },
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} installs`,
+              },
+            },
           },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'} unique tappers`,
+          scales: {
+            x: {
+              type: 'category',
+              ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
+              grid: { color: colors.grid },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: colors.muted,
+                font: { size: 11 },
+                callback: v => Number(v).toLocaleString(),
+              },
+              grid: { color: colors.grid },
+              title: { display: true, text: 'Installs', color: colors.muted, font: { size: 11 } },
             },
           },
         },
-        scales: {
-          x: {
-            ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
-            grid: { color: colors.grid },
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              color: colors.muted,
-              font: { size: 11 },
-              callback: v => Number(v).toLocaleString(),
-            },
-            grid: { color: colors.grid },
-            title: { display: true, text: 'Unique Tappers', color: colors.muted, font: { size: 11 } },
-          },
-        },
-      },
-    });
+      });
   } catch (e) {
     console.error('[TrafficChart] Chart.js init failed:', e);
   }
@@ -113,5 +140,6 @@ const { history, tapNames } = Astro.props;
   window.addEventListener('themechange', () => {
     if (!chart) return;
     applyTheme(chart);
+    chart.update('none');
   });
 </script>

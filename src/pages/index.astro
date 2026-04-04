@@ -13,28 +13,32 @@ const tapNames = stats.taps.map((t: any) => t.name);
 const stableTap = stats.taps[0] as any;
 ---
 
-<Layout title="ublue-os Homebrew Tap Stats" activeTab="homebrew">
+<Layout title="Homebrew Tap Stats" activeTab="homebrew">
   <header>
-    <h1>ublue-os Homebrew Tap Health</h1>
+    <h1>Homebrew Tap Stats</h1>
     <div class="meta">
       Updated {generatedAt} ·
       <a href="https://github.com/ublue-os/homebrew-tap">homebrew-tap</a> ·
       <a href="https://github.com/ublue-os/homebrew-experimental-tap">homebrew-experimental-tap</a>
     </div>
-
+    <p class="explainer">
+      This dashboard tracks installs and usage across the stable and experimental ublue Homebrew taps.
+      Values show rolling install windows (30/90/365 days), traffic trends per tap, and package-level performance.
+      WoW growth reflects week-over-week change and may be negative when demand cools.
+    </p>
   </header>
 
-  <!-- Hero KPI row: aggregated stats across all taps at a glance -->
+  <h2>At a glance</h2>
   <HeroKPIs summary={(stats as any).summary} taps={stats.taps as any} />
 
   <hr class="section-divider" />
 
-  <!-- Sortable leaderboard: all packages across both taps -->
+  <h2>Top package activity</h2>
   <PackageLeaderboard taps={stats.taps as any} />
 
   {stats.history.length > 1 && (
     <section class="charts-section">
-      <h2>Trends</h2>
+      <h2>Install trends</h2>
       <div class="charts-zone-full">
         <TrafficChart history={stats.history} tapNames={tapNames} />
       </div>
@@ -57,6 +61,13 @@ const stableTap = stats.taps[0] as any;
 </Layout>
 
 <style>
+  .explainer {
+    margin-top: 12px;
+    max-width: 860px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
   .charts-section {
     margin-bottom: 48px;
   }

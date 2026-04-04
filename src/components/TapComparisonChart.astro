@@ -18,7 +18,7 @@ const displayNames: Record<string, string> = {
 ---
 
 <ChartCard
-  title="Stable vs Experimental — Downloads"
+  title="Tap Comparison by Date"
   canvasId="tap-comparison-chart"
   height={260}
   rangeId="comparison-range-btns"
@@ -53,16 +53,31 @@ const displayNames: Record<string, string> = {
       return Object.values(downloads).reduce((s, n) => s + n, 0);
     }
 
+    function makeGradient(chart: Chart, topColor: string, bottomColor: string): string | CanvasGradient {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return topColor;
+      const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      gradient.addColorStop(0, topColor);
+      gradient.addColorStop(1, bottomColor);
+      return gradient;
+    }
+
     function buildDatasets(data: typeof allRelevant) {
       return tapNames.map((name, i) => ({
         label: displayNames[name] ?? name,
         data: data.map(d => getTapTotal(d, name)),
         borderColor: BRAND_COLOURS[i % BRAND_COLOURS.length],
-        backgroundColor: BRAND_COLOURS[i % BRAND_COLOURS.length] + '22',
-        fill: false,
-        tension: 0.3,
-        pointRadius: data.length < 15 ? 4 : 2,
-        spanGaps: true,
+        backgroundColor: (ctx: { chart: Chart }) =>
+          makeGradient(
+            ctx.chart,
+            `${BRAND_COLOURS[i % BRAND_COLOURS.length]}bf`,
+            `${BRAND_COLOURS[i % BRAND_COLOURS.length]}33`
+          ),
+        borderWidth: 1.5,
+        borderRadius: 5,
+        maxBarThickness: 18,
+        categoryPercentage: 0.72,
+        barPercentage: 0.9,
       }));
     }
 
@@ -79,7 +94,7 @@ const displayNames: Record<string, string> = {
     let chart: Chart | undefined;
     try {
       chart = new Chart(document.getElementById('tap-comparison-chart') as HTMLCanvasElement, {
-        type: 'line',
+        type: 'bar',
         data: {
           labels: current.map(d => d.date),
           datasets: buildDatasets(current),
@@ -100,10 +115,13 @@ const displayNames: Record<string, string> = {
           },
           scales: {
             x: {
+              type: 'category',
+              stacked: false,
               ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
               grid: { color: colors.grid },
             },
             y: {
+              stacked: false,
               beginAtZero: true,
               ticks: {
                 color: colors.muted,
@@ -140,6 +158,7 @@ const displayNames: Record<string, string> = {
     window.addEventListener('themechange', () => {
       if (!chart) return;
       applyTheme(chart);
+      chart.update('none');
     });
   }
 </script>

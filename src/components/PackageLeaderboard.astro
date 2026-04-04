@@ -1,22 +1,13 @@
 ---
 interface Package {
   name: string;
-  type: string;
-  version?: string;
   downloads?: number;
-  /** Added by newer backend builds; absent in older snapshots. */
   installs_90d?: number;
   installs_365d?: number;
-  velocity7d?: number;
-  is_stale?: boolean;
-  freshness_known?: boolean;
-  homepage?: string;
-  description?: string;
 }
 
 interface Tap {
   name: string;
-  url: string;
   packages: Package[];
 }
 
@@ -24,133 +15,66 @@ interface Props {
   taps: Tap[];
 }
 
-const { taps } = Astro.props;
-
-/** Map full tap names to human-readable short labels. */
-function shortTapName(tapName: string): string {
-  if (tapName.includes('experimental')) return 'experimental';
-  return 'stable';
-}
-
-/** Construct the GitHub blob URL for the formula/cask file. */
-function tapFileUrl(tapUrl: string, pkg: Package): string {
-  const folder = pkg.type === 'cask' ? 'Casks' : 'Formula';
-  return `${tapUrl}/blob/main/${folder}/${pkg.name}.rb`;
-}
-
 interface Row {
-  name: string;
-  type: string;
-  tap: string;
-  tapUrl: string;
-  tapFileUrl: string;
-  downloads: number;
+  package: string;
+  tapName: string;
+  installs30d: number;
   installs90d: number;
   installs365d: number;
-  velocity7d: number | null;
-  version: string;
-  description: string;
-  homepage: string;
+}
+
+const { taps } = Astro.props;
+
+function shortTapName(tapName: string): string {
+  return tapName.includes('experimental') ? 'experimental' : 'stable';
 }
 
 const rows: Row[] = taps.flatMap(tap =>
   tap.packages.map(pkg => ({
-    name:        pkg.name,
-    type:        pkg.type,
-    tap:         shortTapName(tap.name),
-    tapUrl:      tap.url,
-    tapFileUrl:  tapFileUrl(tap.url, pkg),
-    downloads:   pkg.downloads ?? 0,
-    installs90d:  pkg.installs_90d  ?? 0,
+    package: pkg.name,
+    tapName: shortTapName(tap.name),
+    installs30d: pkg.downloads ?? 0,
+    installs90d: pkg.installs_90d ?? 0,
     installs365d: pkg.installs_365d ?? 0,
-    velocity7d:  pkg.velocity7d ?? null,
-    version:     pkg.version ?? '—',
-    description: pkg.description ?? '',
-    homepage:    pkg.homepage    ?? '',
   }))
 );
 
-// Default sort: downloads descending so the most-popular packages appear first.
-rows.sort((a, b) => b.downloads - a.downloads);
+rows.sort((a, b) => b.installs30d - a.installs30d);
 ---
 
 <section class="leaderboard-section">
-  <h2>All Packages</h2>
-
   <div class="leaderboard-toolbar">
-    <input
-      id="pkg-search"
-      type="search"
-      placeholder="Filter packages…"
-      autocomplete="off"
-    />
-    <span class="period-btns" id="leaderboard-period-btns">
-      <button class="period-btn active" data-period="30">30d</button>
-      <button class="period-btn" data-period="90">90d</button>
-      <button class="period-btn" data-period="365">365d</button>
-    </span>
+    <input id="pkg-search" type="search" placeholder="Filter package or tap…" autocomplete="off" />
   </div>
-
   <div class="leaderboard-wrap">
     <table id="pkg-leaderboard">
       <thead>
         <tr>
-          <th data-col="name"      class="sortable">Package    <span class="sort-icon"></span></th>
-          <th data-col="tap"       class="sortable">Tap        <span class="sort-icon"></span></th>
-          <th data-col="downloads" class="sortable sort-active sort-desc" id="downloads-th">Downloads (30d) <span class="sort-icon">↓</span></th>
-          <th data-col="velocity7d" class="sortable hide-mobile">Velocity (7d)  <span class="sort-icon"></span></th>
-          <th data-col="version"   class="sortable hide-mobile">Version        <span class="sort-icon"></span></th>
+          <th data-col="package" class="sortable">Package <span class="sort-icon"></span></th>
+          <th data-col="tap" class="sortable">Tap <span class="sort-icon"></span></th>
+          <th data-col="installs30d" class="sortable sort-active sort-desc">30d installs <span class="sort-icon">↓</span></th>
+          <th data-col="installs90d" class="sortable">90d installs <span class="sort-icon"></span></th>
+          <th data-col="installs365d" class="sortable">365d installs <span class="sort-icon"></span></th>
         </tr>
       </thead>
       <tbody>
         {rows.map(row => (
           <tr
-            data-name={row.name}
-            data-tap={row.tap}
-            data-downloads={row.downloads}
-            data-dl-30={row.downloads}
-            data-dl-90={row.installs90d}
-            data-dl-365={row.installs365d}
-            data-velocity={row.velocity7d !== null ? String(row.velocity7d) : ''}
-            data-version={row.version}
+            data-package={row.package}
+            data-tap={row.tapName}
+            data-installs30d={row.installs30d}
+            data-installs90d={row.installs90d}
+            data-installs365d={row.installs365d}
           >
-            <!-- Package: name links to tap file; type badge inline; homepage + description -->
+            <td class="pkg-cell">
+              <span class="pkg-name">{row.package}</span>
+            </td>
             <td>
-              <div class="pkg-name-cell">
-                <a href={row.tapFileUrl} title={`View ${row.name} in tap`}>{row.name}</a>
-                <span class={`badge badge-${row.type}`}>{row.type}</span>
-                {row.homepage && (
-                  <a href={row.homepage} class="pkg-homepage" title="Homepage">↗</a>
-                )}
-              </div>
-              {row.description && (
-                <div class="pkg-desc">{row.description}</div>
-              )}
+              <span class={`tap-badge tap-${row.tapName}`}>{row.tapName}</span>
             </td>
-
-            <!-- Tap short name -->
-            <td>
-              <a href={row.tapUrl} class="tap-link">{row.tap}</a>
-            </td>
-
-            <!-- Downloads: number updated by period toggle -->
-            <td class="num-cell">
-              <span class="downloads dl-num">
-                {row.downloads > 0 ? row.downloads.toLocaleString() : '—'}
-              </span>
-            </td>
-
-            <!-- Velocity (7d): hidden on mobile -->
-            <td class="num-cell hide-mobile">
-              {row.velocity7d !== null && row.velocity7d > 0
-                ? <span class="velocity">+{row.velocity7d.toFixed(1)}/day</span>
-                : <span class="muted">—</span>}
-            </td>
-
-            <!-- Version: hidden on mobile -->
-            <td class="hide-mobile">
-              <span class="version">{row.version}</span>
-            </td>
+            <td class="num-cell">{row.installs30d.toLocaleString()}</td>
+            <td class="num-cell">{row.installs90d.toLocaleString()}</td>
+            <td class="num-cell">{row.installs365d.toLocaleString()}</td>
           </tr>
         ))}
       </tbody>
@@ -159,93 +83,26 @@ rows.sort((a, b) => b.downloads - a.downloads);
 </section>
 
 <script>
-  // ── Period toggle — switches downloads column between 30d / 90d / 365d ────
   const table = document.getElementById('pkg-leaderboard') as HTMLTableElement | null;
-  const dlHeader = document.getElementById('downloads-th');
-  const periodBtns = document.querySelectorAll<HTMLButtonElement>('#leaderboard-period-btns .period-btn');
+  const searchInput = document.getElementById('pkg-search') as HTMLInputElement | null;
 
-  function applyPeriod(period: string): void {
-    if (!table) return;
-    const label = `Downloads (${period}d)`;
-    if (dlHeader) {
-      const icon = dlHeader.querySelector<HTMLElement>('.sort-icon');
-      dlHeader.childNodes[0].textContent = `${label} `;
-      if (icon) icon.textContent = '↓'; // preserve icon
-    }
-    const tbody = table.querySelector('tbody')!;
-    Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr')).forEach(row => {
-      const val = parseInt(row.dataset[`dl${period}`] ?? '0', 10);
-      // Update sort key — used by getValue('downloads')
-      row.dataset.downloads = String(val);
-      const span = row.querySelector<HTMLElement>('.dl-num');
-      if (span) span.textContent = val > 0 ? val.toLocaleString() : '—';
-    });
-  }
-
-  periodBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      periodBtns.forEach(b => b.classList.toggle('active', b === btn));
-      applyPeriod(btn.dataset.period!);
-      // Re-sort by downloads descending with updated values.
-      sortTable('downloads', 'desc');
-      refreshHeaders('downloads', 'desc');
-    });
-  });
-
-  // ── Sortable leaderboard — vanilla JS, no framework ──────────────────────
   if (table) {
-    const headers = Array.from(table.querySelectorAll<HTMLElement>('th[data-col]'));
-    let currentCol = 'downloads';
+    const headers = Array.from(table.querySelectorAll<HTMLTableCellElement>('th[data-col]'));
+    let currentCol = 'installs30d';
     let currentDir: 'asc' | 'desc' = 'desc';
 
-    headers.forEach(th => {
-      th.style.cursor = 'pointer';
-      th.addEventListener('click', () => {
-        const col = th.dataset.col!;
-        if (col === currentCol) {
-          currentDir = currentDir === 'asc' ? 'desc' : 'asc';
-        } else {
-          currentCol = col;
-          // Numeric columns default to descending; string columns to ascending.
-          currentDir = (col === 'downloads' || col === 'velocity7d') ? 'desc' : 'asc';
-        }
-        sortTable(currentCol, currentDir);
-        refreshHeaders(currentCol, currentDir);
-      });
-    });
-
-    /** Extract a sortable scalar from a row for the given column key. */
     function getValue(row: HTMLTableRowElement, col: string): string | number {
       switch (col) {
-        case 'downloads':  return parseInt(row.dataset.downloads  ?? '0', 10);
-        case 'velocity7d': return parseFloat(row.dataset.velocity ?? '0') || 0;
-        case 'name':       return (row.dataset.name    ?? '').toLowerCase();
-        case 'tap':        return (row.dataset.tap     ?? '').toLowerCase();
-        case 'version':    return (row.dataset.version ?? '').toLowerCase();
-        default:           return '';
+        case 'installs30d': return parseInt(row.dataset.installs30d ?? '0', 10);
+        case 'installs90d': return parseInt(row.dataset.installs90d ?? '0', 10);
+        case 'installs365d': return parseInt(row.dataset.installs365d ?? '0', 10);
+        case 'package': return (row.dataset.package ?? '').toLowerCase();
+        case 'tap': return (row.dataset.tap ?? '').toLowerCase();
+        default: return '';
       }
     }
 
-    function sortTable(col: string, dir: 'asc' | 'desc'): void {
-      const tbody = table!.querySelector('tbody')!;
-      const rows  = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
-
-      rows.sort((a, b) => {
-        const va = getValue(a, col);
-        const vb = getValue(b, col);
-        if (typeof va === 'number' && typeof vb === 'number') {
-          return dir === 'asc' ? va - vb : vb - va;
-        }
-        const sa = String(va);
-        const sb = String(vb);
-        return dir === 'asc' ? sa.localeCompare(sb) : sb.localeCompare(sa);
-      });
-
-      // Re-append in sorted order — avoids full re-render.
-      rows.forEach(r => tbody.appendChild(r));
-    }
-
-    function refreshHeaders(activeCol: string, dir: 'asc' | 'desc'): void {
+    function refreshHeaders(activeCol: string, dir: 'asc' | 'desc') {
       headers.forEach(th => {
         const icon = th.querySelector<HTMLElement>('.sort-icon');
         th.classList.remove('sort-active', 'sort-asc', 'sort-desc');
@@ -257,17 +114,46 @@ rows.sort((a, b) => b.downloads - a.downloads);
         }
       });
     }
+
+    function sortTable(col: string, dir: 'asc' | 'desc') {
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return;
+      const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+      rows.sort((a, b) => {
+        const va = getValue(a, col);
+        const vb = getValue(b, col);
+        if (typeof va === 'number' && typeof vb === 'number') {
+          return dir === 'asc' ? va - vb : vb - va;
+        }
+        return dir === 'asc'
+          ? String(va).localeCompare(String(vb))
+          : String(vb).localeCompare(String(va));
+      });
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    headers.forEach(th => {
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', () => {
+        const col = th.dataset.col!;
+        if (col === currentCol) {
+          currentDir = currentDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentCol = col;
+          currentDir = col.startsWith('installs') ? 'desc' : 'asc';
+        }
+        sortTable(currentCol, currentDir);
+        refreshHeaders(currentCol, currentDir);
+      });
+    });
   }
 
-  // ── Search / filter ──────────────────────────────────────────────────────
-  const searchInput = document.getElementById('pkg-search') as HTMLInputElement | null;
   if (searchInput && table) {
     searchInput.addEventListener('input', () => {
       const q = searchInput.value.toLowerCase().trim();
-      const tbody = table.querySelector('tbody')!;
-      Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr')).forEach(row => {
-        const name = (row.dataset.name ?? '').toLowerCase();
-        const tap  = (row.dataset.tap  ?? '').toLowerCase();
+      table.querySelectorAll<HTMLTableRowElement>('tbody tr').forEach(row => {
+        const name = (row.dataset.package ?? '').toLowerCase();
+        const tap = (row.dataset.tap ?? '').toLowerCase();
         row.style.display = (!q || name.includes(q) || tap.includes(q)) ? '' : 'none';
       });
     });
@@ -276,182 +162,109 @@ rows.sort((a, b) => b.downloads - a.downloads);
 
 <style>
   .leaderboard-section {
-    margin-bottom: 48px;
-  }
-
-  /* Horizontal scroll on small viewports rather than breaking layout */
-  .leaderboard-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-    font-size: 13px;
-    /* Ensure the table respects the wrapper's overflow, not the border-radius */
-    min-width: 560px;
-  }
-
-  th, td {
-    padding: 10px 14px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-
-  th {
-    background: var(--bg);
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    user-select: none;
-  }
-
-  th.sortable:hover { color: var(--text); }
-
-  th.sort-active { color: var(--blue); }
-
-  .sort-icon {
-    display: inline-block;
-    width: 12px;
-    margin-left: 2px;
-    font-style: normal;
-  }
-
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(48, 54, 61, 0.5); }
-
-  /* Package cell: name + badge on same line */
-  .pkg-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .pkg-name-cell a {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .pkg-name-cell a:hover { color: var(--link); }
-
-  .tap-link {
-    color: var(--muted);
-    font-size: 12px;
-  }
-
-  .tap-link:hover { color: var(--link); }
-
-  /* Numeric columns: tabular digits so values align */
-  .num-cell {
-    font-variant-numeric: tabular-nums;
-  }
-
-  .downloads { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; }
-  .velocity  { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: var(--green); }
-  .version   { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: var(--muted); }
-  .muted     { color: var(--muted); }
-
-  /* ── Badges ───────────────────────────────────────────────────────────── */
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  /* Type badges — matches TapSection.astro */
-  .badge-cask    { background: rgba(88,166,255,0.15);  color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
-  .badge-formula { background: rgba(163,113,247,0.15); color: #a371f7; border: 1px solid rgba(163,113,247,0.3); }
-
-  .pkg-homepage {
-    color: var(--muted);
-    font-size: 11px;
-    text-decoration: none;
-    margin-left: 2px;
-  }
-  .pkg-homepage:hover { color: var(--link); }
-
-  .pkg-desc {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-    max-width: 380px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 32px;
   }
 
   .leaderboard-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
-
-  .period-btns {
-    display: flex;
-    gap: 2px;
-    margin-left: auto;
-  }
-
-  .period-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 11px;
-    font-family: inherit;
-    padding: 4px 10px;
-    transition: background 0.1s, color 0.1s, border-color 0.1s;
-  }
-
-  .period-btn:hover {
-    border-color: var(--blue);
-    color: var(--blue);
-  }
-
-  .period-btn.active {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
+    margin-bottom: 12px;
   }
 
   #pkg-search {
+    width: 280px;
+    max-width: 100%;
     background: var(--bg2);
     border: 1px solid var(--border);
     color: var(--text);
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 7px 12px;
     font-size: 13px;
-    font-family: inherit;
-    width: 260px;
-    outline: none;
-    transition: border-color 0.15s;
   }
 
   #pkg-search:focus {
-    border-color: var(--blue);
+    outline: none;
+    border-color: var(--accent);
   }
 
   #pkg-search::placeholder {
     color: var(--muted);
   }
 
-  /* Hide verbose columns on mobile — table still horizontally scrollable */
-  @media (max-width: 700px) {
-    .hide-mobile { display: none; }
+  .leaderboard-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  th, td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover td {
+    background: var(--bg3);
+  }
+
+  th {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--bg);
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  th.sort-active {
+    color: var(--purple);
+  }
+
+  .sort-icon {
+    width: 12px;
+    display: inline-block;
+  }
+
+  .pkg-name {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .num-cell {
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .tap-badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 11px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .tap-stable {
+    background: rgba(120, 41, 139, 0.2);
+    border-color: rgba(175, 104, 217, 0.45);
+    color: #d8b4f1;
+  }
+
+  .tap-experimental {
+    background: rgba(146, 50, 169, 0.16);
+    border-color: rgba(146, 50, 169, 0.45);
+    color: #e2c6f1;
   }
 </style>

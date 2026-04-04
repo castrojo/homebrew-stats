@@ -56,13 +56,6 @@ const totalPackages = summary?.total_packages ?? allPkgs.length;
 // wow_growth_pct: null means "no data yet" — show neutral dash.
 const wowGrowth: number | null = summary?.wow_growth_pct ?? null;
 
-function trendArrow(pct: number | null): string {
-  if (pct === null) return '—';
-  if (pct > 0)  return '↑';
-  if (pct < 0)  return '↓';
-  return '→';
-}
-
 function trendClass(pct: number | null): string {
   if (pct === null) return 'trend-neutral';
   if (pct > 0)  return 'trend-up';
@@ -72,66 +65,44 @@ function trendClass(pct: number | null): string {
 ---
 
 <div class="hero-kpis">
-
-  <!-- Downloads — headline metric with period picker and WoW trend arrow -->
-  <div class="kpi-card"
-       data-dl-30={totalInstalls30d}
-       data-dl-90={totalInstalls90d}
-       data-dl-365={totalInstalls365d}>
-    <div class="kpi-value">
-      <span id="kpi-dl-value">{totalInstalls30d.toLocaleString()}</span>
-      <span class={`kpi-trend ${trendClass(wowGrowth)}`}>
-        {wowGrowth !== null
-          ? `${trendArrow(wowGrowth)} ${Math.abs(wowGrowth).toFixed(1)}%`
-          : trendArrow(null)}
-      </span>
-    </div>
-    <div class="kpi-label-row">
-      <span class="kpi-label">Downloads</span>
-      <span class="period-btns" id="dl-period-btns">
-        <button class="period-btn active" data-period="30">30d</button>
-        <button class="period-btn" data-period="90">90d</button>
-        <button class="period-btn" data-period="365">365d</button>
-      </span>
-    </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{totalInstalls30d.toLocaleString()}</div>
+    <div class="kpi-label">Total installs (30d)</div>
   </div>
 
-  <!-- Unique Tappers -->
+  <div class="kpi-card">
+    <div class="kpi-value">{totalInstalls90d.toLocaleString()}</div>
+    <div class="kpi-label">Total installs (90d)</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value">{totalInstalls365d.toLocaleString()}</div>
+    <div class="kpi-label">Total installs (365d)</div>
+  </div>
+
   <div class="kpi-card">
     <div class="kpi-value">{totalUniqueTappers.toLocaleString()}</div>
-    <div class="kpi-label">Unique Tappers</div>
+    <div class="kpi-label">Unique tappers</div>
   </div>
 
-  <!-- Packages Tracked -->
   <div class="kpi-card">
     <div class="kpi-value">{totalPackages.toLocaleString()}</div>
-    <div class="kpi-label">Packages Tracked</div>
+    <div class="kpi-label">Total packages</div>
   </div>
 
+  <div class="kpi-card">
+    <div class={`kpi-value ${trendClass(wowGrowth)}`}>
+      {wowGrowth === null ? '—' : `${wowGrowth > 0 ? '+' : ''}${wowGrowth.toFixed(1)}%`}
+    </div>
+    <div class="kpi-label">WoW growth</div>
+  </div>
 </div>
-
-<script>
-  const card = document.querySelector<HTMLElement>('.kpi-card[data-dl-30]');
-  const valEl = document.getElementById('kpi-dl-value');
-  const periodBtns = document.querySelectorAll<HTMLButtonElement>('#dl-period-btns .period-btn');
-
-  if (card && valEl) {
-    periodBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const period = btn.dataset.period!;
-        const raw = card.dataset[`dl${period}`] ?? '0';
-        valEl.textContent = parseInt(raw, 10).toLocaleString();
-        periodBtns.forEach(b => b.classList.toggle('active', b === btn));
-      });
-    });
-  }
-</script>
 
 <style>
   .hero-kpis {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(140px, 1fr));
+    gap: 14px;
     margin-bottom: 32px;
   }
 
@@ -139,82 +110,34 @@ function trendClass(pct: number | null): string {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 20px 24px;
-    /* Each card takes an equal share but is never narrower than 130px */
-    flex: 1 1 130px;
+    border-top: 2px solid var(--accent);
+    padding: 18px;
   }
 
   .kpi-value {
-    font-size: 2rem;
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
     font-weight: 700;
     color: var(--text);
     line-height: 1.1;
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    flex-wrap: wrap;
   }
 
   .kpi-label {
     font-size: 11px;
     color: var(--muted);
-    margin-top: 6px;
+    margin-top: 8px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .kpi-label-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-    flex-wrap: wrap;
-  }
-
-  /* Trend indicators */
-  .kpi-trend {
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .trend-up      { color: var(--green); }
-  .trend-down    { color: var(--red); }
+  .trend-up { color: var(--green); }
+  .trend-down { color: var(--red); }
   .trend-neutral { color: var(--muted); }
 
-  /* Period picker buttons inside the downloads KPI card */
-  .period-btns {
-    display: flex;
-    gap: 2px;
-    margin-left: auto;
+  @media (max-width: 1100px) {
+    .hero-kpis { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
   }
 
-  .period-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 10px;
-    font-family: inherit;
-    padding: 2px 6px;
-    transition: background 0.1s, color 0.1s, border-color 0.1s;
-  }
-
-  .period-btn:hover {
-    border-color: var(--blue);
-    color: var(--blue);
-  }
-
-  .period-btn.active {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-  }
-
-  /* On narrow screens drop to 2-column layout */
-  @media (max-width: 600px) {
-    .kpi-card {
-      flex: 1 1 calc(50% - 6px);
-    }
+  @media (max-width: 700px) {
+    .hero-kpis { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
   }
 </style>
