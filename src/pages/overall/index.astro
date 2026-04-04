@@ -21,9 +21,22 @@ import zirconiumBuilds from '../../data/builds-zirconium.json';
 import bootcrewBuilds from '../../data/builds-bootcrew.json';
 import blueBuildBuilds from '../../data/builds-blue-build.json';
 import supplyChainRaw from '../../data/supply-chain.json';
+import quayFedora from '../../data/quay-fedora.json';
+import quayCentos from '../../data/quay-centos.json';
+import quayAlmaLinux from '../../data/quay-almalinux.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
+
+// ── Image Pulls (Quay.io) ─────────────────────────────────────────────────────
+const imagePullTiles = [
+  ...quayFedora.repos.map(r => ({ label: r.label, pulls7d: r.pulls_7d, pulls30d: r.pulls_30d, href: '/bootc-ecosystem/fedora/', verified: r.bootc_verified })),
+  ...quayCentos.repos.map(r => ({ label: r.label, pulls7d: r.pulls_7d, pulls30d: r.pulls_30d, href: '/bootc-ecosystem/centos/', verified: r.bootc_verified })),
+  ...quayAlmaLinux.repos.map(r => ({ label: r.label, pulls7d: r.pulls_7d, pulls30d: r.pulls_30d, href: '/bootc-ecosystem/almalinux/', verified: r.bootc_verified })),
+];
+const totalPulls7d = quayFedora.total_pulls_7d + quayCentos.total_pulls_7d + quayAlmaLinux.total_pulls_7d;
+const totalPulls30d = quayFedora.total_pulls_30d + quayCentos.total_pulls_30d + quayAlmaLinux.total_pulls_30d;
+function fmtNum(n: number) { return n >= 1_000_000 ? (n/1_000_000).toFixed(1)+'M' : n >= 1_000 ? (n/1_000).toFixed(1)+'K' : String(n); }
 
 // ── Countme distros shown across all countme-aware sections ──────────────────
 const countmeDistros = [
@@ -201,6 +214,30 @@ const countmeTrendImages = [
     images={countmeDistros}
   />
 
+  <h1>Image Pulls</h1>
+  <div class="pulls-meta">Quay.io container image pulls · source: public registry API</div>
+  <div class="pulls-grid">
+    <!-- Total tile -->
+    <a href="/bootc-ecosystem/fedora/" class="pull-tile pull-tile--total">
+      <div class="pull-tile-label">All Tracked Images</div>
+      <div class="pull-tile-value">{fmtNum(totalPulls7d)}</div>
+      <div class="pull-tile-sub">7-day pulls</div>
+      <div class="pull-tile-30d">{fmtNum(totalPulls30d)} / 30 days</div>
+    </a>
+    <!-- Individual image tiles -->
+    {imagePullTiles.map(tile => (
+      <a href={tile.href} class="pull-tile">
+        <div class="pull-tile-label">
+          {tile.label}
+          {tile.verified && <span class="verified-badge" title="bootc verified">✓</span>}
+        </div>
+        <div class="pull-tile-value">{fmtNum(tile.pulls7d)}</div>
+        <div class="pull-tile-sub">7-day pulls</div>
+        <div class="pull-tile-30d">{fmtNum(tile.pulls30d)} / 30 days</div>
+      </a>
+    ))}
+  </div>
+
   <DORAComparisonSection images={doraImages} />
 
   <h2>Future Proofed</h2>
@@ -259,4 +296,72 @@ const countmeTrendImages = [
   .explainer p { margin: 0; }
   .explainer strong { color: var(--text); }
   .explainer a { color: var(--blue); }
+
+  /* ── Image Pulls section ── */
+  .pulls-meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    margin-top: -8px;
+  }
+  .pulls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+  .pull-tile {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .pull-tile:hover {
+    border-color: var(--accent);
+    background: var(--bg3);
+    text-decoration: none;
+  }
+  .pull-tile--total {
+    border-left: 3px solid var(--accent);
+    background: var(--bg3);
+  }
+  .pull-tile-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .pull-tile-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .pull-tile--total .pull-tile-value {
+    color: var(--accent);
+  }
+  .pull-tile-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .pull-tile-30d {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+  }
+  .verified-badge {
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
 </style>
