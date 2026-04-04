@@ -84,6 +84,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, "❌ fetch-builds-bootcrew:", err)
 			os.Exit(1)
 		}
+	case "fetch-builds-blue-build":
+		if err := runFetchBuildsFor("blue-build", builds.BlueBuildRepos); err != nil {
+			fmt.Fprintln(os.Stderr, "❌ fetch-builds-blue-build:", err)
+			os.Exit(1)
+		}
 	case "fetch-scorecard":
 		if err := runFetchScorecard(); err != nil {
 			fmt.Fprintln(os.Stderr, "❌ fetch-scorecard:", err)
@@ -96,7 +101,7 @@ func main() {
 		}
 	default:
 		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", cmd)
-		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite|fetch-builds-universal-blue|fetch-builds-ucore|fetch-builds-zirconium|fetch-builds-bootcrew|fetch-scorecard|fetch-supply-chain]")
+		fmt.Fprintln(os.Stderr, "usage: stats [fetch-homebrew|fetch-testhub|fetch-countme|fetch-contributors|fetch-builds-bluefin|fetch-builds-aurora|fetch-builds-bazzite|fetch-builds-universal-blue|fetch-builds-ucore|fetch-builds-zirconium|fetch-builds-bootcrew|fetch-builds-blue-build|fetch-scorecard|fetch-supply-chain]")
 		os.Exit(1)
 	}
 }

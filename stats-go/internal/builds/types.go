@@ -357,3 +357,22 @@ var BootcrewRepos = []RepoConfig{
 		},
 	},
 }
+
+// BlueBuildRepos tracks the BlueBuild toolchain: base images, CLI, and modules.
+// blue-build/base-images publishes reference OCI base images.
+// blue-build/cli is the tool users run to build their custom images.
+// blue-build/modules provides the standard module library.
+var BlueBuildRepos = []RepoConfig{
+	{
+		Owner: "blue-build", Repo: "base-images", Label: "base-images",
+		WorkflowFiles: []string{"build.yml"},
+	},
+	{
+		Owner: "blue-build", Repo: "cli", Label: "cli",
+		WorkflowFiles: []string{"build.yml", "main.yml"},
+	},
+	{
+		Owner: "blue-build", Repo: "modules", Label: "modules",
+		WorkflowFiles: []string{"build.yml"},
+	},
+}

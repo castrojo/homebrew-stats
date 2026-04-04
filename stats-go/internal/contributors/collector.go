@@ -42,6 +42,11 @@ var TrackedRepos = []string{
 	"bootcrew/mono",
 	// secureblue
 	"secureblue/secureblue",
+	// BlueBuild
+	"blue-build/base-images",
+	"blue-build/cli",
+	"blue-build/modules",
+	"blue-build/github-action",
 }
 
 const discussionsQuery = `

@@ -159,6 +159,13 @@ jobs:
         continue-on-error: true
         timeout-minutes: 8
 
+      - name: Fetch build pipeline metrics (BlueBuild)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-blue-build
+        continue-on-error: true
+        timeout-minutes: 8
+
       - name: Fetch Scorecard data
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

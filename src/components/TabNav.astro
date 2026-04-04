@@ -1,5 +1,5 @@
 ---
-interface Props { activeTab: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds' | 'aurora-builds' | 'bazzite-builds' | 'universal-blue' | 'ucore' | 'zirconium' | 'bootcrew' | 'secureblue'; }
+interface Props { activeTab: 'homebrew' | 'testhub' | 'overall' | 'contributors' | 'builds' | 'aurora-builds' | 'bazzite-builds' | 'universal-blue' | 'ucore' | 'zirconium' | 'bootcrew' | 'secureblue' | 'blue-build'; }
 const { activeTab } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
@@ -19,6 +19,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <a href={`${base}/secureblue/`}        data-astro-prefetch class:list={['tab', { active: activeTab === 'secureblue'       }]}>secureblue</a>
     <a href={`${base}/zirconium/`}         data-astro-prefetch class:list={['tab', { active: activeTab === 'zirconium'        }]}>Zirconium</a>
     <a href={`${base}/bootcrew/`}          data-astro-prefetch class:list={['tab', { active: activeTab === 'bootcrew'         }]}>bootcrew</a>
+    <a href={`${base}/blue-build/`}        data-astro-prefetch class:list={['tab', { active: activeTab === 'blue-build'       }]}>BlueBuild</a>
     <span class="tab-sep" aria-hidden="true"></span>
     <a href={`${base}/`}                   data-astro-prefetch class:list={['tab', { active: activeTab === 'homebrew'         }]}>Homebrew</a>
     <a href={`${base}/testhub/`}           data-astro-prefetch class:list={['tab', { active: activeTab === 'testhub'          }]}>Testhub</a>
