@@ -30,8 +30,8 @@ function loadJSON(relPath: string): unknown {
 }
 
 // All valid lowercase distro keys — not all must be present in every record
-// (e.g. bluefin-lts uses CentOS repos so it never appears; secureblue/wayblue/origami are tracked too)
-const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "aurora", "secureblue", "wayblue", "origami"] as const;
+// (e.g. bluefin-lts uses CentOS repos so it never appears; secureblue/wayblue/origami/winblues are tracked too)
+const DISTRO_KEYS_LOWERCASE = ["bazzite", "bluefin", "aurora", "secureblue", "wayblue", "origami", "winblues"] as const;
 const DISTRO_KEYS_TITLECASE = ["Bazzite", "Bluefin", "Aurora"] as const;
 
 // ── countme.json ─────────────────────────────────────────────────────────────

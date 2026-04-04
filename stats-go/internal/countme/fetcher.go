@@ -31,13 +31,22 @@ const countmeCSVURL = "https://data-analysis.fedoraproject.org/csv-reports/count
 // Origami Linux: Fedora Atomic / Cosmic desktop distro. os_name = "Origami Linux" (with space).
 // Weekly counts: ~50/week (Nov 2025) → ~1200/week (Mar 2026). Growing fast; not yet at 10K threshold
 // for a dedicated tab but tracked for trend visibility. Registry: registry.gitlab.com/origami-linux/.
+//
+// winblues: github.com/winblues org — multiple Fedora Atomic images (Blue95, Blue9, Vauxite, BlueXP,
+// Vauxite Workstation) each with a distinct os_name. All aggregated under the "winblues" canonical
+// key. Combined: ~300-500/week (Mar 2026).
 var validDistros = map[string]string{
-	"Bazzite":       "bazzite",
-	"Bluefin":       "bluefin",
-	"Aurora":        "aurora",
-	"secureblue":    "secureblue",
-	"wayblue":       "wayblue",
-	"Origami Linux": "origami",
+	"Bazzite":             "bazzite",
+	"Bluefin":             "bluefin",
+	"Aurora":              "aurora",
+	"secureblue":          "secureblue",
+	"wayblue":             "wayblue",
+	"Origami Linux":       "origami",
+	"Blue95":              "winblues",
+	"Blue9":               "winblues",
+	"BlueXP":              "winblues",
+	"Vauxite":             "winblues",
+	"Vauxite Workstation": "winblues",
 }
 
 // canonicalRepoTagRe matches Fedora canonical repo tags of the form "fedora-NN" (e.g. fedora-41,
