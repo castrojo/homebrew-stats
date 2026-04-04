@@ -445,7 +445,7 @@ test.describe('Contributors tab', () => {
   test('Contributors page has an explainer section', async ({ page }) => {
     const explainer = page.locator('.explainer');
     await expect(explainer).toBeVisible();
-    await expect(explainer).toContainText('Project Bluefin');
+    await expect(explainer).toContainText('bootc ecosystem');
   });
 });
 
