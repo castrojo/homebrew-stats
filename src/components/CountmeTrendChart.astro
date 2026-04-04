@@ -36,7 +36,7 @@ const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
       height={300}
       rangeId="countme-range-btns"
       ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
-      defaultRange="30"
+      defaultRange="365"
     />
     <script type="application/json" id="countme-trend-data" set:html={safeJson({ monthly, DISTROS, LABELS })}></script>
   </>
@@ -77,7 +77,7 @@ if (dataEl) {
     }));
   }
 
-  let currentRange = '30';
+  let currentRange = '365';
   let filtered = getFiltered(currentRange);
   const c = getChartColors();
 
