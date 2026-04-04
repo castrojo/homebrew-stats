@@ -20,6 +20,7 @@ interface PackageData {
 }
 
 interface TapData {
+  name?: string;
   traffic?: { uniques: number; count: number };
   packages: PackageData[];
 }
@@ -83,6 +84,11 @@ function trendClass(pct: number | null): string {
   <div class="kpi-card">
     <div class="kpi-value">{totalUniqueTappers.toLocaleString()}</div>
     <div class="kpi-label">Unique tappers</div>
+    {taps.filter(t => t.traffic?.uniques).map(t => (
+      <div class="kpi-breakdown">
+        {t.name?.replace('ublue-os/', '').replace('-tap', '')}:&nbsp;{t.traffic!.uniques.toLocaleString()}
+      </div>
+    ))}
   </div>
 
   <div class="kpi-card">
@@ -132,6 +138,13 @@ function trendClass(pct: number | null): string {
   .trend-up { color: var(--green); }
   .trend-down { color: var(--red); }
   .trend-neutral { color: var(--muted); }
+
+  .kpi-breakdown {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
 
   @media (max-width: 1100px) {
     .hero-kpis { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
