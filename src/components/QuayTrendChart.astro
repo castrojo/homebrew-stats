@@ -1,0 +1,174 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface DailyStat { date: string; count: number; }
+interface QuayRepo { label: string; daily_stats: DailyStat[]; }
+interface QuayData { repos: QuayRepo[]; combined_daily: DailyStat[]; }
+
+interface Props {
+  fedora: QuayData;
+  centos: QuayData;
+  almalinux: QuayData;
+}
+
+const { fedora, centos, almalinux } = Astro.props;
+
+const combinedByDate = new Map<string, number>();
+for (const source of [fedora, centos, almalinux]) {
+  for (const entry of source.combined_daily ?? []) {
+    combinedByDate.set(entry.date, (combinedByDate.get(entry.date) ?? 0) + entry.count);
+  }
+}
+const mergedData = Array.from(combinedByDate.entries())
+  .sort(([a], [b]) => a.localeCompare(b))
+  .slice(-90)
+  .map(([date, count]) => ({ date, count }));
+---
+
+<ChartCard
+  title="Image Pull Trend"
+  canvasId="quay-trend"
+  height={260}
+  rangeId="quay-trend-range-btns"
+  ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }]}
+  defaultRange="90"
+/>
+<script type="application/json" id="quay-trend-data" set:html={safeJson(mergedData)}></script>
+
+<script>
+  import '../lib/chart-registry.js';
+  import { readChartData } from '../lib/inject.js';
+  import { BRAND_COLOURS, getChartColors, applyTheme } from '../lib/chart-theme.js';
+  import { Chart } from 'chart.js';
+
+  const allData = readChartData<Array<{ date: string; count: number }>>('quay-trend-data');
+
+  function toRgba(hex: string, alpha: number): string {
+    const clean = hex.replace('#', '');
+    const chunk = clean.length === 3
+      ? clean.split('').map(c => `${c}${c}`).join('')
+      : clean;
+    const r = Number.parseInt(chunk.slice(0, 2), 16);
+    const g = Number.parseInt(chunk.slice(2, 4), 16);
+    const b = Number.parseInt(chunk.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function makeGradient(chart: Chart): string | CanvasGradient {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return toRgba(BRAND_COLOURS[0], 0.25);
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, toRgba(BRAND_COLOURS[0], 0.35));
+    gradient.addColorStop(1, toRgba(BRAND_COLOURS[0], 0.04));
+    return gradient;
+  }
+
+  function getWindow(range: string) {
+    if (range === '30') return allData.slice(-30);
+    return allData.slice(-90);
+  }
+
+  function movingAverage(data: number[], windowSize = 7): Array<number | null> {
+    return data.map((_, idx) => {
+      if (idx < windowSize - 1) return null;
+      const window = data.slice(idx - windowSize + 1, idx + 1);
+      const sum = window.reduce((acc, value) => acc + value, 0);
+      return Math.round(sum / windowSize);
+    });
+  }
+
+  function buildDatasets(windowData: Array<{ date: string; count: number }>) {
+    const counts = windowData.map(d => d.count);
+    return [
+      {
+        label: 'Daily pulls',
+        data: counts,
+        borderColor: BRAND_COLOURS[0],
+        backgroundColor: (ctx: { chart: Chart }) => makeGradient(ctx.chart),
+        fill: 'origin' as const,
+        tension: 0.3,
+        cubicInterpolationMode: 'monotone' as const,
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 3,
+      },
+      {
+        label: '7-day avg',
+        data: movingAverage(counts, 7),
+        borderColor: BRAND_COLOURS[0],
+        backgroundColor: 'transparent',
+        borderDash: [6, 4],
+        tension: 0.3,
+        pointRadius: 0,
+        spanGaps: true,
+      },
+    ];
+  }
+
+  let current = getWindow('90');
+  const colors = getChartColors();
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(document.getElementById('quay-trend') as HTMLCanvasElement, {
+      type: 'line',
+      data: {
+        labels: current.map(d => d.date),
+        datasets: buildDatasets(current),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: { color: colors.text, font: { size: 12 } },
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? '—'}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: 'category',
+            ticks: { color: colors.muted, font: { size: 11 }, maxRotation: 45 },
+            grid: { color: colors.grid },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: colors.muted,
+              font: { size: 11 },
+              callback: v => Number(v).toLocaleString(),
+            },
+            grid: { color: colors.grid },
+            title: { display: true, text: 'Image pulls', color: colors.muted, font: { size: 11 } },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[QuayTrendChart] Chart.js init failed:', e);
+  }
+
+  document.querySelectorAll('#quay-trend-range-btns .range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!chart) return;
+      document.querySelectorAll('#quay-trend-range-btns .range-btn').forEach(b => b.classList.remove('active'));
+      (btn as HTMLElement).classList.add('active');
+      current = getWindow((btn as HTMLElement).dataset.range!);
+      chart.data.labels = current.map(d => d.date);
+      chart.data.datasets = buildDatasets(current);
+      chart.update();
+    });
+  });
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    applyTheme(chart);
+    chart.update('none');
+  });
+</script>

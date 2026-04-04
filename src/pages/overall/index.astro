@@ -4,7 +4,8 @@ import CountmeKPIs from '../../components/CountmeKPIs.astro';
 import CountmeTrendChart from '../../components/CountmeTrendChart.astro';
 import DistroTrendChart from '../../components/DistroTrendChart.astro';
 import EcosystemPieChart from '../../components/EcosystemPieChart.astro';
-import EcosystemGrowthChart from '../../components/EcosystemGrowthChart.astro';
+import OsVersionChart from '../../components/OsVersionChart.astro';
+import QuayTrendChart from '../../components/QuayTrendChart.astro';
 import data from '../../data/countme.json';
 import DORAComparisonSection from '../../components/DORAComparisonSection.astro';
 import FutureProofedPanel from '../../components/FutureProofedPanel.astro';
@@ -28,6 +29,12 @@ import quayAlmaLinux from '../../data/quay-almalinux.json';
 
 const generatedAt = new Date(data.generated_at).toUTCString();
 const weekRecords = data.history.week_records ?? [];
+const osVersionDist: Record<string, number> = {};
+for (const distroVersions of Object.values((data.os_version_dist ?? {}) as Record<string, Record<string, number>>)) {
+  for (const [version, count] of Object.entries(distroVersions)) {
+    osVersionDist[version] = (osVersionDist[version] ?? 0) + count;
+  }
+}
 
 // ── Image Pulls (Quay.io) ─────────────────────────────────────────────────────
 const imagePullTiles = [
@@ -273,6 +280,7 @@ const countmeTrendImages = [
       </a>
     ))}
   </div>
+  <QuayTrendChart fedora={quayFedora} centos={quayCentos} almalinux={quayAlmaLinux} />
 
   <DORAComparisonSection images={doraImages} />
 
@@ -300,13 +308,8 @@ const countmeTrendImages = [
 
     <h2>Ecosystem Share</h2>
     <EcosystemPieChart currentWeek={data.current_week as any} distros={countmeDistros} />
+    <OsVersionChart osVersionDist={osVersionDist} />
 
-    <h2>Device Momentum (This Week vs Last Week)</h2>
-    <EcosystemGrowthChart
-      currentWeek={data.current_week as any}
-      prevWeek={data.prev_week as any}
-      distros={countmeDistros}
-    />
   </section>
 </Layout>
 

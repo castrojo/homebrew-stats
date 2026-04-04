@@ -1,0 +1,101 @@
+---
+import ChartCard from './ChartCard.astro';
+import { safeJson } from '../lib/inject.ts';
+
+interface Props {
+  osVersionDist: Record<string, number>;
+}
+
+const { osVersionDist } = Astro.props;
+
+const entries = Object.entries(osVersionDist ?? {})
+  .filter(([, count]) => Number(count) > 0)
+  .sort(([a], [b]) => Number(a) - Number(b));
+const labels = entries.map(([version]) => `Fedora ${version}`);
+const values = entries.map(([, count]) => count);
+const total = values.reduce((sum, value) => sum + value, 0);
+---
+
+<ChartCard title="Fedora Version Distribution" canvasId="os-version" height={220} />
+<script type="application/json" id="os-version-data" set:html={safeJson({ labels, values, total })}></script>
+
+<script>
+  import '../lib/chart-registry.js';
+  import { BRAND_COLOURS, getChartColors as getThemeColors } from '../lib/chart-theme.js';
+  import { readChartData } from '../lib/inject.js';
+  import { Chart } from 'chart.js';
+
+  function getChartColors(n: number): string[] {
+    return Array.from({ length: n }, (_, i) => BRAND_COLOURS[i % BRAND_COLOURS.length]);
+  }
+
+  const { labels, values, total } = readChartData<{
+    labels: string[];
+    values: number[];
+    total: number;
+  }>('os-version-data');
+
+  const canvas = document.getElementById('os-version') as HTMLCanvasElement;
+  const colours = getChartColors(labels.length);
+
+  const centerLabelPlugin = {
+    id: 'centerLabel',
+    afterDraw(chart: Chart) {
+      const { ctx, chartArea } = chart;
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top + chartArea.bottom) / 2;
+      const c = getThemeColors();
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = c.text || '#e6edf3';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText(total >= 1000 ? `${(total / 1000).toFixed(0)}k` : String(total), cx, cy - 8);
+      ctx.fillStyle = c.muted || '#7d8590';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('active devices', cx, cy + 12);
+      ctx.restore();
+    },
+  };
+
+  let chart: Chart | undefined;
+  try {
+    chart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colours,
+          borderColor: getThemeColors().grid || '#161b22',
+          borderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: getThemeColors().text } },
+          tooltip: {
+            callbacks: {
+              label: (ctx: { label: string; raw: unknown }) =>
+                ` ${ctx.label}: ${(ctx.raw as number).toLocaleString()}`,
+            },
+          },
+        },
+      },
+      plugins: [centerLabelPlugin],
+    });
+  } catch (e) {
+    console.error('[OsVersionChart] Chart.js init failed:', e);
+  }
+
+  window.addEventListener('themechange', () => {
+    if (!chart) return;
+    const colors = getThemeColors();
+    (chart.data.datasets[0] as { borderColor: string }).borderColor = colors.grid || '#161b22';
+    (chart.options.plugins?.legend?.labels as { color?: string }).color = colors.text;
+    chart.update();
+  });
+</script>
