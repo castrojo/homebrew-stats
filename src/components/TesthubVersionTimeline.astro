@@ -33,7 +33,7 @@ const timeline = [...history]
       canvasId="testhub-version-chart"
       height={300}
     />
-    <script type="application/json" id="testhub-version-data" set:html={safeJson({ timeline })}></script>
+    <script type="application/json" id="testhub-version-data" set:html={safeJson({ timeline, history: timeline })}></script>
   </>
 )}
 

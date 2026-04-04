@@ -36,7 +36,7 @@ const series = [...history]
       canvasId="testhub-build-chart"
       height={300}
     />
-    <script type="application/json" id="testhub-build-data" set:html={safeJson({ series })}></script>
+    <script type="application/json" id="testhub-build-data" set:html={safeJson({ series, history: series })}></script>
   </>
 )}
 
