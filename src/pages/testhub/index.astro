@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import TesthubKPIs from '../../components/TesthubKPIs.astro';
 import TesthubPackageTable from '../../components/TesthubPackageTable.astro';
 import TesthubBuildChart from '../../components/TesthubBuildChart.astro';
+import TesthubHeatmap from '../../components/TesthubHeatmap.astro';
 import TesthubVersionTimeline from '../../components/TesthubVersionTimeline.astro';
 import data from '../../data/testhub.json';
 
@@ -42,6 +43,8 @@ const history = (data.history as any) ?? [];
 
   {history.length > 0 && (
     <section class="charts-section">
+      <h2 class="section-heading">Package Build Health</h2>
+      <TesthubHeatmap buildMetrics={data.build_metrics ?? []} />
       <h2>Build Outcomes</h2>
       <TesthubBuildChart history={history} />
       <h2>Version Growth Timeline</h2>
@@ -61,6 +64,10 @@ const history = (data.history as any) ?? [];
   .section { margin-bottom: 20px; }
   .section > h2,
   .charts-section > h2 {
+    margin: 22px 0 12px;
+    color: var(--text);
+  }
+  .section-heading {
     margin: 22px 0 12px;
     color: var(--text);
   }

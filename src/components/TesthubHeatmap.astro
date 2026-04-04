@@ -1,0 +1,47 @@
+---
+interface BuildMetric {
+  app: string;
+  pass_rate_7d: number;
+  last_status: string;
+}
+
+interface Props {
+  buildMetrics: BuildMetric[];
+}
+
+const { buildMetrics = [] } = Astro.props;
+
+function getCellClass(metric: BuildMetric) {
+  if (metric.last_status === 'unknown') return 'cell-unknown';
+  if (metric.pass_rate_7d >= 90) return 'cell-passing';
+  if (metric.pass_rate_7d >= 50) return 'cell-partial';
+  return 'cell-failing';
+}
+
+function getEmoji(metric: BuildMetric) {
+  if (metric.last_status === 'unknown') return '⚠';
+  if (metric.pass_rate_7d >= 90) return '✓';
+  if (metric.pass_rate_7d >= 50) return '⚠';
+  return '✗';
+}
+---
+
+<div class="heatmap">
+  {buildMetrics.map(metric => (
+    <div class={`heatmap-cell ${getCellClass(metric)}`}>
+      <div class="app-name" title={metric.app}>{metric.app}</div>
+      <div class="rate">{Math.round(metric.pass_rate_7d)}% {getEmoji(metric)}</div>
+    </div>
+  ))}
+</div>
+
+<style>
+.heatmap { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 2rem; }
+.heatmap-cell { border-radius: 6px; padding: 10px 12px; border: 1px solid; }
+.heatmap-cell .app-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.heatmap-cell .rate { font-size: 18px; font-weight: 700; margin: 4px 0 0; }
+.cell-passing { background: rgba(36, 161, 72, 0.12); border-color: #24a148; }
+.cell-partial  { background: rgba(245, 163, 0, 0.12); border-color: #f5a300; }
+.cell-failing  { background: rgba(250, 77, 86, 0.12); border-color: #fa4d56; }
+.cell-unknown  { background: var(--bg2); border-color: var(--border); color: var(--muted); }
+</style>

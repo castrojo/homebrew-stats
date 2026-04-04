@@ -38,7 +38,7 @@ const monthly = aggregateWeekRecordsToMonthEnd(weekRecords as WeekRecord[]);
       ranges={[{ label: '30d', value: '30' }, { label: '90d', value: '90' }, { label: '365d', value: '365' }, { label: 'All', value: 'all' }]}
       defaultRange="365"
     />
-    <script type="application/json" id="countme-trend-data" set:html={safeJson({ monthly, DISTROS, LABELS })}></script>
+    <script type="application/json" id="countme-trend-data" set:html={safeJson({ monthly, weekly: weekRecords, DISTROS, LABELS })}></script>
   </>
 )}
 
@@ -50,20 +50,43 @@ import { Chart } from 'chart.js';
 
 const dataEl = document.getElementById('countme-trend-data');
 if (dataEl) {
-  const { monthly, DISTROS, LABELS } = readChartData<{
+  const { monthly, weekly, DISTROS, LABELS } = readChartData<{
     monthly: { week_end: string; distros: Record<string, number> }[];
+    weekly: { week_start: string; week_end: string; distros: Record<string, number> }[];
     DISTROS: string[];
     LABELS: string[];
   }>('countme-trend-data');
   const canvas = document.getElementById('countme-trend-chart') as HTMLCanvasElement;
+  const rangeContainer = document.getElementById('countme-range-btns');
 
-  function getFiltered(range: string) {
-    if (range === 'all') return monthly;
+  const header = rangeContainer?.closest('.chart-header');
+  if (header && rangeContainer) {
+    const controlsRow = document.createElement('div');
+    controlsRow.className = 'countme-controls-row';
+    rangeContainer.replaceWith(controlsRow);
+    controlsRow.appendChild(rangeContainer);
+
+    const granularityBtns = document.createElement('div');
+    granularityBtns.className = 'range-btns countme-granularity-btns';
+    granularityBtns.id = 'countme-granularity-btns';
+    granularityBtns.innerHTML = `
+      <button class="range-btn" data-granularity="weekly">Weekly</button>
+      <button class="range-btn active" data-granularity="monthly">Monthly</button>
+    `;
+    controlsRow.appendChild(granularityBtns);
+    header.appendChild(controlsRow);
+  }
+
+  function getFiltered(range: string, granularity: 'monthly' | 'weekly') {
+    const source = granularity === 'weekly' ? weekly : monthly;
+    if (range === 'all') return source;
     const days = Number(range);
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
-    return monthly.filter((r: { week_end: string }) => r.week_end >= cutoffStr);
+    return source.filter((r: { week_start?: string; week_end: string }) =>
+      (granularity === 'weekly' ? r.week_start : r.week_end) >= cutoffStr,
+    );
   }
 
   function buildDatasets(data: { distros: Record<string, number> }[]) {
@@ -78,15 +101,18 @@ if (dataEl) {
   }
 
   let currentRange = '365';
-  let filtered = getFiltered(currentRange);
+  let currentGranularity: 'monthly' | 'weekly' = 'monthly';
+  let filtered = getFiltered(currentRange, currentGranularity);
   const c = getChartColors();
+  const getLabel = (r: { week_start?: string; week_end: string }) =>
+    currentGranularity === 'weekly' ? r.week_start : r.week_end;
 
   let chart: Chart | undefined;
   try {
     chart = new Chart(canvas, {
       type: 'line',
       data: {
-        labels: filtered.map((r: { week_end: string }) => r.week_end),
+        labels: filtered.map((r: { week_start?: string; week_end: string }) => getLabel(r)),
         datasets: buildDatasets(filtered),
       },
       options: {
@@ -111,16 +137,32 @@ if (dataEl) {
     console.error('[CountmeTrendChart] Chart.js init failed:', e);
   }
 
-  document.getElementById('countme-range-btns')?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
+  function updateChart() {
+    if (!chart) return;
+    const data = getFiltered(currentRange, currentGranularity);
+    chart.data.labels = data.map((r: { week_start?: string; week_end: string }) =>
+      currentGranularity === 'weekly' ? r.week_start : r.week_end,
+    );
+    chart.data.datasets = buildDatasets(data);
+    chart.update();
+  }
+
+  rangeContainer?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!chart) return;
-      document.getElementById('countme-range-btns')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      rangeContainer?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentRange = btn.dataset.range!;
-      const data = getFiltered(currentRange);
-      chart.data.labels = data.map((r: { week_end: string }) => r.week_end);
-      chart.data.datasets = buildDatasets(data);
-      chart.update();
+      updateChart();
+    });
+  });
+
+  document.getElementById('countme-granularity-btns')?.querySelectorAll<HTMLButtonElement>('.range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('countme-granularity-btns')?.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentGranularity = btn.dataset.granularity as 'monthly' | 'weekly';
+      updateChart();
     });
   });
 
@@ -136,3 +178,39 @@ if (dataEl) {
   });
 }
 </script>
+
+<style>
+  :global(.countme-controls-row) {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  :global(.countme-granularity-btns) {
+    display: flex;
+    gap: 4px;
+  }
+
+  :global(.countme-granularity-btns .range-btn) {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  :global(.countme-granularity-btns .range-btn:hover) {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  :global(.countme-granularity-btns .range-btn.active) {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+</style>
