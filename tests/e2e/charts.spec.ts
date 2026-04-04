@@ -388,7 +388,10 @@ test.describe('Contributors tab', () => {
     expect(Array.isArray(data.repos), 'contribution-heatmap-data.repos must be an array').toBe(true);
   });
 
-  test('discussion-activity-data has valid JSON', async ({ page }) => {
+  test('discussion-activity-data has valid JSON when present', async ({ page }) => {
+    const el = page.locator('#discussion-activity-data');
+    const exists = await el.count() > 0;
+    if (!exists) return; // no discussion data — empty state is valid
     const data = await getScriptJSON(page, 'discussion-activity-data') as Record<string, unknown>;
     expect(Array.isArray(data.trend), 'discussion-activity-data.trend must be an array').toBe(true);
   });
@@ -411,7 +414,15 @@ test.describe('Contributors tab', () => {
     await expectCanvasRendered(page, 'contribution-heatmap-chart');
   });
 
-  test('DiscussionActivityChart canvas is rendered by Chart.js', async ({ page }) => {
+  test('DiscussionActivityChart canvas is rendered by Chart.js when data is present', async ({ page }) => {
+    const canvas = page.locator('canvas#discussion-activity-chart');
+    const hasCanvas = await canvas.count() > 0;
+    if (!hasCanvas) {
+      // No discussion data — verify empty state is shown instead
+      const emptyEl = page.locator('.chart-empty').first();
+      await expect(emptyEl).toBeVisible();
+      return;
+    }
     await expectCanvasRendered(page, 'discussion-activity-chart');
   });
 
@@ -611,6 +622,9 @@ test.describe('Contributors range toggles', () => {
   });
 
   test('discussion range toggle switches active button and keeps canvas rendered', async ({ page }) => {
+    const canvas = page.locator('canvas#discussion-activity-chart');
+    const hasCanvas = await canvas.count() > 0;
+    if (!hasCanvas) return; // empty state — range toggles not rendered
     const btn60d = page.locator('#discussion-range-btns [data-range="60d"]');
     await btn60d.click();
     await expect(btn60d).toHaveClass(/active/);

@@ -8,7 +8,10 @@ import EcosystemGrowthChart from '../../components/EcosystemGrowthChart.astro';
 import data from '../../data/countme.json';
 import DORAComparisonSection from '../../components/DORAComparisonSection.astro';
 import FutureProofedPanel from '../../components/FutureProofedPanel.astro';
-import type { BuildsData, BuildRepoMetrics } from '../../lib/types.ts';
+import ScorecardPanel from '../../components/builds/ScorecardPanel.astro';
+import scorecardRaw from '../../data/scorecard.json';
+import type { BuildsData, BuildRepoMetrics, ScorecardData } from '../../lib/types.ts';
+const scorecardData = scorecardRaw as unknown as ScorecardData;
 import bluefinBuilds from '../../data/builds-bluefin.json';
 import auroraBuilds from '../../data/builds-aurora.json';
 import bazziteBuilds from '../../data/builds-bazzite.json';
@@ -191,6 +194,8 @@ const countmeTrendImages = [
 
   <h2>Future Proofed</h2>
   <FutureProofedPanel images={imageProofData} />
+
+  <ScorecardPanel data={scorecardData} />
 
   <section class="charts-section">
     <h2>Monthly Trends</h2>

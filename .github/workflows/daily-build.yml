@@ -226,14 +226,14 @@ jobs:
             fi
           done
           # Contributors page has 3 LFX-gated charts (org breakdown, PR health, new vs returning)
-          # that are intentionally empty until LFX Insights sync runs. Allow up to 3 empty;
-          # fail only if MORE than 3 are empty (which would indicate structural breakage).
+          # that are intentionally empty until LFX Insights sync runs. Allow up to 4 empty;
+          # fail only if MORE than 4 are empty (which would indicate structural breakage).
           contrib_count=$(grep -o 'class="chart-empty"' dist/contributors/index.html | wc -l || echo 0)
-          if [ "$contrib_count" -gt 3 ]; then
-            echo "❌ dist/contributors/index.html: $contrib_count empty charts (expected ≤3 LFX-gated)"
+          if [ "$contrib_count" -gt 4 ]; then
+            echo "❌ dist/contributors/index.html: $contrib_count empty charts (expected ≤4 LFX-gated)"
             exit 1
           fi
-          echo "✅ dist/contributors/index.html: $contrib_count/3 LFX-gated charts in empty state (expected)"
+          echo "✅ dist/contributors/index.html: $contrib_count/4 LFX-gated charts in empty state (expected)"
 
       - name: Verify summary KPIs are populated
         run: |

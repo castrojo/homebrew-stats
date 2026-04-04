@@ -382,7 +382,9 @@ for {
 vars := map[string]any{
 "owner": owner,
 "name":  repo,
-"after": cursor,
+}
+if cursor != nil {
+vars["after"] = *cursor
 }
 var data Data
 if err := ghpkg.GraphQL(discussionsQuery, vars, &data); err != nil {

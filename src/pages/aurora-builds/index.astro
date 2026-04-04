@@ -24,16 +24,8 @@ import TriggerBreakdownChart from '../../components/builds/TriggerBreakdownChart
 import StreamHealthTable from '../../components/builds/StreamHealthTable.astro';
 import ArchComparisonPanel from '../../components/builds/ArchComparisonPanel.astro';
 import SupplyChainPanel from '../../components/builds/SupplyChainPanel.astro';
-import ScorecardPanel from '../../components/builds/ScorecardPanel.astro';
-import scorecardRaw from '../../data/scorecard.json';
-import type { ScorecardData } from '../../lib/types.ts';
 
 const builds = rawData as unknown as BuildsData;
-const scorecardData = scorecardRaw as unknown as ScorecardData;
-const auroraScorecardData: ScorecardData = {
-  ...scorecardData,
-  results: (scorecardData.results ?? []).filter((result) => result.repo === 'ublue-os/aurora'),
-};
 const generatedAt = new Date(builds.generated_at).toUTCString();
 const isBootstrap = builds.summary.health_status === 'unknown';
 ---
@@ -97,7 +89,6 @@ const isBootstrap = builds.summary.health_status === 'unknown';
       <ArchComparisonPanel repos={builds.repos} />
       <PublishReliabilityChart repos={builds.repos} />
       <SupplyChainPanel repos={builds.repos} />
-      <ScorecardPanel data={auroraScorecardData} />
 
       <!-- Section 6: Recent builds feed -->
       <RecentBuildsFeed builds={builds.recent_builds} />
