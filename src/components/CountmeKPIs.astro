@@ -60,23 +60,24 @@ function fmt(n: number | undefined): string {
     <div class="kpi-label">Total Active Devices</div>
   </div>
 
-  <!-- Per-image cards -->
+  <!-- Per-image cards — skip images with no data yet (avoids stretching "Collecting…" cards) -->
   {images.map(img => {
     const count = currentWeek?.distros?.[img.key] ?? 0;
     const wow   = wowGrowthPct?.[img.key] ?? null;
     const spark  = sparklineFor(img.key);
     const hasCount = count > 0;
+    if (!hasCount) return null;
     return (
       <div class="kpi-card">
         <div class="kpi-value">
-          {hasCount ? fmt(count) : <span class="kpi-collecting">Collecting…</span>}
-          {wow != null && hasCount && (
+          {fmt(count)}
+          {wow != null && (
             <span class={`kpi-trend ${trendClass(wow)}`}>
               {trendArrow(wow)}
             </span>
           )}
         </div>
-        {hasCount && <div class="kpi-sub">/ this week</div>}
+        <div class="kpi-sub">/ this week</div>
         <div class="kpi-label">{img.label}</div>
         {spark.length >= 2 && spark.some(v => v > 0) && (
           <div class="kpi-sparkline">
@@ -92,7 +93,7 @@ function fmt(n: number | undefined): string {
   .hero-kpis { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
   .kpi-card {
     background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 20px 24px; flex: 1 1 160px;
+    padding: 20px 24px; flex: 0 1 180px; max-width: 220px;
     display: flex; flex-direction: column;
     transition: border-color 0.15s, background 0.15s;
   }
