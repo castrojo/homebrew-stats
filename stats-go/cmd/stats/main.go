@@ -147,6 +147,9 @@ func runFetchHomebrew() error {
 		hist = &history.Store{}
 	}
 
+	// Load cached traffic so we can fall back when the API returns 403 (no push access in CI).
+	cachedTraffic := loadCachedTraffic()
+
 	fmt.Fprintln(os.Stderr, "→ Fetching Homebrew cask-install analytics…")
 	brewInstalls, err := tapanalytics.Fetch()
 	if err != nil {
@@ -164,6 +167,13 @@ func runFetchHomebrew() error {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "⚠️  %s/%s: %v\n", t.owner, t.repo, err)
 			continue
+		}
+		// Traffic API requires push access — fall back to last cached value in CI.
+		if ts.Traffic == nil {
+			if cached, ok := cachedTraffic[ts.Name]; ok {
+				ts.Traffic = cached
+				fmt.Fprintf(os.Stderr, "  ℹ️  Using cached traffic for %s: %d uniques\n", ts.Name, cached.Uniques)
+			}
 		}
 		tapStats = append(tapStats, *ts)
 		pkgDownloads := make(map[string]int64, len(ts.Packages))
@@ -1386,4 +1396,48 @@ func runFetchSupplyChain() error {
 	}
 	fmt.Fprintln(os.Stderr, "✓ Wrote src/data/supply-chain.json")
 	return nil
+}
+
+// loadCachedTraffic reads the last-known traffic values from .sync-cache/stats-latest.json
+// (or src/data/stats.json as a fallback) so CI can preserve traffic when the GitHub Traffic
+// API returns 403 (requires push access to the target repo).
+func loadCachedTraffic() map[string]*tap.Traffic {
+	result := make(map[string]*tap.Traffic)
+	// Try sync-cache first (most recent), then fall back to the committed stats.json.
+	for _, path := range []string{
+		filepath.Join(".sync-cache", "stats-latest.json"),
+		filepath.Join("src", "data", "stats.json"),
+	} {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		var cached struct {
+			Taps []struct {
+				Name    string `json:"name"`
+				Traffic *struct {
+					Count   int    `json:"count"`
+					Uniques int    `json:"uniques"`
+					Window  string `json:"window"`
+				} `json:"traffic,omitempty"`
+			} `json:"taps"`
+		}
+		if err := json.Unmarshal(data, &cached); err != nil {
+			continue
+		}
+		for _, t := range cached.Taps {
+			if t.Traffic != nil && t.Traffic.Uniques > 0 {
+				result[t.Name] = &tap.Traffic{
+					Count:   t.Traffic.Count,
+					Uniques: t.Traffic.Uniques,
+					Window:  t.Traffic.Window,
+				}
+			}
+		}
+		if len(result) > 0 {
+			fmt.Fprintf(os.Stderr, "  ℹ️  Loaded cached traffic from %s\n", path)
+			return result
+		}
+	}
+	return result
 }
