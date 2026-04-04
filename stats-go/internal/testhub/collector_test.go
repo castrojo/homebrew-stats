@@ -232,6 +232,27 @@ func TestListPackagesStripsPrefix(t *testing.T) {
 	}
 }
 
+func TestMergePackages_BackfillsMissingNames(t *testing.T) {
+	existing := []Package{
+		{Name: "ghostty", VersionCount: 7, Version: "1.2.3"},
+	}
+	fallback := []Package{
+		{Name: "ghostty", HTMLURL: "https://example.invalid/ghostty"},
+		{Name: "saturn", HTMLURL: "https://example.invalid/saturn"},
+	}
+
+	got := MergePackages(existing, fallback)
+	if len(got) != 2 {
+		t.Fatalf("expected 2 merged packages, got %d", len(got))
+	}
+	if got[0].Name != "ghostty" || got[1].Name != "saturn" {
+		t.Fatalf("expected sorted package names [ghostty saturn], got [%s %s]", got[0].Name, got[1].Name)
+	}
+	if got[0].VersionCount != 7 || got[0].Version != "1.2.3" {
+		t.Fatalf("expected existing ghostty metadata to win, got %+v", got[0])
+	}
+}
+
 func TestComputeBuildMetrics_WindowFiltering(t *testing.T) {
 	// Only snapshots within the window should count for PassRate7d
 	old := time.Now().UTC().AddDate(0, 0, -10).Format("2006-01-02")

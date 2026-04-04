@@ -269,6 +269,13 @@ func runFetchTesthub() error {
 	} else {
 		fmt.Fprintf(os.Stderr, "  packages: %d\n", len(pkgs))
 	}
+	flatpakPkgs, flatpakErr := testhub.ListFlatpakPackages("projectbluefin", "testhub")
+	if flatpakErr != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  testhub flatpaks fallback: %v\n", flatpakErr)
+	} else if len(flatpakPkgs) > 0 {
+		pkgs = testhub.MergePackages(pkgs, flatpakPkgs)
+		fmt.Fprintf(os.Stderr, "  package inventory after flatpaks merge: %d\n", len(pkgs))
+	}
 
 	fmt.Fprintf(os.Stderr, "→ Fetching testhub build counts (since run %d)…\n", lastRunID)
 	counts, newLastRunID, fetchErr := testhub.FetchBuildCounts(lastRunID)
