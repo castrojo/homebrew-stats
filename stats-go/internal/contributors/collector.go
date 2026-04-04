@@ -13,16 +13,35 @@ ghpkg "github.com/castrojo/bootc-ecosystem/internal/github"
 
 // Repos to always include (hardcoded for predictability).
 var TrackedRepos = []string{
-"ublue-os/bluefin",
-"ublue-os/bluefin-lts",
-"projectbluefin/dakota",
-"projectbluefin/common",
-"projectbluefin/finpilot",
-"projectbluefin/documentation",
-"projectbluefin/bluefin-mcp",
-"projectbluefin/testhub",
-"projectbluefin/iso",
-"projectbluefin/website",
+	// Bluefin
+	"ublue-os/bluefin",
+	"ublue-os/bluefin-lts",
+	"projectbluefin/dakota",
+	"projectbluefin/common",
+	"projectbluefin/finpilot",
+	"projectbluefin/documentation",
+	"projectbluefin/bluefin-mcp",
+	"projectbluefin/testhub",
+	"projectbluefin/iso",
+	"projectbluefin/website",
+	// Aurora
+	"ublue-os/aurora",
+	"get-aurora-dev/common",
+	"get-aurora-dev/iso",
+	// Bazzite
+	"ublue-os/bazzite",
+	"ublue-os/bazzite-dx",
+	// Universal Blue base
+	"ublue-os/main",
+	"ublue-os/akmods",
+	// uCore
+	"ublue-os/ucore",
+	// Zirconium
+	"zirconium-dev/zirconium",
+	// bootcrew
+	"bootcrew/mono",
+	// secureblue
+	"secureblue/secureblue",
 }
 
 const discussionsQuery = `
