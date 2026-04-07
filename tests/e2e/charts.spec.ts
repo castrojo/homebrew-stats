@@ -660,7 +660,7 @@ test.describe('Contributors range toggles', () => {
     const canvas = page.locator('canvas#release-freq');
     const hasCanvas = await canvas.count() > 0;
     if (!hasCanvas) return; // empty seed — chart not rendered, range buttons absent
-    const btn90d = page.locator('#release-freq-range-btns [data-range="90d"]');
+    const btn90d = page.locator('#release-freq-range-btns [data-range="90"]');
     await btn90d.click();
     await expect(btn90d).toHaveClass(/active/);
     await expectCanvasRendered(page, 'release-freq');
