@@ -4,6 +4,9 @@ interface BuildMetrics {
   last_status: string;
   last_build_at: string;
   pass_rate_7d: number;
+  pass_rate_30d: number;
+  arch_x86_status?: string;
+  arch_arm_status?: string;
 }
 
 interface Package {
@@ -24,10 +27,20 @@ const { packages, buildMetrics } = Astro.props;
 
 const metricsByApp = Object.fromEntries(buildMetrics.map(m => [m.app, m]));
 
-function statusBadge(status: string): string {
-  if (status === "passing") return "Passing";
-  if (status === "failing") return "Failing";
-  return "Unknown";
+function statusBadge(status: string): { label: string; cls: string } {
+  switch (status) {
+    case "passing": return { label: "✅ Passing", cls: "passing" };
+    case "failing": return { label: "❌ Failing", cls: "failing" };
+    case "stale":   return { label: "⚠️ Stale", cls: "stale" };
+    case "pending": return { label: "⏳ Pending", cls: "pending" };
+    default:        return { label: "Unknown", cls: "unknown" };
+  }
+}
+
+function archIcon(status?: string): string {
+  if (status === "passing") return "✅";
+  if (status === "failing") return "❌";
+  return "—";
 }
 
 function parseDate(value?: string): Date | null {
@@ -60,36 +73,45 @@ function relativeTime(value?: string): string {
         <thead>
           <tr>
             <th data-sort-key="name" class="sortable">Package ↕</th>
-            <th data-sort-key="version" class="sortable">Version ↕</th>
             <th data-sort-key="last_status" class="sortable">Build Status ↕</th>
-            <th data-sort-key="last_build_ts" class="sortable">Last Build ↕</th>
+            <th>Arch</th>
+            <th data-sort-key="last_published_ts" class="sortable">Last Published ↕</th>
           </tr>
         </thead>
         <tbody id="testhub-tbody">
           {packages.map(pkg => {
             const m = metricsByApp[pkg.name];
             const status = m?.last_status ?? "unknown";
+            const badge = statusBadge(status);
+            // Last Published: GHCR updated_at is primary; CI last_build_at is tooltip
+            const lastPublished = pkg.updated_at;
             const lastBuild = m?.last_build_at;
-            const lastBuildDate = parseDate(lastBuild);
-            // Use explicit version if available, otherwise fall back to build date (OCI tag proxy)
-            const displayVersion = pkg.version ?? lastBuild ?? "—";
+            const lastPublishedDate = parseDate(lastPublished);
+            const lastPublishedTs = lastPublishedDate ? lastPublishedDate.getTime() : 0;
+            const x86 = archIcon(m?.arch_x86_status);
+            const arm = archIcon(m?.arch_arm_status);
             return (
               <tr
                 data-name={pkg.name}
-                data-version={displayVersion}
                 data-last_status={status}
-                data-last_build_ts={lastBuildDate ? lastBuildDate.getTime() : 0}
+                data-last_published_ts={lastPublishedTs}
               >
                 <td>
                   {pkg.html_url
                     ? <a href={pkg.html_url} target="_blank" rel="noopener">{pkg.name}</a>
                     : pkg.name}
                 </td>
-                <td>{displayVersion}</td>
                 <td>
-                  <span class={`status-badge ${status}`}>{statusBadge(status)}</span>
+                  <span class={`status-badge ${badge.cls}`}>{badge.label}</span>
                 </td>
-                <td title={lastBuild ?? "No data"}>{relativeTime(lastBuild)}</td>
+                <td class="arch-cell">
+                  <span title="x86_64">{x86} x86</span>
+                  {" "}
+                  <span title="aarch64">{arm} arm</span>
+                </td>
+                <td title={lastBuild ? `CI build: ${lastBuild}` : "No CI data"}>
+                  {relativeTime(lastPublished)}
+                </td>
               </tr>
             );
           })}
@@ -120,7 +142,7 @@ function relativeTime(value?: string): string {
       rows.sort((a, b) => {
         const aVal = a.dataset[sortKey] ?? '';
         const bVal = b.dataset[sortKey] ?? '';
-        if (sortKey === 'last_build_ts') {
+        if (sortKey === 'last_published_ts') {
           return (Number(aVal) - Number(bVal)) * sortDir;
         }
         return aVal.localeCompare(bVal) * sortDir;
@@ -142,6 +164,7 @@ function relativeTime(value?: string): string {
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .chart-empty { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 14px; }
+  .arch-cell { white-space: nowrap; font-size: 12px; color: var(--muted); }
   .status-badge {
     display: inline-flex;
     align-items: center;
@@ -160,6 +183,15 @@ function relativeTime(value?: string): string {
     border-color: #da1e28;
     color: #fa4d56;
     background: rgba(250, 77, 86, 0.12);
+  }
+  .status-badge.stale {
+    border-color: #f1c21b;
+    color: #b45309;
+    background: rgba(241, 194, 27, 0.12);
+  }
+  .status-badge.pending {
+    color: var(--muted);
+    background: var(--bg3);
   }
   .status-badge.unknown {
     color: var(--muted);

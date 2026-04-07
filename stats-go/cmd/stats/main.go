@@ -348,24 +348,64 @@ func runFetchTesthub() error {
 		}
 	}
 
-	// Compute build metrics for 7d and 30d windows; merge PassRate30d into results.
-	metrics7d := testhub.ComputeBuildMetrics(store.Snapshots, 7)
-	metrics30d := testhub.ComputeBuildMetrics(store.Snapshots, 30)
-	// Build a lookup for 30d rates.
-	rate30d := make(map[string]float64, len(metrics30d))
-	for _, m := range metrics30d {
-		rate30d[m.App] = m.PassRate30d
-	}
-	// Merge: fill PassRate30d and LastStatus/LastBuildAt.
+	// Compute build metrics for 7d and 30d windows.
+	// ComputeBuildMetrics now returns map[string]float64 (app → pass rate).
+	rates7d := testhub.ComputeBuildMetrics(store.Snapshots, 7)
+	rates30d := testhub.ComputeBuildMetrics(store.Snapshots, 30)
+
+	// Determine last known status and build date per app across all history.
 	lastStatusByApp := computeLastStatus(store.Snapshots)
-	buildMetrics := make([]testhub.BuildMetrics, 0, len(metrics7d))
-	for _, m := range metrics7d {
-		m.PassRate30d = rate30d[m.App]
-		if ls, ok := lastStatusByApp[m.App]; ok {
-			m.LastStatus = ls.status
-			m.LastBuildAt = ls.at
+
+	// Union of all apps in either window — apps only in 30d get "stale" status.
+	// Apps in neither window with a package inventory entry get "pending".
+	seenApps := make(map[string]bool)
+	buildMetrics := make([]testhub.BuildMetrics, 0)
+
+	// Add all apps from 7d window first.
+	for app, rate7d := range rates7d {
+		seenApps[app] = true
+		bm := testhub.BuildMetrics{
+			App:        app,
+			PassRate7d: rate7d,
+			PassRate30d: rates30d[app],
 		}
-		buildMetrics = append(buildMetrics, m)
+		if ls, ok := lastStatusByApp[app]; ok {
+			bm.LastStatus = ls.status
+			bm.LastBuildAt = ls.at
+		}
+		bm.Arch86Status, bm.ArchArmStatus = computeArchStatus(store.Snapshots, app)
+		buildMetrics = append(buildMetrics, bm)
+	}
+
+	// Add apps only in 30d window (stale — had history, builds went silent).
+	for app, rate30d := range rates30d {
+		if seenApps[app] {
+			continue
+		}
+		seenApps[app] = true
+		bm := testhub.BuildMetrics{
+			App:         app,
+			PassRate7d:  0,
+			PassRate30d: rate30d,
+			LastStatus:  "stale",
+		}
+		if ls, ok := lastStatusByApp[app]; ok {
+			bm.LastBuildAt = ls.at
+		}
+		bm.Arch86Status, bm.ArchArmStatus = computeArchStatus(store.Snapshots, app)
+		buildMetrics = append(buildMetrics, bm)
+	}
+
+	// Backfill packages in flatpak inventory with no build history at all → "pending".
+	for _, pkg := range pkgs {
+		if !seenApps[pkg.Name] {
+			buildMetrics = append(buildMetrics, testhub.BuildMetrics{
+				App:           pkg.Name,
+				LastStatus:    "pending",
+				Arch86Status:  "unknown",
+				ArchArmStatus: "unknown",
+			})
+		}
 	}
 
 	if len(buildMetrics) == 0 {
@@ -438,12 +478,50 @@ func loadFallbackTesthubBuildMetrics() []testhub.BuildMetrics {
 	return out.BuildMetrics
 }
 
+// computeArchStatus returns the last known x86_64 and aarch64 build status for an app.
+// Looks at the most recent snapshot that has build data for the app.
+func computeArchStatus(snapshots []testhub.DaySnapshot, app string) (x86Status, armStatus string) {
+	sorted := make([]testhub.DaySnapshot, len(snapshots))
+	copy(sorted, snapshots)
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Date > sorted[j].Date })
+
+	for _, snap := range sorted {
+		for _, c := range snap.BuildCounts {
+			if c.App != app {
+				continue
+			}
+			if c.Passed > 0 || c.Failed > 0 {
+				if c.Failed > 0 {
+					x86Status = "failing"
+				} else {
+					x86Status = "passing"
+				}
+			} else {
+				x86Status = "unknown"
+			}
+			if c.PassedAarch64 > 0 || c.FailedAarch64 > 0 {
+				if c.FailedAarch64 > 0 {
+					armStatus = "failing"
+				} else {
+					armStatus = "passing"
+				}
+			} else {
+				armStatus = "unknown"
+			}
+			return x86Status, armStatus
+		}
+	}
+	return "unknown", "unknown"
+}
+
 type lastStatus struct {
 	status string
 	at     string
 }
 
 // computeLastStatus returns the last known build status per app from snapshots.
+// A run is "failing" if compile-oci failed OR any downstream stage explicitly failed
+// (publish-manifest-list failure means the image is unpullable even if compile passed).
 func computeLastStatus(snapshots []testhub.DaySnapshot) map[string]lastStatus {
 	// Sort descending by date to find the most recent entry per app.
 	sorted := make([]testhub.DaySnapshot, len(snapshots))
@@ -457,10 +535,12 @@ func computeLastStatus(snapshots []testhub.DaySnapshot) map[string]lastStatus {
 				continue
 			}
 			status := "unknown"
-			if c.Passed > 0 && c.Failed == 0 {
-				status = "passing"
-			} else if c.Failed > 0 {
+			pipelineFailed := c.Failed > 0 || c.FailedAarch64 > 0 ||
+				c.SignFailed > 0 || c.PublishFailed > 0 || c.AnnotateFailed > 0
+			if pipelineFailed {
 				status = "failing"
+			} else if c.Passed > 0 || c.PassedAarch64 > 0 {
+				status = "passing"
 			}
 			result[c.App] = lastStatus{status: status, at: snap.Date}
 		}

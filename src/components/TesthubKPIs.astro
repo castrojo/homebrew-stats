@@ -27,7 +27,7 @@ interface Props {
   generatedAt: string;
 }
 
-const { packages, buildMetrics, history } = Astro.props;
+const { packages, buildMetrics, history, generatedAt } = Astro.props;
 
 const totalPackages = packages.length;
 
@@ -63,6 +63,17 @@ const avgPassRate7d = passRateSamples.length > 0
   ? passRateSamples.reduce((sum, v) => sum + v, 0) / passRateSamples.length
   : null;
 ---
+
+<div id="freshness-banner" class="freshness-banner" style="display:none">
+  ⚠️ Dashboard data may be stale — last updated more than 48 hours ago.
+</div>
+<script define:vars={{ generatedAt }}>
+  const elapsed = Date.now() - new Date(generatedAt).getTime();
+  if (elapsed > 48 * 60 * 60 * 1000) {
+    const banner = document.getElementById('freshness-banner');
+    if (banner) banner.style.display = 'block';
+  }
+</script>
 
 <div class="hero-kpis">
   <div class="kpi-card">
@@ -122,5 +133,14 @@ const avgPassRate7d = passRateSamples.length > 0
   }
   @media (max-width: 600px) {
     .kpi-card { flex: 1 1 calc(50% - 6px); }
+  }
+  .freshness-banner {
+    background: rgba(241, 194, 27, 0.15);
+    border: 1px solid #f1c21b;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #b45309;
   }
 </style>

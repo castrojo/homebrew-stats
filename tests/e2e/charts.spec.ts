@@ -405,18 +405,57 @@ test.describe('Testhub data quality', () => {
     expect(normalized).toContain('LATEST BUILD STATUS');
     expect(normalized).toContain('UPDATED THIS WEEK');
     expect(normalized).toContain('BUILD RUNS (30D)');
-    // 'TOTAL PULLS' is conditional — omitted until OCI pull API available (#13)
   });
 
   test('Package table has all expected column headers', async ({ page }) => {
     const headers = await page.locator('#testhub-table thead th').allTextContents();
     const text = headers.join(' ');
     expect(text).toContain('Package');
-    expect(text).toContain('Version');
     expect(text).toContain('Build Status');
-    expect(text).toContain('Last Build');
+    expect(text).toContain('Arch');
+    expect(text).toContain('Last Published');
     expect(text).not.toContain('Version Count');
     expect(text).not.toContain('Pulls');
+  });
+
+  // Pre-deploy structural: verify status badge element exists in at least one row
+  test('Status badge element is present in table rows', async ({ page }) => {
+    const badge = page.locator('#testhub-tbody .status-badge').first();
+    await expect(badge).toBeAttached();
+  });
+
+  // Pre-deploy structural: arch cell is present in at least one row
+  test('Arch cell is present in table rows', async ({ page }) => {
+    const archCell = page.locator('#testhub-tbody .arch-cell').first();
+    await expect(archCell).toBeAttached();
+  });
+
+  // Pre-deploy structural: freshness banner element exists (hidden by default)
+  test('Freshness banner element exists in DOM', async ({ page }) => {
+    const banner = page.locator('#freshness-banner');
+    await expect(banner).toBeAttached();
+  });
+
+  // Pre-deploy structural: CI runs link is present
+  test('View CI Runs link is present', async ({ page }) => {
+    const link = page.locator('a[href*="actions/workflows/build.yml"]');
+    await expect(link).toBeAttached();
+  });
+
+  // Pre-deploy enum validation: last_status must be a known valid value
+  test('build_metrics last_status values are valid enum members', async ({ page }) => {
+    const rows = page.locator('#testhub-tbody tr');
+    const count = await rows.count();
+    if (count === 0) return; // cold cache — skip
+    const validStatuses = new Set(['passing', 'failing', 'stale', 'pending', 'unknown']);
+    for (let i = 0; i < Math.min(count, 5); i++) {
+      const badge = rows.nth(i).locator('.status-badge');
+      const cls = await badge.getAttribute('class');
+      if (!cls) continue;
+      // Extract the status class (passing|failing|stale|pending|unknown)
+      const statusCls = cls.split(' ').find(c => validStatuses.has(c));
+      expect(statusCls, `Row ${i} badge class must be a known status`).toBeTruthy();
+    }
   });
 });
 
