@@ -96,6 +96,13 @@ jobs:
             exit 1
           fi
 
+      - name: Fetch Brewfile tap data
+        id: sync-brewfile-taps
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-brewfile-taps
+
       - name: Fetch Testhub package stats
         id: sync-testhub
         continue-on-error: true

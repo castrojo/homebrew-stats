@@ -78,6 +78,63 @@ test.describe('Homebrew tab', () => {
   });
 });
 
+// ─── Package Leaderboard ──────────────────────────────────────────────────────
+
+test.describe('Package Leaderboard', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/bootc-ecosystem/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('leaderboard table is visible and has at least one row', async ({ page }) => {
+    const table = page.locator('#pkg-leaderboard');
+    await expect(table).toBeVisible();
+    const rows = table.locator('tbody tr');
+    await expect(rows.first()).toBeVisible();
+  });
+
+  test('badges use self-describing labels (not "stable" or "experimental")', async ({ page }) => {
+    const badges = page.locator('.tap-badge');
+    const count = await badges.count();
+    expect(count, 'At least one tap badge must be present').toBeGreaterThan(0);
+
+    const texts = await badges.allTextContents();
+    for (const text of texts) {
+      expect(text, `Badge "${text}" must not use opaque label "stable"`).not.toBe('stable');
+      expect(text, `Badge "${text}" must not use opaque label "experimental"`).not.toBe('experimental');
+    }
+  });
+
+  test('ublue-os/tap badge is present', async ({ page }) => {
+    const badge = page.locator('.tap-badge', { hasText: 'ublue-os/tap' });
+    await expect(badge.first()).toBeVisible();
+  });
+
+  test('search filter hides non-matching rows', async ({ page }) => {
+    const searchInput = page.locator('#pkg-search');
+    await expect(searchInput).toBeVisible();
+
+    // Type a search query that should match something
+    await searchInput.fill('ublue-os');
+    // Some rows should be visible
+    const visibleRows = page.locator('#pkg-leaderboard tbody tr:visible');
+    const count = await visibleRows.count();
+    expect(count, 'Filtering by "ublue-os" should show at least one row').toBeGreaterThan(0);
+
+    // Clear and verify rows come back
+    await searchInput.fill('');
+  });
+
+  test('zero-install cells render em-dash not "0"', async ({ page }) => {
+    // If any package has zero installs, it should show '—' not '0'
+    const cells = page.locator('#pkg-leaderboard tbody .num-cell');
+    const cellTexts = await cells.allTextContents();
+    for (const text of cellTexts) {
+      expect(text.trim(), `Cell "${text}" must not render bare "0" — use "—" instead`).not.toBe('0');
+    }
+  });
+});
+
 // ─── Testhub tab ─────────────────────────────────────────────────────────────
 
 test.describe('Testhub tab', () => {

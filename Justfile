@@ -22,6 +22,7 @@ sync-scorecard:
 sync:
     cd stats-go && go build -o stats ./cmd/stats/
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats
+    GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-brewfile-taps
     GITHUB_TOKEN="${GITHUB_TOKEN:-$GITHUB_PAT}" ./stats-go/stats fetch-releases
     just sync-builds
 

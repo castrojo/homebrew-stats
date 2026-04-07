@@ -205,6 +205,97 @@ func applyDownloads(packages []Package, tapPrefix string, brewInstalls map[strin
 	}
 }
 
+// applyDownloadsBoth populates install counts for packages using separate analytics maps
+// for casks and formulas. Used for Brewfile-sourced packages where both types exist.
+func applyDownloadsBoth(packages []Package, tapPrefix string, caskInstalls, formulaInstalls map[string]tapanalytics.PkgInstalls) {
+	for i := range packages {
+		p := &packages[i]
+		var installs tapanalytics.PkgInstalls
+		var ok bool
+		if p.Type == "cask" {
+			installs, ok = caskInstalls[tapPrefix+p.Name]
+		} else {
+			installs, ok = formulaInstalls[tapPrefix+p.Name]
+		}
+		if ok {
+			p.Downloads = installs.Installs30d
+			p.Installs90d = installs.Installs90d
+			p.Installs365d = installs.Installs365d
+		}
+	}
+}
+
+// CollectWithFormulas is like Collect but uses separate maps for cask and formula analytics.
+// Used when collecting stats for taps that contain both casks and formulas (e.g. third-party taps).
+func CollectWithFormulas(owner, repo string, caskInstalls, formulaInstalls map[string]tapanalytics.PkgInstalls) (*TapStats, error) {
+	name := owner + "/" + repo
+	ts := &TapStats{
+		Name:      name,
+		URL:       "https://github.com/" + name,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
+	}
+
+	// Traffic.
+	count, uniques, err := ghclient.GetTrafficClones(owner, repo)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Traffic for %s: %v\n", name, err)
+	} else {
+		ts.Traffic = &Traffic{Count: count, Uniques: uniques, Window: "14d"}
+	}
+
+	// Packages — Casks first, then Formula.
+	dirs := []struct {
+		path    string
+		pkgType string
+	}{
+		{"Casks", "cask"},
+		{"Formula", "formula"},
+	}
+
+	for _, d := range dirs {
+		files, err := ghclient.ListDirectory(owner, repo, d.path)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  Listing %s/%s: %v\n", name, d.path, err)
+			continue
+		}
+		for _, filename := range files {
+			pkgName := strings.TrimSuffix(filename, ".rb")
+			content, err := ghclient.GetFileContent(owner, repo, d.path+"/"+filename)
+			if err != nil {
+				ts.Packages = append(ts.Packages, Package{Name: pkgName, Type: d.pkgType})
+				continue
+			}
+			pkg := parseRuby(pkgName, d.pkgType, content)
+			ts.Packages = append(ts.Packages, pkg)
+		}
+	}
+
+	tapPrefix := buildTapPrefix(owner, repo)
+
+	for i := range ts.Packages {
+		p := &ts.Packages[i]
+		if p.SourceOwner != "" && p.SourceRepo != "" && p.Version != "" {
+			latest, err := ghclient.GetLatestReleaseTag(p.SourceOwner, p.SourceRepo)
+			if err == nil && latest != "" {
+				p.LatestVersion = normaliseVersion(latest)
+				p.FreshnessKnown = true
+				p.IsStale = p.LatestVersion != normaliseVersion(p.Version)
+			}
+		}
+	}
+
+	applyDownloadsBoth(ts.Packages, tapPrefix, caskInstalls, formulaInstalls)
+
+	sort.Slice(ts.Packages, func(i, j int) bool {
+		if ts.Packages[i].Type != ts.Packages[j].Type {
+			return ts.Packages[i].Type < ts.Packages[j].Type // "cask" < "formula"
+		}
+		return ts.Packages[i].Downloads > ts.Packages[j].Downloads
+	})
+
+	return ts, nil
+}
+
 // buildTapPrefix constructs the Homebrew cask token prefix for the given
 // owner/repo pair.  Homebrew's convention strips the "homebrew-" prefix from
 // the repository name when forming a tap short-name, so:

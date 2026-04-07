@@ -25,14 +25,25 @@ interface Row {
 
 const { taps } = Astro.props;
 
-function shortTapName(tapName: string): string {
-  return tapName.includes('experimental') ? 'experimental' : 'stable';
+const BADGE_LABELS: Record<string, string> = {
+  'ublue-os/homebrew-tap': 'ublue-os/tap',
+  'ublue-os/homebrew-experimental-tap': 'ublue-os/experimental',
+  'bluefin/brewfile': 'bluefin',
+  'bazzite/brewfile': 'bazzite',
+};
+
+function tapBadgeLabel(tapName: string): string {
+  return BADGE_LABELS[tapName] ?? tapName.replace('homebrew-', '');
+}
+
+function tapBadgeCssClass(label: string): string {
+  return label.replace(/\//g, '-').replace(/homebrew-/g, '');
 }
 
 const rows: Row[] = taps.flatMap(tap =>
   tap.packages.map(pkg => ({
     package: pkg.name,
-    tapName: shortTapName(tap.name),
+    tapName: tapBadgeLabel(tap.name),
     installs30d: pkg.downloads ?? 0,
     installs90d: pkg.installs_90d ?? 0,
     installs365d: pkg.installs_365d ?? 0,
@@ -70,11 +81,11 @@ rows.sort((a, b) => b.installs30d - a.installs30d);
               <span class="pkg-name">{row.package}</span>
             </td>
             <td>
-              <span class={`tap-badge tap-${row.tapName}`}>{row.tapName}</span>
+              <span class={`tap-badge tap-${tapBadgeCssClass(row.tapName)}`}>{row.tapName}</span>
             </td>
-            <td class="num-cell">{row.installs30d.toLocaleString()}</td>
-            <td class="num-cell">{row.installs90d.toLocaleString()}</td>
-            <td class="num-cell">{row.installs365d.toLocaleString()}</td>
+            <td class="num-cell">{row.installs30d > 0 ? row.installs30d.toLocaleString() : '—'}</td>
+            <td class="num-cell">{row.installs90d > 0 ? row.installs90d.toLocaleString() : '—'}</td>
+            <td class="num-cell">{row.installs365d > 0 ? row.installs365d.toLocaleString() : '—'}</td>
           </tr>
         ))}
       </tbody>
@@ -266,5 +277,29 @@ rows.sort((a, b) => b.installs30d - a.installs30d);
     background: rgba(146, 50, 169, 0.16);
     border-color: rgba(146, 50, 169, 0.45);
     color: #e2c6f1;
+  }
+
+  .tap-ublue-os-tap {
+    background: rgba(120, 41, 139, 0.2);
+    border-color: rgba(175, 104, 217, 0.45);
+    color: #d8b4f1;
+  }
+
+  .tap-ublue-os-experimental {
+    background: rgba(146, 50, 169, 0.16);
+    border-color: rgba(146, 50, 169, 0.45);
+    color: #e2c6f1;
+  }
+
+  .tap-bluefin {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(96, 165, 250, 0.45);
+    color: #93c5fd;
+  }
+
+  .tap-bazzite {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(52, 211, 153, 0.45);
+    color: #6ee7b7;
   }
 </style>

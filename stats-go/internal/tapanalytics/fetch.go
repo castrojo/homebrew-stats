@@ -10,6 +10,7 @@ import (
 )
 
 const caskInstallBaseURL = "https://formulae.brew.sh/api/analytics/cask-install"
+const formulaInstallBaseURL = "https://formulae.brew.sh/api/analytics/install"
 
 // PkgInstalls holds Homebrew cask install counts across periods.
 type PkgInstalls struct {
@@ -66,4 +67,110 @@ func Fetch() (map[string]PkgInstalls, error) {
 	}
 
 	return result, nil
+}
+
+// fetchCaskPeriods fetches all cask-install analytics from baseURL across 30d/90d/365d.
+// No prefix filter — returns every entry from the API.
+func fetchCaskPeriods(baseURL string) (map[string]PkgInstalls, error) {
+	result := make(map[string]PkgInstalls)
+
+	periods := []struct {
+		name string
+		set  func(p *PkgInstalls, v int64)
+	}{
+		{"30d", func(p *PkgInstalls, v int64) { p.Installs30d = v }},
+		{"90d", func(p *PkgInstalls, v int64) { p.Installs90d = v }},
+		{"365d", func(p *PkgInstalls, v int64) { p.Installs365d = v }},
+	}
+
+	for _, period := range periods {
+		url := fmt.Sprintf("%s/%s.json", baseURL, period.name)
+		resp, err := http.Get(url) //nolint:gosec // URL is constructed from allowlisted base
+		if err != nil {
+			return nil, fmt.Errorf("fetching cask-install analytics (%s): %w", period.name, err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("cask-install analytics (%s): HTTP %d", period.name, resp.StatusCode)
+		}
+
+		var payload struct {
+			Items []struct {
+				Cask  string `json:"cask"`
+				Count string `json:"count"`
+			} `json:"items"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+			return nil, fmt.Errorf("decoding cask-install analytics (%s): %w", period.name, err)
+		}
+
+		for _, item := range payload.Items {
+			countStr := strings.ReplaceAll(item.Count, ",", "")
+			count, _ := strconv.ParseInt(countStr, 10, 64)
+			entry := result[item.Cask]
+			period.set(&entry, count)
+			result[item.Cask] = entry
+		}
+	}
+
+	return result, nil
+}
+
+// fetchFormulaPeriods fetches all formula-install analytics from baseURL across 30d/90d/365d.
+// No prefix filter — returns every entry from the API.
+func fetchFormulaPeriods(baseURL string) (map[string]PkgInstalls, error) {
+	result := make(map[string]PkgInstalls)
+
+	periods := []struct {
+		name string
+		set  func(p *PkgInstalls, v int64)
+	}{
+		{"30d", func(p *PkgInstalls, v int64) { p.Installs30d = v }},
+		{"90d", func(p *PkgInstalls, v int64) { p.Installs90d = v }},
+		{"365d", func(p *PkgInstalls, v int64) { p.Installs365d = v }},
+	}
+
+	for _, period := range periods {
+		url := fmt.Sprintf("%s/%s.json", baseURL, period.name)
+		resp, err := http.Get(url) //nolint:gosec // URL is constructed from allowlisted base
+		if err != nil {
+			return nil, fmt.Errorf("fetching formula-install analytics (%s): %w", period.name, err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("formula-install analytics (%s): HTTP %d", period.name, resp.StatusCode)
+		}
+
+		var payload struct {
+			Items []struct {
+				Formula string `json:"formula"`
+				Count   string `json:"count"`
+			} `json:"items"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+			return nil, fmt.Errorf("decoding formula-install analytics (%s): %w", period.name, err)
+		}
+
+		for _, item := range payload.Items {
+			countStr := strings.ReplaceAll(item.Count, ",", "")
+			count, _ := strconv.ParseInt(countStr, 10, 64)
+			entry := result[item.Formula]
+			period.set(&entry, count)
+			result[item.Formula] = entry
+		}
+	}
+
+	return result, nil
+}
+
+// FetchAllCasks returns install counts for ALL cask packages across 30d/90d/365d.
+// No prefix filtering — the full Homebrew cask analytics dataset is returned.
+func FetchAllCasks() (map[string]PkgInstalls, error) {
+	return fetchCaskPeriods(caskInstallBaseURL)
+}
+
+// FetchFormulas returns install counts for ALL formula packages across 30d/90d/365d.
+// No prefix filtering — the full Homebrew formula analytics dataset is returned.
+func FetchFormulas() (map[string]PkgInstalls, error) {
+	return fetchFormulaPeriods(formulaInstallBaseURL)
 }

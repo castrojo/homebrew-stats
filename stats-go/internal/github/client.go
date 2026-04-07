@@ -55,13 +55,9 @@ fmt.Sprintf("repos/%s/%s/contents/%s", owner, repo, path),
 if err != nil {
 return "", fmt.Errorf("get file %s/%s/%s: %w", owner, repo, path, err)
 }
-// gh api --jq returns the value as a JSON string (quoted), unwrap it.
-var b64 string
-if err := json.Unmarshal(out, &b64); err != nil {
-return "", fmt.Errorf("decode content json %s/%s/%s: %w", owner, repo, path, err)
-}
+// gh api --jq outputs raw string values (not JSON-encoded).
 // GitHub encodes content as base64 with embedded newlines.
-cleaned := strings.ReplaceAll(b64, "\n", "")
+cleaned := strings.ReplaceAll(strings.TrimSpace(string(out)), "\n", "")
 decoded, err := base64.StdEncoding.DecodeString(cleaned)
 if err != nil {
 return "", fmt.Errorf("base64 decode %s/%s/%s: %w", owner, repo, path, err)
@@ -82,11 +78,7 @@ return "", nil
 }
 return "", fmt.Errorf("latest release for %s/%s: %w", owner, repo, err)
 }
-var tag string
-if err := json.Unmarshal(out, &tag); err != nil {
-return "", fmt.Errorf("latest release parse %s/%s: %w", owner, repo, err)
-}
-return tag, nil
+return strings.TrimSpace(string(out)), nil
 }
 
 // pkgEntry is used for parsing gh api package listing output.

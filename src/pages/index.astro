@@ -7,6 +7,7 @@ import OsSection from '../components/OsSection.astro';
 import HeroKPIs from '../components/HeroKPIs.astro';
 import PackageLeaderboard from '../components/PackageLeaderboard.astro';
 import stats from '../data/stats.json';
+import brewfileStats from '../data/brewfile-stats.json';
 
 const generatedAt = new Date(stats.generated_at).toUTCString();
 const tapNames = stats.taps.map((t: any) => t.name);
@@ -34,7 +35,7 @@ const stableTap = stats.taps[0] as any;
   <hr class="section-divider" />
 
   <h2>Top package activity</h2>
-  <PackageLeaderboard taps={stats.taps as any} />
+  <PackageLeaderboard taps={[...stats.taps, ...(brewfileStats?.taps ?? [])] as any} />
 
   {stats.history.length > 1 && (
     <section class="charts-section">
