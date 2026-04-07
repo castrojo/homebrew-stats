@@ -1,349 +1,484 @@
 {
-  "generated_at": "2026-04-04T18:24:52Z",
+  "generated_at": "2026-04-07T20:35:05Z",
   "summary": {
-    "total_installs_30d": 2424,
-    "total_installs_90d": 5134,
-    "total_installs_365d": 6493,
-    "total_unique_tappers": 2140,
+    "total_installs_30d": 2832,
+    "total_installs_90d": 5820,
+    "total_installs_365d": 7350,
+    "total_unique_tappers": 2347,
     "total_packages": 43,
-    "stale_count": 0,
-    "fresh_count": 0,
-    "unknown_freshness_count": 43,
-    "wow_growth_pct": -37.4
+    "stale_count": 7,
+    "fresh_count": 7,
+    "unknown_freshness_count": 29,
+    "wow_growth_pct": -27.2
   },
   "taps": [
     {
       "name": "ublue-os/homebrew-tap",
       "url": "https://github.com/ublue-os/homebrew-tap",
       "traffic": {
-        "count": 2028,
-        "uniques": 1702,
+        "count": 2247,
+        "uniques": 1909,
         "window": "14d"
       },
-      "growth_pct": 27.6,
+      "growth_pct": 46.1,
       "packages": [
         {
           "name": "jetbrains-toolbox-linux",
           "type": "cask",
+          "version": "3.4.1.78303",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1389,
-          "installs_90d": 2076,
-          "installs_365d": 2342,
-          "velocity7d": 192.6
+          "downloads": 1449,
+          "installs_90d": 2206,
+          "installs_365d": 2514,
+          "velocity7d": 200,
+          "description": "JetBrains tools manager",
+          "homepage": "https://www.jetbrains.com/toolbox-app/"
         },
         {
           "name": "visual-studio-code-linux",
           "type": "cask",
+          "version": "1.114.0",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 187,
-          "installs_90d": 416,
-          "installs_365d": 601,
-          "velocity7d": 14.1
+          "downloads": 341,
+          "installs_90d": 576,
+          "installs_365d": 771,
+          "velocity7d": 37.6,
+          "description": "Open-source code editor",
+          "homepage": "https://code.visualstudio.com/"
         },
         {
           "name": "antigravity-linux",
           "type": "cask",
+          "version": "1.21.9,4905428782546944",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 180,
-          "installs_90d": 456,
-          "installs_365d": 456,
-          "velocity7d": 14.9
+          "downloads": 186,
+          "installs_90d": 480,
+          "installs_365d": 480,
+          "velocity7d": 14.9,
+          "description": "AI Coding Agent IDE",
+          "homepage": "https://antigravity.google/"
         },
         {
           "name": "lm-studio-linux",
           "type": "cask",
+          "version": "0.4.9-1",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 126,
-          "installs_90d": 354,
-          "installs_365d": 458,
-          "velocity7d": 10.7
-        },
-        {
-          "name": "bluefin-wallpapers-extra",
-          "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 86,
-          "installs_90d": 291,
-          "installs_365d": 492,
-          "velocity7d": 0
-        },
-        {
-          "name": "aurora-wallpapers",
-          "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 61,
-          "installs_90d": 208,
-          "installs_365d": 309,
-          "velocity7d": 0
+          "downloads": 134,
+          "installs_90d": 373,
+          "installs_365d": 477,
+          "velocity7d": 13.1,
+          "description": "Discover, download, and run local LLMs",
+          "homepage": "https://lmstudio.ai/"
         },
         {
           "name": "vscodium-linux",
           "type": "cask",
+          "version": "1.112.01907",
+          "latest_version": "1.112.01907",
           "is_stale": false,
-          "freshness_known": false,
-          "downloads": 60,
-          "installs_90d": 175,
-          "installs_365d": 230,
-          "velocity7d": 0
+          "freshness_known": true,
+          "downloads": 114,
+          "installs_90d": 225,
+          "installs_365d": 286,
+          "velocity7d": 0,
+          "description": "Open-source code editor",
+          "homepage": "https://vscodium.com/",
+          "source_owner": "VSCodium",
+          "source_repo": "vscodium"
+        },
+        {
+          "name": "bluefin-wallpapers-extra",
+          "type": "cask",
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-04-07",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 88,
+          "installs_90d": 290,
+          "installs_365d": 501,
+          "velocity7d": 0,
+          "description": "Extra Wallpapers for Bluefin",
+          "homepage": "https://github.com/ublue-os/artwork",
+          "source_owner": "ublue-os",
+          "source_repo": "artwork"
+        },
+        {
+          "name": "aurora-wallpapers",
+          "type": "cask",
+          "version": "2026-03-05",
+          "latest_version": "aurora-v2026-04-07",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 57,
+          "installs_90d": 204,
+          "installs_365d": 313,
+          "velocity7d": 0,
+          "description": "Wallpapers for Aurora",
+          "homepage": "https://github.com/projectbluefin/artwork",
+          "source_owner": "ublue-os",
+          "source_repo": "artwork"
         },
         {
           "name": "framework-wallpapers",
           "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 59,
-          "installs_90d": 186,
-          "installs_365d": 271,
-          "velocity7d": 1.7
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-04-07",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 55,
+          "installs_90d": 181,
+          "installs_365d": 274,
+          "velocity7d": 0.1,
+          "description": "Wallpapers for Framework laptops",
+          "homepage": "https://github.com/projectbluefin/artwork",
+          "source_owner": "projectbluefin",
+          "source_repo": "artwork"
         },
         {
           "name": "bluefin-wallpapers",
           "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-04-07",
+          "is_stale": true,
+          "freshness_known": true,
           "downloads": 55,
-          "installs_90d": 191,
-          "installs_365d": 277,
-          "velocity7d": 0
+          "installs_90d": 187,
+          "installs_365d": 280,
+          "velocity7d": 0,
+          "description": "Wallpapers for Bluefin",
+          "homepage": "https://github.com/projectbluefin/artwork",
+          "source_owner": "projectbluefin",
+          "source_repo": "artwork"
         },
         {
           "name": "bazzite-wallpapers",
           "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
+          "version": "2025-12-14",
+          "latest_version": "aurora-v2026-04-07",
+          "is_stale": true,
+          "freshness_known": true,
           "downloads": 48,
-          "installs_90d": 155,
-          "installs_365d": 222,
-          "velocity7d": 0
+          "installs_90d": 154,
+          "installs_365d": 227,
+          "velocity7d": 0,
+          "description": "Wallpapers for Bazzite",
+          "homepage": "https://bazzite.gg/",
+          "source_owner": "ublue-os",
+          "source_repo": "artwork"
         },
         {
           "name": "goose-linux",
           "type": "cask",
+          "version": "1.29.1",
+          "latest_version": "1.29.1",
           "is_stale": false,
-          "freshness_known": false,
-          "downloads": 42,
+          "freshness_known": true,
+          "downloads": 41,
           "installs_90d": 181,
-          "installs_365d": 189,
-          "velocity7d": 0
+          "installs_365d": 193,
+          "velocity7d": 0,
+          "description": "Open source, extensible AI agent that goes beyond code suggestions",
+          "homepage": "https://block.github.io/goose/",
+          "source_owner": "block",
+          "source_repo": "goose"
         },
         {
           "name": "1password-gui-linux",
           "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 25,
-          "installs_90d": 85,
-          "installs_365d": 192,
-          "velocity7d": 0
+          "version": "8.12.8",
+          "latest_version": "41.1.1",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 28,
+          "installs_90d": 86,
+          "installs_365d": 197,
+          "velocity7d": 0,
+          "description": "Password manager that keeps all passwords secure behind one password",
+          "homepage": "https://1password.com/",
+          "source_owner": "electron",
+          "source_repo": "electron"
         },
         {
           "name": "framework-tool",
           "type": "cask",
+          "version": "0.6.2",
+          "latest_version": "0.6.2",
           "is_stale": false,
-          "freshness_known": false,
-          "downloads": 20,
-          "installs_90d": 38,
-          "installs_365d": 90,
-          "velocity7d": 0
-        },
-        {
-          "name": "heic-to-dynamic-gnome-wallpaper",
-          "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 0.7
+          "freshness_known": true,
+          "downloads": 19,
+          "installs_90d": 37,
+          "installs_365d": 91,
+          "velocity7d": 0,
+          "description": "System tool for Framework laptop hardware management",
+          "homepage": "https://github.com/FrameworkComputer/framework-system",
+          "source_owner": "FrameworkComputer",
+          "source_repo": "framework-system"
         },
         {
           "name": "linux-mcp-server",
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 8.7
+          "downloads": 40,
+          "installs_90d": 121,
+          "installs_365d": 121,
+          "velocity7d": 0,
+          "description": "MCP server for Linux system administration and diagnostics",
+          "homepage": "https://rhel-lightspeed.github.io/linux-mcp-server/"
+        },
+        {
+          "name": "heic-to-dynamic-gnome-wallpaper",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 7,
+          "installs_90d": 14,
+          "installs_365d": 24,
+          "velocity7d": 0,
+          "description": "Convert macOS HEIC dynamic wallpapers to GNOME dynamic wallpapers",
+          "homepage": "https://github.com/fia0/heic-to-dynamic-gnome-wallpaper",
+          "source_owner": "fia0",
+          "source_repo": "heic-to-dynamic-gnome-wallpaper"
         },
         {
           "name": "pmbootstrap",
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 7
+          "downloads": 1,
+          "installs_90d": 62,
+          "installs_365d": 86,
+          "velocity7d": 0,
+          "description": "Sophisticated chroot / build / flash tool to develop and install postmarketOS",
+          "homepage": "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap"
         }
       ],
-      "updated_at": "2026-04-04T18:24:38Z"
+      "updated_at": "2026-04-07T20:34:45Z"
     },
     {
       "name": "ublue-os/homebrew-experimental-tap",
       "url": "https://github.com/ublue-os/homebrew-experimental-tap",
       "traffic": {
-        "count": 930,
+        "count": 918,
         "uniques": 438,
         "window": "14d"
       },
-      "growth_pct": -95.8,
+      "growth_pct": -91.8,
       "packages": [
         {
           "name": "opencode-desktop-linux",
           "type": "cask",
+          "version": "1.3.17",
+          "latest_version": "1.3.17",
           "is_stale": false,
-          "freshness_known": false,
-          "downloads": 59,
-          "installs_90d": 156,
-          "installs_365d": 156,
-          "velocity7d": 0
-        },
-        {
-          "name": "emacs-app-linux",
-          "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 10,
-          "installs_90d": 66,
-          "installs_365d": 66,
-          "velocity7d": 0
+          "freshness_known": true,
+          "downloads": 57,
+          "installs_90d": 161,
+          "installs_365d": 161,
+          "velocity7d": 0,
+          "description": "Open source AI coding agent desktop client",
+          "homepage": "https://opencode.ai/",
+          "source_owner": "anomalyco",
+          "source_repo": "opencode"
         },
         {
           "name": "cursor-linux",
           "type": "cask",
+          "version": "2.6.22,c6285feaba0ad62603f7c22e72f0a170dc8415a5",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 8,
+          "downloads": 11,
           "installs_90d": 56,
-          "installs_365d": 72,
-          "velocity7d": 0
+          "installs_365d": 76,
+          "velocity7d": 0,
+          "description": "Write, edit, and chat about your code with AI",
+          "homepage": "https://www.cursor.com/"
+        },
+        {
+          "name": "emacs-app-linux",
+          "type": "cask",
+          "version": "30.2-18",
+          "latest_version": "emacs-pgtk-30.2-18",
+          "is_stale": true,
+          "freshness_known": true,
+          "downloads": 11,
+          "installs_90d": 67,
+          "installs_365d": 67,
+          "velocity7d": 0,
+          "description": "Text editor with PGTK support (Native Wayland and X11)",
+          "homepage": "https://github.com/daegalus/linux-app-builds",
+          "source_owner": "daegalus",
+          "source_repo": "linux-app-builds"
         },
         {
           "name": "winboat",
           "type": "cask",
+          "version": "0.9.0",
+          "latest_version": "0.9.0",
           "is_stale": false,
-          "freshness_known": false,
-          "downloads": 4,
+          "freshness_known": true,
+          "downloads": 3,
           "installs_90d": 10,
           "installs_365d": 26,
-          "velocity7d": 0
+          "velocity7d": 0,
+          "description": "Run Windows apps on Linux with seamless integration",
+          "homepage": "https://www.winboat.app/",
+          "source_owner": "TibixDev",
+          "source_repo": "winboat"
         },
         {
           "name": "rider-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.335",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 3,
           "installs_90d": 5,
           "installs_365d": 5,
-          "velocity7d": 0
+          "velocity7d": 0,
+          "description": ".NET IDE",
+          "homepage": "https://www.jetbrains.com/rider/"
         },
         {
           "name": "craft-agents-linux",
           "type": "cask",
+          "version": "0.8.3",
+          "latest_version": "0.8.3",
           "is_stale": false,
-          "freshness_known": false,
-          "downloads": 2,
-          "installs_90d": 3,
-          "installs_365d": 3,
-          "velocity7d": 0
-        },
-        {
-          "name": "dataspell-linux",
-          "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 1,
-          "installs_365d": 1,
-          "velocity7d": 1.6
-        },
-        {
-          "name": "rubymine-linux",
-          "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 1.4
+          "freshness_known": true,
+          "downloads": 3,
+          "installs_90d": 4,
+          "installs_365d": 4,
+          "velocity7d": 0,
+          "description": "Work with most powerful agents in the world, with the UX they deserve",
+          "homepage": "https://agents.craft.do/",
+          "source_owner": "lukilabs",
+          "source_repo": "craft-agents-oss"
         },
         {
           "name": "1password-flatpak-browser-integration",
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 8,
-          "installs_365d": 11,
-          "velocity7d": 0.7
+          "downloads": 2,
+          "installs_90d": 10,
+          "installs_365d": 13,
+          "velocity7d": 0,
+          "description": "Integration for 1Password with Flatpak browsers",
+          "homepage": "https://github.com/FlyinPancake/1password-flatpak-browser-integration",
+          "source_owner": "FlyinPancake",
+          "source_repo": "1password-flatpak-browser-integration"
         },
         {
-          "name": "emdash-linux",
+          "name": "datagrip-linux",
           "type": "cask",
+          "version": "2026.1.1,261.22158.354",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 0,
+          "downloads": 1,
           "installs_90d": 2,
           "installs_365d": 2,
-          "velocity7d": 0.3
+          "velocity7d": 0,
+          "description": "Databases and SQL IDE",
+          "homepage": "https://www.jetbrains.com/datagrip/"
         },
         {
-          "name": "goland-linux",
+          "name": "pycharm-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.340",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 1,
+          "installs_90d": 2,
+          "installs_365d": 6,
+          "velocity7d": 0,
+          "description": "IDE for professional Python development",
+          "homepage": "https://www.jetbrains.com/pycharm/"
+        },
+        {
+          "name": "dataspell-linux",
+          "type": "cask",
+          "version": "2026.1,261.22158.332",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 1,
           "installs_365d": 1,
-          "velocity7d": 2.6
+          "velocity7d": 1.6,
+          "description": "IDE for Professional Data Scientists",
+          "homepage": "https://www.jetbrains.com/dataspell/"
+        },
+        {
+          "name": "rustrover-linux",
+          "type": "cask",
+          "version": "2026.1,261.22158.331",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 0,
+          "installs_90d": 1,
+          "installs_365d": 2,
+          "velocity7d": 1.1,
+          "description": "Rust IDE",
+          "homepage": "https://www.jetbrains.com/rustrover/"
         },
         {
           "name": "intellij-idea-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.277",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 2,
           "installs_365d": 3,
-          "velocity7d": 0
+          "velocity7d": 0,
+          "description": "Java IDE by JetBrains",
+          "homepage": "https://www.jetbrains.com/idea/"
         },
         {
-          "name": "datagrip-linux",
+          "name": "emdash-linux",
           "type": "cask",
+          "version": "0.4.47",
+          "latest_version": "0.4.47",
           "is_stale": false,
-          "freshness_known": false,
+          "freshness_known": true,
           "downloads": 0,
-          "installs_90d": 1,
-          "installs_365d": 1,
-          "velocity7d": 0.7
+          "installs_90d": 2,
+          "installs_365d": 2,
+          "velocity7d": 0.3,
+          "description": "Agentic development environment for running multiple coding agents in parallel",
+          "homepage": "https://emdash.sh/",
+          "source_owner": "generalaction",
+          "source_repo": "emdash"
         },
         {
           "name": "phpstorm-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.283",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 2,
           "installs_365d": 2,
-          "velocity7d": 1.4
+          "velocity7d": 1.4,
+          "description": "PHP IDE by JetBrains",
+          "homepage": "https://www.jetbrains.com/phpstorm/"
         },
         {
-          "name": "pycharm-linux",
+          "name": "dockerd-linux",
           "type": "cask",
+          "version": "29.3.1",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
-          "installs_90d": 2,
-          "installs_365d": 5,
-          "velocity7d": 1.4
+          "installs_90d": 0,
+          "installs_365d": 0,
+          "velocity7d": 5.4,
+          "description": "Dockerd and utilities with rootless support by default",
+          "homepage": "https://docs.docker.com/engine/security/rootless/"
         },
         {
           "name": "rancher-desktop-linux",
@@ -353,77 +488,100 @@
           "downloads": 0,
           "installs_90d": 0,
           "installs_365d": 0,
-          "velocity7d": 4.3
+          "velocity7d": 4.3,
+          "description": "Container management and Kubernetes on the desktop",
+          "homepage": "https://rancherdesktop.io/"
         },
         {
           "name": "clion-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.273",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 1,
           "installs_365d": 2,
-          "velocity7d": 1.3
+          "velocity7d": 1.3,
+          "description": "C and C++ IDE",
+          "homepage": "https://www.jetbrains.com/clion/"
         },
         {
-          "name": "dockerd-linux",
+          "name": "rubymine-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.284",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 0,
           "installs_365d": 0,
-          "velocity7d": 5.4
+          "velocity7d": 1.4,
+          "description": "Ruby on Rails IDE",
+          "homepage": "https://www.jetbrains.com/rubymine/"
         },
         {
-          "name": "rustrover-linux",
+          "name": "goland-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.291",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 1,
-          "installs_365d": 2,
-          "velocity7d": 1.1
+          "installs_365d": 1,
+          "velocity7d": 2.6,
+          "description": "Go (golang) IDE",
+          "homepage": "https://www.jetbrains.com/goland/"
         },
         {
           "name": "webstorm-linux",
           "type": "cask",
+          "version": "2026.1,261.22158.274",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 2,
           "installs_365d": 3,
-          "velocity7d": 0.9
+          "velocity7d": 0.9,
+          "description": "JavaScript IDE",
+          "homepage": "https://www.jetbrains.com/webstorm/"
         },
         {
           "name": "buildbox",
           "type": "cask",
+          "version": "1.3.52",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 3,
           "installs_365d": 3,
-          "velocity7d": 0
-        },
-        {
-          "name": "asusctl",
-          "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 1.6
+          "velocity7d": 0,
+          "description": "Set of tools for remote worker build execution",
+          "homepage": "https://gitlab.com/BuildGrid/buildbox"
         },
         {
           "name": "bluefin-cli",
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 3.4
+          "downloads": 65,
+          "installs_90d": 86,
+          "installs_365d": 94,
+          "velocity7d": 0,
+          "description": "Bluefin's CLI tool",
+          "homepage": "https://github.com/hanthor/bluefin-cli",
+          "source_owner": "hanthor",
+          "source_repo": "bluefin-cli"
+        },
+        {
+          "name": "asusctl",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 12,
+          "installs_90d": 12,
+          "installs_365d": 20,
+          "velocity7d": 0,
+          "description": "Control daemon, CLI tools for interacting with ASUS ROG laptops",
+          "homepage": "https://gitlab.com/asus-linux/asusctl"
         },
         {
           "name": "buildstream",
@@ -431,9 +589,11 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 0
+          "installs_90d": 12,
+          "installs_365d": 12,
+          "velocity7d": 0,
+          "description": "Powerful software integration tool",
+          "homepage": "https://buildstream.build"
         },
         {
           "name": "foundry",
@@ -441,9 +601,11 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 0.6
+          "installs_90d": 1,
+          "installs_365d": 4,
+          "velocity7d": 0.6,
+          "description": "Command-line tool for building and managing IDE-like development environments",
+          "homepage": "https://gitlab.gnome.org/GNOME/foundry"
         },
         {
           "name": "libvirt-full",
@@ -452,8 +614,12 @@
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 3.3
+          "installs_365d": 4,
+          "velocity7d": 3.3,
+          "description": "C virtualization API, now with udev support",
+          "homepage": "https://libvirt.org/",
+          "source_owner": "eudev-project",
+          "source_repo": "eudev"
         },
         {
           "name": "ydotool",
@@ -462,11 +628,15 @@
           "freshness_known": false,
           "downloads": 0,
           "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 0.1
+          "installs_365d": 2,
+          "velocity7d": 0.1,
+          "description": "Generic command-line automation tool (no X!)",
+          "homepage": "https://github.com/ReimuNotMoe/ydotool",
+          "source_owner": "ReimuNotMoe",
+          "source_repo": "ydotool"
         }
       ],
-      "updated_at": "2026-04-04T18:24:43Z"
+      "updated_at": "2026-04-07T20:34:54Z"
     }
   ],
   "top_packages": [
@@ -597,6 +767,10 @@
         {
           "date": "2026-04-04",
           "downloads": 1389
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 1449
         }
       ]
     },
@@ -727,6 +901,10 @@
         {
           "date": "2026-04-04",
           "downloads": 187
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 341
         }
       ]
     },
@@ -857,6 +1035,10 @@
         {
           "date": "2026-04-04",
           "downloads": 180
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 186
         }
       ]
     },
@@ -987,266 +1169,10 @@
         {
           "date": "2026-04-04",
           "downloads": 126
-        }
-      ]
-    },
-    {
-      "name": "bluefin-wallpapers-extra",
-      "tap": "ublue-os/homebrew-tap",
-      "history": [
-        {
-          "date": "2026-02-17",
-          "downloads": 64
         },
         {
-          "date": "2026-02-18",
-          "downloads": 60
-        },
-        {
-          "date": "2026-02-19",
-          "downloads": 75
-        },
-        {
-          "date": "2026-02-20",
-          "downloads": 83
-        },
-        {
-          "date": "2026-02-21",
-          "downloads": 74
-        },
-        {
-          "date": "2026-02-22",
-          "downloads": 73
-        },
-        {
-          "date": "2026-02-23",
-          "downloads": 94
-        },
-        {
-          "date": "2026-02-24",
-          "downloads": 80
-        },
-        {
-          "date": "2026-02-25",
-          "downloads": 86
-        },
-        {
-          "date": "2026-02-26",
-          "downloads": 81
-        },
-        {
-          "date": "2026-02-27",
-          "downloads": 98
-        },
-        {
-          "date": "2026-02-28",
-          "downloads": 105
-        },
-        {
-          "date": "2026-03-01",
-          "downloads": 103
-        },
-        {
-          "date": "2026-03-02",
-          "downloads": 106
-        },
-        {
-          "date": "2026-03-03",
-          "downloads": 112
-        },
-        {
-          "date": "2026-03-04",
-          "downloads": 118
-        },
-        {
-          "date": "2026-03-05",
-          "downloads": 123
-        },
-        {
-          "date": "2026-03-06",
-          "downloads": 102
-        },
-        {
-          "date": "2026-03-07",
-          "downloads": 113
-        },
-        {
-          "date": "2026-03-08",
-          "downloads": 113
-        },
-        {
-          "date": "2026-03-09",
-          "downloads": 125
-        },
-        {
-          "date": "2026-03-10",
-          "downloads": 142
-        },
-        {
-          "date": "2026-03-11",
+          "date": "2026-04-07",
           "downloads": 134
-        },
-        {
-          "date": "2026-03-12",
-          "downloads": 139
-        },
-        {
-          "date": "2026-03-13",
-          "downloads": 137
-        },
-        {
-          "date": "2026-03-14",
-          "downloads": 156
-        },
-        {
-          "date": "2026-03-15",
-          "downloads": 148
-        },
-        {
-          "date": "2026-03-16",
-          "downloads": 148
-        },
-        {
-          "date": "2026-03-17",
-          "downloads": 164
-        },
-        {
-          "date": "2026-03-18",
-          "downloads": 152
-        },
-        {
-          "date": "2026-04-04",
-          "downloads": 86
-        }
-      ]
-    },
-    {
-      "name": "aurora-wallpapers",
-      "tap": "ublue-os/homebrew-tap",
-      "history": [
-        {
-          "date": "2026-02-17",
-          "downloads": 74
-        },
-        {
-          "date": "2026-02-18",
-          "downloads": 80
-        },
-        {
-          "date": "2026-02-19",
-          "downloads": 83
-        },
-        {
-          "date": "2026-02-20",
-          "downloads": 90
-        },
-        {
-          "date": "2026-02-21",
-          "downloads": 93
-        },
-        {
-          "date": "2026-02-22",
-          "downloads": 91
-        },
-        {
-          "date": "2026-02-23",
-          "downloads": 96
-        },
-        {
-          "date": "2026-02-24",
-          "downloads": 87
-        },
-        {
-          "date": "2026-02-25",
-          "downloads": 112
-        },
-        {
-          "date": "2026-02-26",
-          "downloads": 112
-        },
-        {
-          "date": "2026-02-27",
-          "downloads": 100
-        },
-        {
-          "date": "2026-02-28",
-          "downloads": 123
-        },
-        {
-          "date": "2026-03-01",
-          "downloads": 119
-        },
-        {
-          "date": "2026-03-02",
-          "downloads": 124
-        },
-        {
-          "date": "2026-03-03",
-          "downloads": 141
-        },
-        {
-          "date": "2026-03-04",
-          "downloads": 126
-        },
-        {
-          "date": "2026-03-05",
-          "downloads": 135
-        },
-        {
-          "date": "2026-03-06",
-          "downloads": 121
-        },
-        {
-          "date": "2026-03-07",
-          "downloads": 126
-        },
-        {
-          "date": "2026-03-08",
-          "downloads": 141
-        },
-        {
-          "date": "2026-03-09",
-          "downloads": 130
-        },
-        {
-          "date": "2026-03-10",
-          "downloads": 157
-        },
-        {
-          "date": "2026-03-11",
-          "downloads": 157
-        },
-        {
-          "date": "2026-03-12",
-          "downloads": 146
-        },
-        {
-          "date": "2026-03-13",
-          "downloads": 168
-        },
-        {
-          "date": "2026-03-14",
-          "downloads": 173
-        },
-        {
-          "date": "2026-03-15",
-          "downloads": 165
-        },
-        {
-          "date": "2026-03-16",
-          "downloads": 205
-        },
-        {
-          "date": "2026-03-17",
-          "downloads": 170
-        },
-        {
-          "date": "2026-03-18",
-          "downloads": 200
-        },
-        {
-          "date": "2026-04-04",
-          "downloads": 61
         }
       ]
     },
@@ -1377,136 +1303,274 @@
         {
           "date": "2026-04-04",
           "downloads": 60
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 114
         }
       ]
     },
     {
-      "name": "framework-wallpapers",
+      "name": "bluefin-wallpapers-extra",
       "tap": "ublue-os/homebrew-tap",
       "history": [
         {
           "date": "2026-02-17",
-          "downloads": 24
-        },
-        {
-          "date": "2026-02-18",
-          "downloads": 19
-        },
-        {
-          "date": "2026-02-19",
-          "downloads": 24
-        },
-        {
-          "date": "2026-02-20",
-          "downloads": 26
-        },
-        {
-          "date": "2026-02-21",
-          "downloads": 31
-        },
-        {
-          "date": "2026-02-22",
-          "downloads": 32
-        },
-        {
-          "date": "2026-02-23",
-          "downloads": 34
-        },
-        {
-          "date": "2026-02-24",
-          "downloads": 33
-        },
-        {
-          "date": "2026-02-25",
-          "downloads": 36
-        },
-        {
-          "date": "2026-02-26",
-          "downloads": 34
-        },
-        {
-          "date": "2026-02-27",
-          "downloads": 31
-        },
-        {
-          "date": "2026-02-28",
-          "downloads": 39
-        },
-        {
-          "date": "2026-03-01",
-          "downloads": 37
-        },
-        {
-          "date": "2026-03-02",
-          "downloads": 34
-        },
-        {
-          "date": "2026-03-03",
-          "downloads": 38
-        },
-        {
-          "date": "2026-03-04",
-          "downloads": 38
-        },
-        {
-          "date": "2026-03-05",
-          "downloads": 45
-        },
-        {
-          "date": "2026-03-06",
-          "downloads": 42
-        },
-        {
-          "date": "2026-03-07",
-          "downloads": 46
-        },
-        {
-          "date": "2026-03-08",
-          "downloads": 44
-        },
-        {
-          "date": "2026-03-09",
-          "downloads": 49
-        },
-        {
-          "date": "2026-03-10",
-          "downloads": 45
-        },
-        {
-          "date": "2026-03-11",
-          "downloads": 49
-        },
-        {
-          "date": "2026-03-12",
-          "downloads": 47
-        },
-        {
-          "date": "2026-03-13",
-          "downloads": 54
-        },
-        {
-          "date": "2026-03-14",
-          "downloads": 44
-        },
-        {
-          "date": "2026-03-15",
-          "downloads": 52
-        },
-        {
-          "date": "2026-03-16",
-          "downloads": 54
-        },
-        {
-          "date": "2026-03-17",
           "downloads": 64
         },
         {
+          "date": "2026-02-18",
+          "downloads": 60
+        },
+        {
+          "date": "2026-02-19",
+          "downloads": 75
+        },
+        {
+          "date": "2026-02-20",
+          "downloads": 83
+        },
+        {
+          "date": "2026-02-21",
+          "downloads": 74
+        },
+        {
+          "date": "2026-02-22",
+          "downloads": 73
+        },
+        {
+          "date": "2026-02-23",
+          "downloads": 94
+        },
+        {
+          "date": "2026-02-24",
+          "downloads": 80
+        },
+        {
+          "date": "2026-02-25",
+          "downloads": 86
+        },
+        {
+          "date": "2026-02-26",
+          "downloads": 81
+        },
+        {
+          "date": "2026-02-27",
+          "downloads": 98
+        },
+        {
+          "date": "2026-02-28",
+          "downloads": 105
+        },
+        {
+          "date": "2026-03-01",
+          "downloads": 103
+        },
+        {
+          "date": "2026-03-02",
+          "downloads": 106
+        },
+        {
+          "date": "2026-03-03",
+          "downloads": 112
+        },
+        {
+          "date": "2026-03-04",
+          "downloads": 118
+        },
+        {
+          "date": "2026-03-05",
+          "downloads": 123
+        },
+        {
+          "date": "2026-03-06",
+          "downloads": 102
+        },
+        {
+          "date": "2026-03-07",
+          "downloads": 113
+        },
+        {
+          "date": "2026-03-08",
+          "downloads": 113
+        },
+        {
+          "date": "2026-03-09",
+          "downloads": 125
+        },
+        {
+          "date": "2026-03-10",
+          "downloads": 142
+        },
+        {
+          "date": "2026-03-11",
+          "downloads": 134
+        },
+        {
+          "date": "2026-03-12",
+          "downloads": 139
+        },
+        {
+          "date": "2026-03-13",
+          "downloads": 137
+        },
+        {
+          "date": "2026-03-14",
+          "downloads": 156
+        },
+        {
+          "date": "2026-03-15",
+          "downloads": 148
+        },
+        {
+          "date": "2026-03-16",
+          "downloads": 148
+        },
+        {
+          "date": "2026-03-17",
+          "downloads": 164
+        },
+        {
           "date": "2026-03-18",
-          "downloads": 53
+          "downloads": 152
         },
         {
           "date": "2026-04-04",
-          "downloads": 59
+          "downloads": 86
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 88
+        }
+      ]
+    },
+    {
+      "name": "bluefin-cli",
+      "tap": "ublue-os/homebrew-experimental-tap",
+      "history": [
+        {
+          "date": "2026-02-17",
+          "downloads": 53
+        },
+        {
+          "date": "2026-02-18",
+          "downloads": 52
+        },
+        {
+          "date": "2026-02-19",
+          "downloads": 55
+        },
+        {
+          "date": "2026-02-20",
+          "downloads": 55
+        },
+        {
+          "date": "2026-02-21",
+          "downloads": 58
+        },
+        {
+          "date": "2026-02-22",
+          "downloads": 58
+        },
+        {
+          "date": "2026-02-23",
+          "downloads": 62
+        },
+        {
+          "date": "2026-02-24",
+          "downloads": 65
+        },
+        {
+          "date": "2026-02-25",
+          "downloads": 66
+        },
+        {
+          "date": "2026-02-26",
+          "downloads": 67
+        },
+        {
+          "date": "2026-02-27",
+          "downloads": 70
+        },
+        {
+          "date": "2026-02-28",
+          "downloads": 76
+        },
+        {
+          "date": "2026-03-01",
+          "downloads": 77
+        },
+        {
+          "date": "2026-03-02",
+          "downloads": 88
+        },
+        {
+          "date": "2026-03-03",
+          "downloads": 89
+        },
+        {
+          "date": "2026-03-04",
+          "downloads": 83
+        },
+        {
+          "date": "2026-03-05",
+          "downloads": 88
+        },
+        {
+          "date": "2026-03-06",
+          "downloads": 88
+        },
+        {
+          "date": "2026-03-07",
+          "downloads": 84
+        },
+        {
+          "date": "2026-03-08",
+          "downloads": 89
+        },
+        {
+          "date": "2026-03-09",
+          "downloads": 110
+        },
+        {
+          "date": "2026-03-10",
+          "downloads": 107
+        },
+        {
+          "date": "2026-03-11",
+          "downloads": 93
+        },
+        {
+          "date": "2026-03-12",
+          "downloads": 90
+        },
+        {
+          "date": "2026-03-13",
+          "downloads": 104
+        },
+        {
+          "date": "2026-03-14",
+          "downloads": 102
+        },
+        {
+          "date": "2026-03-15",
+          "downloads": 95
+        },
+        {
+          "date": "2026-03-16",
+          "downloads": 88
+        },
+        {
+          "date": "2026-03-17",
+          "downloads": 112
+        },
+        {
+          "date": "2026-03-18",
+          "downloads": 117
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 65
         }
       ]
     },
@@ -1637,135 +1701,277 @@
         {
           "date": "2026-04-04",
           "downloads": 59
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 57
         }
       ]
     },
     {
-      "name": "bluefin-wallpapers",
+      "name": "aurora-wallpapers",
       "tap": "ublue-os/homebrew-tap",
       "history": [
         {
           "date": "2026-02-17",
-          "downloads": 48
-        },
-        {
-          "date": "2026-02-18",
-          "downloads": 47
-        },
-        {
-          "date": "2026-02-19",
-          "downloads": 54
-        },
-        {
-          "date": "2026-02-20",
-          "downloads": 53
-        },
-        {
-          "date": "2026-02-21",
-          "downloads": 52
-        },
-        {
-          "date": "2026-02-22",
-          "downloads": 59
-        },
-        {
-          "date": "2026-02-23",
-          "downloads": 56
-        },
-        {
-          "date": "2026-02-24",
-          "downloads": 68
-        },
-        {
-          "date": "2026-02-25",
-          "downloads": 61
-        },
-        {
-          "date": "2026-02-26",
-          "downloads": 71
-        },
-        {
-          "date": "2026-02-27",
-          "downloads": 65
-        },
-        {
-          "date": "2026-02-28",
-          "downloads": 65
-        },
-        {
-          "date": "2026-03-01",
-          "downloads": 82
-        },
-        {
-          "date": "2026-03-02",
           "downloads": 74
         },
         {
+          "date": "2026-02-18",
+          "downloads": 80
+        },
+        {
+          "date": "2026-02-19",
+          "downloads": 83
+        },
+        {
+          "date": "2026-02-20",
+          "downloads": 90
+        },
+        {
+          "date": "2026-02-21",
+          "downloads": 93
+        },
+        {
+          "date": "2026-02-22",
+          "downloads": 91
+        },
+        {
+          "date": "2026-02-23",
+          "downloads": 96
+        },
+        {
+          "date": "2026-02-24",
+          "downloads": 87
+        },
+        {
+          "date": "2026-02-25",
+          "downloads": 112
+        },
+        {
+          "date": "2026-02-26",
+          "downloads": 112
+        },
+        {
+          "date": "2026-02-27",
+          "downloads": 100
+        },
+        {
+          "date": "2026-02-28",
+          "downloads": 123
+        },
+        {
+          "date": "2026-03-01",
+          "downloads": 119
+        },
+        {
+          "date": "2026-03-02",
+          "downloads": 124
+        },
+        {
           "date": "2026-03-03",
-          "downloads": 79
+          "downloads": 141
         },
         {
           "date": "2026-03-04",
-          "downloads": 86
+          "downloads": 126
         },
         {
           "date": "2026-03-05",
-          "downloads": 78
+          "downloads": 135
         },
         {
           "date": "2026-03-06",
-          "downloads": 88
+          "downloads": 121
         },
         {
           "date": "2026-03-07",
-          "downloads": 88
+          "downloads": 126
         },
         {
           "date": "2026-03-08",
-          "downloads": 88
+          "downloads": 141
         },
         {
           "date": "2026-03-09",
-          "downloads": 73
+          "downloads": 130
         },
         {
           "date": "2026-03-10",
-          "downloads": 94
+          "downloads": 157
         },
         {
           "date": "2026-03-11",
-          "downloads": 103
+          "downloads": 157
         },
         {
           "date": "2026-03-12",
-          "downloads": 100
+          "downloads": 146
         },
         {
           "date": "2026-03-13",
-          "downloads": 100
+          "downloads": 168
         },
         {
           "date": "2026-03-14",
-          "downloads": 102
+          "downloads": 173
         },
         {
           "date": "2026-03-15",
-          "downloads": 109
+          "downloads": 165
         },
         {
           "date": "2026-03-16",
-          "downloads": 108
+          "downloads": 205
         },
         {
           "date": "2026-03-17",
-          "downloads": 94
+          "downloads": 170
         },
         {
           "date": "2026-03-18",
-          "downloads": 104
+          "downloads": 200
         },
         {
           "date": "2026-04-04",
+          "downloads": 61
+        },
+        {
+          "date": "2026-04-07",
+          "downloads": 57
+        }
+      ]
+    },
+    {
+      "name": "framework-wallpapers",
+      "tap": "ublue-os/homebrew-tap",
+      "history": [
+        {
+          "date": "2026-02-17",
+          "downloads": 24
+        },
+        {
+          "date": "2026-02-18",
+          "downloads": 19
+        },
+        {
+          "date": "2026-02-19",
+          "downloads": 24
+        },
+        {
+          "date": "2026-02-20",
+          "downloads": 26
+        },
+        {
+          "date": "2026-02-21",
+          "downloads": 31
+        },
+        {
+          "date": "2026-02-22",
+          "downloads": 32
+        },
+        {
+          "date": "2026-02-23",
+          "downloads": 34
+        },
+        {
+          "date": "2026-02-24",
+          "downloads": 33
+        },
+        {
+          "date": "2026-02-25",
+          "downloads": 36
+        },
+        {
+          "date": "2026-02-26",
+          "downloads": 34
+        },
+        {
+          "date": "2026-02-27",
+          "downloads": 31
+        },
+        {
+          "date": "2026-02-28",
+          "downloads": 39
+        },
+        {
+          "date": "2026-03-01",
+          "downloads": 37
+        },
+        {
+          "date": "2026-03-02",
+          "downloads": 34
+        },
+        {
+          "date": "2026-03-03",
+          "downloads": 38
+        },
+        {
+          "date": "2026-03-04",
+          "downloads": 38
+        },
+        {
+          "date": "2026-03-05",
+          "downloads": 45
+        },
+        {
+          "date": "2026-03-06",
+          "downloads": 42
+        },
+        {
+          "date": "2026-03-07",
+          "downloads": 46
+        },
+        {
+          "date": "2026-03-08",
+          "downloads": 44
+        },
+        {
+          "date": "2026-03-09",
+          "downloads": 49
+        },
+        {
+          "date": "2026-03-10",
+          "downloads": 45
+        },
+        {
+          "date": "2026-03-11",
+          "downloads": 49
+        },
+        {
+          "date": "2026-03-12",
+          "downloads": 47
+        },
+        {
+          "date": "2026-03-13",
+          "downloads": 54
+        },
+        {
+          "date": "2026-03-14",
+          "downloads": 44
+        },
+        {
+          "date": "2026-03-15",
+          "downloads": 52
+        },
+        {
+          "date": "2026-03-16",
+          "downloads": 54
+        },
+        {
+          "date": "2026-03-17",
+          "downloads": 64
+        },
+        {
+          "date": "2026-03-18",
+          "downloads": 53
+        },
+        {
+          "date": "2026-04-04",
+          "downloads": 59
+        },
+        {
+          "date": "2026-04-07",
           "downloads": 55
         }
       ]
@@ -3607,6 +3813,50 @@
           }
         }
       }
+    },
+    {
+      "date": "2026-04-07",
+      "taps": {
+        "ublue-os/homebrew-experimental-tap": {
+          "uniques": 438,
+          "count": 918,
+          "downloads": {
+            "1password-flatpak-browser-integration": 2,
+            "asusctl": 12,
+            "bluefin-cli": 65,
+            "craft-agents-linux": 3,
+            "cursor-linux": 11,
+            "datagrip-linux": 1,
+            "emacs-app-linux": 11,
+            "opencode-desktop-linux": 57,
+            "pycharm-linux": 1,
+            "rider-linux": 3,
+            "winboat": 3
+          }
+        },
+        "ublue-os/homebrew-tap": {
+          "uniques": 1909,
+          "count": 2247,
+          "downloads": {
+            "1password-gui-linux": 28,
+            "antigravity-linux": 186,
+            "aurora-wallpapers": 57,
+            "bazzite-wallpapers": 48,
+            "bluefin-wallpapers": 55,
+            "bluefin-wallpapers-extra": 88,
+            "framework-tool": 19,
+            "framework-wallpapers": 55,
+            "goose-linux": 41,
+            "heic-to-dynamic-gnome-wallpaper": 7,
+            "jetbrains-toolbox-linux": 1449,
+            "linux-mcp-server": 40,
+            "lm-studio-linux": 134,
+            "pmbootstrap": 1,
+            "visual-studio-code-linux": 341,
+            "vscodium-linux": 114
+          }
+        }
+      }
     }
   ],
   "os_analytics": {
@@ -3616,53 +3866,53 @@
         "items": [
           {
             "os": "Ubuntu",
-            "count": 5720882,
-            "percent": 72.6
+            "count": 5658955,
+            "percent": 72.52
           },
           {
             "os": "Debian GNU/Linux",
-            "count": 850394,
-            "percent": 10.79
+            "count": 831109,
+            "percent": 10.65
           },
           {
             "os": "Bazzite",
-            "count": 339590,
-            "percent": 4.31
+            "count": 344225,
+            "percent": 4.41
           },
           {
             "os": "Fedora Linux",
-            "count": 125510,
-            "percent": 1.59
+            "count": 127024,
+            "percent": 1.63
           },
           {
             "os": "Bluefin",
-            "count": 120595,
-            "percent": 1.53
-          },
-          {
-            "os": "Alibaba Cloud Linux 3.2104 U12.3",
-            "count": 116734,
-            "percent": 1.48
+            "count": 119876,
+            "percent": 1.54
           },
           {
             "os": "Amazon Linux",
-            "count": 115503,
-            "percent": 1.47
+            "count": 118572,
+            "percent": 1.52
+          },
+          {
+            "os": "Alibaba Cloud Linux 3.2104 U12.3",
+            "count": 105794,
+            "percent": 1.36
           },
           {
             "os": "Linux Mint",
-            "count": 68734,
-            "percent": 0.87
+            "count": 68938,
+            "percent": 0.88
           },
           {
             "os": "Aurora",
-            "count": 68293,
+            "count": 67933,
             "percent": 0.87
           },
           {
             "os": "Pop!_OS",
-            "count": 40176,
-            "percent": 0.51
+            "count": 40403,
+            "percent": 0.52
           }
         ]
       },
@@ -3671,52 +3921,52 @@
         "items": [
           {
             "os": "Ubuntu",
-            "count": 15880056,
-            "percent": 72.54
+            "count": 16006289,
+            "percent": 72.44
           },
           {
             "os": "Debian GNU/Linux",
-            "count": 2299130,
-            "percent": 10.5
+            "count": 2346787,
+            "percent": 10.62
           },
           {
             "os": "Bazzite",
-            "count": 952572,
-            "percent": 4.35
+            "count": 963006,
+            "percent": 4.36
           },
           {
             "os": "Fedora Linux",
-            "count": 392546,
-            "percent": 1.79
+            "count": 390334,
+            "percent": 1.77
           },
           {
             "os": "Bluefin",
-            "count": 361196,
-            "percent": 1.65
+            "count": 360957,
+            "percent": 1.63
           },
           {
             "os": "Amazon Linux",
-            "count": 359867,
-            "percent": 1.64
+            "count": 359698,
+            "percent": 1.63
           },
           {
             "os": "Linux Mint",
-            "count": 209228,
+            "count": 212267,
             "percent": 0.96
           },
           {
             "os": "Aurora",
-            "count": 209044,
-            "percent": 0.95
+            "count": 207970,
+            "percent": 0.94
           },
           {
             "os": "Alibaba Cloud Linux 3.2104 U12.3",
-            "count": 183615,
-            "percent": 0.84
+            "count": 188702,
+            "percent": 0.85
           },
           {
             "os": "Pop!_OS",
-            "count": 124137,
+            "count": 125140,
             "percent": 0.57
           }
         ]
@@ -3726,52 +3976,52 @@
         "items": [
           {
             "os": "Ubuntu",
-            "count": 43144138,
-            "percent": 74.53
+            "count": 43450119,
+            "percent": 74.49
           },
           {
             "os": "Debian GNU/Linux",
-            "count": 4525121,
-            "percent": 7.82
+            "count": 4579125,
+            "percent": 7.85
           },
           {
             "os": "Bazzite",
-            "count": 2365661,
-            "percent": 4.09
+            "count": 2395000,
+            "percent": 4.11
           },
           {
             "os": "Bluefin",
-            "count": 1247070,
+            "count": 1251735,
             "percent": 2.15
           },
           {
             "os": "Fedora Linux",
-            "count": 1145503,
+            "count": 1152618,
             "percent": 1.98
           },
           {
             "os": "Amazon Linux",
-            "count": 1126110,
-            "percent": 1.95
+            "count": 1132121,
+            "percent": 1.94
           },
           {
             "os": "Aurora",
-            "count": 697068,
+            "count": 699787,
             "percent": 1.2
           },
           {
             "os": "Linux Mint",
-            "count": 547885,
+            "count": 552057,
             "percent": 0.95
           },
           {
             "os": "Pop!_OS",
-            "count": 382267,
+            "count": 383442,
             "percent": 0.66
           },
           {
             "os": "Arch Linux",
-            "count": 343814,
+            "count": 346084,
             "percent": 0.59
           }
         ]

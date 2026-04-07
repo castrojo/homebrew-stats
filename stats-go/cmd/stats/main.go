@@ -172,11 +172,20 @@ func runFetchHomebrew() error {
 		fmt.Fprintf(os.Stderr, "  cask-install: %d ublue-os packages found\n", len(brewInstalls))
 	}
 
+	fmt.Fprintln(os.Stderr, "→ Fetching Homebrew formula-install analytics…")
+	formulaInstalls, err := tapanalytics.FetchFormulas()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Homebrew formula-install analytics: %v\n", err)
+		formulaInstalls = make(map[string]tapanalytics.PkgInstalls)
+	} else {
+		fmt.Fprintf(os.Stderr, "  formula-install: %d packages found\n", len(formulaInstalls))
+	}
+
 	tapStats := make([]tap.TapStats, 0, len(taps))
 	todayTaps := make(map[string]history.TapSnapshot)
 	for _, t := range taps {
 		fmt.Fprintf(os.Stderr, "→ Collecting %s/%s…\n", t.owner, t.repo)
-		ts, err := tap.Collect(t.owner, t.repo, brewInstalls)
+		ts, err := tap.CollectWithFormulas(t.owner, t.repo, brewInstalls, formulaInstalls)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "⚠️  %s/%s: %v\n", t.owner, t.repo, err)
 			continue
