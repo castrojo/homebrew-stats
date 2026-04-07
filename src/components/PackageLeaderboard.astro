@@ -28,8 +28,8 @@ const { taps } = Astro.props;
 const BADGE_LABELS: Record<string, string> = {
   'ublue-os/homebrew-tap': 'ublue-os/tap',
   'ublue-os/homebrew-experimental-tap': 'ublue-os/experimental',
-  'bluefin/brewfile': 'bluefin',
-  'bazzite/brewfile': 'bazzite',
+  'bluefin/brewfile': 'homebrew',
+  'bazzite/brewfile': 'homebrew',
 };
 
 function tapBadgeLabel(tapName: string): string {
@@ -40,6 +40,7 @@ function tapBadgeCssClass(label: string): string {
   return label.replace(/\//g, '-').replace(/homebrew-/g, '');
 }
 
+const seen = new Set<string>();
 const rows: Row[] = taps.flatMap(tap =>
   tap.packages.map(pkg => ({
     package: pkg.name,
@@ -48,7 +49,12 @@ const rows: Row[] = taps.flatMap(tap =>
     installs90d: pkg.installs_90d ?? 0,
     installs365d: pkg.installs_365d ?? 0,
   }))
-);
+).filter(row => {
+  const key = `${row.tapName}::${row.package}`;
+  if (seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
 
 rows.sort((a, b) => b.installs30d - a.installs30d);
 ---
@@ -291,15 +297,9 @@ rows.sort((a, b) => b.installs30d - a.installs30d);
     color: #e2c6f1;
   }
 
-  .tap-bluefin {
-    background: rgba(59, 130, 246, 0.15);
-    border-color: rgba(96, 165, 250, 0.45);
-    color: #93c5fd;
-  }
-
-  .tap-bazzite {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: rgba(52, 211, 153, 0.45);
-    color: #6ee7b7;
+  .tap-homebrew {
+    background: rgba(251, 146, 60, 0.15);
+    border-color: rgba(251, 146, 60, 0.45);
+    color: #fdba74;
   }
 </style>

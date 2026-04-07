@@ -110,6 +110,11 @@ test.describe('Package Leaderboard', () => {
     await expect(badge.first()).toBeVisible();
   });
 
+  test('homebrew badge is present for Brewfile core packages', async ({ page }) => {
+    const badge = page.locator('.tap-badge', { hasText: 'homebrew' });
+    await expect(badge.first()).toBeVisible();
+  });
+
   test('search filter hides non-matching rows', async ({ page }) => {
     const searchInput = page.locator('#pkg-search');
     await expect(searchInput).toBeVisible();

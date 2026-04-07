@@ -29,12 +29,13 @@ const stableTap = stats.taps[0] as any;
     </p>
   </header>
 
-  <h2>At a glance</h2>
+  <h2>Universal Blue's Homebrew Tap</h2>
   <HeroKPIs summary={(stats as any).summary} taps={stats.taps as any} />
 
   <hr class="section-divider" />
 
   <h2>Top package activity</h2>
+  <p class="section-subheading">Recommended Tooling from Universal Blue</p>
   <PackageLeaderboard taps={[...stats.taps, ...(brewfileStats?.taps ?? [])] as any} />
 
   {stats.history.length > 1 && (
@@ -85,5 +86,11 @@ const stableTap = stats.taps[0] as any;
     border: none;
     border-top: 1px solid var(--border);
     margin: 8px 0 32px;
+  }
+
+  .section-subheading {
+    margin: -8px 0 16px;
+    color: var(--text-muted, #9ca3af);
+    font-size: 0.9rem;
   }
 </style>
