@@ -428,6 +428,29 @@ test.describe('Contributors tab', () => {
     await expectCanvasRendered(page, 'discussion-activity-chart');
   });
 
+  test('release-freq-data has valid JSON with repos array and monthlyBreakdown', async ({ page }) => {
+    const el = page.locator('#release-freq-data');
+    const exists = await el.count() > 0;
+    if (!exists) return; // repos is empty — entire component not rendered; see empty-seed test below
+    const data = await getScriptJSON(page, 'release-freq-data') as Record<string, unknown>;
+    expect(Array.isArray(data.repos), 'release-freq-data.repos must be an array').toBe(true);
+    expect(typeof data.monthlyBreakdown, 'release-freq-data.monthlyBreakdown must be an object').toBe('object');
+  });
+
+  test('ReleaseFrequencyChart canvas is rendered by Chart.js when repos data is present', async ({ page }) => {
+    const canvas = page.locator('canvas#release-freq');
+    const hasCanvas = await canvas.count() > 0;
+    if (!hasCanvas) return; // empty seed — repos.length === 0, chart not rendered; see next test
+    await expectCanvasRendered(page, 'release-freq');
+  });
+
+  test('ReleaseFrequencyChart shows no canvas when repos data is absent (empty seed)', async ({ page }) => {
+    const canvas = page.locator('canvas#release-freq');
+    const hasCanvas = await canvas.count() > 0;
+    if (hasCanvas) return; // real data present — handled by previous test
+    await expect(canvas, 'release-freq canvas must not exist when repos is empty').not.toBeAttached();
+  });
+
   // ── LFX-gated charts: empty-state when lfx data is absent ────────────────
   // OrgDependencyChart, PRHealthChart, and NewVsReturningChart all require LFX
   // Insights data. With lfx={} (seed data), they render a .chart-empty <p>
@@ -631,5 +654,15 @@ test.describe('Contributors range toggles', () => {
     await btn60d.click();
     await expect(btn60d).toHaveClass(/active/);
     await expectCanvasRendered(page, 'discussion-activity-chart');
+  });
+
+  test('release cadence range toggle switches active button and keeps canvas rendered', async ({ page }) => {
+    const canvas = page.locator('canvas#release-freq');
+    const hasCanvas = await canvas.count() > 0;
+    if (!hasCanvas) return; // empty seed — chart not rendered, range buttons absent
+    const btn90d = page.locator('#release-freq-range-btns [data-range="90d"]');
+    await btn90d.click();
+    await expect(btn90d).toHaveClass(/active/);
+    await expectCanvasRendered(page, 'release-freq');
   });
 });

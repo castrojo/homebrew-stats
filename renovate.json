@@ -1,5 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "schedule": ["before 6am on monday"]
+  "schedule": ["before 6am on monday"],
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["cgr.dev/chainguard/.*"],
+      "pinDigests": true
+    }
+  ]
 }
