@@ -1590,7 +1590,7 @@ func runFetchBrewfileTaps() error {
 	}
 
 	fmt.Fprintln(os.Stderr, "→ Fetching Homebrew formula analytics…")
-	formulaInstalls, err := tapanalytics.FetchFormulas()
+	formulaInstalls, err := tapanalytics.FetchFormulasWithAliases()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  formula analytics: %v\n", err)
 		formulaInstalls = make(map[string]tapanalytics.PkgInstalls)

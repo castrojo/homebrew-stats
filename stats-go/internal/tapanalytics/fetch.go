@@ -174,3 +174,55 @@ func FetchAllCasks() (map[string]PkgInstalls, error) {
 func FetchFormulas() (map[string]PkgInstalls, error) {
 	return fetchFormulaPeriods(formulaInstallBaseURL)
 }
+
+// fetchAliasMap fetches the Homebrew formula list and returns a map of
+// alias → canonical formula name (e.g. "nvim" → "neovim").
+func fetchAliasMap() (map[string]string, error) {
+	resp, err := http.Get("https://formulae.brew.sh/api/formula.json") //nolint:gosec
+	if err != nil {
+		return nil, fmt.Errorf("fetching formula list for aliases: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("formula list: HTTP %d", resp.StatusCode)
+	}
+
+	var formulas []struct {
+		Name    string   `json:"name"`
+		Aliases []string `json:"aliases"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&formulas); err != nil {
+		return nil, fmt.Errorf("decoding formula list: %w", err)
+	}
+
+	aliases := make(map[string]string, len(formulas))
+	for _, f := range formulas {
+		for _, a := range f.Aliases {
+			aliases[a] = f.Name
+		}
+	}
+	return aliases, nil
+}
+
+// FetchFormulasWithAliases returns install counts for ALL formula packages across
+// 30d/90d/365d, with alias names also indexed (e.g. "nvim" → same counts as "neovim").
+// This allows Brewfile tokens that use aliases to resolve correctly.
+func FetchFormulasWithAliases() (map[string]PkgInstalls, error) {
+	installs, err := fetchFormulaPeriods(formulaInstallBaseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	aliases, err := fetchAliasMap()
+	if err != nil {
+		// Non-fatal: return canonical-only map
+		return installs, nil
+	}
+
+	for alias, canonical := range aliases {
+		if data, ok := installs[canonical]; ok {
+			installs[alias] = data
+		}
+	}
+	return installs, nil
+}

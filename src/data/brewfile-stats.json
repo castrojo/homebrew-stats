@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-07T20:10:42Z",
+  "generated_at": "2026-04-07T20:45:10Z",
   "taps": [
     {
       "name": "anomalyco/tap",
@@ -11,13 +11,13 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 69604,
-          "installs_90d": 173927,
-          "installs_365d": 173953,
+          "downloads": 69625,
+          "installs_90d": 174003,
+          "installs_365d": 174040,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "artifacthub/cmd",
@@ -35,7 +35,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "buildpacks/tap",
@@ -47,13 +47,13 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 841,
-          "installs_90d": 2282,
+          "downloads": 837,
+          "installs_90d": 2281,
           "installs_365d": 8065,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "carvel-dev/carvel",
@@ -65,7 +65,7 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 104,
+          "downloads": 103,
           "installs_90d": 367,
           "installs_365d": 551,
           "velocity7d": 0
@@ -85,7 +85,7 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 15,
+          "downloads": 14,
           "installs_90d": 107,
           "installs_365d": 397,
           "velocity7d": 0
@@ -131,7 +131,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "charmbracelet/tap",
@@ -143,13 +143,13 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 7642,
-          "installs_90d": 24610,
-          "installs_365d": 61228,
+          "downloads": 7650,
+          "installs_90d": 24594,
+          "installs_365d": 61241,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "dapr/tap",
@@ -161,13 +161,13 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 64,
-          "installs_90d": 247,
-          "installs_365d": 3167,
+          "downloads": 67,
+          "installs_90d": 250,
+          "installs_365d": 3170,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "k0sproject/tap",
@@ -181,11 +181,11 @@
           "freshness_known": false,
           "downloads": 879,
           "installs_90d": 2326,
-          "installs_365d": 9344,
+          "installs_365d": 9343,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "kcl-lang/tap",
@@ -203,7 +203,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "kitops-ml/kitops",
@@ -221,7 +221,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "kptdev/kpt",
@@ -239,7 +239,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "microcks/tap",
@@ -257,7 +257,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "telepresenceio/telepresence",
@@ -271,11 +271,11 @@
           "freshness_known": false,
           "downloads": 451,
           "installs_90d": 1453,
-          "installs_365d": 5070,
+          "installs_365d": 5071,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "valkyrie00/bbrew",
@@ -287,13 +287,13 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 5514,
-          "installs_90d": 19823,
-          "installs_365d": 41787,
+          "downloads": 5507,
+          "installs_90d": 19816,
+          "installs_365d": 41795,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "wasmcloud/wasmcloud",
@@ -311,7 +311,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "bluefin/brewfile",
@@ -323,9 +323,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 333654,
-          "installs_90d": 878422,
-          "installs_365d": 2296045,
+          "downloads": 333799,
+          "installs_90d": 878576,
+          "installs_365d": 2296266,
           "velocity7d": 0
         },
         {
@@ -333,9 +333,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 172959,
-          "installs_90d": 443815,
-          "installs_365d": 665732,
+          "downloads": 173016,
+          "installs_90d": 443649,
+          "installs_365d": 665945,
           "velocity7d": 0
         },
         {
@@ -343,9 +343,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 117098,
-          "installs_90d": 354222,
-          "installs_365d": 654620,
+          "downloads": 117069,
+          "installs_90d": 354174,
+          "installs_365d": 654707,
           "velocity7d": 0
         },
         {
@@ -353,9 +353,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 88581,
-          "installs_90d": 229824,
-          "installs_365d": 622631,
+          "downloads": 88621,
+          "installs_90d": 229840,
+          "installs_365d": 622710,
           "velocity7d": 0
         },
         {
@@ -363,9 +363,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 74931,
-          "installs_90d": 197137,
-          "installs_365d": 308775,
+          "downloads": 75012,
+          "installs_90d": 197247,
+          "installs_365d": 308934,
           "velocity7d": 0
         },
         {
@@ -373,9 +373,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 57969,
-          "installs_90d": 163258,
-          "installs_365d": 562151,
+          "downloads": 58022,
+          "installs_90d": 163289,
+          "installs_365d": 562191,
           "velocity7d": 0
         },
         {
@@ -383,9 +383,19 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 55689,
-          "installs_90d": 157412,
-          "installs_365d": 405697,
+          "downloads": 55762,
+          "installs_90d": 157485,
+          "installs_365d": 405802,
+          "velocity7d": 0
+        },
+        {
+          "name": "kubectl",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 53464,
+          "installs_90d": 151092,
+          "installs_365d": 592676,
           "velocity7d": 0
         },
         {
@@ -393,9 +403,19 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 53455,
-          "installs_90d": 151110,
-          "installs_365d": 592699,
+          "downloads": 53464,
+          "installs_90d": 151092,
+          "installs_365d": 592676,
+          "velocity7d": 0
+        },
+        {
+          "name": "nvim",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 52105,
+          "installs_90d": 128472,
+          "installs_365d": 527597,
           "velocity7d": 0
         },
         {
@@ -403,9 +423,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 47334,
-          "installs_90d": 147613,
-          "installs_365d": 553654,
+          "downloads": 47345,
+          "installs_90d": 147599,
+          "installs_365d": 553621,
           "velocity7d": 0
         },
         {
@@ -413,9 +433,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 46176,
-          "installs_90d": 83166,
-          "installs_365d": 183587,
+          "downloads": 45944,
+          "installs_90d": 83197,
+          "installs_365d": 183622,
           "velocity7d": 0
         },
         {
@@ -423,9 +443,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 37379,
-          "installs_90d": 89410,
-          "installs_365d": 99395,
+          "downloads": 37414,
+          "installs_90d": 89443,
+          "installs_365d": 99457,
           "velocity7d": 0
         },
         {
@@ -433,9 +453,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 28654,
-          "installs_90d": 93977,
-          "installs_365d": 431443,
+          "downloads": 28715,
+          "installs_90d": 93986,
+          "installs_365d": 431423,
           "velocity7d": 0
         },
         {
@@ -443,9 +463,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 28290,
-          "installs_90d": 53177,
-          "installs_365d": 109840,
+          "downloads": 28291,
+          "installs_90d": 53182,
+          "installs_365d": 109842,
           "velocity7d": 0
         },
         {
@@ -453,8 +473,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 19769,
-          "installs_90d": 40722,
+          "downloads": 19777,
+          "installs_90d": 40728,
           "installs_365d": 154157,
           "velocity7d": 0
         },
@@ -463,9 +483,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 17843,
-          "installs_90d": 41134,
-          "installs_365d": 86186,
+          "downloads": 17836,
+          "installs_90d": 41137,
+          "installs_365d": 86197,
           "velocity7d": 0
         },
         {
@@ -473,9 +493,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 17709,
-          "installs_90d": 50318,
-          "installs_365d": 178830,
+          "downloads": 17718,
+          "installs_90d": 50297,
+          "installs_365d": 178845,
           "velocity7d": 0
         },
         {
@@ -483,9 +503,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 17571,
-          "installs_90d": 55529,
-          "installs_365d": 129081,
+          "downloads": 17583,
+          "installs_90d": 55551,
+          "installs_365d": 129105,
           "velocity7d": 0
         },
         {
@@ -493,9 +513,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 17087,
-          "installs_90d": 50342,
-          "installs_365d": 194575,
+          "downloads": 17105,
+          "installs_90d": 50361,
+          "installs_365d": 194599,
           "velocity7d": 0
         },
         {
@@ -503,9 +523,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 14580,
-          "installs_90d": 20735,
-          "installs_365d": 51113,
+          "downloads": 14599,
+          "installs_90d": 20749,
+          "installs_365d": 51131,
           "velocity7d": 0
         },
         {
@@ -513,9 +533,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 14364,
-          "installs_90d": 42244,
-          "installs_365d": 179378,
+          "downloads": 14377,
+          "installs_90d": 42246,
+          "installs_365d": 179380,
           "velocity7d": 0
         },
         {
@@ -523,9 +543,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 13612,
-          "installs_90d": 19066,
-          "installs_365d": 19072,
+          "downloads": 13598,
+          "installs_90d": 19073,
+          "installs_365d": 19074,
           "velocity7d": 0
         },
         {
@@ -533,9 +553,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 13015,
-          "installs_90d": 34632,
-          "installs_365d": 228589,
+          "downloads": 13038,
+          "installs_90d": 34652,
+          "installs_365d": 228579,
           "velocity7d": 0
         },
         {
@@ -543,9 +563,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 12903,
-          "installs_90d": 48695,
-          "installs_365d": 233892,
+          "downloads": 12910,
+          "installs_90d": 48692,
+          "installs_365d": 233872,
           "velocity7d": 0
         },
         {
@@ -553,9 +573,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 12853,
-          "installs_90d": 39160,
-          "installs_365d": 167309,
+          "downloads": 12864,
+          "installs_90d": 39157,
+          "installs_365d": 167301,
           "velocity7d": 0
         },
         {
@@ -563,9 +583,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 11698,
-          "installs_90d": 31186,
-          "installs_365d": 82029,
+          "downloads": 11706,
+          "installs_90d": 31192,
+          "installs_365d": 82004,
           "velocity7d": 0
         },
         {
@@ -573,9 +593,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 10920,
-          "installs_90d": 35274,
-          "installs_365d": 158342,
+          "downloads": 10952,
+          "installs_90d": 35282,
+          "installs_365d": 158360,
           "velocity7d": 0
         },
         {
@@ -583,9 +603,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 10420,
-          "installs_90d": 22938,
-          "installs_365d": 32862,
+          "downloads": 10427,
+          "installs_90d": 22949,
+          "installs_365d": 32874,
           "velocity7d": 0
         },
         {
@@ -593,9 +613,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 9934,
-          "installs_90d": 33693,
-          "installs_365d": 110761,
+          "downloads": 9935,
+          "installs_90d": 33683,
+          "installs_365d": 110758,
           "velocity7d": 0
         },
         {
@@ -603,9 +623,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 8888,
-          "installs_90d": 21838,
-          "installs_365d": 100212,
+          "downloads": 8930,
+          "installs_90d": 21873,
+          "installs_365d": 100250,
           "velocity7d": 0
         },
         {
@@ -613,9 +633,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 8457,
-          "installs_90d": 22299,
-          "installs_365d": 38778,
+          "downloads": 8477,
+          "installs_90d": 22304,
+          "installs_365d": 38801,
           "velocity7d": 0
         },
         {
@@ -623,8 +643,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 7163,
-          "installs_90d": 23154,
+          "downloads": 7159,
+          "installs_90d": 23152,
           "installs_365d": 107956,
           "velocity7d": 0
         },
@@ -633,9 +653,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 6109,
-          "installs_90d": 16955,
-          "installs_365d": 52816,
+          "downloads": 6112,
+          "installs_90d": 16953,
+          "installs_365d": 52821,
           "velocity7d": 0
         },
         {
@@ -643,9 +663,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 5543,
-          "installs_90d": 25456,
-          "installs_365d": 96902,
+          "downloads": 5530,
+          "installs_90d": 25455,
+          "installs_365d": 96896,
           "velocity7d": 0
         },
         {
@@ -653,9 +673,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 5251,
-          "installs_90d": 15560,
-          "installs_365d": 71352,
+          "downloads": 5246,
+          "installs_90d": 15551,
+          "installs_365d": 71343,
           "velocity7d": 0
         },
         {
@@ -664,7 +684,7 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 2822,
-          "installs_90d": 10020,
+          "installs_90d": 10019,
           "installs_365d": 28255,
           "velocity7d": 0
         },
@@ -673,9 +693,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 2657,
-          "installs_90d": 9652,
-          "installs_365d": 29795,
+          "downloads": 2658,
+          "installs_90d": 9651,
+          "installs_365d": 29793,
           "velocity7d": 0
         },
         {
@@ -683,8 +703,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 2648,
-          "installs_90d": 8080,
+          "downloads": 2643,
+          "installs_90d": 8081,
           "installs_365d": 29812,
           "velocity7d": 0
         },
@@ -693,9 +713,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 2416,
-          "installs_90d": 12261,
-          "installs_365d": 23592,
+          "downloads": 2415,
+          "installs_90d": 12260,
+          "installs_365d": 23595,
           "velocity7d": 0
         },
         {
@@ -703,9 +723,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 2257,
-          "installs_90d": 4112,
-          "installs_365d": 16123,
+          "downloads": 2262,
+          "installs_90d": 4115,
+          "installs_365d": 16112,
           "velocity7d": 0
         },
         {
@@ -713,8 +733,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 2006,
-          "installs_90d": 6221,
+          "downloads": 2011,
+          "installs_90d": 6222,
           "installs_365d": 29972,
           "velocity7d": 0
         },
@@ -723,8 +743,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1952,
-          "installs_90d": 5994,
+          "downloads": 1953,
+          "installs_90d": 5995,
           "installs_365d": 33874,
           "velocity7d": 0
         },
@@ -733,9 +753,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1880,
-          "installs_90d": 3552,
-          "installs_365d": 4379,
+          "downloads": 1881,
+          "installs_90d": 3553,
+          "installs_365d": 4380,
           "velocity7d": 0
         },
         {
@@ -744,8 +764,8 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 1866,
-          "installs_90d": 6013,
-          "installs_365d": 15896,
+          "installs_90d": 6014,
+          "installs_365d": 15895,
           "velocity7d": 0
         },
         {
@@ -753,9 +773,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1830,
-          "installs_90d": 6000,
-          "installs_365d": 14134,
+          "downloads": 1831,
+          "installs_90d": 5999,
+          "installs_365d": 14135,
           "velocity7d": 0
         },
         {
@@ -763,19 +783,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1735,
-          "installs_90d": 5631,
-          "installs_365d": 26355,
-          "velocity7d": 0
-        },
-        {
-          "name": "devcontainer",
-          "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 1734,
-          "installs_90d": 6067,
-          "installs_365d": 10988,
+          "downloads": 1736,
+          "installs_90d": 5630,
+          "installs_365d": 26356,
           "velocity7d": 0
         },
         {
@@ -784,8 +794,8 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 1733,
-          "installs_90d": 4991,
-          "installs_365d": 10690,
+          "installs_90d": 4990,
+          "installs_365d": 10691,
           "velocity7d": 0
         },
         {
@@ -793,9 +803,19 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
+          "downloads": 1731,
+          "installs_90d": 5661,
+          "installs_365d": 15126,
+          "velocity7d": 0
+        },
+        {
+          "name": "devcontainer",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
           "downloads": 1730,
-          "installs_90d": 5663,
-          "installs_365d": 15125,
+          "installs_90d": 6068,
+          "installs_365d": 10988,
           "velocity7d": 0
         },
         {
@@ -804,8 +824,8 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 1595,
-          "installs_90d": 4557,
-          "installs_365d": 13662,
+          "installs_90d": 4543,
+          "installs_365d": 13659,
           "velocity7d": 0
         },
         {
@@ -815,7 +835,7 @@
           "freshness_known": false,
           "downloads": 1581,
           "installs_90d": 5170,
-          "installs_365d": 13076,
+          "installs_365d": 13077,
           "velocity7d": 0
         },
         {
@@ -823,9 +843,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1511,
-          "installs_90d": 4995,
-          "installs_365d": 12342,
+          "downloads": 1512,
+          "installs_90d": 4994,
+          "installs_365d": 12344,
           "velocity7d": 0
         },
         {
@@ -833,9 +853,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1510,
+          "downloads": 1511,
           "installs_90d": 4907,
-          "installs_365d": 12244,
+          "installs_365d": 12246,
           "velocity7d": 0
         },
         {
@@ -843,8 +863,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1489,
-          "installs_90d": 5251,
+          "downloads": 1488,
+          "installs_90d": 5245,
           "installs_365d": 14018,
           "velocity7d": 0
         },
@@ -853,9 +873,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1460,
+          "downloads": 1461,
           "installs_90d": 4949,
-          "installs_365d": 12236,
+          "installs_365d": 12237,
           "velocity7d": 0
         },
         {
@@ -863,9 +883,9 @@
           "type": "cask",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1459,
+          "downloads": 1460,
           "installs_90d": 4250,
-          "installs_365d": 7660,
+          "installs_365d": 7661,
           "velocity7d": 0
         },
         {
@@ -873,9 +893,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1438,
-          "installs_90d": 4194,
-          "installs_365d": 11771,
+          "downloads": 1440,
+          "installs_90d": 4197,
+          "installs_365d": 11777,
           "velocity7d": 0
         },
         {
@@ -883,9 +903,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1386,
-          "installs_90d": 4455,
-          "installs_365d": 17401,
+          "downloads": 1389,
+          "installs_90d": 4457,
+          "installs_365d": 17402,
           "velocity7d": 0
         },
         {
@@ -893,9 +913,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1367,
+          "downloads": 1372,
           "installs_90d": 4699,
-          "installs_365d": 33169,
+          "installs_365d": 33171,
           "velocity7d": 0
         },
         {
@@ -913,9 +933,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1235,
+          "downloads": 1249,
           "installs_90d": 3742,
-          "installs_365d": 16804,
+          "installs_365d": 16816,
           "velocity7d": 0
         },
         {
@@ -923,9 +943,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1216,
-          "installs_90d": 2696,
-          "installs_365d": 11343,
+          "downloads": 1217,
+          "installs_90d": 2698,
+          "installs_365d": 11344,
           "velocity7d": 0
         },
         {
@@ -933,8 +953,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1160,
-          "installs_90d": 3893,
+          "downloads": 1162,
+          "installs_90d": 3895,
           "installs_365d": 15376,
           "velocity7d": 0
         },
@@ -943,9 +963,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1077,
-          "installs_90d": 1336,
-          "installs_365d": 3445,
+          "downloads": 1078,
+          "installs_90d": 1337,
+          "installs_365d": 3446,
           "velocity7d": 0
         },
         {
@@ -953,9 +973,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1041,
-          "installs_90d": 3364,
-          "installs_365d": 22980,
+          "downloads": 1046,
+          "installs_90d": 3361,
+          "installs_365d": 22982,
           "velocity7d": 0
         },
         {
@@ -964,8 +984,8 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 1008,
-          "installs_90d": 1543,
-          "installs_365d": 6570,
+          "installs_90d": 1542,
+          "installs_365d": 6569,
           "velocity7d": 0
         },
         {
@@ -974,8 +994,8 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 991,
-          "installs_90d": 2134,
-          "installs_365d": 3493,
+          "installs_90d": 2136,
+          "installs_365d": 3494,
           "velocity7d": 0
         },
         {
@@ -983,9 +1003,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 910,
+          "downloads": 909,
           "installs_90d": 1878,
-          "installs_365d": 8258,
+          "installs_365d": 8257,
           "velocity7d": 0
         },
         {
@@ -995,7 +1015,7 @@
           "freshness_known": false,
           "downloads": 871,
           "installs_90d": 4558,
-          "installs_365d": 15058,
+          "installs_365d": 15057,
           "velocity7d": 0
         },
         {
@@ -1005,7 +1025,7 @@
           "freshness_known": false,
           "downloads": 735,
           "installs_90d": 2133,
-          "installs_365d": 7590,
+          "installs_365d": 7581,
           "velocity7d": 0
         },
         {
@@ -1014,8 +1034,8 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 574,
-          "installs_90d": 1632,
-          "installs_365d": 7150,
+          "installs_90d": 1631,
+          "installs_365d": 7149,
           "velocity7d": 0
         },
         {
@@ -1023,7 +1043,7 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 565,
+          "downloads": 564,
           "installs_90d": 2164,
           "installs_365d": 8713,
           "velocity7d": 0
@@ -1043,9 +1063,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 465,
+          "downloads": 466,
           "installs_90d": 1534,
-          "installs_365d": 5791,
+          "installs_365d": 5792,
           "velocity7d": 0
         },
         {
@@ -1053,8 +1073,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 431,
-          "installs_90d": 1011,
+          "downloads": 430,
+          "installs_90d": 1010,
           "installs_365d": 12515,
           "velocity7d": 0
         },
@@ -1063,8 +1083,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 411,
-          "installs_90d": 1856,
+          "downloads": 410,
+          "installs_90d": 1854,
           "installs_365d": 7810,
           "velocity7d": 0
         },
@@ -1083,9 +1103,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 363,
-          "installs_90d": 1062,
-          "installs_365d": 5319,
+          "downloads": 364,
+          "installs_90d": 1061,
+          "installs_365d": 5309,
           "velocity7d": 0
         },
         {
@@ -1103,9 +1123,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 250,
-          "installs_90d": 749,
-          "installs_365d": 2462,
+          "downloads": 251,
+          "installs_90d": 750,
+          "installs_365d": 2463,
           "velocity7d": 0
         },
         {
@@ -1115,7 +1135,7 @@
           "freshness_known": false,
           "downloads": 239,
           "installs_90d": 833,
-          "installs_365d": 3085,
+          "installs_365d": 3084,
           "velocity7d": 0
         },
         {
@@ -1133,7 +1153,7 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 208,
+          "downloads": 205,
           "installs_90d": 617,
           "installs_365d": 2367,
           "velocity7d": 0
@@ -1143,9 +1163,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 167,
+          "downloads": 169,
           "installs_90d": 380,
-          "installs_365d": 2372,
+          "installs_365d": 2373,
           "velocity7d": 0
         },
         {
@@ -1153,7 +1173,7 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 163,
+          "downloads": 162,
           "installs_90d": 658,
           "installs_365d": 2153,
           "velocity7d": 0
@@ -1164,7 +1184,7 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 156,
-          "installs_90d": 344,
+          "installs_90d": 343,
           "installs_365d": 1217,
           "velocity7d": 0
         },
@@ -1183,9 +1203,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 123,
+          "downloads": 124,
           "installs_90d": 298,
-          "installs_365d": 1064,
+          "installs_365d": 1065,
           "velocity7d": 0
         },
         {
@@ -1203,9 +1223,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 88,
-          "installs_90d": 217,
-          "installs_365d": 299,
+          "downloads": 89,
+          "installs_90d": 219,
+          "installs_365d": 301,
           "velocity7d": 0
         },
         {
@@ -1224,7 +1244,7 @@
           "is_stale": false,
           "freshness_known": false,
           "downloads": 78,
-          "installs_90d": 201,
+          "installs_90d": 200,
           "installs_365d": 1361,
           "velocity7d": 0
         },
@@ -1389,8 +1409,8 @@
           "velocity7d": 0
         },
         {
-          "name": "nvim",
-          "type": "formula",
+          "name": "bluefin-wallpapers",
+          "type": "cask",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
@@ -1409,28 +1429,8 @@
           "velocity7d": 0
         },
         {
-          "name": "bluefin-wallpapers",
-          "type": "cask",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 0
-        },
-        {
           "name": "tiup",
           "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
-          "velocity7d": 0
-        },
-        {
-          "name": "framework-wallpapers",
-          "type": "cask",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
@@ -1459,8 +1459,8 @@
           "velocity7d": 0
         },
         {
-          "name": "kubectl",
-          "type": "formula",
+          "name": "framework-wallpapers",
+          "type": "cask",
           "is_stale": false,
           "freshness_known": false,
           "downloads": 0,
@@ -1469,7 +1469,7 @@
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     },
     {
       "name": "bazzite/brewfile",
@@ -1481,9 +1481,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 333654,
-          "installs_90d": 878422,
-          "installs_365d": 2296045,
+          "downloads": 333799,
+          "installs_90d": 878576,
+          "installs_365d": 2296266,
           "velocity7d": 0
         },
         {
@@ -1491,9 +1491,19 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 57969,
-          "installs_90d": 163258,
-          "installs_365d": 562151,
+          "downloads": 58022,
+          "installs_90d": 163289,
+          "installs_365d": 562191,
+          "velocity7d": 0
+        },
+        {
+          "name": "rg",
+          "type": "formula",
+          "is_stale": false,
+          "freshness_known": false,
+          "downloads": 55762,
+          "installs_90d": 157485,
+          "installs_365d": 405802,
           "velocity7d": 0
         },
         {
@@ -1501,9 +1511,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 46176,
-          "installs_90d": 83166,
-          "installs_365d": 183587,
+          "downloads": 45944,
+          "installs_90d": 83197,
+          "installs_365d": 183622,
           "velocity7d": 0
         },
         {
@@ -1511,9 +1521,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 28290,
-          "installs_90d": 53177,
-          "installs_365d": 109840,
+          "downloads": 28291,
+          "installs_90d": 53182,
+          "installs_365d": 109842,
           "velocity7d": 0
         },
         {
@@ -1521,9 +1531,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 25398,
-          "installs_90d": 67932,
-          "installs_365d": 188667,
+          "downloads": 25415,
+          "installs_90d": 67948,
+          "installs_365d": 188665,
           "velocity7d": 0
         },
         {
@@ -1531,9 +1541,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 24488,
-          "installs_90d": 81305,
-          "installs_365d": 218640,
+          "downloads": 24503,
+          "installs_90d": 81322,
+          "installs_365d": 218664,
           "velocity7d": 0
         },
         {
@@ -1541,9 +1551,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 17709,
-          "installs_90d": 50318,
-          "installs_365d": 178830,
+          "downloads": 17718,
+          "installs_90d": 50297,
+          "installs_365d": 178845,
           "velocity7d": 0
         },
         {
@@ -1551,9 +1561,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 17571,
-          "installs_90d": 55529,
-          "installs_365d": 129081,
+          "downloads": 17583,
+          "installs_90d": 55551,
+          "installs_365d": 129105,
           "velocity7d": 0
         },
         {
@@ -1561,9 +1571,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 17087,
-          "installs_90d": 50342,
-          "installs_365d": 194575,
+          "downloads": 17105,
+          "installs_90d": 50361,
+          "installs_365d": 194599,
           "velocity7d": 0
         },
         {
@@ -1571,9 +1581,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 13015,
-          "installs_90d": 34632,
-          "installs_365d": 228589,
+          "downloads": 13038,
+          "installs_90d": 34652,
+          "installs_365d": 228579,
           "velocity7d": 0
         },
         {
@@ -1581,9 +1591,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 10920,
-          "installs_90d": 35274,
-          "installs_365d": 158342,
+          "downloads": 10952,
+          "installs_90d": 35282,
+          "installs_365d": 158360,
           "velocity7d": 0
         },
         {
@@ -1591,9 +1601,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 9934,
-          "installs_90d": 33693,
-          "installs_365d": 110761,
+          "downloads": 9935,
+          "installs_90d": 33683,
+          "installs_365d": 110758,
           "velocity7d": 0
         },
         {
@@ -1601,9 +1611,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 4872,
-          "installs_90d": 19073,
-          "installs_365d": 63947,
+          "downloads": 4873,
+          "installs_90d": 19070,
+          "installs_365d": 63946,
           "velocity7d": 0
         },
         {
@@ -1611,9 +1621,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 3404,
-          "installs_90d": 8526,
-          "installs_365d": 29364,
+          "downloads": 3407,
+          "installs_90d": 8530,
+          "installs_365d": 29369,
           "velocity7d": 0
         },
         {
@@ -1621,8 +1631,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 2648,
-          "installs_90d": 8080,
+          "downloads": 2643,
+          "installs_90d": 8081,
           "installs_365d": 29812,
           "velocity7d": 0
         },
@@ -1631,8 +1641,8 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 2006,
-          "installs_90d": 6221,
+          "downloads": 2011,
+          "installs_90d": 6222,
           "installs_365d": 29972,
           "velocity7d": 0
         },
@@ -1641,9 +1651,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1386,
-          "installs_90d": 4455,
-          "installs_365d": 17401,
+          "downloads": 1389,
+          "installs_90d": 4457,
+          "installs_365d": 17402,
           "velocity7d": 0
         },
         {
@@ -1651,9 +1661,9 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1367,
+          "downloads": 1372,
           "installs_90d": 4699,
-          "installs_365d": 33169,
+          "installs_365d": 33171,
           "velocity7d": 0
         },
         {
@@ -1661,23 +1671,13 @@
           "type": "formula",
           "is_stale": false,
           "freshness_known": false,
-          "downloads": 1160,
-          "installs_90d": 3893,
+          "downloads": 1162,
+          "installs_90d": 3895,
           "installs_365d": 15376,
-          "velocity7d": 0
-        },
-        {
-          "name": "rg",
-          "type": "formula",
-          "is_stale": false,
-          "freshness_known": false,
-          "downloads": 0,
-          "installs_90d": 0,
-          "installs_365d": 0,
           "velocity7d": 0
         }
       ],
-      "updated_at": "2026-04-07T20:10:42Z"
+      "updated_at": "2026-04-07T20:45:10Z"
     }
   ]
 }
