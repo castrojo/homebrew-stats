@@ -4,7 +4,17 @@ import { safeJson } from '../lib/inject.ts';
 
 interface DaySnapshot {
   date: string;
-  build_counts: { app: string; passed: number; failed: number; total: number }[] | null;
+  build_counts: {
+    app: string;
+    passed: number;
+    failed: number;
+    passed_aarch64?: number;
+    failed_aarch64?: number;
+    sign_failed?: number;
+    publish_failed?: number;
+    annotate_failed?: number;
+    total: number;
+  }[] | null;
 }
 
 interface Props {
@@ -17,8 +27,17 @@ const series = [...history]
   .slice(-30)
   .map((snapshot) => {
     const counts = snapshot.build_counts ?? [];
-    const passed = counts.reduce((sum, item) => sum + (item.passed ?? 0), 0);
-    const failed = counts.reduce((sum, item) => sum + (item.failed ?? 0), 0);
+    const passed = counts.reduce((sum, item) => sum + (item.passed ?? 0) + (item.passed_aarch64 ?? 0), 0);
+    const failed = counts.reduce(
+      (sum, item) =>
+        sum +
+        (item.failed ?? 0) +
+        (item.failed_aarch64 ?? 0) +
+        (item.sign_failed ?? 0) +
+        (item.publish_failed ?? 0) +
+        (item.annotate_failed ?? 0),
+      0,
+    );
     return {
       date: snapshot.date,
       passed,

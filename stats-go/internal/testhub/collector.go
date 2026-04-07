@@ -13,19 +13,41 @@ import (
 	ghcli "github.com/castrojo/bootc-ecosystem/internal/ghcli"
 )
 
-// parseJobApp extracts the app name from a job name like "compile-oci (ghostty, x86_64)".
-// Returns ("", false) if the job is aarch64 or doesn't match the pattern.
-func parseJobApp(jobName string) (string, bool) {
-	re := regexp.MustCompile(`^compile-oci \((.+),\s*(x86_64|aarch64)\)$`)
-	m := re.FindStringSubmatch(jobName)
-	if m == nil {
-		return "", false
+var (
+	// archRe matches compile-oci, sign-and-push, annotate-packages jobs with arch suffix.
+	archRe = regexp.MustCompile(`^(compile-oci|sign-and-push|annotate-packages) \((.+),\s*(x86_64|aarch64)\)$`)
+	// manifestRe matches publish-manifest-list jobs (no arch suffix).
+	manifestRe = regexp.MustCompile(`^publish-manifest-list \((.+)\)$`)
+)
+
+// parseJobApp extracts structured info from a CI job name.
+// Supported patterns:
+//
+//	compile-oci (app, x86_64|aarch64)
+//	sign-and-push (app, x86_64|aarch64)
+//	publish-manifest-list (app)
+//	annotate-packages (app, x86_64|aarch64)
+//
+// App names are normalized to lowercase. Returns (result, false) for unrecognised jobs.
+func parseJobApp(jobName string) (JobParseResult, bool) {
+	if m := archRe.FindStringSubmatch(jobName); m != nil {
+		return JobParseResult{
+			App:     strings.ToLower(strings.TrimSpace(m[2])),
+			Stage:   m[1],
+			Arch:    m[3],
+			HasArch: true,
+		}, true
 	}
-	arch := m[2]
-	if arch != "x86_64" {
-		return "", false
+	// publish-manifest-list has no arch suffix
+	if m := manifestRe.FindStringSubmatch(jobName); m != nil {
+		return JobParseResult{
+			App:     strings.ToLower(strings.TrimSpace(m[1])),
+			Stage:   "publish-manifest-list",
+			Arch:    "",
+			HasArch: false,
+		}, true
 	}
-	return strings.TrimSpace(m[1]), true
+	return JobParseResult{}, false
 }
 
 // isTesthubPackage reports whether the package name belongs to the testhub namespace.
@@ -208,13 +230,14 @@ type ghJobRecord struct {
 }
 
 // FetchBuildCounts fetches workflow run job results from projectbluefin/testhub
-// for runs with ID > lastRunID. Returns aggregated per-app counts and the new max run ID.
+// for completed main-branch runs with ID > lastRunID. Returns aggregated per-app counts and the new max run ID.
 func FetchBuildCounts(lastRunID int64) ([]AppDayCount, int64, error) {
 	out, err := ghcli.Run("run", "list",
 		"--repo", "projectbluefin/testhub",
 		"--workflow", "build.yml",
+		"--branch", "main",
 		"--json", "databaseId,status",
-		"--limit", "50")
+		"--limit", "100")
 	if err != nil {
 		return nil, lastRunID, fmt.Errorf("listing workflow runs: %w", err)
 	}
@@ -228,6 +251,12 @@ func FetchBuildCounts(lastRunID int64) ([]AppDayCount, int64, error) {
 	newMaxRunID := lastRunID
 
 	for _, run := range runs {
+		// Only process completed runs — in-progress runs would advance the cursor
+		// and never be reprocessed after completion (Bug 7B fix).
+		if run.Status != "completed" {
+			continue
+		}
+
 		runID := run.DatabaseID
 		if runID <= lastRunID {
 			continue
@@ -249,20 +278,48 @@ func FetchBuildCounts(lastRunID int64) ([]AppDayCount, int64, error) {
 			continue
 		}
 		for _, job := range jobs {
-			app, ok := parseJobApp(job.Name)
+			parsed, ok := parseJobApp(job.Name)
 			if !ok {
 				continue
 			}
+			app := parsed.App
 			if _, exists := counts[app]; !exists {
 				counts[app] = &AppDayCount{App: app}
 			}
-			switch job.Conclusion {
-			case "success":
-				counts[app].Passed++
-				counts[app].Total++
-			case "failure", "cancelled":
-				counts[app].Failed++
-				counts[app].Total++
+			c := counts[app]
+
+			switch parsed.Stage {
+			case "compile-oci":
+				// Compile-oci: count both failure AND cancelled (cascade origin)
+				switch job.Conclusion {
+				case "success":
+					if parsed.Arch == "x86_64" {
+						c.Passed++
+					} else {
+						c.PassedAarch64++
+					}
+					c.Total++
+				case "failure", "cancelled":
+					if parsed.Arch == "x86_64" {
+						c.Failed++
+					} else {
+						c.FailedAarch64++
+					}
+					c.Total++
+				}
+			case "sign-and-push":
+				// Non-compile: only count explicit "failure" (cancelled = cascade, not a sign failure)
+				if job.Conclusion == "failure" {
+					c.SignFailed++
+				}
+			case "publish-manifest-list":
+				if job.Conclusion == "failure" {
+					c.PublishFailed++
+				}
+			case "annotate-packages":
+				if job.Conclusion == "failure" {
+					c.AnnotateFailed++
+				}
 			}
 		}
 	}
@@ -304,10 +361,11 @@ func AppendSnapshot(store *HistoryStore, pkgs []Package, counts []AppDayCount, l
 }
 
 // ComputeBuildMetrics computes pass rates from raw snapshot counts over a rolling window.
+// Returns a map of app name → pass rate (0–100) for apps with activity in the window.
 // The window is relative to the most recent snapshot date (not time.Now()), so that
 // historical test data with fixed dates is handled consistently.
 // This is a pure function — no I/O.
-func ComputeBuildMetrics(snapshots []DaySnapshot, windowDays int) []BuildMetrics {
+func ComputeBuildMetrics(snapshots []DaySnapshot, windowDays int) map[string]float64 {
 	if len(snapshots) == 0 {
 		return nil
 	}
@@ -321,16 +379,13 @@ func ComputeBuildMetrics(snapshots []DaySnapshot, windowDays int) []BuildMetrics
 	}
 	latest, err := time.Parse("2006-01-02", latestDate)
 	if err != nil {
-		// Fallback to now if date is unparseable.
 		latest = time.Now().UTC()
 	}
 	cutoff := latest.AddDate(0, 0, -windowDays)
 	cutoffStr := cutoff.Format("2006-01-02")
 
-	// Aggregate per app within window
 	type agg struct {
 		passed int
-		failed int
 		total  int
 	}
 	appData := make(map[string]*agg)
@@ -344,23 +399,15 @@ func ComputeBuildMetrics(snapshots []DaySnapshot, windowDays int) []BuildMetrics
 				appData[c.App] = &agg{}
 			}
 			appData[c.App].passed += c.Passed
-			appData[c.App].failed += c.Failed
 			appData[c.App].total += c.Total
 		}
 	}
 
-	result := make([]BuildMetrics, 0, len(appData))
+	result := make(map[string]float64, len(appData))
 	for app, a := range appData {
-		var rate float64
 		if a.total > 0 {
-			rate = float64(a.passed) / float64(a.total) * 100.0
+			result[app] = float64(a.passed) / float64(a.total) * 100.0
 		}
-		bm := BuildMetrics{
-			App:        app,
-			PassRate7d: rate,
-		}
-		result = append(result, bm)
 	}
-
 	return result
 }

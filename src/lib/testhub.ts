@@ -2,6 +2,11 @@ export interface AppDayCount {
   app: string;
   passed: number;
   failed: number;
+  passed_aarch64?: number;
+  failed_aarch64?: number;
+  sign_failed?: number;
+  publish_failed?: number;
+  annotate_failed?: number;
   total: number;
 }
 

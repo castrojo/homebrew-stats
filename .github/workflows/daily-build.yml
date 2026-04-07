@@ -103,12 +103,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-brewfile-taps
 
+      - name: Restore testhub history cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache/testhub-history.json
+          key: testhub-history-v1-${{ github.run_id }}
+          restore-keys: testhub-history-v1-
+
       - name: Fetch Testhub package stats
         id: sync-testhub
         continue-on-error: true
+        timeout-minutes: 5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./stats-go/stats fetch-testhub
+
+      - name: Save testhub history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache/testhub-history.json
+          key: testhub-history-v1-${{ github.run_id }}
 
       - name: Fetch countme active-user stats
         id: sync-countme
@@ -286,6 +301,8 @@ jobs:
           pkg_count=$(jq '.packages | length' src/data/testhub.json 2>/dev/null || echo 0)
           metric_count=$(jq '.build_metrics | length' src/data/testhub.json 2>/dev/null || echo 0)
           known=$(jq '[.build_metrics[] | select(.last_status != "unknown" and .last_status != "")] | length' src/data/testhub.json 2>/dev/null || echo 0)
+          stale_count=$(jq '[.build_metrics[] | select(.last_status == "stale")] | length' src/data/testhub.json 2>/dev/null || echo 0)
+          pending_count=$(jq '[.build_metrics[] | select(.last_status == "pending")] | length' src/data/testhub.json 2>/dev/null || echo 0)
           last_hist_date=$(jq -r '[.history[].date] | max // ""' src/data/testhub.json 2>/dev/null || echo "")
           stale_days=""
           if [ -n "$last_hist_date" ]; then
@@ -297,6 +314,8 @@ jobs:
           fi
           echo "  packages: $pkg_count"
           echo "  build_metrics: $metric_count"
+          echo "  stale (>7d silent): $stale_count"
+          echo "  pending (no history): $pending_count"
           if [ "$pkg_count" -gt 0 ]; then
             echo "✅ testhub.packages = $pkg_count"
           else
