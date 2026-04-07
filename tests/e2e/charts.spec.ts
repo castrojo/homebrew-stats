@@ -451,7 +451,8 @@ test.describe('Testhub data quality', () => {
     for (let i = 0; i < Math.min(count, 5); i++) {
       const badge = rows.nth(i).locator('.status-badge');
       const cls = await badge.getAttribute('class');
-      if (!cls) continue;
+      expect(cls, `Row ${i} must have a .status-badge with a class`).toBeTruthy();
+      if (!cls) continue; // type guard only — expect above already fails
       // Extract the status class (passing|failing|stale|pending|unknown)
       const statusCls = cls.split(' ').find(c => validStatuses.has(c));
       expect(statusCls, `Row ${i} badge class must be a known status`).toBeTruthy();

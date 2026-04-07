@@ -396,6 +396,20 @@ func runFetchTesthub() error {
 		buildMetrics = append(buildMetrics, bm)
 	}
 
+	// Ensure pkgs is populated before the pending backfill so fallback-only packages
+	// also receive "pending" status when both package APIs failed.
+	if pkgs == nil {
+		// Package listing failed (e.g. missing read:packages scope on GITHUB_TOKEN).
+		// Fall back to the committed src/data/testhub.json so the site always has
+		// package data instead of rendering an empty table.
+		if fallback := loadFallbackTesthubPackages(); len(fallback) > 0 {
+			pkgs = fallback
+			fmt.Fprintf(os.Stderr, "  using %d fallback packages from committed testhub.json\n", len(pkgs))
+		} else {
+			pkgs = []testhub.Package{}
+		}
+	}
+
 	// Backfill packages in flatpak inventory with no build history at all → "pending".
 	for _, pkg := range pkgs {
 		if !seenApps[pkg.Name] {
@@ -417,18 +431,6 @@ func runFetchTesthub() error {
 			fmt.Fprintf(os.Stderr, "  using %d fallback build metrics from committed testhub.json\n", len(buildMetrics))
 		} else {
 			buildMetrics = []testhub.BuildMetrics{}
-		}
-	}
-
-	if pkgs == nil {
-		// Package listing failed (e.g. missing read:packages scope on GITHUB_TOKEN).
-		// Fall back to the committed src/data/testhub.json so the site always has
-		// package data instead of rendering an empty table.
-		if fallback := loadFallbackTesthubPackages(); len(fallback) > 0 {
-			pkgs = fallback
-			fmt.Fprintf(os.Stderr, "  using %d fallback packages from committed testhub.json\n", len(pkgs))
-		} else {
-			pkgs = []testhub.Package{}
 		}
 	}
 	if store.Snapshots == nil {
@@ -479,39 +481,41 @@ func loadFallbackTesthubBuildMetrics() []testhub.BuildMetrics {
 }
 
 // computeArchStatus returns the last known x86_64 and aarch64 build status for an app.
-// Looks at the most recent snapshot that has build data for the app.
+// Walks snapshots newest-first and resolves each architecture independently — stops
+// only when both have been determined from actual build data.
 func computeArchStatus(snapshots []testhub.DaySnapshot, app string) (x86Status, armStatus string) {
 	sorted := make([]testhub.DaySnapshot, len(snapshots))
 	copy(sorted, snapshots)
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Date > sorted[j].Date })
 
+	x86Status = "unknown"
+	armStatus = "unknown"
+
 	for _, snap := range sorted {
+		if x86Status != "unknown" && armStatus != "unknown" {
+			break
+		}
 		for _, c := range snap.BuildCounts {
 			if c.App != app {
 				continue
 			}
-			if c.Passed > 0 || c.Failed > 0 {
+			if x86Status == "unknown" && (c.Passed > 0 || c.Failed > 0) {
 				if c.Failed > 0 {
 					x86Status = "failing"
 				} else {
 					x86Status = "passing"
 				}
-			} else {
-				x86Status = "unknown"
 			}
-			if c.PassedAarch64 > 0 || c.FailedAarch64 > 0 {
+			if armStatus == "unknown" && (c.PassedAarch64 > 0 || c.FailedAarch64 > 0) {
 				if c.FailedAarch64 > 0 {
 					armStatus = "failing"
 				} else {
 					armStatus = "passing"
 				}
-			} else {
-				armStatus = "unknown"
 			}
-			return x86Status, armStatus
 		}
 	}
-	return "unknown", "unknown"
+	return x86Status, armStatus
 }
 
 type lastStatus struct {

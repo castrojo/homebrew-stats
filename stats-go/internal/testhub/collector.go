@@ -13,6 +13,13 @@ import (
 	ghcli "github.com/castrojo/bootc-ecosystem/internal/ghcli"
 )
 
+var (
+	// archRe matches compile-oci, sign-and-push, annotate-packages jobs with arch suffix.
+	archRe = regexp.MustCompile(`^(compile-oci|sign-and-push|annotate-packages) \((.+),\s*(x86_64|aarch64)\)$`)
+	// manifestRe matches publish-manifest-list jobs (no arch suffix).
+	manifestRe = regexp.MustCompile(`^publish-manifest-list \((.+)\)$`)
+)
+
 // parseJobApp extracts structured info from a CI job name.
 // Supported patterns:
 //
@@ -23,8 +30,6 @@ import (
 //
 // App names are normalized to lowercase. Returns (result, false) for unrecognised jobs.
 func parseJobApp(jobName string) (JobParseResult, bool) {
-	// Patterns with arch
-	archRe := regexp.MustCompile(`^(compile-oci|sign-and-push|annotate-packages) \((.+),\s*(x86_64|aarch64)\)$`)
 	if m := archRe.FindStringSubmatch(jobName); m != nil {
 		return JobParseResult{
 			App:     strings.ToLower(strings.TrimSpace(m[2])),
@@ -34,7 +39,6 @@ func parseJobApp(jobName string) (JobParseResult, bool) {
 		}, true
 	}
 	// publish-manifest-list has no arch suffix
-	manifestRe := regexp.MustCompile(`^publish-manifest-list \((.+)\)$`)
 	if m := manifestRe.FindStringSubmatch(jobName); m != nil {
 		return JobParseResult{
 			App:     strings.ToLower(strings.TrimSpace(m[1])),
@@ -216,7 +220,6 @@ func MergePackages(existing, fallback []Package) []Package {
 type ghRunRecord struct {
 	DatabaseID int64  `json:"databaseId"`
 	Status     string `json:"status"`
-	HeadBranch string `json:"headBranch"`
 }
 
 // ghJobRecord is the minimal shape from the jobs API.
@@ -233,7 +236,7 @@ func FetchBuildCounts(lastRunID int64) ([]AppDayCount, int64, error) {
 		"--repo", "projectbluefin/testhub",
 		"--workflow", "build.yml",
 		"--branch", "main",
-		"--json", "databaseId,status,headBranch",
+		"--json", "databaseId,status",
 		"--limit", "100")
 	if err != nil {
 		return nil, lastRunID, fmt.Errorf("listing workflow runs: %w", err)

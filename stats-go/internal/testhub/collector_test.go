@@ -236,10 +236,10 @@ func TestComputeBuildMetrics_ZeroTotal(t *testing.T) {
 			BuildCounts: []AppDayCount{{App: "ghostty", Passed: 0, Failed: 0, Total: 0}},
 		},
 	}
-	// Total=0 should not panic and rate=0 → app absent from map
+	// Total=0 → app should be absent from map (no entry added for zero total)
 	metrics := ComputeBuildMetrics(snapshots, 7)
-	if rate, ok := metrics["ghostty"]; ok && rate != 0.0 {
-		t.Errorf("expected 0.0 or absent for zero total, got %f", rate)
+	if _, ok := metrics["ghostty"]; ok {
+		t.Error("expected ghostty absent from map for zero total")
 	}
 }
 
@@ -295,10 +295,12 @@ func TestComputeBuildMetrics_30dField(t *testing.T) {
 	if rate30d["ghostty"] != 100.0 {
 		t.Errorf("30d rate: expected 100.0, got %f", rate30d["ghostty"])
 	}
-	// Verify the two window results are independent (different map objects)
-	if &rate7d == &rate30d {
+	// Verify the two window results are independent maps.
+	rate7d["__test__"] = -1
+	if _, found := rate30d["__test__"]; found {
 		t.Error("expected independent map objects for 7d and 30d")
 	}
+	delete(rate7d, "__test__")
 }
 
 // --- isTesthubPackage / stripTesthubPrefix tests ---
