@@ -14,6 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -28,15 +29,168 @@ jobs:
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .sync-cache
-          key: tap-history-v1-${{ github.run_id }}
-          restore-keys: tap-history-v1-
+          key: tap-history-v4-${{ github.run_id }}
+          restore-keys: tap-history-v4-
 
-      - name: Sync tap data
+      - name: Restore contributor history cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: contributor-history-v1-${{ github.run_id }}
+          restore-keys: contributor-history-v1-
+
+      - name: Restore build history cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: builds-history-v2-${{ github.run_id }}
+          restore-keys: builds-history-v2-
+
+      - name: Restore testhub history cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache/testhub-history.json
+          key: testhub-history-v1-${{ github.run_id }}
+          restore-keys: testhub-history-v1-
+
+      - name: Build stats binary
+        run: cd stats-go && go build -o stats ./cmd/stats/
+
+      - name: Fetch Homebrew tap data
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          (cd stats-go && go build -o stats ./cmd/stats/)
-          ./stats-go/stats
+        run: ./stats-go/stats fetch-homebrew
+
+      - name: Fetch Brewfile tap data
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-brewfile-taps
+
+      - name: Fetch Testhub package stats
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-testhub
+
+      - name: Fetch countme active-user stats
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-countme
+
+      - name: Fetch build pipeline metrics (Bluefin)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-bluefin
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (Aurora)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-aurora
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (Bazzite)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-bazzite
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (Universal Blue)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-universal-blue
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (uCore)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-ucore
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (Zirconium)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-zirconium
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (bootcrew)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-bootcrew
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch build pipeline metrics (BlueBuild)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-builds-blue-build
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Fetch Quay.io pull stats (Fedora)
+        run: ./stats-go/stats fetch-quay-fedora
+        continue-on-error: true
+        timeout-minutes: 5
+
+      - name: Fetch Quay.io pull stats (CentOS)
+        run: ./stats-go/stats fetch-quay-centos
+        continue-on-error: true
+        timeout-minutes: 5
+
+      - name: Fetch Quay.io pull stats (AlmaLinux)
+        run: ./stats-go/stats fetch-quay-almalinux
+        continue-on-error: true
+        timeout-minutes: 5
+
+      - name: Fetch release frequency data
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-releases
+
+      - name: Fetch supply chain data
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-supply-chain
+
+      - name: Fetch Scorecard data
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-scorecard
+
+      - name: Save traffic history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: tap-history-v4-${{ github.run_id }}
+
+      - name: Save testhub history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache/testhub-history.json
+          key: testhub-history-v1-${{ github.run_id }}
+
+      - name: Save build history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: builds-history-v2-${{ github.run_id }}
 
       - name: Log in to ghcr.io
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0

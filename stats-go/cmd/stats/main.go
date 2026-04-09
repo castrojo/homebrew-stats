@@ -348,6 +348,12 @@ func runFetchTesthub() error {
 		}
 	}
 
+	// Pre-sort snapshots newest-first once. computeArchStatus and computeLastStatus
+	// both walk newest-first; sorting per-call is O(N×S log S) across all app loops.
+	sort.Slice(store.Snapshots, func(i, j int) bool {
+		return store.Snapshots[i].Date > store.Snapshots[j].Date
+	})
+
 	// Compute build metrics for 7d and 30d windows.
 	// ComputeBuildMetrics now returns map[string]float64 (app → pass rate).
 	rates7d := testhub.ComputeBuildMetrics(store.Snapshots, 7)
@@ -483,15 +489,13 @@ func loadFallbackTesthubBuildMetrics() []testhub.BuildMetrics {
 // computeArchStatus returns the last known x86_64 and aarch64 build status for an app.
 // Walks snapshots newest-first and resolves each architecture independently — stops
 // only when both have been determined from actual build data.
+// Caller must pass snapshots pre-sorted newest-first (runFetchTesthub sorts once before
+// all app-loop calls to avoid O(N×S log S) redundant sorting).
 func computeArchStatus(snapshots []testhub.DaySnapshot, app string) (x86Status, armStatus string) {
-	sorted := make([]testhub.DaySnapshot, len(snapshots))
-	copy(sorted, snapshots)
-	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Date > sorted[j].Date })
-
 	x86Status = "unknown"
 	armStatus = "unknown"
 
-	for _, snap := range sorted {
+	for _, snap := range snapshots {
 		if x86Status != "unknown" && armStatus != "unknown" {
 			break
 		}
@@ -526,14 +530,10 @@ type lastStatus struct {
 // computeLastStatus returns the last known build status per app from snapshots.
 // A run is "failing" if compile-oci failed OR any downstream stage explicitly failed
 // (publish-manifest-list failure means the image is unpullable even if compile passed).
+// Caller must pass snapshots pre-sorted newest-first (runFetchTesthub sorts once).
 func computeLastStatus(snapshots []testhub.DaySnapshot) map[string]lastStatus {
-	// Sort descending by date to find the most recent entry per app.
-	sorted := make([]testhub.DaySnapshot, len(snapshots))
-	copy(sorted, snapshots)
-	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Date > sorted[j].Date })
-
 	result := make(map[string]lastStatus)
-	for _, snap := range sorted {
+	for _, snap := range snapshots {
 		for _, c := range snap.BuildCounts {
 			if _, seen := result[c.App]; seen {
 				continue

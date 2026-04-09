@@ -270,6 +270,154 @@ func TestBuildActiveHumanLogins_EmptyInputReturnsEmptySlice(t *testing.T) {
 	}
 }
 
+// ── computeArchStatus tests ─────────────────────────────────────────────────
+
+// TestComputeArchStatus_BothKnown verifies passing/failing are correctly resolved
+// when the newest snapshot has data for both architectures.
+func TestComputeArchStatus_BothKnown(t *testing.T) {
+	// Snapshots must be provided newest-first (caller responsibility after pre-sort).
+	snapshots := []testhub.DaySnapshot{
+		{
+			Date: "2026-04-09",
+			BuildCounts: []testhub.AppDayCount{
+				{App: "ghostty", Passed: 3, Failed: 0, PassedAarch64: 2, FailedAarch64: 0},
+			},
+		},
+		{
+			Date: "2026-04-08",
+			BuildCounts: []testhub.AppDayCount{
+				{App: "ghostty", Passed: 0, Failed: 1, PassedAarch64: 0, FailedAarch64: 1},
+			},
+		},
+	}
+	x86, arm := computeArchStatus(snapshots, "ghostty")
+	if x86 != "passing" {
+		t.Errorf("x86Status: want passing, got %s", x86)
+	}
+	if arm != "passing" {
+		t.Errorf("armStatus: want passing, got %s", arm)
+	}
+}
+
+// TestComputeArchStatus_NewestWins verifies that the newest snapshot takes precedence.
+// The app had a failure on day1 and a success on day2 (newest); should report passing.
+func TestComputeArchStatus_NewestWins(t *testing.T) {
+	snapshots := []testhub.DaySnapshot{
+		{
+			Date: "2026-04-09", // newest first
+			BuildCounts: []testhub.AppDayCount{
+				{App: "goose", Passed: 1, Failed: 0, PassedAarch64: 1, FailedAarch64: 0},
+			},
+		},
+		{
+			Date: "2026-04-08",
+			BuildCounts: []testhub.AppDayCount{
+				{App: "goose", Passed: 0, Failed: 2, PassedAarch64: 0, FailedAarch64: 2},
+			},
+		},
+	}
+	x86, arm := computeArchStatus(snapshots, "goose")
+	if x86 != "passing" {
+		t.Errorf("x86Status: want passing (newest wins), got %s", x86)
+	}
+	if arm != "passing" {
+		t.Errorf("armStatus: want passing (newest wins), got %s", arm)
+	}
+}
+
+// TestComputeArchStatus_Failing verifies that a failing result is returned when the
+// newest snapshot shows failures.
+func TestComputeArchStatus_Failing(t *testing.T) {
+	snapshots := []testhub.DaySnapshot{
+		{
+			Date: "2026-04-09",
+			BuildCounts: []testhub.AppDayCount{
+				{App: "app", Passed: 0, Failed: 1, PassedAarch64: 0, FailedAarch64: 1},
+			},
+		},
+	}
+	x86, arm := computeArchStatus(snapshots, "app")
+	if x86 != "failing" {
+		t.Errorf("x86Status: want failing, got %s", x86)
+	}
+	if arm != "failing" {
+		t.Errorf("armStatus: want failing, got %s", arm)
+	}
+}
+
+// TestComputeArchStatus_UnknownApp returns unknown for both when the app has no data.
+func TestComputeArchStatus_UnknownApp(t *testing.T) {
+	snapshots := []testhub.DaySnapshot{
+		{
+			Date: "2026-04-09",
+			BuildCounts: []testhub.AppDayCount{
+				{App: "other-app", Passed: 1, Failed: 0, PassedAarch64: 1, FailedAarch64: 0},
+			},
+		},
+	}
+	x86, arm := computeArchStatus(snapshots, "missing-app")
+	if x86 != "unknown" {
+		t.Errorf("x86Status: want unknown for missing app, got %s", x86)
+	}
+	if arm != "unknown" {
+		t.Errorf("armStatus: want unknown for missing app, got %s", arm)
+	}
+}
+
+// TestComputeArchStatus_EmptySnapshots returns both unknown on empty history.
+func TestComputeArchStatus_EmptySnapshots(t *testing.T) {
+	x86, arm := computeArchStatus(nil, "app")
+	if x86 != "unknown" || arm != "unknown" {
+		t.Errorf("want unknown/unknown on empty snapshots, got %s/%s", x86, arm)
+	}
+}
+
+// TestComputeArchStatus_DoesNotMutateInput verifies that computeArchStatus does not
+// sort or modify the input slice (pre-sort is caller's responsibility).
+func TestComputeArchStatus_DoesNotMutateInput(t *testing.T) {
+	original := []testhub.DaySnapshot{
+		{Date: "2026-04-09"},
+		{Date: "2026-04-08"},
+		{Date: "2026-04-07"},
+	}
+	copyBefore := make([]testhub.DaySnapshot, len(original))
+	copy(copyBefore, original)
+
+	computeArchStatus(original, "any-app")
+
+	for i, snap := range original {
+		if snap.Date != copyBefore[i].Date {
+			t.Errorf("input slice mutated at index %d: was %s, now %s", i, copyBefore[i].Date, snap.Date)
+		}
+	}
+}
+
+// TestComputeArchStatus_ArmOnlyResolvesFromOlderSnapshot verifies arch independence:
+// x86 data is in the newest snapshot, arm data is only in an older snapshot.
+func TestComputeArchStatus_ArmOnlyResolvesFromOlderSnapshot(t *testing.T) {
+	snapshots := []testhub.DaySnapshot{
+		{
+			Date: "2026-04-09",
+			BuildCounts: []testhub.AppDayCount{
+				{App: "app", Passed: 2, Failed: 0, PassedAarch64: 0, FailedAarch64: 0},
+			},
+		},
+		{
+			Date: "2026-04-08",
+			BuildCounts: []testhub.AppDayCount{
+				{App: "app", Passed: 0, Failed: 0, PassedAarch64: 1, FailedAarch64: 0},
+			},
+		},
+	}
+	x86, arm := computeArchStatus(snapshots, "app")
+	if x86 != "passing" {
+		t.Errorf("x86Status: want passing, got %s", x86)
+	}
+	if arm != "passing" {
+		t.Errorf("armStatus: want passing (resolved from older snapshot), got %s", arm)
+	}
+}
+
 func TestShouldAppendTesthubSnapshot(t *testing.T) {
 	tests := []struct {
 		name       string
