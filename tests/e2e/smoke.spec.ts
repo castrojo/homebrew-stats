@@ -39,12 +39,15 @@ test.describe('Smoke — data quality (live site only)', () => {
     // tbody is SSR'd — wait for it to be attached (script/hidden elements need state: 'attached')
     await page.waitForSelector('#testhub-tbody', { state: 'attached', timeout: 15_000 });
 
-    const statusCells = await page.locator('#testhub-tbody td:nth-child(4)').allTextContents();
-    const known = statusCells.filter(s => s.includes('🟢') || s.includes('🔴'));
+    // Build Status is the 2nd column: Package | Build Status | Arch | Last Published.
+    // TesthubPackageTable renders "✅ Passing" and "❌ Failing" (not 🟢/🔴).
+    const statusCells = await page.locator('#testhub-tbody td:nth-child(2)').allTextContents();
+    const known = statusCells.filter(s => s.includes('✅') || s.includes('❌'));
 
     expect(
       known.length,
-      `Expected at least one package with a known build status (🟢/🔴), but all ${statusCells.length} show ⚪ unknown. ` +
+      `Expected at least one package with a known build status (✅ Passing / ❌ Failing), ` +
+      `but all ${statusCells.length} show ⏳ Pending or Unknown. ` +
       'This indicates build_metrics is empty — check testhub cache state and seed file.'
     ).toBeGreaterThan(0);
   });
