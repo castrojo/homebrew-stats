@@ -80,8 +80,24 @@ The `stats` binary dispatches on `os.Args[1]`:
 | Subcommand | Writes | Source |
 |---|---|---|
 | `stats fetch-homebrew` | `src/data/stats.json` + `.sync-cache/history.json` | GitHub API (tap traffic) |
-| `stats fetch-testhub` | `src/data/testhub.json` + `.sync-cache/testhub-history.json` | GitHub Packages + Actions API |
-| `stats fetch-countme` | `src/data/countme.json` + `.sync-cache/countme-history.json` | ublue-os/countme CSV + badges |
+| `stats fetch-brewfile-taps` | `src/data/brewfile-stats.json` | Parses system Brewfiles in bluefin-common and bluefin repos |
+| `stats fetch-testhub` | `src/data/testhub.json` + `.sync-cache/testhub-history.json` | GitHub Packages + Actions API (projectbluefin/testhub) |
+| `stats fetch-countme` | `src/data/countme.json` + `.sync-cache/countme-history.json` | Fedora countme CSV (data-analysis.fedoraproject.org) |
+| `stats fetch-releases` | `src/data/releases.json` | GitHub Releases API (Bluefin, Aurora, Bazzite, uCore) |
+| `stats fetch-contributors` | `src/data/contributors.json` + `.sync-cache/contributor-history.json` | GitHub commits, PRs, issues, discussions APIs |
+| `stats fetch-scorecard` | `src/data/scorecard.json` | OpenSSF Scorecard API (tracked repos) |
+| `stats fetch-supply-chain` | `src/data/supply-chain.json` | GitHub workflow files (cosign, SBOM, Sigstore detection) |
+| `stats fetch-builds-bluefin` | `src/data/builds-bluefin.json` + `.sync-cache/builds-bluefin-history.json` | GitHub Actions API |
+| `stats fetch-builds-aurora` | `src/data/builds-aurora.json` + `.sync-cache/builds-aurora-history.json` | GitHub Actions API |
+| `stats fetch-builds-bazzite` | `src/data/builds-bazzite.json` + `.sync-cache/builds-bazzite-history.json` | GitHub Actions API |
+| `stats fetch-builds-universal-blue` | `src/data/builds-universal-blue.json` + `.sync-cache/builds-universal-blue-history.json` | GitHub Actions API |
+| `stats fetch-builds-ucore` | `src/data/builds-ucore.json` + `.sync-cache/builds-ucore-history.json` | GitHub Actions API |
+| `stats fetch-builds-zirconium` | `src/data/builds-zirconium.json` + `.sync-cache/builds-zirconium-history.json` | GitHub Actions API |
+| `stats fetch-builds-bootcrew` | `src/data/builds-bootcrew.json` + `.sync-cache/builds-bootcrew-history.json` | GitHub Actions API |
+| `stats fetch-builds-blue-build` | `src/data/builds-blue-build.json` + `.sync-cache/builds-blue-build-history.json` | GitHub Actions API |
+| `stats fetch-quay-fedora` | `src/data/quay-fedora.json` | Quay.io API (fedora base images) |
+| `stats fetch-quay-centos` | `src/data/quay-centos.json` | Quay.io API (centos base images) |
+| `stats fetch-quay-almalinux` | `src/data/quay-almalinux.json` | Quay.io API (almalinux base images) |
 
 No-arg default = `fetch-homebrew` (backward compat for `just sync`).
 
@@ -173,12 +189,19 @@ Runs daily at 06:00 UTC:
 
 1. **Build stats binary** — `go build ./cmd/stats/`
 2. **`stats fetch-homebrew`** — writes `stats.json`; falls back to cached `stats-latest.json` on failure
-3. **`stats fetch-testhub`** — writes `testhub.json`; `continue-on-error: true`
-4. **`stats fetch-countme`** — writes `countme.json`; `continue-on-error: true`
-5. **Build Astro site** — `npm run build` (3 pages: `/`, `/testhub/`, `/overall/`)
-6. **Verify charts have data** — fails if `chart-empty` appears in `dist/index.html`
-7. **Verify summary KPIs** — asserts `summary.total_packages > 0`
-8. **Deploy to GitHub Pages**
+3. **`stats fetch-brewfile-taps`** — writes `brewfile-stats.json`; `continue-on-error: true`
+4. **`stats fetch-testhub`** — writes `testhub.json`; `continue-on-error: true`
+5. **`stats fetch-countme`** — writes `countme.json`; `continue-on-error: true`
+6. **`stats fetch-releases`** — writes `releases.json`; `continue-on-error: true`
+7. **`stats fetch-builds-*`** — one step per image (bluefin/aurora/bazzite/universal-blue/ucore/zirconium/bootcrew/blue-build); `continue-on-error: true`
+8. **`stats fetch-quay-*`** — fedora/centos/almalinux; `continue-on-error: true`
+9. **`stats fetch-scorecard`** — writes `scorecard.json`; `continue-on-error: true`
+10. **`stats fetch-supply-chain`** — writes `supply-chain.json`; `continue-on-error: true`
+11. **Build Astro site** — `npm run build`
+12. **Verify charts have data** — fails if `class="chart-empty"` appears in output pages
+13. **Verify summary KPIs** — asserts `summary.total_packages > 0`
+14. **Run Playwright E2E chart tests** — `npm run test:e2e`
+15. **Deploy to GitHub Pages**
 
 ---
 
