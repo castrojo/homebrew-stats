@@ -48,6 +48,7 @@ bootc-ecosystem/
 │       ├── contributors/  # GitHub commits, PRs, issues, discussions APIs
 │       ├── countme/       # Universal Blue countme badge + CSV fetcher
 │       ├── ghcli/         # gh CLI wrapper (reads GITHUB_TOKEN automatically)
+│       ├── github/        # GitHub REST API client (traffic, packages, Actions data)
 │       ├── history/       # Snapshot persistence (.sync-cache/)
 │       ├── metrics/       # Pure stats computation (no I/O)
 │       ├── osanalytics/   # OS-breakdown analytics
@@ -196,17 +197,18 @@ Runs daily at 06:00 UTC:
 3. **`stats fetch-brewfile-taps`** — writes `brewfile-stats.json`; `continue-on-error: true`
 4. **`stats fetch-testhub`** — writes `testhub.json`; `continue-on-error: true`
 5. **`stats fetch-countme`** — writes `countme.json`; `continue-on-error: true`
-6. **`stats fetch-releases`** — writes `releases.json`; `continue-on-error: true`
-7. **`stats fetch-contributors`** — writes `contributors.json`; `continue-on-error: true`
-8. **`stats fetch-builds-*`** — one step per image (bluefin/aurora/bazzite/universal-blue/ucore/zirconium/bootcrew/blue-build); `continue-on-error: true`
-9. **`stats fetch-quay-*`** — fedora/centos/almalinux; `continue-on-error: true`
-10. **`stats fetch-scorecard`** — writes `scorecard.json`; `continue-on-error: true`
-11. **`stats fetch-supply-chain`** — writes `supply-chain.json`; `continue-on-error: true`
-12. **Build Astro site** — `npm run build`
-13. **Verify charts have data** — fails if `class="chart-empty"` appears in output pages
-14. **Verify summary KPIs** — asserts `summary.total_packages > 0`
-15. **Run Playwright E2E chart tests** — `npm run test:e2e`
-16. **Deploy to GitHub Pages**
+6. **`stats fetch-builds-*`** — one step per image (bluefin/aurora/bazzite/universal-blue/ucore/zirconium/bootcrew/blue-build); `continue-on-error: true`
+7. **`stats fetch-quay-*`** — fedora/centos/almalinux; `continue-on-error: true`
+8. **`stats fetch-scorecard`** — writes `scorecard.json`; `continue-on-error: true`
+9. **`stats fetch-supply-chain`** — writes `supply-chain.json`; `continue-on-error: true`
+10. **`stats fetch-releases`** — writes `releases.json`; `continue-on-error: true`
+11. **Build Astro site** — `npm run build`
+12. **Verify charts have data** — fails if `class="chart-empty"` appears in output pages
+13. **Verify summary KPIs** — asserts `summary.total_packages > 0`
+14. **Run Playwright E2E chart tests** — `npm run test:e2e`
+15. **Deploy to GitHub Pages**
+
+> **Note:** `fetch-contributors` does NOT run in `daily-build.yml`. It runs in the separate `.github/workflows/contributor-sync.yml` workflow.
 
 ---
 
