@@ -28,15 +28,76 @@ jobs:
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .sync-cache
-          key: tap-history-v1-${{ github.run_id }}
-          restore-keys: tap-history-v1-
+          key: tap-history-v4-${{ github.run_id }}
+          restore-keys: tap-history-v4-
 
-      - name: Sync tap data
+      - name: Restore testhub history cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache/testhub-history.json
+          key: testhub-history-v1-${{ github.run_id }}
+          restore-keys: testhub-history-v1-
+
+      - name: Build stats binary
+        run: cd stats-go && go build -o stats ./cmd/stats/
+
+      - name: Fetch Homebrew tap data
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          (cd stats-go && go build -o stats ./cmd/stats/)
-          ./stats-go/stats
+        run: ./stats-go/stats fetch-homebrew
+
+      - name: Fetch Brewfile tap data
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-brewfile-taps
+
+      - name: Fetch Testhub package stats
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-testhub
+
+      - name: Fetch countme active-user stats
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-countme
+
+      - name: Fetch release frequency data
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-releases
+
+      - name: Fetch supply chain data
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-supply-chain
+
+      - name: Fetch Scorecard data
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./stats-go/stats fetch-scorecard
+
+      - name: Save traffic history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache
+          key: tap-history-v4-${{ github.run_id }}
+
+      - name: Save testhub history cache
+        if: always()
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .sync-cache/testhub-history.json
+          key: testhub-history-v1-${{ github.run_id }}
 
       - name: Log in to ghcr.io
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
