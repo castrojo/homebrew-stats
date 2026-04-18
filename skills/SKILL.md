@@ -43,11 +43,18 @@ bootc-ecosystem/
 ├── stats-go/              # Go data-collection backend
 │   ├── cmd/stats/         # CLI entry point (main.go) — subcommand dispatch
 │   └── internal/
+│       ├── brewfile/      # Brewfile fetcher (parses GitHub-hosted Brewfiles)
+│       ├── builds/        # GitHub Actions build run collector (per-image)
+│       ├── contributors/  # GitHub commits, PRs, issues, discussions APIs
 │       ├── countme/       # Universal Blue countme badge + CSV fetcher
-│       ├── github/        # GitHub REST API client (traffic data)
+│       ├── ghcli/         # gh CLI wrapper (reads GITHUB_TOKEN automatically)
+│       ├── github/        # GitHub REST API client (traffic, packages, Actions data)
 │       ├── history/       # Snapshot persistence (.sync-cache/)
 │       ├── metrics/       # Pure stats computation (no I/O)
 │       ├── osanalytics/   # OS-breakdown analytics
+│       ├── quay/          # Quay.io public API client (no auth required)
+│       ├── scorecard/     # OpenSSF Scorecard public API client (no auth required)
+│       ├── supplychain/   # OCI image supply-chain inspection (anonymous pull)
 │       ├── tap/           # Homebrew tap scraping
 │       ├── tapanalytics/  # Per-tap aggregation
 │       └── testhub/       # projectbluefin/testhub container package stats
@@ -75,31 +82,29 @@ bootc-ecosystem/
 
 ## stats-go Subcommands
 
-The `stats` binary dispatches on `os.Args[1]`:
+The `stats` binary dispatches on `os.Args[1]`. No-arg default = `fetch-homebrew` (backward compat for `just sync`).
 
-| Subcommand | Writes | Source |
-|---|---|---|
-| `stats fetch-homebrew` | `src/data/stats.json` + `.sync-cache/history.json` | GitHub API (tap traffic) |
-| `stats fetch-brewfile-taps` | `src/data/brewfile-stats.json` | Parses system Brewfiles in bluefin-common and bluefin repos |
-| `stats fetch-testhub` | `src/data/testhub.json` + `.sync-cache/testhub-history.json` | GitHub Packages + Actions API (projectbluefin/testhub) |
-| `stats fetch-countme` | `src/data/countme.json` + `.sync-cache/countme-history.json` | Fedora countme CSV (data-analysis.fedoraproject.org) |
-| `stats fetch-releases` | `src/data/releases.json` | GitHub Releases API (Bluefin, Aurora, Bazzite, uCore) |
-| `stats fetch-contributors` | `src/data/contributors.json` + `.sync-cache/contributor-history.json` | GitHub commits, PRs, issues, discussions APIs |
-| `stats fetch-scorecard` | `src/data/scorecard.json` | OpenSSF Scorecard API (tracked repos) |
-| `stats fetch-supply-chain` | `src/data/supply-chain.json` | GitHub workflow files (cosign, SBOM, Sigstore detection) |
-| `stats fetch-builds-bluefin` | `src/data/builds-bluefin.json` + `.sync-cache/builds-bluefin-history.json` | GitHub Actions API |
-| `stats fetch-builds-aurora` | `src/data/builds-aurora.json` + `.sync-cache/builds-aurora-history.json` | GitHub Actions API |
-| `stats fetch-builds-bazzite` | `src/data/builds-bazzite.json` + `.sync-cache/builds-bazzite-history.json` | GitHub Actions API |
-| `stats fetch-builds-universal-blue` | `src/data/builds-universal-blue.json` + `.sync-cache/builds-universal-blue-history.json` | GitHub Actions API |
-| `stats fetch-builds-ucore` | `src/data/builds-ucore.json` + `.sync-cache/builds-ucore-history.json` | GitHub Actions API |
-| `stats fetch-builds-zirconium` | `src/data/builds-zirconium.json` + `.sync-cache/builds-zirconium-history.json` | GitHub Actions API |
-| `stats fetch-builds-bootcrew` | `src/data/builds-bootcrew.json` + `.sync-cache/builds-bootcrew-history.json` | GitHub Actions API |
-| `stats fetch-builds-blue-build` | `src/data/builds-blue-build.json` + `.sync-cache/builds-blue-build-history.json` | GitHub Actions API |
-| `stats fetch-quay-fedora` | `src/data/quay-fedora.json` | Quay.io API (fedora base images) |
-| `stats fetch-quay-centos` | `src/data/quay-centos.json` | Quay.io API (centos base images) |
-| `stats fetch-quay-almalinux` | `src/data/quay-almalinux.json` | Quay.io API (almalinux base images) |
-
-No-arg default = `fetch-homebrew` (backward compat for `just sync`).
+| Subcommand | Writes | Source | Caveats |
+|---|---|---|---|
+| `stats fetch-homebrew` | `src/data/stats.json` + `.sync-cache/history.json` + `.sync-cache/stats-latest.json` | GitHub API (tap traffic, Homebrew analytics) | Requires `GITHUB_TOKEN`; traffic API needs push access — falls back to cached values in CI |
+| `stats fetch-brewfile-taps` | `src/data/brewfile-stats.json` | Parses GitHub-hosted Brewfiles (bluefin-common, bazzite) + Homebrew analytics | Requires `GITHUB_TOKEN`; skips ublue-os taps (already tracked by fetch-homebrew) |
+| `stats fetch-testhub` | `src/data/testhub.json` + `.sync-cache/testhub-history.json` | GitHub Packages API + Actions API (projectbluefin/testhub) | Requires `GITHUB_TOKEN` with `packages: read` scope; falls back to committed testhub.json on cold start |
+| `stats fetch-countme` | `src/data/countme.json` + `.sync-cache/countme-history.json` | Fedora countme CSV (data-analysis.fedoraproject.org) | No GITHUB_TOKEN needed; CSV updates weekly (Sundays); skips re-fetch when current week already cached |
+| `stats fetch-releases` | `src/data/releases.json` | GitHub Releases API (Bluefin, Aurora, Bazzite, uCore) | Requires `GITHUB_TOKEN`; tracks 4 repos: `ublue-os/{bluefin,aurora,bazzite,ucore}` |
+| `stats fetch-contributors` | `src/data/contributors.json` + `.sync-cache/contributors-history.json` + `.sync-cache/contributor-profiles.json` | GitHub commits, PRs, issues, discussions, participation, punch card APIs | Requires `GITHUB_TOKEN`; fetches 365d data and filters in-memory; profiles are cached to avoid repeated API calls |
+| `stats fetch-scorecard` | `src/data/scorecard.json` | OpenSSF Scorecard public API (api.securityscorecards.dev) | No GITHUB_TOKEN needed; some repos not yet indexed → marked as `indexed: false` in output |
+| `stats fetch-supply-chain` | `src/data/supply-chain.json` | OCI image manifests + GitHub workflow YAML inspection | OCI metadata pulled **anonymously** (`authn.Anonymous`) — no registry credentials needed; detects cosign, SBOM, Sigstore |
+| `stats fetch-builds-bluefin` | `src/data/builds-bluefin.json` + `.sync-cache/builds-bluefin-history.json` | GitHub Actions API (`ublue-os/bluefin` + related repos) | Requires `GITHUB_TOKEN`; 14-day lookback, 30 runs/workflow max |
+| `stats fetch-builds-aurora` | `src/data/builds-aurora.json` + `.sync-cache/builds-aurora-history.json` | GitHub Actions API (`ublue-os/aurora`, `get-aurora-dev/{common,iso}`) | Requires `GITHUB_TOKEN`; excludes `get-aurora-dev/aurora-test` to avoid mirrored-run duplication |
+| `stats fetch-builds-bazzite` | `src/data/builds-bazzite.json` + `.sync-cache/builds-bazzite-history.json` | GitHub Actions API (`ublue-os/bazzite`) | Requires `GITHUB_TOKEN` |
+| `stats fetch-builds-universal-blue` | `src/data/builds-universal-blue.json` + `.sync-cache/builds-universal-blue-history.json` | GitHub Actions API (`ublue-os/main` + related repos) | Requires `GITHUB_TOKEN` |
+| `stats fetch-builds-ucore` | `src/data/builds-ucore.json` + `.sync-cache/builds-ucore-history.json` | GitHub Actions API (`ublue-os/ucore`) | Requires `GITHUB_TOKEN` |
+| `stats fetch-builds-zirconium` | `src/data/builds-zirconium.json` + `.sync-cache/builds-zirconium-history.json` | GitHub Actions API (`zirconium-dev/zirconium`) | Requires `GITHUB_TOKEN` |
+| `stats fetch-builds-bootcrew` | `src/data/builds-bootcrew.json` + `.sync-cache/builds-bootcrew-history.json` | GitHub Actions API (`bootcrew/mono`) | Requires `GITHUB_TOKEN` |
+| `stats fetch-builds-blue-build` | `src/data/builds-blue-build.json` + `.sync-cache/builds-blue-build-history.json` | GitHub Actions API (BlueBuild repos) | Requires `GITHUB_TOKEN` |
+| `stats fetch-quay-fedora` | `src/data/quay-fedora.json` | Quay.io public API (fedora base images) | No GITHUB_TOKEN needed; Quay.io API is public for tracked repos |
+| `stats fetch-quay-centos` | `src/data/quay-centos.json` | Quay.io public API (centos base images) | No GITHUB_TOKEN needed |
+| `stats fetch-quay-almalinux` | `src/data/quay-almalinux.json` | Quay.io public API (almalinux base images) | No GITHUB_TOKEN needed |
 
 ---
 
@@ -192,16 +197,18 @@ Runs daily at 06:00 UTC:
 3. **`stats fetch-brewfile-taps`** — writes `brewfile-stats.json`; `continue-on-error: true`
 4. **`stats fetch-testhub`** — writes `testhub.json`; `continue-on-error: true`
 5. **`stats fetch-countme`** — writes `countme.json`; `continue-on-error: true`
-6. **`stats fetch-releases`** — writes `releases.json`; `continue-on-error: true`
-7. **`stats fetch-builds-*`** — one step per image (bluefin/aurora/bazzite/universal-blue/ucore/zirconium/bootcrew/blue-build); `continue-on-error: true`
-8. **`stats fetch-quay-*`** — fedora/centos/almalinux; `continue-on-error: true`
-9. **`stats fetch-scorecard`** — writes `scorecard.json`; `continue-on-error: true`
-10. **`stats fetch-supply-chain`** — writes `supply-chain.json`; `continue-on-error: true`
+6. **`stats fetch-builds-*`** — one step per image (bluefin/aurora/bazzite/universal-blue/ucore/zirconium/bootcrew/blue-build); `continue-on-error: true`
+7. **`stats fetch-quay-*`** — fedora/centos/almalinux; `continue-on-error: true`
+8. **`stats fetch-scorecard`** — writes `scorecard.json`; `continue-on-error: true`
+9. **`stats fetch-supply-chain`** — writes `supply-chain.json`; `continue-on-error: true`
+10. **`stats fetch-releases`** — writes `releases.json`; `continue-on-error: true`
 11. **Build Astro site** — `npm run build`
 12. **Verify charts have data** — fails if `class="chart-empty"` appears in output pages
 13. **Verify summary KPIs** — asserts `summary.total_packages > 0`
 14. **Run Playwright E2E chart tests** — `npm run test:e2e`
 15. **Deploy to GitHub Pages**
+
+> **Note:** `fetch-contributors` does NOT run in `daily-build.yml`. It runs in the separate `.github/workflows/contributor-sync.yml` workflow.
 
 ---
 
