@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-04-19T04:11:08Z",
+  "generated_at": "2026-04-26T04:18:22Z",
   "period": {
-    "start": "2026-03-20",
-    "end": "2026-04-19"
+    "start": "2026-03-27",
+    "end": "2026-04-26"
   },
   "summary": {
     "active_contributors": 233,
-    "active_contributors_60d": 459,
-    "active_contributors_365d": 1977,
-    "new_contributors": 205,
-    "total_commits": 1233,
-    "total_commits_60d": 2567,
-    "total_commits_365d": 13675,
-    "total_prs_merged": 918,
-    "total_prs_merged_60d": 1656,
-    "total_prs_merged_365d": 8156,
-    "total_issues_opened": 275,
-    "total_issues_closed": 73,
-    "bus_factor": 7,
+    "active_contributors_60d": 451,
+    "active_contributors_365d": 1983,
+    "new_contributors": 206,
+    "total_commits": 1249,
+    "total_commits_60d": 2561,
+    "total_commits_365d": 13723,
+    "total_prs_merged": 923,
+    "total_prs_merged_60d": 1674,
+    "total_prs_merged_365d": 8220,
+    "total_issues_opened": 266,
+    "total_issues_closed": 93,
+    "bus_factor": 6,
     "bus_factor_60d": 8,
-    "bus_factor_365d": 10,
-    "review_participation_rate": 0.477124183006536,
+    "bus_factor_365d": 11,
+    "review_participation_rate": 0.4637053087757313,
     "active_repos": 24,
-    "total_discussions": 44,
+    "total_discussions": 49,
     "discussion_answer_rate": 0
   },
   "top_contributors": [
@@ -32,18 +32,18 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/1264109?v=4",
       "company": "Cloud Native Computing Foundation",
       "location": "Ann Arbor, MI",
-      "commits_30d": 402,
-      "commits_60d": 842,
-      "commits_365d": 3592,
-      "prs_merged_30d": 140,
-      "prs_merged_60d": 185,
-      "prs_merged_365d": 629,
-      "issues_opened_30d": 48,
-      "issues_opened_60d": 75,
-      "issues_opened_365d": 286,
-      "discussion_posts_30d": 3,
+      "commits_30d": 476,
+      "commits_60d": 889,
+      "commits_365d": 3624,
+      "prs_merged_30d": 159,
+      "prs_merged_60d": 203,
+      "prs_merged_365d": 633,
+      "issues_opened_30d": 25,
+      "issues_opened_60d": 66,
+      "issues_opened_365d": 281,
+      "discussion_posts_30d": 4,
       "discussion_posts_60d": 6,
-      "discussion_posts_365d": 56,
+      "discussion_posts_365d": 57,
       "repos_active": [
         "get-aurora-dev/common",
         "projectbluefin/bluefin-mcp",
@@ -65,49 +65,17 @@
       "is_bot": false
     },
     {
-      "login": "hanthor",
-      "name": "James Reilly",
-      "avatar_url": "https://avatars.githubusercontent.com/u/5840441?v=4",
-      "location": "India",
-      "commits_30d": 40,
-      "commits_60d": 60,
-      "commits_365d": 206,
-      "prs_merged_30d": 22,
-      "prs_merged_60d": 33,
-      "prs_merged_365d": 113,
-      "issues_opened_30d": 4,
-      "issues_opened_60d": 4,
-      "issues_opened_365d": 43,
-      "discussion_posts_30d": 0,
-      "discussion_posts_60d": 0,
-      "discussion_posts_365d": 1,
-      "repos_active": [
-        "get-aurora-dev/common",
-        "projectbluefin/common",
-        "projectbluefin/dakota",
-        "projectbluefin/documentation",
-        "projectbluefin/finpilot",
-        "projectbluefin/iso",
-        "projectbluefin/website",
-        "ublue-os/akmods",
-        "ublue-os/bluefin",
-        "ublue-os/bluefin-lts",
-        "zirconium-dev/zirconium"
-      ],
-      "is_bot": false
-    },
-    {
       "login": "KyleGospo",
       "name": "Kyle Gospodnetich",
       "avatar_url": "https://avatars.githubusercontent.com/u/10704358?v=4",
       "company": "Microsoft",
       "location": "San Francisco Bay Area",
-      "commits_30d": 39,
-      "commits_60d": 131,
-      "commits_365d": 844,
-      "prs_merged_30d": 16,
+      "commits_30d": 30,
+      "commits_60d": 126,
+      "commits_365d": 834,
+      "prs_merged_30d": 14,
       "prs_merged_60d": 30,
-      "prs_merged_365d": 50,
+      "prs_merged_365d": 49,
       "issues_opened_30d": 0,
       "issues_opened_60d": 0,
       "issues_opened_365d": 0,
@@ -130,15 +98,15 @@
       "name": "Tulip Blossom",
       "avatar_url": "https://avatars.githubusercontent.com/u/120808662?v=4",
       "location": "Brazil",
-      "commits_30d": 38,
-      "commits_60d": 111,
-      "commits_365d": 626,
-      "prs_merged_30d": 22,
-      "prs_merged_60d": 37,
-      "prs_merged_365d": 201,
+      "commits_30d": 28,
+      "commits_60d": 105,
+      "commits_365d": 604,
+      "prs_merged_30d": 18,
+      "prs_merged_60d": 40,
+      "prs_merged_365d": 183,
       "issues_opened_30d": 0,
       "issues_opened_60d": 6,
-      "issues_opened_365d": 33,
+      "issues_opened_365d": 31,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
       "discussion_posts_365d": 0,
@@ -158,36 +126,33 @@
       "is_bot": false
     },
     {
-      "login": "renner0e",
-      "name": "renner",
-      "avatar_url": "https://avatars.githubusercontent.com/u/80410025?v=4",
-      "company": "looking for work",
-      "location": "Germany",
-      "commits_30d": 24,
-      "commits_60d": 72,
-      "commits_365d": 511,
-      "prs_merged_30d": 34,
-      "prs_merged_60d": 90,
-      "prs_merged_365d": 454,
-      "issues_opened_30d": 1,
-      "issues_opened_60d": 4,
-      "issues_opened_365d": 67,
+      "login": "hanthor",
+      "name": "James Reilly",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5840441?v=4",
+      "location": "India",
+      "commits_30d": 26,
+      "commits_60d": 47,
+      "commits_365d": 208,
+      "prs_merged_30d": 15,
+      "prs_merged_60d": 28,
+      "prs_merged_365d": 114,
+      "issues_opened_30d": 5,
+      "issues_opened_60d": 5,
+      "issues_opened_365d": 43,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
-      "discussion_posts_365d": 0,
+      "discussion_posts_365d": 1,
       "repos_active": [
-        "bootcrew/mono",
         "get-aurora-dev/common",
-        "get-aurora-dev/iso",
         "projectbluefin/common",
+        "projectbluefin/dakota",
+        "projectbluefin/documentation",
         "projectbluefin/finpilot",
         "projectbluefin/iso",
+        "projectbluefin/website",
         "ublue-os/akmods",
-        "ublue-os/aurora",
-        "ublue-os/bazzite",
         "ublue-os/bluefin",
         "ublue-os/bluefin-lts",
-        "ublue-os/main",
         "zirconium-dev/zirconium"
       ],
       "is_bot": false
@@ -197,12 +162,12 @@
       "name": "Dylan M. Taylor",
       "avatar_url": "https://avatars.githubusercontent.com/u/277927?v=4",
       "location": "Durham, North Carolina, USA",
-      "commits_30d": 23,
-      "commits_60d": 23,
-      "commits_365d": 25,
-      "prs_merged_30d": 23,
-      "prs_merged_60d": 23,
-      "prs_merged_365d": 25,
+      "commits_30d": 26,
+      "commits_60d": 26,
+      "commits_365d": 28,
+      "prs_merged_30d": 30,
+      "prs_merged_60d": 30,
+      "prs_merged_365d": 32,
       "issues_opened_30d": 1,
       "issues_opened_60d": 1,
       "issues_opened_365d": 1,
@@ -224,12 +189,12 @@
       "login": "Lumaeris",
       "name": "Jill Fiore",
       "avatar_url": "https://avatars.githubusercontent.com/u/10499845?v=4",
-      "commits_30d": 20,
-      "commits_60d": 27,
-      "commits_365d": 46,
-      "prs_merged_30d": 22,
-      "prs_merged_60d": 25,
-      "prs_merged_365d": 42,
+      "commits_30d": 22,
+      "commits_60d": 33,
+      "commits_365d": 52,
+      "prs_merged_30d": 27,
+      "prs_merged_60d": 34,
+      "prs_merged_365d": 51,
       "issues_opened_30d": 1,
       "issues_opened_60d": 1,
       "issues_opened_365d": 6,
@@ -249,17 +214,17 @@
       "name": "inffy",
       "avatar_url": "https://avatars.githubusercontent.com/u/10782843?v=4",
       "location": "Finland",
-      "commits_30d": 16,
+      "commits_30d": 18,
       "commits_60d": 36,
-      "commits_365d": 383,
+      "commits_365d": 377,
       "prs_merged_30d": 12,
       "prs_merged_60d": 30,
-      "prs_merged_365d": 290,
+      "prs_merged_365d": 283,
       "issues_opened_30d": 0,
-      "issues_opened_60d": 4,
+      "issues_opened_60d": 0,
       "issues_opened_365d": 35,
-      "discussion_posts_30d": 1,
-      "discussion_posts_60d": 3,
+      "discussion_posts_30d": 0,
+      "discussion_posts_60d": 2,
       "discussion_posts_365d": 3,
       "repos_active": [
         "get-aurora-dev/common",
@@ -277,21 +242,37 @@
       "is_bot": false
     },
     {
-      "login": "James Reilly",
-      "commits_30d": 16,
-      "commits_60d": 16,
-      "commits_365d": 16,
-      "prs_merged_30d": 0,
-      "prs_merged_60d": 0,
-      "prs_merged_365d": 0,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 0,
-      "issues_opened_365d": 0,
+      "login": "renner0e",
+      "name": "renner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/80410025?v=4",
+      "company": "looking for work",
+      "location": "Germany",
+      "commits_30d": 18,
+      "commits_60d": 66,
+      "commits_365d": 511,
+      "prs_merged_30d": 24,
+      "prs_merged_60d": 85,
+      "prs_merged_365d": 454,
+      "issues_opened_30d": 1,
+      "issues_opened_60d": 5,
+      "issues_opened_365d": 68,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
       "discussion_posts_365d": 0,
       "repos_active": [
-        "ublue-os/bluefin-lts"
+        "bootcrew/mono",
+        "get-aurora-dev/common",
+        "get-aurora-dev/iso",
+        "projectbluefin/common",
+        "projectbluefin/finpilot",
+        "projectbluefin/iso",
+        "ublue-os/akmods",
+        "ublue-os/aurora",
+        "ublue-os/bazzite",
+        "ublue-os/bluefin",
+        "ublue-os/bluefin-lts",
+        "ublue-os/main",
+        "zirconium-dev/zirconium"
       ],
       "is_bot": false
     },
@@ -299,12 +280,12 @@
       "login": "HastD",
       "name": "Daniel Hast",
       "avatar_url": "https://avatars.githubusercontent.com/u/32797673?v=4",
-      "commits_30d": 12,
-      "commits_60d": 41,
-      "commits_365d": 232,
-      "prs_merged_30d": 13,
-      "prs_merged_60d": 43,
-      "prs_merged_365d": 242,
+      "commits_30d": 10,
+      "commits_60d": 38,
+      "commits_365d": 234,
+      "prs_merged_30d": 12,
+      "prs_merged_60d": 41,
+      "prs_merged_365d": 245,
       "issues_opened_30d": 1,
       "issues_opened_60d": 4,
       "issues_opened_365d": 16,
@@ -322,15 +303,15 @@
     {
       "login": "RoyalOughtness",
       "avatar_url": "https://avatars.githubusercontent.com/u/129108030?v=4",
-      "commits_30d": 8,
-      "commits_60d": 23,
-      "commits_365d": 243,
-      "prs_merged_30d": 12,
-      "prs_merged_60d": 27,
-      "prs_merged_365d": 258,
+      "commits_30d": 9,
+      "commits_60d": 19,
+      "commits_365d": 245,
+      "prs_merged_30d": 14,
+      "prs_merged_60d": 24,
+      "prs_merged_365d": 261,
       "issues_opened_30d": 3,
-      "issues_opened_60d": 6,
-      "issues_opened_365d": 90,
+      "issues_opened_60d": 7,
+      "issues_opened_365d": 91,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
       "discussion_posts_365d": 0,
@@ -343,6 +324,30 @@
       "is_bot": false
     },
     {
+      "login": "gmpinder",
+      "name": "Gerald Pinder",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4626052?v=4",
+      "commits_30d": 8,
+      "commits_60d": 14,
+      "commits_365d": 226,
+      "prs_merged_30d": 1,
+      "prs_merged_60d": 4,
+      "prs_merged_365d": 59,
+      "issues_opened_30d": 0,
+      "issues_opened_60d": 0,
+      "issues_opened_365d": 9,
+      "discussion_posts_30d": 0,
+      "discussion_posts_60d": 0,
+      "discussion_posts_365d": 0,
+      "repos_active": [
+        "blue-build/base-images",
+        "blue-build/cli",
+        "blue-build/github-action",
+        "blue-build/modules"
+      ],
+      "is_bot": false
+    },
+    {
       "login": "ledif",
       "name": "Adam Fidel",
       "avatar_url": "https://avatars.githubusercontent.com/u/307744?v=4",
@@ -350,13 +355,13 @@
       "location": "Texas",
       "commits_30d": 7,
       "commits_60d": 10,
-      "commits_365d": 59,
+      "commits_365d": 58,
       "prs_merged_30d": 3,
       "prs_merged_60d": 6,
-      "prs_merged_365d": 53,
+      "prs_merged_365d": 52,
       "issues_opened_30d": 0,
       "issues_opened_60d": 0,
-      "issues_opened_365d": 14,
+      "issues_opened_365d": 13,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
       "discussion_posts_365d": 0,
@@ -372,43 +377,19 @@
       "is_bot": false
     },
     {
-      "login": "gmpinder",
-      "name": "Gerald Pinder",
-      "avatar_url": "https://avatars.githubusercontent.com/u/4626052?v=4",
-      "commits_30d": 6,
-      "commits_60d": 17,
-      "commits_365d": 223,
-      "prs_merged_30d": 0,
-      "prs_merged_60d": 5,
-      "prs_merged_365d": 58,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 1,
-      "issues_opened_365d": 9,
-      "discussion_posts_30d": 0,
-      "discussion_posts_60d": 0,
-      "discussion_posts_365d": 0,
-      "repos_active": [
-        "blue-build/base-images",
-        "blue-build/cli",
-        "blue-build/github-action",
-        "blue-build/modules"
-      ],
-      "is_bot": false
-    },
-    {
       "login": "ahmedadan",
       "name": "Ahmed Adan",
       "avatar_url": "https://avatars.githubusercontent.com/u/1892225?v=4",
       "location": "Ottawa, Ontario, Canada",
-      "commits_30d": 6,
-      "commits_60d": 23,
-      "commits_365d": 70,
-      "prs_merged_30d": 3,
-      "prs_merged_60d": 6,
-      "prs_merged_365d": 24,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 1,
-      "issues_opened_365d": 3,
+      "commits_30d": 7,
+      "commits_60d": 16,
+      "commits_365d": 71,
+      "prs_merged_30d": 4,
+      "prs_merged_60d": 7,
+      "prs_merged_365d": 25,
+      "issues_opened_30d": 1,
+      "issues_opened_60d": 2,
+      "issues_opened_365d": 4,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
       "discussion_posts_365d": 0,
@@ -419,49 +400,6 @@
         "projectbluefin/website",
         "ublue-os/bluefin",
         "ublue-os/bluefin-lts"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "Xarishark",
-      "name": "Zacharias Xenakis",
-      "avatar_url": "https://avatars.githubusercontent.com/u/21146743?v=4",
-      "location": "Athens, Greece",
-      "commits_30d": 6,
-      "commits_60d": 18,
-      "commits_365d": 44,
-      "prs_merged_30d": 9,
-      "prs_merged_60d": 18,
-      "prs_merged_365d": 44,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 1,
-      "issues_opened_365d": 11,
-      "discussion_posts_30d": 0,
-      "discussion_posts_60d": 0,
-      "discussion_posts_365d": 0,
-      "repos_active": [
-        "ublue-os/bazzite"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "stellaberrant",
-      "name": "stellaberrant",
-      "avatar_url": "https://avatars.githubusercontent.com/u/104581805?v=4",
-      "commits_30d": 5,
-      "commits_60d": 10,
-      "commits_365d": 28,
-      "prs_merged_30d": 6,
-      "prs_merged_60d": 11,
-      "prs_merged_365d": 28,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 0,
-      "issues_opened_365d": 4,
-      "discussion_posts_30d": 0,
-      "discussion_posts_60d": 0,
-      "discussion_posts_365d": 0,
-      "repos_active": [
-        "ublue-os/bazzite"
       ],
       "is_bot": false
     },
@@ -495,17 +433,80 @@
       "is_bot": false
     },
     {
+      "login": "stellaberrant",
+      "name": "stellaberrant",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104581805?v=4",
+      "commits_30d": 5,
+      "commits_60d": 7,
+      "commits_365d": 28,
+      "prs_merged_30d": 7,
+      "prs_merged_60d": 9,
+      "prs_merged_365d": 29,
+      "issues_opened_30d": 0,
+      "issues_opened_60d": 0,
+      "issues_opened_365d": 4,
+      "discussion_posts_30d": 0,
+      "discussion_posts_60d": 0,
+      "discussion_posts_365d": 0,
+      "repos_active": [
+        "ublue-os/bazzite"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "Xarishark",
+      "name": "Zacharias Xenakis",
+      "avatar_url": "https://avatars.githubusercontent.com/u/21146743?v=4",
+      "location": "Athens, Greece",
+      "commits_30d": 5,
+      "commits_60d": 17,
+      "commits_365d": 44,
+      "prs_merged_30d": 9,
+      "prs_merged_60d": 18,
+      "prs_merged_365d": 45,
+      "issues_opened_30d": 0,
+      "issues_opened_60d": 1,
+      "issues_opened_365d": 11,
+      "discussion_posts_30d": 0,
+      "discussion_posts_60d": 0,
+      "discussion_posts_365d": 0,
+      "repos_active": [
+        "ublue-os/bazzite"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "goozkan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58654441?v=4",
+      "commits_30d": 4,
+      "commits_60d": 4,
+      "commits_365d": 4,
+      "prs_merged_30d": 2,
+      "prs_merged_60d": 2,
+      "prs_merged_365d": 2,
+      "issues_opened_30d": 0,
+      "issues_opened_60d": 0,
+      "issues_opened_365d": 0,
+      "discussion_posts_30d": 0,
+      "discussion_posts_60d": 0,
+      "discussion_posts_365d": 0,
+      "repos_active": [
+        "projectbluefin/dakota"
+      ],
+      "is_bot": false
+    },
+    {
       "login": "underscorejoser",
       "name": "José Renato",
       "avatar_url": "https://avatars.githubusercontent.com/u/259754904?v=4",
-      "commits_30d": 4,
+      "commits_30d": 3,
       "commits_60d": 9,
       "commits_365d": 9,
-      "prs_merged_30d": 5,
+      "prs_merged_30d": 4,
       "prs_merged_60d": 10,
       "prs_merged_365d": 10,
       "issues_opened_30d": 0,
-      "issues_opened_60d": 3,
+      "issues_opened_60d": 2,
       "issues_opened_365d": 3,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
@@ -521,11 +522,11 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/33781398?v=4",
       "location": "Spain",
       "commits_30d": 3,
-      "commits_60d": 18,
+      "commits_60d": 16,
       "commits_365d": 118,
-      "prs_merged_30d": 3,
-      "prs_merged_60d": 14,
-      "prs_merged_365d": 101,
+      "prs_merged_30d": 4,
+      "prs_merged_60d": 13,
+      "prs_merged_365d": 102,
       "issues_opened_30d": 0,
       "issues_opened_60d": 0,
       "issues_opened_365d": 5,
@@ -535,56 +536,7 @@
       "repos_active": [
         "projectbluefin/finpilot",
         "ublue-os/bazzite",
-        "ublue-os/bazzite-dx",
-        "ublue-os/bluefin"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "NahsiN",
-      "name": "Nishan Singh Mann",
-      "avatar_url": "https://avatars.githubusercontent.com/u/14959090?v=4",
-      "company": "Doubleverify",
-      "location": "NYC",
-      "commits_30d": 3,
-      "commits_60d": 3,
-      "commits_365d": 3,
-      "prs_merged_30d": 1,
-      "prs_merged_60d": 1,
-      "prs_merged_365d": 1,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 1,
-      "issues_opened_365d": 1,
-      "discussion_posts_30d": 0,
-      "discussion_posts_60d": 0,
-      "discussion_posts_365d": 0,
-      "repos_active": [
-        "projectbluefin/documentation"
-      ],
-      "is_bot": false
-    },
-    {
-      "login": "alatiera",
-      "name": "Jordan Petridis",
-      "avatar_url": "https://avatars.githubusercontent.com/u/16531710?v=4",
-      "location": "Greece",
-      "commits_30d": 2,
-      "commits_60d": 29,
-      "commits_365d": 35,
-      "prs_merged_30d": 2,
-      "prs_merged_60d": 16,
-      "prs_merged_365d": 19,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 0,
-      "issues_opened_365d": 2,
-      "discussion_posts_30d": 0,
-      "discussion_posts_60d": 0,
-      "discussion_posts_365d": 0,
-      "repos_active": [
-        "projectbluefin/dakota",
-        "projectbluefin/documentation",
-        "projectbluefin/finpilot",
-        "ublue-os/bluefin"
+        "ublue-os/bazzite-dx"
       ],
       "is_bot": false
     },
@@ -593,12 +545,12 @@
       "name": "Hec",
       "avatar_url": "https://avatars.githubusercontent.com/u/64450239?v=4",
       "location": "Earth",
-      "commits_30d": 2,
-      "commits_60d": 10,
-      "commits_365d": 63,
-      "prs_merged_30d": 1,
-      "prs_merged_60d": 5,
-      "prs_merged_365d": 13,
+      "commits_30d": 3,
+      "commits_60d": 7,
+      "commits_365d": 64,
+      "prs_merged_30d": 2,
+      "prs_merged_60d": 4,
+      "prs_merged_365d": 14,
       "issues_opened_30d": 0,
       "issues_opened_60d": 0,
       "issues_opened_365d": 16,
@@ -612,46 +564,49 @@
       "is_bot": false
     },
     {
-      "login": "jherzstein",
-      "name": "Jordan Herzstein",
-      "avatar_url": "https://avatars.githubusercontent.com/u/63795875?v=4",
+      "login": "sebjag",
+      "name": "Sebastian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/65182314?v=4",
       "commits_30d": 2,
-      "commits_60d": 5,
-      "commits_365d": 5,
+      "commits_60d": 2,
+      "commits_365d": 8,
       "prs_merged_30d": 2,
-      "prs_merged_60d": 5,
-      "prs_merged_365d": 5,
+      "prs_merged_60d": 2,
+      "prs_merged_365d": 7,
       "issues_opened_30d": 0,
-      "issues_opened_60d": 1,
-      "issues_opened_365d": 1,
+      "issues_opened_60d": 0,
+      "issues_opened_365d": 0,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
       "discussion_posts_365d": 0,
       "repos_active": [
-        "secureblue/secureblue"
+        "projectbluefin/common",
+        "projectbluefin/documentation",
+        "projectbluefin/website"
       ],
       "is_bot": false
     },
     {
-      "login": "FairlySadPanda",
-      "name": "Hannah Giovanna Dawson",
-      "avatar_url": "https://avatars.githubusercontent.com/u/732532?v=4",
-      "company": "CCP Games London @ccpgames ",
-      "location": "Tottenham, London",
+      "login": "repires",
+      "name": "Renato Pires",
+      "avatar_url": "https://avatars.githubusercontent.com/u/867660?v=4",
+      "location": "Calgary,AB - Canada",
       "commits_30d": 2,
       "commits_60d": 2,
-      "commits_365d": 2,
+      "commits_365d": 5,
       "prs_merged_30d": 2,
       "prs_merged_60d": 2,
-      "prs_merged_365d": 2,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 1,
-      "issues_opened_365d": 1,
+      "prs_merged_365d": 7,
+      "issues_opened_30d": 1,
+      "issues_opened_60d": 2,
+      "issues_opened_365d": 14,
       "discussion_posts_30d": 0,
       "discussion_posts_60d": 0,
-      "discussion_posts_365d": 0,
+      "discussion_posts_365d": 6,
       "repos_active": [
-        "ublue-os/bazzite"
+        "projectbluefin/common",
+        "projectbluefin/documentation",
+        "ublue-os/bluefin"
       ],
       "is_bot": false
     },
@@ -675,31 +630,81 @@
         "ublue-os/bazzite"
       ],
       "is_bot": false
+    },
+    {
+      "login": "Copilot",
+      "commits_30d": 2,
+      "commits_60d": 3,
+      "commits_365d": 455,
+      "prs_merged_30d": 1,
+      "prs_merged_60d": 2,
+      "prs_merged_365d": 210,
+      "issues_opened_30d": 0,
+      "issues_opened_60d": 0,
+      "issues_opened_365d": 0,
+      "discussion_posts_30d": 0,
+      "discussion_posts_60d": 0,
+      "discussion_posts_365d": 0,
+      "repos_active": [
+        "projectbluefin/common",
+        "projectbluefin/dakota",
+        "projectbluefin/documentation",
+        "projectbluefin/finpilot",
+        "projectbluefin/iso",
+        "projectbluefin/testhub",
+        "projectbluefin/website",
+        "ublue-os/aurora",
+        "ublue-os/bazzite",
+        "ublue-os/bazzite-dx",
+        "ublue-os/bluefin",
+        "ublue-os/bluefin-lts",
+        "ublue-os/main"
+      ],
+      "is_bot": false
+    },
+    {
+      "login": "StorageB",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44729718?v=4",
+      "commits_30d": 2,
+      "commits_60d": 2,
+      "commits_365d": 2,
+      "prs_merged_30d": 1,
+      "prs_merged_60d": 1,
+      "prs_merged_365d": 1,
+      "issues_opened_30d": 1,
+      "issues_opened_60d": 1,
+      "issues_opened_365d": 1,
+      "discussion_posts_30d": 0,
+      "discussion_posts_60d": 0,
+      "discussion_posts_365d": 0,
+      "repos_active": [
+        "projectbluefin/dakota"
+      ],
+      "is_bot": false
     }
   ],
   "repos": [
     {
       "name": "ublue-os/bluefin",
-      "commits_30d": 117,
-      "commits_60d": 195,
-      "commits_365d": 1283,
+      "commits_30d": 121,
+      "commits_60d": 198,
+      "commits_365d": 1264,
       "unique_human_authors_30d": 6,
-      "prs_merged_30d": 118,
-      "prs_merged_60d": 196,
-      "prs_merged_365d": 1279,
-      "issues_opened_30d": 19,
+      "prs_merged_30d": 122,
+      "prs_merged_60d": 198,
+      "prs_merged_365d": 1260,
+      "issues_opened_30d": 20,
       "issues_opened_60d": 33,
-      "issues_opened_365d": 330,
+      "issues_opened_365d": 320,
       "bus_factor": 3,
       "bus_factor_60d": 5,
       "bus_factor_365d": 7,
-      "bot_commits_30d": 100,
-      "human_commits_30d": 17,
-      "human_commits_60d": 22,
-      "human_commits_365d": 436,
+      "bot_commits_30d": 103,
+      "human_commits_30d": 18,
+      "human_commits_60d": 23,
+      "human_commits_365d": 399,
       "active_weeks_streak": 52,
       "weekly_commits_52w": [
-        37,
         28,
         34,
         23,
@@ -750,16 +755,17 @@
         20,
         35,
         30,
-        27
+        27,
+        21
       ],
       "commits_by_day_of_week": {
-        "Friday": 425,
-        "Monday": 430,
-        "Saturday": 394,
-        "Sunday": 545,
-        "Thursday": 357,
-        "Tuesday": 353,
-        "Wednesday": 343
+        "Friday": 427,
+        "Monday": 435,
+        "Saturday": 397,
+        "Sunday": 546,
+        "Thursday": 361,
+        "Tuesday": 355,
+        "Wednesday": 347
       },
       "contribution_heatmap": [
         [
@@ -795,7 +801,7 @@
         [
           0,
           6,
-          11
+          12
         ],
         [
           0,
@@ -900,7 +906,7 @@
         [
           1,
           3,
-          29
+          30
         ],
         [
           1,
@@ -995,7 +1001,7 @@
         [
           1,
           22,
-          21
+          25
         ],
         [
           1,
@@ -1020,7 +1026,7 @@
         [
           2,
           3,
-          24
+          25
         ],
         [
           2,
@@ -1035,7 +1041,7 @@
         [
           2,
           6,
-          10
+          11
         ],
         [
           2,
@@ -1140,7 +1146,7 @@
         [
           3,
           3,
-          24
+          25
         ],
         [
           3,
@@ -1155,7 +1161,7 @@
         [
           3,
           6,
-          18
+          19
         ],
         [
           3,
@@ -1220,7 +1226,7 @@
         [
           3,
           19,
-          16
+          18
         ],
         [
           3,
@@ -1260,7 +1266,7 @@
         [
           4,
           3,
-          21
+          22
         ],
         [
           4,
@@ -1320,7 +1326,7 @@
         [
           4,
           15,
-          21
+          24
         ],
         [
           4,
@@ -1415,12 +1421,12 @@
         [
           5,
           10,
-          18
+          19
         ],
         [
           5,
           11,
-          28
+          29
         ],
         [
           5,
@@ -1500,7 +1506,7 @@
         [
           6,
           3,
-          30
+          31
         ],
         [
           6,
@@ -1510,7 +1516,7 @@
         [
           6,
           5,
-          10
+          11
         ],
         [
           6,
@@ -1530,7 +1536,7 @@
         [
           6,
           9,
-          13
+          14
         ],
         [
           6,
@@ -1604,47 +1610,48 @@
         ]
       ],
       "issue_label_distribution": {
+        "area/aurora": 1,
         "area/dx": 1,
         "area/flatpak": 3,
         "area/gnome": 3,
         "area/iso": 1,
         "area/just": 2,
-        "area/nvidia": 1,
+        "area/nvidia": 2,
         "area/policy": 1,
-        "area/upstream": 4,
+        "area/upstream": 3,
         "area:appstore": 1,
-        "framework": 1,
+        "beta": 1,
         "help wanted": 1,
         "kind/bug": 14,
         "kind/enhancement": 2,
+        "kind/tech-debt": 1,
         "package-requests": 3,
         "power": 1,
-        "stale": 1,
+        "release-blocker": 1,
         "website": 2
       }
     },
     {
       "name": "ublue-os/bluefin-lts",
-      "commits_30d": 113,
-      "commits_60d": 185,
-      "commits_365d": 640,
-      "unique_human_authors_30d": 4,
-      "prs_merged_30d": 94,
-      "prs_merged_60d": 172,
-      "prs_merged_365d": 626,
-      "issues_opened_30d": 6,
+      "commits_30d": 77,
+      "commits_60d": 183,
+      "commits_365d": 635,
+      "unique_human_authors_30d": 3,
+      "prs_merged_30d": 80,
+      "prs_merged_60d": 167,
+      "prs_merged_365d": 622,
+      "issues_opened_30d": 7,
       "issues_opened_60d": 7,
-      "issues_opened_365d": 161,
+      "issues_opened_365d": 159,
       "bus_factor": 2,
       "bus_factor_60d": 3,
       "bus_factor_365d": 5,
-      "bot_commits_30d": 67,
-      "human_commits_30d": 46,
-      "human_commits_60d": 69,
-      "human_commits_365d": 258,
-      "active_weeks_streak": 47,
+      "bot_commits_30d": 63,
+      "human_commits_30d": 14,
+      "human_commits_60d": 67,
+      "human_commits_365d": 255,
+      "active_weeks_streak": 48,
       "weekly_commits_52w": [
-        11,
         13,
         13,
         1,
@@ -1695,15 +1702,16 @@
         14,
         35,
         20,
-        15
+        15,
+        5
       ],
       "commits_by_day_of_week": {
         "Friday": 163,
-        "Monday": 197,
-        "Saturday": 152,
-        "Sunday": 178,
+        "Monday": 199,
+        "Saturday": 153,
+        "Sunday": 179,
         "Thursday": 154,
-        "Tuesday": 149,
+        "Tuesday": 150,
         "Wednesday": 159
       },
       "contribution_heatmap": [
@@ -1715,7 +1723,7 @@
         [
           0,
           1,
-          18
+          19
         ],
         [
           0,
@@ -1835,7 +1843,7 @@
         [
           1,
           1,
-          13
+          14
         ],
         [
           1,
@@ -1850,7 +1858,7 @@
         [
           1,
           4,
-          2
+          3
         ],
         [
           1,
@@ -2015,7 +2023,7 @@
         [
           2,
           13,
-          6
+          7
         ],
         [
           2,
@@ -2480,7 +2488,7 @@
         [
           6,
           10,
-          3
+          4
         ],
         [
           6,
@@ -2549,35 +2557,35 @@
         ]
       ],
       "issue_label_distribution": {
+        "area/dx": 1,
         "area/flatpak": 1,
         "area/gnome": 3,
         "area/policy": 1,
         "area/upstream": 1,
-        "kind/bug": 6
+        "kind/bug": 7
       }
     },
     {
       "name": "projectbluefin/dakota",
-      "commits_30d": 123,
-      "commits_60d": 207,
-      "commits_365d": 415,
-      "unique_human_authors_30d": 5,
-      "prs_merged_30d": 53,
-      "prs_merged_60d": 89,
-      "prs_merged_365d": 99,
-      "issues_opened_30d": 32,
-      "issues_opened_60d": 47,
-      "issues_opened_365d": 64,
-      "bus_factor": 2,
-      "bus_factor_60d": 3,
-      "bus_factor_365d": 4,
-      "bot_commits_30d": 15,
-      "human_commits_30d": 108,
-      "human_commits_60d": 181,
-      "human_commits_365d": 387,
-      "active_weeks_streak": 6,
+      "commits_30d": 209,
+      "commits_60d": 250,
+      "commits_365d": 503,
+      "unique_human_authors_30d": 7,
+      "prs_merged_30d": 91,
+      "prs_merged_60d": 116,
+      "prs_merged_365d": 139,
+      "issues_opened_30d": 41,
+      "issues_opened_60d": 43,
+      "issues_opened_365d": 73,
+      "bus_factor": 1,
+      "bus_factor_60d": 2,
+      "bus_factor_365d": 3,
+      "bot_commits_30d": 29,
+      "human_commits_30d": 180,
+      "human_commits_60d": 210,
+      "human_commits_365d": 459,
+      "active_weeks_streak": 7,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -2628,22 +2636,23 @@
         2,
         13,
         17,
-        90
+        91,
+        87
       ],
       "commits_by_day_of_week": {
-        "Friday": 12,
-        "Monday": 48,
-        "Saturday": 84,
-        "Sunday": 114,
-        "Thursday": 22,
-        "Tuesday": 18,
-        "Wednesday": 30
+        "Friday": 15,
+        "Monday": 50,
+        "Saturday": 89,
+        "Sunday": 134,
+        "Thursday": 29,
+        "Tuesday": 23,
+        "Wednesday": 35
       },
       "contribution_heatmap": [
         [
           0,
           0,
-          12
+          13
         ],
         [
           0,
@@ -2673,7 +2682,7 @@
         [
           0,
           6,
-          3
+          4
         ],
         [
           0,
@@ -2703,7 +2712,7 @@
         [
           0,
           12,
-          1
+          2
         ],
         [
           0,
@@ -2713,17 +2722,17 @@
         [
           0,
           14,
-          9
+          10
         ],
         [
           0,
           15,
-          0
+          1
         ],
         [
           0,
           16,
-          15
+          17
         ],
         [
           0,
@@ -2738,7 +2747,7 @@
         [
           0,
           19,
-          1
+          4
         ],
         [
           0,
@@ -2753,12 +2762,12 @@
         [
           0,
           22,
-          2
+          4
         ],
         [
           0,
           23,
-          3
+          11
         ],
         [
           1,
@@ -2793,12 +2802,12 @@
         [
           1,
           6,
-          3
+          4
         ],
         [
           1,
           7,
-          0
+          1
         ],
         [
           1,
@@ -2983,17 +2992,17 @@
         [
           2,
           20,
-          0
+          1
         ],
         [
           2,
           21,
-          0
+          2
         ],
         [
           2,
           22,
-          5
+          7
         ],
         [
           2,
@@ -3003,7 +3012,7 @@
         [
           3,
           0,
-          0
+          1
         ],
         [
           3,
@@ -3033,7 +3042,7 @@
         [
           3,
           6,
-          3
+          4
         ],
         [
           3,
@@ -3083,12 +3092,12 @@
         [
           3,
           16,
-          1
+          3
         ],
         [
           3,
           17,
-          0
+          1
         ],
         [
           3,
@@ -3153,7 +3162,7 @@
         [
           4,
           6,
-          4
+          7
         ],
         [
           4,
@@ -3203,12 +3212,12 @@
         [
           4,
           16,
-          1
+          3
         ],
         [
           4,
           17,
-          1
+          2
         ],
         [
           4,
@@ -3223,7 +3232,7 @@
         [
           4,
           20,
-          1
+          2
         ],
         [
           4,
@@ -3273,7 +3282,7 @@
         [
           5,
           6,
-          3
+          4
         ],
         [
           5,
@@ -3348,7 +3357,7 @@
         [
           5,
           21,
-          1
+          3
         ],
         [
           5,
@@ -3378,7 +3387,7 @@
         [
           6,
           3,
-          1
+          2
         ],
         [
           6,
@@ -3433,12 +3442,12 @@
         [
           6,
           14,
-          5
-        ],
-        [
-          6,
-          15,
           6
+        ],
+        [
+          6,
+          15,
+          7
         ],
         [
           6,
@@ -3463,7 +3472,7 @@
         [
           6,
           20,
-          7
+          9
         ],
         [
           6,
@@ -3491,26 +3500,25 @@
     },
     {
       "name": "projectbluefin/common",
-      "commits_30d": 42,
-      "commits_60d": 60,
-      "commits_365d": 402,
-      "unique_human_authors_30d": 8,
-      "prs_merged_30d": 18,
-      "prs_merged_60d": 26,
-      "prs_merged_365d": 139,
-      "issues_opened_30d": 18,
-      "issues_opened_60d": 31,
-      "issues_opened_365d": 110,
-      "bus_factor": 5,
+      "commits_30d": 58,
+      "commits_60d": 73,
+      "commits_365d": 418,
+      "unique_human_authors_30d": 10,
+      "prs_merged_30d": 26,
+      "prs_merged_60d": 33,
+      "prs_merged_365d": 147,
+      "issues_opened_30d": 22,
+      "issues_opened_60d": 36,
+      "issues_opened_365d": 118,
+      "bus_factor": 4,
       "bus_factor_60d": 5,
       "bus_factor_365d": 5,
-      "bot_commits_30d": 10,
-      "human_commits_30d": 32,
-      "human_commits_60d": 50,
-      "human_commits_365d": 392,
-      "active_weeks_streak": 4,
+      "bot_commits_30d": 13,
+      "human_commits_30d": 45,
+      "human_commits_60d": 60,
+      "human_commits_365d": 405,
+      "active_weeks_streak": 5,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -3560,17 +3568,18 @@
         0,
         4,
         24,
-        6,
-        8
+        8,
+        8,
+        12
       ],
       "commits_by_day_of_week": {
-        "Friday": 51,
-        "Monday": 39,
+        "Friday": 52,
+        "Monday": 41,
         "Saturday": 38,
-        "Sunday": 69,
-        "Thursday": 19,
+        "Sunday": 70,
+        "Thursday": 20,
         "Tuesday": 23,
-        "Wednesday": 23
+        "Wednesday": 26
       },
       "contribution_heatmap": [
         [
@@ -3681,7 +3690,7 @@
         [
           0,
           21,
-          7
+          8
         ],
         [
           0,
@@ -3701,7 +3710,7 @@
         [
           1,
           1,
-          2
+          3
         ],
         [
           1,
@@ -3741,7 +3750,7 @@
         [
           1,
           9,
-          2
+          3
         ],
         [
           1,
@@ -4026,7 +4035,7 @@
         [
           3,
           18,
-          0
+          1
         ],
         [
           3,
@@ -4051,12 +4060,12 @@
         [
           3,
           23,
-          0
+          2
         ],
         [
           4,
           0,
-          0
+          1
         ],
         [
           4,
@@ -4221,7 +4230,7 @@
         [
           5,
           9,
-          0
+          1
         ],
         [
           5,
@@ -4416,36 +4425,35 @@
       ],
       "issue_label_distribution": {
         "area/aurora": 1,
-        "area/bluespeed": 3,
-        "area/brew": 3,
-        "area/dx": 3,
-        "area/gnome": 3,
-        "area/just": 2,
-        "area/policy": 2,
-        "area/services": 1,
+        "area/bluespeed": 1,
+        "area/brew": 4,
+        "area/dx": 4,
+        "area/gnome": 5,
+        "area/just": 1,
+        "area/policy": 3,
+        "area/services": 2,
         "area/upstream": 1,
         "dependencies": 1,
-        "help wanted": 6,
+        "help wanted": 9,
         "kind/bug": 1,
-        "kind/enhancement": 12,
-        "kind/github-action": 1,
+        "kind/enhancement": 13,
         "kind/parity": 1,
         "kind/question": 1,
-        "kind/renovate": 1
+        "kind/renovate": 2
       }
     },
     {
       "name": "projectbluefin/finpilot",
       "commits_30d": 0,
       "commits_60d": 4,
-      "commits_365d": 209,
+      "commits_365d": 208,
       "unique_human_authors_30d": 0,
       "prs_merged_30d": 0,
       "prs_merged_60d": 2,
       "prs_merged_365d": 35,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 3,
-      "issues_opened_365d": 23,
+      "issues_opened_30d": 1,
+      "issues_opened_60d": 4,
+      "issues_opened_365d": 24,
       "bus_factor": 1,
       "bus_factor_60d": 2,
       "bus_factor_365d": 2,
@@ -4455,7 +4463,6 @@
       "human_commits_365d": 198,
       "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        1,
         5,
         1,
         1,
@@ -4501,6 +4508,7 @@
         0,
         1,
         3,
+        0,
         0,
         0,
         0,
@@ -5359,30 +5367,31 @@
           1
         ]
       ],
-      "issue_label_distribution": {}
+      "issue_label_distribution": {
+        "bug": 1
+      }
     },
     {
       "name": "projectbluefin/documentation",
-      "commits_30d": 231,
-      "commits_60d": 328,
-      "commits_365d": 2349,
-      "unique_human_authors_30d": 5,
-      "prs_merged_30d": 88,
-      "prs_merged_60d": 117,
-      "prs_merged_365d": 515,
-      "issues_opened_30d": 2,
-      "issues_opened_60d": 5,
-      "issues_opened_365d": 39,
+      "commits_30d": 241,
+      "commits_60d": 313,
+      "commits_365d": 2323,
+      "unique_human_authors_30d": 4,
+      "prs_merged_30d": 91,
+      "prs_merged_60d": 113,
+      "prs_merged_365d": 512,
+      "issues_opened_30d": 4,
+      "issues_opened_60d": 6,
+      "issues_opened_365d": 41,
       "bus_factor": 1,
       "bus_factor_60d": 1,
       "bus_factor_365d": 1,
-      "bot_commits_30d": 18,
-      "human_commits_30d": 213,
-      "human_commits_60d": 291,
-      "human_commits_365d": 2230,
+      "bot_commits_30d": 14,
+      "human_commits_30d": 227,
+      "human_commits_60d": 283,
+      "human_commits_365d": 2207,
       "active_weeks_streak": 52,
       "weekly_commits_52w": [
-        43,
         63,
         49,
         16,
@@ -5433,13 +5442,14 @@
         26,
         108,
         45,
-        50
+        50,
+        18
       ],
       "commits_by_day_of_week": {
-        "Friday": 221,
+        "Friday": 222,
         "Monday": 405,
         "Saturday": 321,
-        "Sunday": 587,
+        "Sunday": 601,
         "Thursday": 334,
         "Tuesday": 308,
         "Wednesday": 364
@@ -5503,12 +5513,12 @@
         [
           0,
           11,
-          11
+          14
         ],
         [
           0,
           12,
-          29
+          35
         ],
         [
           0,
@@ -5523,7 +5533,7 @@
         [
           0,
           15,
-          19
+          22
         ],
         [
           0,
@@ -5538,7 +5548,7 @@
         [
           0,
           18,
-          51
+          53
         ],
         [
           0,
@@ -6098,7 +6108,7 @@
         [
           5,
           10,
-          17
+          18
         ],
         [
           5,
@@ -6290,21 +6300,21 @@
     },
     {
       "name": "projectbluefin/bluefin-mcp",
-      "commits_30d": 14,
+      "commits_30d": 0,
       "commits_60d": 35,
       "commits_365d": 35,
-      "unique_human_authors_30d": 1,
-      "prs_merged_30d": 2,
+      "unique_human_authors_30d": 0,
+      "prs_merged_30d": 0,
       "prs_merged_60d": 2,
       "prs_merged_365d": 2,
-      "issues_opened_30d": 26,
-      "issues_opened_60d": 30,
-      "issues_opened_365d": 30,
+      "issues_opened_30d": 1,
+      "issues_opened_60d": 31,
+      "issues_opened_365d": 31,
       "bus_factor": 1,
       "bus_factor_60d": 1,
       "bus_factor_365d": 1,
       "bot_commits_30d": 0,
-      "human_commits_30d": 14,
+      "human_commits_30d": 0,
       "human_commits_60d": 34,
       "human_commits_365d": 34,
       "active_weeks_streak": 0,
@@ -6355,9 +6365,9 @@
         0,
         0,
         0,
-        0,
         34,
         1,
+        0,
         0,
         0,
         0
@@ -7214,46 +7224,31 @@
         ]
       ],
       "issue_label_distribution": {
-        "documentation": 5,
-        "enhancement": 20,
-        "feature-idea": 1,
-        "needs-human-review": 1,
-        "priority:high": 2,
-        "priority:low": 2,
-        "priority:medium": 2,
-        "source:bluefin": 1,
-        "source:common": 1,
-        "tier:atomic-os": 3,
-        "tier:knowledge-store": 7,
-        "tier:new-tool": 1,
-        "tier:packages": 3,
-        "tier:ujust": 3,
-        "variant:dx": 6,
-        "variant:nvidia": 2
+        "bug": 1,
+        "priority:high": 1
       }
     },
     {
       "name": "projectbluefin/testhub",
-      "commits_30d": 34,
-      "commits_60d": 322,
-      "commits_365d": 322,
+      "commits_30d": 32,
+      "commits_60d": 323,
+      "commits_365d": 323,
       "unique_human_authors_30d": 1,
-      "prs_merged_30d": 28,
-      "prs_merged_60d": 48,
-      "prs_merged_365d": 48,
-      "issues_opened_30d": 3,
-      "issues_opened_60d": 22,
-      "issues_opened_365d": 22,
+      "prs_merged_30d": 26,
+      "prs_merged_60d": 49,
+      "prs_merged_365d": 49,
+      "issues_opened_30d": 4,
+      "issues_opened_60d": 23,
+      "issues_opened_365d": 23,
       "bus_factor": 1,
       "bus_factor_60d": 1,
       "bus_factor_365d": 1,
-      "bot_commits_30d": 7,
-      "human_commits_30d": 27,
-      "human_commits_60d": 306,
-      "human_commits_365d": 306,
-      "active_weeks_streak": 0,
+      "bot_commits_30d": 6,
+      "human_commits_30d": 26,
+      "human_commits_60d": 307,
+      "human_commits_365d": 307,
+      "active_weeks_streak": 1,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -7304,14 +7299,15 @@
         9,
         10,
         15,
-        0
+        0,
+        1
       ],
       "commits_by_day_of_week": {
         "Friday": 30,
         "Monday": 12,
         "Saturday": 37,
         "Sunday": 34,
-        "Thursday": 67,
+        "Thursday": 68,
         "Tuesday": 25,
         "Wednesday": 115
       },
@@ -7904,7 +7900,7 @@
         [
           4,
           21,
-          8
+          9
         ],
         [
           4,
@@ -8164,26 +8160,25 @@
     },
     {
       "name": "projectbluefin/iso",
-      "commits_30d": 16,
+      "commits_30d": 15,
       "commits_60d": 35,
       "commits_365d": 144,
       "unique_human_authors_30d": 1,
       "prs_merged_30d": 7,
       "prs_merged_60d": 12,
       "prs_merged_365d": 40,
-      "issues_opened_30d": 1,
-      "issues_opened_60d": 2,
-      "issues_opened_365d": 6,
+      "issues_opened_30d": 2,
+      "issues_opened_60d": 3,
+      "issues_opened_365d": 7,
       "bus_factor": 1,
       "bus_factor_60d": 1,
       "bus_factor_365d": 2,
-      "bot_commits_30d": 1,
+      "bot_commits_30d": 0,
       "human_commits_30d": 15,
       "human_commits_60d": 32,
       "human_commits_365d": 141,
       "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -8233,6 +8228,7 @@
         0,
         1,
         15,
+        0,
         0,
         0
       ],
@@ -9089,31 +9085,31 @@
       ],
       "issue_label_distribution": {
         "area/iso": 1,
-        "documentation": 1
+        "documentation": 1,
+        "kind/automation": 1
       }
     },
     {
       "name": "projectbluefin/website",
-      "commits_30d": 35,
-      "commits_60d": 44,
-      "commits_365d": 971,
+      "commits_30d": 37,
+      "commits_60d": 43,
+      "commits_365d": 964,
       "unique_human_authors_30d": 3,
       "prs_merged_30d": 9,
-      "prs_merged_60d": 14,
+      "prs_merged_60d": 12,
       "prs_merged_365d": 331,
-      "issues_opened_30d": 0,
-      "issues_opened_60d": 0,
+      "issues_opened_30d": 1,
+      "issues_opened_60d": 1,
       "issues_opened_365d": 38,
       "bus_factor": 1,
       "bus_factor_60d": 1,
       "bus_factor_365d": 2,
-      "bot_commits_30d": 1,
-      "human_commits_30d": 34,
-      "human_commits_60d": 42,
-      "human_commits_365d": 771,
-      "active_weeks_streak": 1,
+      "bot_commits_30d": 0,
+      "human_commits_30d": 37,
+      "human_commits_60d": 41,
+      "human_commits_365d": 770,
+      "active_weeks_streak": 2,
       "weekly_commits_52w": [
-        11,
         23,
         16,
         23,
@@ -9164,15 +9160,16 @@
         2,
         27,
         0,
-        6
+        8,
+        2
       ],
       "commits_by_day_of_week": {
         "Friday": 152,
         "Monday": 222,
         "Saturday": 118,
         "Sunday": 234,
-        "Thursday": 242,
-        "Tuesday": 158,
+        "Thursday": 244,
+        "Tuesday": 159,
         "Wednesday": 199
       },
       "contribution_heatmap": [
@@ -9494,7 +9491,7 @@
         [
           2,
           15,
-          8
+          9
         ],
         [
           2,
@@ -9739,12 +9736,12 @@
         [
           4,
           16,
-          2
+          3
         ],
         [
           4,
           17,
-          11
+          12
         ],
         [
           4,
@@ -10021,26 +10018,25 @@
     },
     {
       "name": "ublue-os/aurora",
-      "commits_30d": 79,
-      "commits_60d": 179,
-      "commits_365d": 1352,
-      "unique_human_authors_30d": 4,
-      "prs_merged_30d": 97,
-      "prs_merged_60d": 211,
-      "prs_merged_365d": 1376,
+      "commits_30d": 75,
+      "commits_60d": 176,
+      "commits_365d": 1346,
+      "unique_human_authors_30d": 5,
+      "prs_merged_30d": 89,
+      "prs_merged_60d": 209,
+      "prs_merged_365d": 1371,
       "issues_opened_30d": 11,
-      "issues_opened_60d": 36,
+      "issues_opened_60d": 30,
       "issues_opened_365d": 202,
-      "bus_factor": 1,
+      "bus_factor": 3,
       "bus_factor_60d": 2,
       "bus_factor_365d": 2,
-      "bot_commits_30d": 63,
-      "human_commits_30d": 16,
-      "human_commits_60d": 54,
-      "human_commits_365d": 507,
+      "bot_commits_30d": 64,
+      "human_commits_30d": 11,
+      "human_commits_60d": 50,
+      "human_commits_365d": 490,
       "active_weeks_streak": 52,
       "weekly_commits_52w": [
-        19,
         27,
         25,
         29,
@@ -10091,16 +10087,17 @@
         19,
         17,
         21,
-        16
+        16,
+        15
       ],
       "commits_by_day_of_week": {
-        "Friday": 424,
-        "Monday": 440,
-        "Saturday": 414,
-        "Sunday": 500,
-        "Thursday": 387,
-        "Tuesday": 395,
-        "Wednesday": 385
+        "Friday": 427,
+        "Monday": 443,
+        "Saturday": 416,
+        "Sunday": 502,
+        "Thursday": 389,
+        "Tuesday": 397,
+        "Wednesday": 386
       },
       "contribution_heatmap": [
         [
@@ -10116,7 +10113,7 @@
         [
           0,
           2,
-          17
+          18
         ],
         [
           0,
@@ -10131,7 +10128,7 @@
         [
           0,
           5,
-          28
+          29
         ],
         [
           0,
@@ -10251,12 +10248,12 @@
         [
           1,
           5,
-          15
+          16
         ],
         [
           1,
           6,
-          16
+          17
         ],
         [
           1,
@@ -10266,7 +10263,7 @@
         [
           1,
           8,
-          15
+          16
         ],
         [
           1,
@@ -10371,7 +10368,7 @@
         [
           2,
           5,
-          22
+          23
         ],
         [
           2,
@@ -10416,7 +10413,7 @@
         [
           2,
           14,
-          13
+          14
         ],
         [
           2,
@@ -10491,7 +10488,7 @@
         [
           3,
           5,
-          21
+          22
         ],
         [
           3,
@@ -10611,7 +10608,7 @@
         [
           4,
           5,
-          14
+          16
         ],
         [
           4,
@@ -10736,7 +10733,7 @@
         [
           5,
           6,
-          20
+          22
         ],
         [
           5,
@@ -10756,7 +10753,7 @@
         [
           5,
           10,
-          22
+          23
         ],
         [
           5,
@@ -10851,7 +10848,7 @@
         [
           6,
           5,
-          13
+          14
         ],
         [
           6,
@@ -10881,7 +10878,7 @@
         [
           6,
           11,
-          15
+          16
         ],
         [
           6,
@@ -10945,32 +10942,31 @@
         ]
       ],
       "issue_label_distribution": {
-        "bug": 1,
+        "bug": 2,
         "upstream": 1
       }
     },
     {
       "name": "get-aurora-dev/common",
-      "commits_30d": 18,
-      "commits_60d": 27,
-      "commits_365d": 234,
+      "commits_30d": 25,
+      "commits_60d": 32,
+      "commits_365d": 242,
       "unique_human_authors_30d": 2,
-      "prs_merged_30d": 16,
-      "prs_merged_60d": 25,
-      "prs_merged_365d": 118,
+      "prs_merged_30d": 21,
+      "prs_merged_60d": 28,
+      "prs_merged_365d": 124,
       "issues_opened_30d": 0,
       "issues_opened_60d": 0,
       "issues_opened_365d": 14,
       "bus_factor": 2,
       "bus_factor_60d": 2,
       "bus_factor_365d": 2,
-      "bot_commits_30d": 8,
-      "human_commits_30d": 10,
-      "human_commits_60d": 19,
-      "human_commits_365d": 221,
-      "active_weeks_streak": 21,
+      "bot_commits_30d": 11,
+      "human_commits_30d": 14,
+      "human_commits_60d": 21,
+      "human_commits_365d": 226,
+      "active_weeks_streak": 22,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -11021,14 +11017,15 @@
         1,
         2,
         13,
-        2
+        2,
+        8
       ],
       "commits_by_day_of_week": {
-        "Friday": 9,
-        "Monday": 17,
+        "Friday": 15,
+        "Monday": 18,
         "Saturday": 43,
         "Sunday": 25,
-        "Thursday": 35,
+        "Thursday": 36,
         "Tuesday": 28,
         "Wednesday": 12
       },
@@ -11196,7 +11193,7 @@
         [
           1,
           8,
-          0
+          1
         ],
         [
           1,
@@ -11551,7 +11548,7 @@
         [
           4,
           7,
-          0
+          1
         ],
         [
           4,
@@ -11671,12 +11668,12 @@
         [
           5,
           7,
-          1
+          2
         ],
         [
           5,
           8,
-          1
+          4
         ],
         [
           5,
@@ -11721,7 +11718,7 @@
         [
           5,
           17,
-          0
+          2
         ],
         [
           5,
@@ -11878,12 +11875,12 @@
     },
     {
       "name": "get-aurora-dev/iso",
-      "commits_30d": 11,
-      "commits_60d": 17,
+      "commits_30d": 10,
+      "commits_60d": 15,
       "commits_365d": 59,
       "unique_human_authors_30d": 1,
-      "prs_merged_30d": 7,
-      "prs_merged_60d": 12,
+      "prs_merged_30d": 6,
+      "prs_merged_60d": 10,
       "prs_merged_365d": 44,
       "issues_opened_30d": 1,
       "issues_opened_60d": 1,
@@ -11892,12 +11889,11 @@
       "bus_factor_60d": 2,
       "bus_factor_365d": 2,
       "bot_commits_30d": 5,
-      "human_commits_30d": 6,
-      "human_commits_60d": 12,
+      "human_commits_30d": 5,
+      "human_commits_60d": 10,
       "human_commits_365d": 54,
       "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -11948,6 +11944,7 @@
         0,
         5,
         5,
+        0,
         0
       ],
       "commits_by_day_of_week": {
@@ -12805,26 +12802,25 @@
     },
     {
       "name": "ublue-os/bazzite",
-      "commits_30d": 100,
-      "commits_60d": 311,
-      "commits_365d": 1701,
+      "commits_30d": 89,
+      "commits_60d": 287,
+      "commits_365d": 1679,
       "unique_human_authors_30d": 15,
-      "prs_merged_30d": 100,
-      "prs_merged_60d": 204,
-      "prs_merged_365d": 638,
-      "issues_opened_30d": 104,
-      "issues_opened_60d": 244,
-      "issues_opened_365d": 1358,
+      "prs_merged_30d": 105,
+      "prs_merged_60d": 206,
+      "prs_merged_365d": 653,
+      "issues_opened_30d": 101,
+      "issues_opened_60d": 243,
+      "issues_opened_365d": 1355,
       "bus_factor": 6,
-      "bus_factor_60d": 6,
+      "bus_factor_60d": 5,
       "bus_factor_365d": 6,
-      "bot_commits_30d": 33,
-      "human_commits_30d": 67,
-      "human_commits_60d": 243,
-      "human_commits_365d": 1567,
+      "bot_commits_30d": 30,
+      "human_commits_30d": 59,
+      "human_commits_60d": 226,
+      "human_commits_365d": 1545,
       "active_weeks_streak": 52,
       "weekly_commits_52w": [
-        28,
         61,
         34,
         21,
@@ -12875,16 +12871,17 @@
         25,
         26,
         24,
-        21
+        21,
+        10
       ],
       "commits_by_day_of_week": {
         "Friday": 888,
         "Monday": 1157,
-        "Saturday": 744,
-        "Sunday": 931,
-        "Thursday": 918,
-        "Tuesday": 1040,
-        "Wednesday": 983
+        "Saturday": 748,
+        "Sunday": 934,
+        "Thursday": 920,
+        "Tuesday": 1041,
+        "Wednesday": 984
       },
       "contribution_heatmap": [
         [
@@ -12920,7 +12917,7 @@
         [
           0,
           6,
-          8
+          10
         ],
         [
           0,
@@ -12935,7 +12932,7 @@
         [
           0,
           9,
-          30
+          31
         ],
         [
           0,
@@ -13210,7 +13207,7 @@
         [
           2,
           16,
-          69
+          70
         ],
         [
           2,
@@ -13345,7 +13342,7 @@
         [
           3,
           19,
-          46
+          47
         ],
         [
           3,
@@ -13400,7 +13397,7 @@
         [
           4,
           6,
-          14
+          15
         ],
         [
           4,
@@ -13475,7 +13472,7 @@
         [
           4,
           21,
-          43
+          44
         ],
         [
           4,
@@ -13680,12 +13677,12 @@
         [
           6,
           14,
-          46
+          47
         ],
         [
           6,
           15,
-          39
+          40
         ],
         [
           6,
@@ -13715,12 +13712,12 @@
         [
           6,
           21,
-          43
+          44
         ],
         [
           6,
           22,
-          56
+          57
         ],
         [
           6,
@@ -13728,30 +13725,31 @@
           44
         ]
       ],
-      "issue_label_distribution": {}
+      "issue_label_distribution": {
+        "upstream": 1
+      }
     },
     {
       "name": "ublue-os/bazzite-dx",
-      "commits_30d": 6,
+      "commits_30d": 5,
       "commits_60d": 7,
-      "commits_365d": 149,
-      "unique_human_authors_30d": 2,
+      "commits_365d": 143,
+      "unique_human_authors_30d": 1,
       "prs_merged_30d": 3,
       "prs_merged_60d": 3,
-      "prs_merged_365d": 44,
+      "prs_merged_365d": 41,
       "issues_opened_30d": 2,
-      "issues_opened_60d": 5,
-      "issues_opened_365d": 52,
+      "issues_opened_60d": 4,
+      "issues_opened_365d": 51,
       "bus_factor": 1,
       "bus_factor_60d": 2,
       "bus_factor_365d": 5,
       "bot_commits_30d": 0,
-      "human_commits_30d": 6,
+      "human_commits_30d": 5,
       "human_commits_60d": 7,
-      "human_commits_365d": 120,
+      "human_commits_365d": 117,
       "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        6,
         13,
         0,
         5,
@@ -13802,6 +13800,7 @@
         0,
         0,
         5,
+        0,
         0
       ],
       "commits_by_day_of_week": {
@@ -14659,26 +14658,25 @@
     },
     {
       "name": "ublue-os/main",
-      "commits_30d": 126,
-      "commits_60d": 240,
-      "commits_365d": 1471,
+      "commits_30d": 125,
+      "commits_60d": 243,
+      "commits_365d": 1487,
       "unique_human_authors_30d": 0,
-      "prs_merged_30d": 126,
-      "prs_merged_60d": 240,
-      "prs_merged_365d": 1471,
+      "prs_merged_30d": 125,
+      "prs_merged_60d": 243,
+      "prs_merged_365d": 1487,
       "issues_opened_30d": 0,
       "issues_opened_60d": 3,
-      "issues_opened_365d": 53,
+      "issues_opened_365d": 52,
       "bus_factor": 0,
       "bus_factor_60d": 2,
       "bus_factor_365d": 9,
-      "bot_commits_30d": 126,
+      "bot_commits_30d": 125,
       "human_commits_30d": 0,
       "human_commits_60d": 4,
-      "human_commits_365d": 73,
+      "human_commits_365d": 72,
       "active_weeks_streak": 52,
       "weekly_commits_52w": [
-        13,
         23,
         14,
         16,
@@ -14729,16 +14727,17 @@
         24,
         32,
         29,
-        29
+        29,
+        28
       ],
       "commits_by_day_of_week": {
-        "Friday": 285,
-        "Monday": 253,
-        "Saturday": 284,
-        "Sunday": 266,
-        "Thursday": 268,
-        "Tuesday": 274,
-        "Wednesday": 237
+        "Friday": 289,
+        "Monday": 257,
+        "Saturday": 288,
+        "Sunday": 270,
+        "Thursday": 272,
+        "Tuesday": 278,
+        "Wednesday": 241
       },
       "contribution_heatmap": [
         [
@@ -14749,7 +14748,7 @@
         [
           0,
           1,
-          42
+          43
         ],
         [
           0,
@@ -14759,17 +14758,17 @@
         [
           0,
           3,
-          47
+          48
         ],
         [
           0,
           4,
-          52
+          53
         ],
         [
           0,
           5,
-          23
+          24
         ],
         [
           0,
@@ -14869,7 +14868,7 @@
         [
           1,
           1,
-          35
+          36
         ],
         [
           1,
@@ -14879,12 +14878,12 @@
         [
           1,
           3,
-          40
+          41
         ],
         [
           1,
           4,
-          43
+          44
         ],
         [
           1,
@@ -14894,7 +14893,7 @@
         [
           1,
           6,
-          11
+          12
         ],
         [
           1,
@@ -14989,7 +14988,7 @@
         [
           2,
           1,
-          44
+          45
         ],
         [
           2,
@@ -14999,17 +14998,17 @@
         [
           2,
           3,
-          40
+          41
         ],
         [
           2,
           4,
-          44
+          45
         ],
         [
           2,
           5,
-          27
+          28
         ],
         [
           2,
@@ -15109,7 +15108,7 @@
         [
           3,
           1,
-          34
+          35
         ],
         [
           3,
@@ -15119,17 +15118,17 @@
         [
           3,
           3,
-          39
+          40
         ],
         [
           3,
           4,
-          46
+          47
         ],
         [
           3,
           5,
-          19
+          20
         ],
         [
           3,
@@ -15229,7 +15228,7 @@
         [
           4,
           1,
-          38
+          39
         ],
         [
           4,
@@ -15239,17 +15238,17 @@
         [
           4,
           3,
-          43
+          44
         ],
         [
           4,
           4,
-          47
+          48
         ],
         [
           4,
           5,
-          23
+          24
         ],
         [
           4,
@@ -15349,7 +15348,7 @@
         [
           5,
           1,
-          37
+          38
         ],
         [
           5,
@@ -15359,17 +15358,17 @@
         [
           5,
           3,
-          45
+          46
         ],
         [
           5,
           4,
-          48
+          49
         ],
         [
           5,
           5,
-          26
+          27
         ],
         [
           5,
@@ -15469,7 +15468,7 @@
         [
           6,
           1,
-          44
+          45
         ],
         [
           6,
@@ -15479,17 +15478,17 @@
         [
           6,
           3,
-          58
+          59
         ],
         [
           6,
           4,
-          55
+          56
         ],
         [
           6,
           5,
-          22
+          23
         ],
         [
           6,
@@ -15586,26 +15585,25 @@
     },
     {
       "name": "ublue-os/akmods",
-      "commits_30d": 25,
-      "commits_60d": 47,
-      "commits_365d": 109,
+      "commits_30d": 23,
+      "commits_60d": 45,
+      "commits_365d": 108,
       "unique_human_authors_30d": 2,
-      "prs_merged_30d": 25,
-      "prs_merged_60d": 47,
-      "prs_merged_365d": 107,
+      "prs_merged_30d": 23,
+      "prs_merged_60d": 45,
+      "prs_merged_365d": 106,
       "issues_opened_30d": 2,
       "issues_opened_60d": 2,
       "issues_opened_365d": 36,
       "bus_factor": 2,
-      "bus_factor_60d": 3,
+      "bus_factor_60d": 2,
       "bus_factor_365d": 3,
       "bot_commits_30d": 6,
-      "human_commits_30d": 19,
-      "human_commits_60d": 34,
+      "human_commits_30d": 17,
+      "human_commits_60d": 32,
       "human_commits_365d": 89,
-      "active_weeks_streak": 3,
+      "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        1,
         3,
         6,
         2,
@@ -15656,7 +15654,8 @@
         0,
         13,
         8,
-        2
+        2,
+        0
       ],
       "commits_by_day_of_week": {
         "Friday": 44,
@@ -16513,26 +16512,25 @@
     },
     {
       "name": "ublue-os/ucore",
-      "commits_30d": 17,
-      "commits_60d": 17,
-      "commits_365d": 80,
+      "commits_30d": 13,
+      "commits_60d": 18,
+      "commits_365d": 81,
       "unique_human_authors_30d": 2,
-      "prs_merged_30d": 17,
-      "prs_merged_60d": 17,
-      "prs_merged_365d": 69,
+      "prs_merged_30d": 13,
+      "prs_merged_60d": 18,
+      "prs_merged_365d": 70,
       "issues_opened_30d": 9,
       "issues_opened_60d": 13,
-      "issues_opened_365d": 51,
+      "issues_opened_365d": 50,
       "bus_factor": 1,
       "bus_factor_60d": 1,
       "bus_factor_365d": 1,
-      "bot_commits_30d": 11,
+      "bot_commits_30d": 7,
       "human_commits_30d": 6,
       "human_commits_60d": 6,
       "human_commits_365d": 57,
-      "active_weeks_streak": 3,
+      "active_weeks_streak": 4,
       "weekly_commits_52w": [
-        0,
         1,
         2,
         1,
@@ -16583,12 +16581,13 @@
         0,
         7,
         1,
-        4
+        4,
+        1
       ],
       "commits_by_day_of_week": {
         "Friday": 41,
         "Monday": 30,
-        "Saturday": 39,
+        "Saturday": 40,
         "Sunday": 35,
         "Thursday": 37,
         "Tuesday": 41,
@@ -17433,7 +17432,7 @@
         [
           6,
           23,
-          1
+          2
         ]
       ],
       "issue_label_distribution": {
@@ -17442,26 +17441,25 @@
     },
     {
       "name": "zirconium-dev/zirconium",
-      "commits_30d": 56,
-      "commits_60d": 138,
-      "commits_365d": 509,
+      "commits_30d": 37,
+      "commits_60d": 128,
+      "commits_365d": 513,
       "unique_human_authors_30d": 3,
-      "prs_merged_30d": 41,
-      "prs_merged_60d": 64,
-      "prs_merged_365d": 126,
-      "issues_opened_30d": 9,
-      "issues_opened_60d": 17,
+      "prs_merged_30d": 29,
+      "prs_merged_60d": 65,
+      "prs_merged_365d": 130,
+      "issues_opened_30d": 5,
+      "issues_opened_60d": 16,
       "issues_opened_365d": 58,
       "bus_factor": 1,
       "bus_factor_60d": 1,
       "bus_factor_365d": 2,
-      "bot_commits_30d": 16,
-      "human_commits_30d": 40,
-      "human_commits_60d": 122,
-      "human_commits_365d": 478,
-      "active_weeks_streak": 28,
+      "bot_commits_30d": 6,
+      "human_commits_30d": 31,
+      "human_commits_60d": 112,
+      "human_commits_365d": 482,
+      "active_weeks_streak": 29,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -17512,16 +17510,17 @@
         20,
         13,
         3,
-        6
+        6,
+        4
       ],
       "commits_by_day_of_week": {
         "Friday": 55,
-        "Monday": 70,
+        "Monday": 71,
         "Saturday": 68,
-        "Sunday": 98,
+        "Sunday": 100,
         "Thursday": 47,
         "Tuesday": 49,
-        "Wednesday": 53
+        "Wednesday": 54
       },
       "contribution_heatmap": [
         [
@@ -17622,7 +17621,7 @@
         [
           0,
           19,
-          6
+          8
         ],
         [
           0,
@@ -17677,7 +17676,7 @@
         [
           1,
           6,
-          0
+          1
         ],
         [
           1,
@@ -17887,7 +17886,7 @@
         [
           3,
           0,
-          4
+          5
         ],
         [
           3,
@@ -18376,9 +18375,9 @@
       "prs_merged_30d": 1,
       "prs_merged_60d": 1,
       "prs_merged_365d": 1,
-      "issues_opened_30d": 2,
-      "issues_opened_60d": 5,
-      "issues_opened_365d": 5,
+      "issues_opened_30d": 3,
+      "issues_opened_60d": 6,
+      "issues_opened_365d": 6,
       "bus_factor": 2,
       "bus_factor_60d": 1,
       "bus_factor_365d": 1,
@@ -18434,10 +18433,10 @@
         0,
         0,
         0,
-        0,
         4,
         0,
         2,
+        0,
         0,
         0
       ],
@@ -19296,26 +19295,25 @@
     },
     {
       "name": "secureblue/secureblue",
-      "commits_30d": 36,
-      "commits_60d": 102,
-      "commits_365d": 613,
-      "unique_human_authors_30d": 9,
+      "commits_30d": 34,
+      "commits_60d": 96,
+      "commits_365d": 623,
+      "unique_human_authors_30d": 8,
       "prs_merged_30d": 42,
-      "prs_merged_60d": 109,
-      "prs_merged_365d": 656,
+      "prs_merged_60d": 105,
+      "prs_merged_365d": 668,
       "issues_opened_30d": 18,
-      "issues_opened_60d": 49,
-      "issues_opened_365d": 346,
+      "issues_opened_60d": 47,
+      "issues_opened_365d": 348,
       "bus_factor": 4,
-      "bus_factor_60d": 4,
+      "bus_factor_60d": 3,
       "bus_factor_365d": 3,
       "bot_commits_30d": 8,
-      "human_commits_30d": 28,
-      "human_commits_60d": 84,
-      "human_commits_365d": 516,
-      "active_weeks_streak": 51,
+      "human_commits_30d": 26,
+      "human_commits_60d": 76,
+      "human_commits_365d": 522,
+      "active_weeks_streak": 52,
       "weekly_commits_52w": [
-        0,
         5,
         10,
         13,
@@ -19366,16 +19364,17 @@
         10,
         10,
         5,
-        6
+        6,
+        10
       ],
       "commits_by_day_of_week": {
-        "Friday": 249,
-        "Monday": 345,
-        "Saturday": 228,
+        "Friday": 251,
+        "Monday": 347,
+        "Saturday": 230,
         "Sunday": 296,
-        "Thursday": 261,
-        "Tuesday": 259,
-        "Wednesday": 255
+        "Thursday": 262,
+        "Tuesday": 260,
+        "Wednesday": 257
       },
       "contribution_heatmap": [
         [
@@ -19581,7 +19580,7 @@
         [
           1,
           16,
-          27
+          28
         ],
         [
           1,
@@ -19606,7 +19605,7 @@
         [
           1,
           21,
-          13
+          14
         ],
         [
           1,
@@ -19671,7 +19670,7 @@
         [
           2,
           10,
-          17
+          18
         ],
         [
           2,
@@ -19786,7 +19785,7 @@
         [
           3,
           9,
-          13
+          14
         ],
         [
           3,
@@ -19816,7 +19815,7 @@
         [
           3,
           15,
-          7
+          8
         ],
         [
           3,
@@ -19966,7 +19965,7 @@
         [
           4,
           21,
-          17
+          18
         ],
         [
           4,
@@ -20091,12 +20090,12 @@
         [
           5,
           22,
-          7
+          8
         ],
         [
           5,
           23,
-          12
+          13
         ],
         [
           6,
@@ -20151,7 +20150,7 @@
         [
           6,
           10,
-          3
+          4
         ],
         [
           6,
@@ -20161,7 +20160,7 @@
         [
           6,
           12,
-          26
+          27
         ],
         [
           6,
@@ -20220,20 +20219,21 @@
         ]
       ],
       "issue_label_distribution": {
-        "bug": 2,
-        "enhancement": 3
+        "bug": 1,
+        "enhancement": 2,
+        "good first issue": 3
       }
     },
     {
       "name": "blue-build/base-images",
       "commits_30d": 0,
-      "commits_60d": 2,
+      "commits_60d": 1,
       "commits_365d": 58,
       "unique_human_authors_30d": 0,
       "prs_merged_30d": 0,
       "prs_merged_60d": 0,
       "prs_merged_365d": 17,
-      "issues_opened_30d": 1,
+      "issues_opened_30d": 0,
       "issues_opened_60d": 1,
       "issues_opened_365d": 6,
       "bus_factor": 1,
@@ -20241,11 +20241,10 @@
       "bus_factor_365d": 1,
       "bot_commits_30d": 0,
       "human_commits_30d": 0,
-      "human_commits_60d": 2,
+      "human_commits_60d": 1,
       "human_commits_365d": 51,
       "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        0,
         0,
         0,
         0,
@@ -20292,6 +20291,7 @@
         1,
         0,
         1,
+        0,
         0,
         0,
         0,
@@ -21153,26 +21153,25 @@
     },
     {
       "name": "blue-build/cli",
-      "commits_30d": 29,
-      "commits_60d": 46,
-      "commits_365d": 372,
+      "commits_30d": 21,
+      "commits_60d": 38,
+      "commits_365d": 370,
       "unique_human_authors_30d": 5,
-      "prs_merged_30d": 23,
-      "prs_merged_60d": 36,
-      "prs_merged_365d": 243,
-      "issues_opened_30d": 4,
-      "issues_opened_60d": 5,
+      "prs_merged_30d": 14,
+      "prs_merged_60d": 29,
+      "prs_merged_365d": 239,
+      "issues_opened_30d": 6,
+      "issues_opened_60d": 6,
       "issues_opened_365d": 47,
       "bus_factor": 3,
       "bus_factor_60d": 3,
       "bus_factor_365d": 2,
-      "bot_commits_30d": 18,
-      "human_commits_30d": 11,
-      "human_commits_60d": 23,
-      "human_commits_365d": 205,
-      "active_weeks_streak": 9,
+      "bot_commits_30d": 9,
+      "human_commits_30d": 12,
+      "human_commits_60d": 20,
+      "human_commits_365d": 208,
+      "active_weeks_streak": 10,
       "weekly_commits_52w": [
-        5,
         10,
         10,
         16,
@@ -21223,12 +21222,13 @@
         12,
         5,
         11,
-        1
+        1,
+        3
       ],
       "commits_by_day_of_week": {
-        "Friday": 80,
+        "Friday": 81,
         "Monday": 307,
-        "Saturday": 129,
+        "Saturday": 131,
         "Sunday": 189,
         "Thursday": 73,
         "Tuesday": 124,
@@ -21918,7 +21918,7 @@
         [
           5,
           16,
-          14
+          15
         ],
         [
           5,
@@ -22008,12 +22008,12 @@
         [
           6,
           10,
-          3
+          4
         ],
         [
           6,
           11,
-          9
+          10
         ],
         [
           6,
@@ -22077,20 +22077,22 @@
         ]
       ],
       "issue_label_distribution": {
-        "ai-generated": 1
+        "ai-generated": 1,
+        "type: bug": 1,
+        "type: feature": 1
       }
     },
     {
       "name": "blue-build/modules",
       "commits_30d": 0,
       "commits_60d": 7,
-      "commits_365d": 142,
+      "commits_365d": 141,
       "unique_human_authors_30d": 0,
       "prs_merged_30d": 0,
       "prs_merged_60d": 3,
       "prs_merged_365d": 85,
       "issues_opened_30d": 4,
-      "issues_opened_60d": 6,
+      "issues_opened_60d": 5,
       "issues_opened_365d": 56,
       "bus_factor": 1,
       "bus_factor_60d": 3,
@@ -22098,10 +22100,9 @@
       "bot_commits_30d": 0,
       "human_commits_30d": 0,
       "human_commits_60d": 7,
-      "human_commits_365d": 128,
+      "human_commits_365d": 127,
       "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        1,
         10,
         0,
         1,
@@ -22149,6 +22150,7 @@
         0,
         1,
         6,
+        0,
         0,
         0,
         0,
@@ -23009,26 +23011,25 @@
     },
     {
       "name": "blue-build/github-action",
-      "commits_30d": 3,
-      "commits_60d": 6,
+      "commits_30d": 0,
+      "commits_60d": 5,
       "commits_365d": 50,
       "unique_human_authors_30d": 0,
-      "prs_merged_30d": 3,
-      "prs_merged_60d": 6,
+      "prs_merged_30d": 0,
+      "prs_merged_60d": 5,
       "prs_merged_365d": 47,
       "issues_opened_30d": 1,
       "issues_opened_60d": 1,
       "issues_opened_365d": 8,
-      "bus_factor": 0,
-      "bus_factor_60d": 2,
+      "bus_factor": 1,
+      "bus_factor_60d": 1,
       "bus_factor_365d": 3,
-      "bot_commits_30d": 3,
+      "bot_commits_30d": 0,
       "human_commits_30d": 0,
-      "human_commits_60d": 2,
+      "human_commits_60d": 1,
       "human_commits_365d": 28,
       "active_weeks_streak": 0,
       "weekly_commits_52w": [
-        0,
         0,
         1,
         1,
@@ -23077,6 +23078,7 @@
         0,
         0,
         3,
+        0,
         0,
         0,
         0
@@ -23936,31 +23938,26 @@
     }
   ],
   "discussions_summary": {
-    "total_discussions_30d": 44,
-    "total_discussions_60d": 80,
-    "total_discussions_365d": 443,
-    "total_discussion_comments_30d": 68,
-    "total_discussion_comments_60d": 144,
-    "total_discussion_comments_365d": 857,
-    "unique_discussion_authors_30d": 40,
-    "unique_discussion_authors_60d": 66,
-    "unique_discussion_authors_365d": 229,
+    "total_discussions_30d": 49,
+    "total_discussions_60d": 79,
+    "total_discussions_365d": 454,
+    "total_discussion_comments_30d": 67,
+    "total_discussion_comments_60d": 135,
+    "total_discussion_comments_365d": 872,
+    "unique_discussion_authors_30d": 43,
+    "unique_discussion_authors_60d": 64,
+    "unique_discussion_authors_365d": 236,
     "answered_rate": 0,
     "weekly_trend": [
       {
-        "week": "2026-03-16",
-        "discussions": 3,
-        "comments": 7
-      },
-      {
         "week": "2026-03-23",
-        "discussions": 5,
-        "comments": 11
+        "discussions": 2,
+        "comments": 5
       },
       {
         "week": "2026-03-30",
         "discussions": 13,
-        "comments": 16
+        "comments": 17
       },
       {
         "week": "2026-04-06",
@@ -23969,38 +23966,43 @@
       },
       {
         "week": "2026-04-13",
-        "discussions": 13,
-        "comments": 25
+        "discussions": 14,
+        "comments": 28
+      },
+      {
+        "week": "2026-04-20",
+        "discussions": 10,
+        "comments": 8
       }
     ]
   },
   "pr_merge_time": {
-    "p50_hours": 1.1,
-    "p95_hours": 193.2,
+    "p50_hours": 1,
+    "p95_hours": 200.2,
     "monthly": [
       {
         "month": "2026-01",
-        "p50_hours": 0.5,
-        "p95_hours": 266.3,
-        "pr_count": 152
+        "p50_hours": 0.3,
+        "p95_hours": 91.8,
+        "pr_count": 51
       },
       {
         "month": "2026-02",
-        "p50_hours": 1.8,
-        "p95_hours": 188.9,
-        "pr_count": 482
+        "p50_hours": 1.2,
+        "p95_hours": 200.1,
+        "pr_count": 334
       },
       {
         "month": "2026-03",
-        "p50_hours": 1.1,
-        "p95_hours": 262.5,
-        "pr_count": 791
+        "p50_hours": 1,
+        "p95_hours": 300.1,
+        "pr_count": 630
       },
       {
         "month": "2026-04",
         "p50_hours": 1,
-        "p95_hours": 139.6,
-        "pr_count": 579
+        "p95_hours": 157.5,
+        "pr_count": 637
       }
     ]
   }
